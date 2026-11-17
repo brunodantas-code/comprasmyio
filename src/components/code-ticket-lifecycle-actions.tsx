@@ -7,6 +7,9 @@ import { canConcludeCodeTicket } from "@/lib/code-conversation";
 import { canReopenCodeTicket, codeReopenReasonSchema, confirmCodeTicketConclusion } from "@/lib/code-ticket-lifecycle";
 import { confirmAction } from "@/components/confirm-dialog";
 import { Button } from "@/components/ui/button";
+import { useCdeLook } from "@/components/cde/cde-look";
+import { ICONS } from "@/components/cde/cde-render";
+import { cn } from "@/lib/utils";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -23,6 +26,8 @@ export function CodeTicketLifecycleActions({ ticket, userId, isCodeAdmin, onChan
   const [confirming, setConfirming] = useState(false);
   const [reopenOpen, setReopenOpen] = useState(false);
   const [reason, setReason] = useState("");
+  const conclusionLook = useCdeLook("confirm", true, "components/code-ticket-lifecycle-actions.tsx", true);
+  const ConclusionIcon = ICONS[conclusionLook.icon ?? "Check"] ?? Check;
   useEffect(() => { setReopenOpen(false); setReason(""); }, [ticket.id, ticket.status]);
 
   const conclude = useMutation({
@@ -62,7 +67,7 @@ export function CodeTicketLifecycleActions({ ticket, userId, isCodeAdmin, onChan
 
   if (!canConcludeCodeTicket(ticket.status, ticket.reporter_id === userId) && !canReopenCodeTicket(ticket, userId, isCodeAdmin)) return null;
   return <div className="flex flex-wrap items-center gap-2">
-    {canConcludeCodeTicket(ticket.status, ticket.reporter_id === userId) ? <Button type="button" cdeNative className="bg-code-completed text-code-completed-foreground hover:bg-code-completed/85" onClick={requestConclusion} disabled={confirming || conclude.isPending}><Check className="h-4 w-4" />{conclude.isPending ? "Concluindo..." : "Marcar como concluído"}</Button> : null}
+    {canConcludeCodeTicket(ticket.status, ticket.reporter_id === userId) ? <Button type="button" actionKind="specific" variant={conclusionLook.variant as React.ComponentProps<typeof Button>["variant"]} size={(conclusionLook.size || "default") as React.ComponentProps<typeof Button>["size"]} style={conclusionLook.style} className={cn(conclusionLook.className, "!border !border-foreground !border-solid")} onClick={requestConclusion} disabled={confirming || conclude.isPending}><ConclusionIcon className={conclusionLook.iconClass || "h-4 w-4"} />{conclude.isPending ? "Concluindo..." : "Marcar como concluído"}</Button> : null}
     {canReopenCodeTicket(ticket, userId, isCodeAdmin) ? <Button type="button" actionKind="standard" onClick={() => setReopenOpen(true)}><RotateCcw className="h-4 w-4" />Reabrir chamado</Button> : null}
     <Dialog open={reopenOpen} onOpenChange={(open) => { if (reopen.isPending) return; setReopenOpen(open); if (!open) setReason(""); }}>
       <DialogContent className="max-w-lg" onEscapeKeyDown={(event) => { if (reopen.isPending) event.preventDefault(); }} onPointerDownOutside={(event) => { if (reopen.isPending) event.preventDefault(); }}>

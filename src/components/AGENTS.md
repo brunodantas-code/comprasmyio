@@ -2,3 +2,4 @@
 - Code and personal tasks share ImageAttachmentField for gallery, drop, paste and temporary thumbnails; persistence and attachment authorization remain in each caller.
 - PendingGroups owns its heading and grouping controls, and TodoSection renders one shared toolbar; this prevents divergent portal/Central headers and duplicate dialogs.
 - FilterColumn may provide a scoped filter renderer that writes existing ColumnFilterValue conditions; combined filtering and exports keep using the same source rows.
+- Code completion resolves the live CDE confirm look explicitly, preserving its scoped border exception and descriptive label without changing lifecycle guards.
