@@ -359,5 +359,7 @@
 - [x] CRM Fase 2: telas dentro do ERP
 - [x] Cores de borda, fundo e texto dos cabeçalhos (CDE Cabeçalhos e Listas)
 - [x] Cores de texto, fundo e borda das listas + prévia dos cabeçalhos funcionando
-- [ ] CRM Fase 3: Propostas
+- [x] CRM Fase 3: Propostas (lista, editor, itens, pendências, versões, situação, DOCX)
+- [ ] CRM Fase 3b: levantamento por arquivos com IA e memória de cálculo (depende da Fase 4 Custeio)
 - [x] Botões Escolher/Adicionar como padrão do CDE no padrão visual comum
+- [x] Textos longos seguem o modelo 1.3 escolhido (confirmado; tela do usuário estava desatualizada)

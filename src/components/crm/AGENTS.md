@@ -1,2 +1,3 @@
 - CRM opportunities are never deleted (their activity timeline is append-only); closing uses lost/disqualified phases with a reason.
 - CRM screens use shared CDE-bound components (Table, Input, Select, Button) and pure rules in crm-logic.ts.
+- Proposals: items/totals/incompleteness/status guards live in DB triggers (crm_proposta_*); items editable only in draft, changes after sending go through a new version (same numero); DOCX is generated client-side with the docx package (proposta-docx.ts).

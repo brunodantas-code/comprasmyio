@@ -23,7 +23,7 @@ Trazer o CRM (hoje em crm-myio.vercel.app, app Next.js separado com login e banc
 - Dashboard, Painel, Leads (lista, quadro, importação CSV, etapas), Empresas e Contatos, Funil (quadro por fases) e Oportunidades.
 - Visual no padrão do ERP: cabeçalhos de tabela, filtros, botões e campos conforme o CDE.
 
-### Fase 3 — Propostas
+### Fase 3 — Propostas (núcleo concluído: lista, editor, pendências, versões, DOCX padrão; falta IA de levantamento e memória de cálculo)
 - Assistente de proposta, edição, memória de cálculo, pendências.
 - Geração de DOCX (modelos atuais precisam ser enviados — estão fora do arquivo de código).
 - Levantamento por arquivos com IA via Lovable AI (substitui a integração atual).

@@ -14,10 +14,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { CRM_URL } from "@/lib/external-apps";
 import { crmOptions, type CrmData, type Empresa, type FullLead, type FullOp, type Contato } from "./crm-data";
+import { PropostasSection } from "./crm-propostas";
 import { CrmRecordDialog, nn, num, type FieldSpec } from "./crm-record-dialog";
 import { LEAD_ORIGENS, brl, funnelSummary, matchesSearch, needsReason, origemLabel, overdueActions, parseLeadsCsv, pipelineTotals, type Fase } from "./crm-logic";
 
-export type CrmSection = "painel" | "leads" | "empresas" | "funil" | "oportunidades";
+export type CrmSection = "painel" | "leads" | "empresas" | "funil" | "oportunidades" | "propostas";
 const today = () => new Date(Date.now() - 3 * 3600000).toISOString().slice(0, 10);
 const br = (d: string | null) => (d ? d.slice(0, 10).split("-").reverse().join("/") : "—");
 const uid = async () => { const u = (await supabase.auth.getUser()).data.user; if (!u) throw new Error("Sessão expirada."); return u.id; };
@@ -46,6 +47,7 @@ export function CrmWorkspace({ section }: { section: CrmSection }) {
     {section === "empresas" && <Empresas {...ctx} />}
     {section === "funil" && <Funil {...ctx} />}
     {section === "oportunidades" && <Oportunidades {...ctx} />}
+    {section === "propostas" && <PropostasSection data={data} />}
     <EmpresaDialog value={empresa} onClose={() => setEmpresa(null)} refresh={refresh} />
     <ContatoDialog value={contato} data={data} onClose={() => setContato(null)} refresh={refresh} />
     <LeadDialog value={lead} data={data} onClose={() => setLead(null)} refresh={refresh} />
