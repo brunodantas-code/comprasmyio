@@ -13,6 +13,14 @@ import { SearchableSelect } from '@/components/ui/searchable-select';
 import { confirmAction } from '@/components/confirm-dialog';
 import { emptyReimbursementAccount, reimbursementAccountSchema, reimbursementAccountOptions, filterReimbursementAccounts, type ReimbursementDetails } from '@/lib/reimbursement-account';
 
+const pixTypeLabels: Record<string, string> = {
+  cpf: 'CPF',
+  cnpj: 'CNPJ',
+  email: 'Email',
+  telefone: 'Telefone',
+  aleatoria: 'Aleatória',
+};
+
 export function useReimbursementAccounts(userId: string) {
   return useQuery({ queryKey: ['reimbursement-accounts', userId], queryFn: async () => {
     const { data, error } = await supabase.from('reimbursement_accounts').select('*').eq('user_id', userId).eq('active', true).order('name');
@@ -49,7 +57,7 @@ export function ReimbursementAccounts({ userId, value, onChange }: { userId: str
     await qc.invalidateQueries({ queryKey: ['reimbursement-accounts', userId] });
   }
   const field = (key: keyof ReimbursementDetails, label: string) => <div className="space-y-1"><Label htmlFor={`ra-${key}`}>{label}</Label><Input id={`ra-${key}`} value={draft[key]} onChange={e => update(key, e.target.value)} maxLength={150} /></div>;
-  const select = (key: keyof ReimbursementDetails, label: string, values: string[]) => <div className="space-y-1"><Label>{label}</Label><Select value={draft[key]} onValueChange={v => update(key, v)}><SelectTrigger aria-label={label}><SelectValue /></SelectTrigger><SelectContent>{values.map(v => <SelectItem key={v} value={v}>{v === 'pix' ? 'PIX' : v === 'bank' ? 'Dados bancários' : v}</SelectItem>)}</SelectContent></Select></div>;
+  const select = (key: keyof ReimbursementDetails, label: string, values: string[]) => <div className="space-y-1"><Label>{label}</Label><Select value={draft[key]} onValueChange={v => update(key, v)}><SelectTrigger aria-label={label}><SelectValue /></SelectTrigger><SelectContent>{values.map(v => <SelectItem key={v} value={v}>{v === 'pix' ? 'PIX' : v === 'bank' ? 'Dados bancários' : key === 'pix_type' ? pixTypeLabels[v] ?? v : v}</SelectItem>)}</SelectContent></Select></div>;
   return <section className="space-y-3 pt-3">
     <div className="flex items-center justify-between gap-2"><h3 className="text-sm font-semibold">Dados bancários / PIX</h3><div className="flex items-center gap-2"><CdeButton group="plus" screen="components/reimbursement-accounts.tsx" aria-label="Adicionar conta" title="Adicionar conta" onClick={() => { setDraft(emptyReimbursementAccount); setEditing(null); setOpen(true); }} /><Button variant="ghost" size="compactIcon" aria-label={expanded ? 'Recolher contas' : 'Exibir contas'} onClick={() => setExpanded(v => !v)}>{expanded ? <ChevronUp /> : <ChevronDown />}</Button></div></div>
     {onChange && <SearchableSelect aria-label="Conta para reembolso" value={value ?? ''} onChange={onChange} placeholder="Escolher conta bancária ou PIX" options={reimbursementAccountOptions(accounts)} optionFilter={filterReimbursementAccounts} />}
