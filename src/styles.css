@@ -481,8 +481,8 @@
 }
 
 /* List-type menu items (submenus, 3-bar menu): CDE list_item_style */
-@layer utilities {
-  button.erp-entry-button { background: var(--primary) !important; color: var(--erp-landing-foreground) !important; }
+@layer base {
+  .erp-entry-button { background: var(--primary) !important; color: var(--primary-foreground) !important; }
 }
 [role="menuitem"] { color: var(--li-text, inherit); }
 [role="menuitem"] svg { color: var(--li-fg, currentColor); }

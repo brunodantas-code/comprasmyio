@@ -186,7 +186,7 @@ function PropostaEditor({ id, data, templates, onClose, onOpen }: { id: string |
         vendedor: op?.dono_id ? { nome: data.users.find((u) => u.id === op.dono_id)?.full_name ?? "" } : null, produto: op?.produto_alvo ?? null,
         condicoes: cond, itens, total_setup: tot.setup, total_mensal: tot.mensal };
       const blob = await gerarDocxProposta(dados);
-      const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = nomeArquivoDocx(dados); a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+      const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = nomeArquivoDocx(dados); a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 30_000);
     } catch (e) { toast.error(errMsg(e)); }
   }
   async function pend(action: "add" | "resolver" | "nao_se_aplica" | "reabrir" | "excluir", p?: Pendencia) {

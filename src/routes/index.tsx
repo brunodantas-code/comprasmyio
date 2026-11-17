@@ -232,7 +232,7 @@ export function Landing() {
             </div>
 
             {signedIn ? (
-              <Button asChild size="lg" className="h-12 w-full">
+              <Button asChild size="lg" actionKind="specific" className="erp-entry-button h-12 w-full">
                 <Link to="/portal">
                   Entrar na plataforma <ArrowRight className="h-5 w-5" />
                 </Link>

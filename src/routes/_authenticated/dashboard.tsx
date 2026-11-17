@@ -4700,7 +4700,7 @@ function BackupButton() {
       a.href = url;
       a.download = `backup-myio-${stamp}.json`;
       a.click();
-      URL.revokeObjectURL(url);
+      setTimeout(() => URL.revokeObjectURL(url), 30_000);
       const total = Object.values(backup.tables).reduce((acc, rows) => acc + rows.length, 0);
       toast.success(`Backup baixado: ${total} registros em ${Object.keys(backup.tables).length} tabelas.`);
       setOpen(false);

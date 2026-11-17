@@ -47,7 +47,7 @@ export function WishlistIdeaDialog({ idea, messages, steps, users, userId, isAdm
     const payload = wishlistProjectExport(idea, steps, messages, name(idea.idealizer_id));
     const url = URL.createObjectURL(new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" }));
     const link = document.createElement("a"); link.href = url; link.download = `Wishlist-${idea.title.replace(/[^\p{L}\p{N}-]+/gu, "-").slice(0, 70)}.json`; link.click();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    setTimeout(() => URL.revokeObjectURL(url), 30_000);
   }
   return <Dialog open onOpenChange={open => { if (!open && !save.isPending) onClose(); }}><DialogContent aria-describedby={undefined} className="!max-w-3xl !min-w-0 overflow-x-hidden [&>*]:min-w-0">
     <DialogHeader className="sticky top-0 z-20 -mx-4 -mt-1 flex flex-row items-start justify-between gap-2 bg-background px-4 pb-3 pr-12 sm:-mx-6 sm:px-6 sm:pr-14">
