@@ -3,23 +3,35 @@ import { TABLE_FONTS_DEFAULT, parseTableFonts } from "./table-fonts-config";
 
 describe("parseTableFonts", () => {
   it("usa o padrão 11/12 quando não há padrão salvo", () => {
-    expect(parseTableFonts(undefined)).toEqual({ headerPx: 11, filterPx: 12 });
-    expect(parseTableFonts(null)).toEqual(TABLE_FONTS_DEFAULT);
-    expect(parseTableFonts("")).toEqual(TABLE_FONTS_DEFAULT);
+    expect(parseTableFonts(undefined)).toMatchObject({ headerPx: 11, filterPx: 12 });
+    expect(parseTableFonts(null)).toMatchObject(TABLE_FONTS_DEFAULT);
+    expect(parseTableFonts("")).toMatchObject(TABLE_FONTS_DEFAULT);
   });
 
   it("aceita tamanhos válidos salvos no CDE", () => {
-    expect(parseTableFonts('{"headerPx":13,"filterPx":14}')).toEqual({ headerPx: 13, filterPx: 14 });
-    expect(parseTableFonts('{"headerPx":10,"filterPx":11}')).toEqual({ headerPx: 10, filterPx: 11 });
+    expect(parseTableFonts('{"headerPx":13,"filterPx":14}')).toMatchObject({ headerPx: 13, filterPx: 14 });
+    expect(parseTableFonts('{"headerPx":10,"filterPx":11}')).toMatchObject({ headerPx: 10, filterPx: 11 });
   });
 
   it("rejeita tamanhos fora da faixa permitida", () => {
-    expect(parseTableFonts('{"headerPx":20,"filterPx":8}')).toEqual(TABLE_FONTS_DEFAULT);
-    expect(parseTableFonts('{"headerPx":11.5,"filterPx":12}')).toEqual({ headerPx: 11, filterPx: 12 });
+    expect(parseTableFonts('{"headerPx":20,"filterPx":8}')).toMatchObject(TABLE_FONTS_DEFAULT);
+    expect(parseTableFonts('{"headerPx":11.5,"filterPx":12}')).toMatchObject({ headerPx: 11, filterPx: 12 });
   });
 
   it("tolera JSON inválido e campos ausentes", () => {
-    expect(parseTableFonts("não é json")).toEqual(TABLE_FONTS_DEFAULT);
-    expect(parseTableFonts('{"headerPx":12}')).toEqual({ headerPx: 12, filterPx: 12 });
+    expect(parseTableFonts("não é json")).toMatchObject(TABLE_FONTS_DEFAULT);
+    expect(parseTableFonts('{"headerPx":12}')).toMatchObject({ headerPx: 12, filterPx: 12 });
+  });
+});
+
+describe("table alignment", () => {
+  it("keeps headers and lists independent", async () => {
+    const { parseTableFonts, tableAlignVars } = await import("./table-fonts-config");
+    const c = parseTableFonts('{"headerH":"center","headerV":"middle","cellH":"left","cellV":"middle"}');
+    expect(tableAlignVars(c)).toMatchObject({ "--th-align": "center", "--th-justify": "center", "--td-align": "left", "--td-valign": "middle" });
+  });
+  it("defaults to today's left/middle alignment for unknown values", async () => {
+    const { parseTableFonts } = await import("./table-fonts-config");
+    expect(parseTableFonts('{"headerH":"x"}')).toMatchObject({ headerH: "left", headerV: "middle", cellH: "left", cellV: "middle" });
   });
 });

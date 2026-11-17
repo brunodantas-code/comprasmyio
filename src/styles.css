@@ -113,6 +113,9 @@
   /* Fontes de cabeçalhos de tabela e barras de filtro — padrão CDE (grupo table_fonts); valores iniciais até o CDE carregar */
   --th-fs: 11px;
   --filter-fs: 12px;
+  /* Alinhamento de cabeçalhos e listas — padrão CDE (table_fonts) */
+  --th-align: left; --th-valign: middle; --th-justify: flex-start;
+  --td-align: left; --td-valign: middle; --td-justify: flex-start;
   /* Pantones exatos da marca myio (Manual da Marca) */
   --myio-green: #0fc482;
   --cde-number-soft: color-mix(in oklab, var(--myio-green) 10%, var(--card));
@@ -503,3 +506,11 @@
 
 .central-flow { --xy-node-background-color: var(--card); --xy-node-color: var(--foreground); --xy-node-border: 1px solid var(--border); --xy-edge-stroke: var(--foreground); --xy-edge-label-background-color: var(--background); --xy-edge-label-color: var(--foreground); --xy-controls-button-background-color: var(--card); --xy-controls-button-color: var(--foreground); --xy-background-pattern-dots-color: var(--border); }
 .central-flow .central-flow-node { background: var(--card); color: var(--foreground); border: 1px solid var(--border); border-radius: 6px; padding: 12px; }
+
+/* CDE: alinhamento padrão de cabeçalhos (.cde-th) e listas (.cde-td); classes explícitas das telas (utilities) prevalecem. */
+@layer base {
+  .cde-th { text-align: var(--th-align); vertical-align: var(--th-valign); }
+  .cde-td { text-align: var(--td-align); vertical-align: var(--td-valign); }
+  .cde-th > :is(div, span, button):where(.flex, .inline-flex) { justify-content: var(--th-justify); }
+  .cde-td > :is(div, span):where(.flex, .inline-flex) { justify-content: var(--td-justify); }
+}
