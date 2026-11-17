@@ -334,3 +334,6 @@
 - [x] Supply: datas de ida e volta abaixo de UF e Cidade, cidade em largura completa; conferido na tela (destino 508 px em linha própria, datas na linha seguinte).
 - [x] Responder e Nova pergunta padronizados em Code, Supply e Wishlist: ghost preto, mesmo tamanho, modo ativo com sublinhado e negrito (Wishlist não usa mais fundo cinza). Conferido por código; botões só aparecem para o destinatário da pergunta.
 - [x] Filtros múltiplos em Approvals, Solicitações e demais listas (padrão Tickets)
+- [x] Tickets (Code): cabeçalho 11px e linhas 12px iguais às Solicitações/Approvals; filtros (Contém, Buscar ticket, Filtros) em 12px; campo de busca mantém 16px no celular contra zoom. Conferido na conta Leonardo em 1280/390 px, sem overflow; 8 testes passaram. Não publicado.
+- [ ] CRM: usuário perguntou se dá para integrar o CRM dentro do ERP em vez de abrir em nova aba; resposta: sim, exige adaptação do código Next.js ao ERP, mapeamento de usuários/permissões e migração de dados; aguardando confirmação para iniciar o projeto.
+- [ ] CRM: ações futuras de Atas (Legal) e To Dos (Central) deverão vincular-se ao CRM; considerar na decisão de integração interna vs. aba externa.

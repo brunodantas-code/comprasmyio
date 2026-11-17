@@ -251,16 +251,16 @@ function DevelopmentPage() {
             <CardDescription>{data?.isAdmin ? "Todos os tickets abertos na plataforma." : "Tickets abertos por você ou atribuídos a você."}</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="mb-3 flex flex-wrap items-center justify-end gap-2">
+            <div className="mb-3 flex flex-wrap items-center justify-end gap-2 text-xs">
               <div className="flex min-w-0 flex-wrap items-center gap-2">
-                <Select value={searchOp} onValueChange={value => setSearchOp(value as FilterOp)}><SelectTrigger aria-label="Condição da busca" className="w-36"><SelectValue /></SelectTrigger><SelectContent>{OP_LABELS.text.map(option => <SelectItem key={option.op} value={option.op}>{option.label}</SelectItem>)}</SelectContent></Select>
-                {searchOp !== "empty" && searchOp !== "not_empty" ? <div className="relative w-56 max-w-full"><Input aria-label="Buscar tickets" placeholder="Buscar ticket" value={searchText} onChange={event => setSearchText(event.target.value)} className="pr-8" />{searchText ? <Button type="button" variant="ghost" size="compactIcon" className="absolute right-0 top-1/2 -translate-y-1/2" aria-label="Limpar busca" title="Limpar busca" onClick={() => setSearchText("")}><X /></Button> : null}</div> : null}
+                <Select value={searchOp} onValueChange={value => setSearchOp(value as FilterOp)}><SelectTrigger aria-label="Condição da busca" className="h-8 w-36 text-xs"><SelectValue /></SelectTrigger><SelectContent>{OP_LABELS.text.map(option => <SelectItem key={option.op} value={option.op}>{option.label}</SelectItem>)}</SelectContent></Select>
+                {searchOp !== "empty" && searchOp !== "not_empty" ? <div className="relative w-56 max-w-full"><Input aria-label="Buscar tickets" placeholder="Buscar ticket" value={searchText} onChange={event => setSearchText(event.target.value)} className="h-8 pr-8 text-xs md:text-xs" />{searchText ? <Button type="button" variant="ghost" size="compactIcon" className="absolute right-0 top-1/2 -translate-y-1/2" aria-label="Limpar busca" title="Limpar busca" onClick={() => setSearchText("")}><X /></Button> : null}</div> : null}
               </div>
-              <span className="inline-flex shrink-0 items-center gap-1 text-sm text-muted-foreground">Filtros{ticketFilters.menu}</span>
+              <span className="inline-flex shrink-0 items-center gap-1 text-xs text-muted-foreground">Filtros{ticketFilters.menu}</span>
             </div>
             {ticketFilters.active > 0 ? <div className="mb-3 flex flex-wrap justify-end gap-2">{ticketColumns.filter(column => isFilterActive(ticketFilters.filters[column.key])).map(column => { const value = ticketFilters.filters[column.key]; return <Badge key={column.key} variant="secondary" className="max-w-full gap-1 font-normal"><span className="min-w-0 break-words">{column.label}: {value?.selected?.join(", ") || `${OP_LABELS[column.kind ?? "text"].find(option => option.op === value?.op)?.label ?? ""} ${value?.value ?? ""}${value?.value2 ? ` — ${value.value2}` : ""}`}</span><Button type="button" variant="ghost" size="compactIcon" aria-label={`Remover filtro ${column.label}`} title={`Remover filtro ${column.label}`} onClick={() => ticketFilters.setFilter(column.key, undefined)}><X /></Button></Badge>; })}</div> : null}
             {isLoading ? <p className="py-8 text-center text-sm text-muted-foreground">Carregando tickets...</p> : (
-              <Table className="table-auto md:min-w-[1100px]">
+              <Table className="table-auto text-xs md:min-w-[1100px] [&_th]:text-[11px]">
                  <TableHeader>
                    <TableRow>
                      <TableHead className="w-[5%]">{sortHeader("number")}</TableHead>
