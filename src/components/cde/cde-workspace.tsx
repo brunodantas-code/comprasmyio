@@ -107,6 +107,7 @@ const inventoryKey = (v: Omit<Variant, "key">) => [v.tag, v.variant, v.size, v.c
 
 function Preview({ v }: { v: Pick<Variant, "tag" | "variant" | "size" | "className" | "icon" | "iconClass" | "label" | "style"> }) {
   const { css, cls } = styleOf(v.style);
+  if (v.tag === "span" && v.icon && ICONS[v.icon]) { const SpanIcon = ICONS[v.icon]; return <span style={css} className={cn("inline-flex shrink-0 items-center justify-center", v.className, cls)}><SpanIcon className={v.iconClass} />{v.label || null}</span>; }
   if (v.tag === "span") return <span style={css} className={cn("flex h-7 w-7 shrink-0 items-center justify-center text-sm font-bold", v.className, cls)}>{v.label || "1"}</span>;
   if (v.tag === "div") return <div style={css} className={cn("flex h-14 w-48 items-center justify-center text-xs", v.className || "rounded-xl border bg-card shadow", cls)}>{v.label || "Box"}</div>;
   if (v.tag === "Textarea") return <textarea style={css} className={cn("min-h-[60px] w-56 rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground", v.className, cls)} placeholder="Texto" readOnly />;
