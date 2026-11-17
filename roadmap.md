@@ -383,3 +383,7 @@
 - [x] To Dos: contador alinhado aos grupos, moldura também recolhido e setas baixo/cima conforme CDE; conferido no portal/Central em 320/390/1085/1280 px.
 - [x] Alertas: diâmetro único do CDE em todas as telas; prévias 7/59/99+ iguais em 28 px, sem redução por uso compacto.
 - [x] Chamados: diâmetro único independente (22 px atual), prévias 7/59/99+ iguais; identificadores preservados com texto ajustado internamente. 46 testes passaram.
+- [x] To Dos: texto aprovado “Tarefas pendentes” à esquerda do box aplicado e conferido.
+- [x] Portal/Central: bolinhas vermelhas imediatamente antes das setas à direita, com 12 px de distância; computador 1085 px e celular 390 px conferidos autenticado, sem excesso lateral.
+- [x] To Dos: ordenação Etiqueta: A–Z salva e relida após recarga; ERP, Operação, Pagamento e Reembolsos conferidos, preferência anterior restaurada. Filtros, tarefas e ordem manual preservados; 9 testes passaram.
+- [x] Informado: ícones do portal no celular 80 × 80 px; no print do iPhone aproximadamente 64 × 64, portal 25% maior. Nenhuma dimensão alterada.

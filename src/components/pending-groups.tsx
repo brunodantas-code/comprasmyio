@@ -40,9 +40,8 @@ export function PendingGroups({ items, leading }: { items: PendingGroupItem[]; l
         return <div key={name}>
           <div className="transition-colors hover:bg-primary/10 focus-within:bg-primary/10"><Button variant="ghost" type="button" onClick={() => toggle(name)} aria-expanded={isOpen} className="!flex !h-auto !min-w-0 !w-full !max-w-none !justify-start items-center gap-3 !bg-transparent px-4 py-3 text-left">
             {groupBy === "app" ? <AppSymbol name={name} className="h-5 w-5 shrink-0 text-foreground" /> : <span aria-hidden className="h-5 w-5 shrink-0" />}
-            <span className="min-w-0 w-40 max-w-[40vw] shrink-0 break-words text-sm font-semibold">{name}</span>
-            <AlertMarker count={total} />
-            <span className="ml-auto flex shrink-0 items-center"><CdeDisclosureIcon open={isOpen} screen="components/pending-groups.tsx" /></span>
+            <span className="min-w-0 flex-1 break-words text-sm font-semibold">{name}</span>
+            <span className="ml-auto flex shrink-0 items-center gap-3"><AlertMarker count={total} /><CdeDisclosureIcon open={isOpen} screen="components/pending-groups.tsx" /></span>
           </Button></div>
           {isOpen ? <div className="divide-y divide-border border-t border-border bg-muted/30">{rows.map((r) => <div key={r.key} className="pl-8 transition-colors hover:bg-primary/10 focus-within:bg-primary/10 [&>a]:!bg-transparent">{r.row}</div>)}</div> : null}
         </div>;

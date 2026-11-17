@@ -8,6 +8,7 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+- Todo label sort uses personal names to preserve privacy.
 - Code queues share assignee-only pending logic; app-attendant triggers assign new tickets and audit redistribution of unfinished tickets to avoid duplicate Admin tasks.
 - Code completion uses an explicit confirmation; reopening uses an authenticated, row-locked RPC and the shared log trigger to preserve content/assignment and atomically audit the reason without widening ticket-management access.
 - Code hides deleted rows by default; Supply clears inherited Internal tags on reallocation via its shared trigger.

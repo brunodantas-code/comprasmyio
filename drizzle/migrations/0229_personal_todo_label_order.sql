@@ -1,0 +1,2 @@
+ALTER TABLE public.personal_todo_preferences DROP CONSTRAINT personal_todo_preferences_sort_mode_check;
+ALTER TABLE public.personal_todo_preferences ADD CONSTRAINT personal_todo_preferences_sort_mode_check CHECK (sort_mode IN ('manual','due','priority','title','newest','oldest','status','label'));

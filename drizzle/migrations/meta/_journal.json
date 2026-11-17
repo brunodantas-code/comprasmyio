@@ -1604,6 +1604,13 @@
       "when": 1794928117519,
       "tag": "0228_crm_configuracoes_integracoes",
       "breakpoints": true
+    },
+    {
+      "idx": 229,
+      "version": "7",
+      "when": 1794940956246,
+      "tag": "0229_personal_todo_label_order",
+      "breakpoints": true
     }
   ]
 }

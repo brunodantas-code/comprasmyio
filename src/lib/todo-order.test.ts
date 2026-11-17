@@ -12,3 +12,8 @@ it('orders critical and high priority ahead of low', () => expect(sortTodos(task
 it('orders titles alphabetically', () => expect(sortTodos(tasks, 'title').map(t=>t.id)).toEqual(['b','c','a']));
 it('orders by creation date in both directions', () => { expect(sortTodos(tasks,'newest').map(t=>t.id)).toEqual(['a','b','c']); expect(sortTodos(tasks,'oldest').map(t=>t.id)).toEqual(['c','b','a']); });
 it('keeps filtered-out tasks in their positions', () => expect(mergeVisibleTodoOrder(['a','hidden','b'], ['b','a'])).toEqual(['b','hidden','a']));
+it('orders tasks by their personal labels alphabetically, leaving unlabelled tasks last', () => {
+  const labels: Record<string, string[]> = { a: ['ERP'], b: [], c: ['Casa', 'Administração'] };
+  expect(sortTodos(tasks, 'label', [], id => labels[id] ?? []).map(t => t.id)).toEqual(['c', 'a', 'b']);
+  expect(labels.c).toEqual(['Casa', 'Administração']);
+});
