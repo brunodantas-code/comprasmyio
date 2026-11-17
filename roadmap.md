@@ -375,3 +375,4 @@
 - [x] CDE: item Aparência do CDE (categorias/subcategorias)
 - [x] CRM Fase 4: Custeio e Preços
 - [x] CRM Fase 5: Configurações (fases, etapas personalizadas, papéis, modelos de proposta/mensagem), consultas CNPJ e IBGE; criar/renomear/excluir fase temporária verificado autenticado; CNPJ preenchido, 92 municípios RJ e mobile 390 px. WhatsApp original apenas classifica telefone; sem conexão acessível, nenhum envio implementado. Modelos locais disponíveis para copiar em leads/oportunidades. 20 testes CRM passaram.
+- [x] Site Survey: cliente e projeto ao lado do número da visita, visíveis no box recolhido e expandido; conferido na visita 202611100001 (Allos / Implantação | Shopping Vila Velha), celular 390 px e computador 1085/1280 px, sem sobreposição ou rolagem horizontal.
