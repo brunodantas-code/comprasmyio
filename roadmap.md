@@ -338,3 +338,5 @@
 - [ ] CRM: usuário perguntou se dá para integrar o CRM dentro do ERP em vez de abrir em nova aba; resposta: sim, exige adaptação do código Next.js ao ERP, mapeamento de usuários/permissões e migração de dados; aguardando confirmação para iniciar o projeto.
 - [ ] CRM: ações futuras de Atas (Legal) e To Dos (Central) deverão vincular-se ao CRM; considerar na decisão de integração interna vs. aba externa.
 - [x] CRM: confirmado ao usuário que a integração não afeta o arquivo MD, o banco, o layout nem as customizações do CRM original; acesso externo do João preservado até a desativação na fase final.
+- [ ] Padronizar fontes de cabeçalhos de tabela (11px) e filtros (12px) em todos os apps, no padrão Supply/Tickets, antes de iniciar a integração do CRM.
+- [ ] Publicar alterações prontas (fontes do Tickets, busca PIX, botões, link externo do CRM) antes da padronização geral de fontes.
