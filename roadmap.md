@@ -337,3 +337,4 @@
 - [x] Tickets (Code): cabeçalho 11px e linhas 12px iguais às Solicitações/Approvals; filtros (Contém, Buscar ticket, Filtros) em 12px; campo de busca mantém 16px no celular contra zoom. Conferido na conta Leonardo em 1280/390 px, sem overflow; 8 testes passaram. Não publicado.
 - [ ] CRM: usuário perguntou se dá para integrar o CRM dentro do ERP em vez de abrir em nova aba; resposta: sim, exige adaptação do código Next.js ao ERP, mapeamento de usuários/permissões e migração de dados; aguardando confirmação para iniciar o projeto.
 - [ ] CRM: ações futuras de Atas (Legal) e To Dos (Central) deverão vincular-se ao CRM; considerar na decisão de integração interna vs. aba externa.
+- [x] CRM: confirmado ao usuário que a integração não afeta o arquivo MD, o banco, o layout nem as customizações do CRM original; acesso externo do João preservado até a desativação na fase final.

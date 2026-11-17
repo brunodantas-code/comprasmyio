@@ -44,5 +44,5 @@ Trazer o CRM (hoje em crm-myio.vercel.app, app Next.js separado com login e banc
 
 ## Observações
 - Trabalho grande, entregue em fases; cada fase fica utilizável e verificada antes da próxima.
-- Nada do CRM atual será alterado ou apagado durante a construção — ele continua no ar até a Fase 7.
+- **Garantia de isolamento**: o arquivo MD é usado apenas como referência de leitura. Nada no CRM atual será alterado — banco de dados, layout e customizações permanecem intactos, e o acesso externo (ex.: João pela máquina dele, sem passar pelo ERP) continua funcionando até a Fase 7, quando você decidir desativá-lo.
 - O código-fonte enviado não inclui imagens, modelos DOCX e dados; vou solicitá-los quando cada fase precisar.
