@@ -16,8 +16,14 @@ function scan(p) {
   }
 }
 walk("src");
-const code = fs.readFileSync("src/components/code-status-badge.tsx", "utf8"); void code;
-for (const [l] of [["Concluído"], ["Em aberto"], ["Atendido"], ["Em atendimento"]]) add(l, "outline", "", "components/code-status-badge.tsx");
+const code = fs.readFileSync("src/components/code-status-badge.tsx", "utf8");
+const codeLooks = Object.fromEntries([...code.matchAll(/^\s*(\w+):\s*"([^"]+)"/gm)].map(m => [m[1], m[2]]));
+for (const [status, label] of [["concluido", "Concluído"], ["aberto", "Em aberto"], ["atendido", "Atendido"], ["em_atendimento", "Em atendimento"]]) {
+  const className = `whitespace-nowrap text-xs font-normal ${codeLooks[status] ?? ""}`;
+  add(label, "outline", className, "components/code-status-badge.tsx");
+  const entry = out.get(label.toLowerCase());
+  if (entry) { entry.variant = "outline"; entry.className = className; }
+}
 for (const l of ["Rascunho", "Enviada", "Aceita", "Recusada"]) add(l, "outline", "", "components/crm/crm-propostas.tsx");
 fs.writeFileSync("src/components/cde/tag-inventory.json", JSON.stringify([...out.values()].sort((a, b) => a.label.localeCompare(b.label, "pt-BR")), null, 1) + "\n");
 console.log(out.size);

@@ -37,7 +37,7 @@
  {
   "label": "Admin do ERP",
   "variant": "outline",
-  "className": "",
+  "className": "col-start-1 row-start-2 w-fit",
   "apps": [
    "Usuários"
   ],
@@ -137,6 +137,17 @@
   ]
  },
  {
+  "label": "Alerta",
+  "variant": "default",
+  "className": "",
+  "apps": [
+   "CRM"
+  ],
+  "files": [
+   "components/crm/crm-memoria.tsx"
+  ]
+ },
+ {
   "label": "Almoxarifado",
   "variant": "default",
   "className": "",
@@ -173,9 +184,20 @@
   ]
  },
  {
+  "label": "Atenção",
+  "variant": "default",
+  "className": "",
+  "apps": [
+   "CRM"
+  ],
+  "files": [
+   "components/crm/crm-memoria.tsx"
+  ]
+ },
+ {
   "label": "Atendido",
   "variant": "outline",
-  "className": "",
+  "className": "whitespace-nowrap text-xs font-normal border-transparent bg-code-attended text-code-attended-foreground",
   "apps": [
    "Code"
   ],
@@ -314,8 +336,8 @@
  },
  {
   "label": "Concluído",
-  "variant": "status",
-  "className": "",
+  "variant": "outline",
+  "className": "whitespace-nowrap text-xs font-normal border-transparent bg-code-completed text-code-completed-foreground",
   "apps": [
    "Supply",
    "Code"
@@ -363,7 +385,7 @@
  {
   "label": "Em aberto",
   "variant": "outline",
-  "className": "",
+  "className": "whitespace-nowrap text-xs font-normal border-transparent bg-destructive text-destructive-foreground",
   "apps": [
    "Code"
   ],
@@ -395,8 +417,8 @@
  },
  {
   "label": "Em atendimento",
-  "variant": "status",
-  "className": "",
+  "variant": "outline",
+  "className": "whitespace-nowrap text-xs font-normal border-transparent bg-muted text-foreground",
   "apps": [
    "Supply",
    "Code"
@@ -736,6 +758,17 @@
   ]
  },
  {
+  "label": "OK",
+  "variant": "default",
+  "className": "",
+  "apps": [
+   "CRM"
+  ],
+  "files": [
+   "components/crm/crm-memoria.tsx"
+  ]
+ },
+ {
   "label": "Orçamento excedido",
   "variant": "destructive",
   "className": "mt-1",
@@ -1041,6 +1074,17 @@
   ],
   "files": [
    "components/distribution.tsx"
+  ]
+ },
+ {
+  "label": "Vigente",
+  "variant": "default",
+  "className": "",
+  "apps": [
+   "CRM"
+  ],
+  "files": [
+   "components/crm/crm-custos.tsx"
   ]
  },
  {

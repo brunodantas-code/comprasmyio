@@ -21,9 +21,9 @@ export const APP_DESCRIPTIONS: Record<string, string[]> = {
 /** Symbol + name inside a portal app tile; shared by the portal and the CDE preview. */
 export function AppTileFace({ appKey, name, tile, mobile = false }: { appKey: string; name: string; tile: AppTileConfig; mobile?: boolean }) {
   const [Icon, stroke] = APP_ICONS[appKey] ?? [CodeXml, 2.8];
-  const scale = (tile.iconPct / 100) * (APP_ICON_OPTICAL[appKey] ?? 1);
-  return <><span className={`flex h-11 w-full translate-y-0.5 items-center justify-center ${mobile ? "" : "sm:h-16 sm:translate-y-1"}`} aria-hidden="true"><Icon className={`text-[color:var(--tile-symbol,currentColor)] h-11 w-11 max-w-[65%] ${mobile ? "" : "sm:h-16 sm:w-16"}`} style={{ strokeWidth: stroke, transform: `scale(${mobile ? Math.min(scale, 1.2) : scale})` }} /></span>
-    <span className={`max-w-full whitespace-nowrap font-normal leading-none text-[color:var(--tile-inside,currentColor)] text-[length:var(--tile-fs-m)] ${mobile ? "" : "sm:text-[length:var(--tile-fs)]"}`} style={{ "--tile-fs": `${tile.labelPx}px`, "--tile-fs-m": `${mobile ? Math.min(tile.labelPx - 2, 11) : tile.labelPx - 2}px` } as React.CSSProperties}>{name}</span></>;
+  const scale = ((mobile ? tile.mobileIconPct : tile.iconPct) / 100) * (APP_ICON_OPTICAL[appKey] ?? 1);
+  return <><span className={`flex w-full items-center justify-center ${mobile ? "translate-y-0.5 h-[length:var(--mobile-symbol-box,44px)]" : "h-16 translate-y-1"}`} aria-hidden="true"><Icon className={`text-[color:var(--tile-symbol,currentColor)] max-w-[65%] ${mobile ? "h-[length:var(--mobile-symbol-box,44px)] w-[length:var(--mobile-symbol-box,44px)]" : "h-16 w-16"}`} style={{ strokeWidth: stroke, transform: `scale(${mobile ? Math.min(scale, 1.4) : scale})` }} /></span>
+    <span className={`max-w-full whitespace-nowrap font-normal leading-none text-[color:var(--tile-inside,currentColor)] ${mobile ? "text-[length:var(--tile-fs-m)]" : "text-[length:var(--tile-fs)]"}`} style={{ "--tile-fs": `${tile.labelPx}px`, "--tile-fs-m": `${Math.min(tile.labelPx - 2, 11)}px` } as React.CSSProperties}>{name}</span></>;
 }
 
 const APP_NAME_KEYS: Record<string, string> = { Supply: "supply", "Cash Flow": "cash_flow", CRM: "crm", Legal: "legal", RH: "rh", "Site Survey": "site_survey", Chamados: "chamados", OpDesk: "chamados", CDE: "cde", Mytosis: "mytosis", Code: "development", Wishlist: "wishlist" };

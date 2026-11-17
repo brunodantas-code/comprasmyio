@@ -28,8 +28,9 @@ import { saveLibrarySelection } from "./save-library-selection";
 const normalize = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
 export type LibraryButton = (typeof library)[number];
-export function CdeButtonLibrary({ number, handle, onEdit, nameSearch = "" }: { number: number; handle?: ReactNode; nameSearch?: string; onEdit: (button: LibraryButton, group?: string, ids?: string[], modelKey?: string) => void }) {
+export function CdeButtonLibrary({ number, handle, onEdit }: { number: number; handle?: ReactNode; onEdit: (button: LibraryButton, group?: string, ids?: string[], modelKey?: string) => void }) {
   const [open, setOpen] = useState(false);
+  const [nameSearch, setNameSearch] = useState("");
   const [sort, setSort] = useState("name");
   const [direction, setDirection] = useState("asc");
   const [checked, setChecked] = useState<string[]>([]);
@@ -132,14 +133,14 @@ export function CdeButtonLibrary({ number, handle, onEdit, nameSearch = "" }: { 
     } catch { toast.error("Não foi possível retirar os cards."); } finally { setSaving(false); }
   }
   return <section className="min-w-0 space-y-4">
-    <CdeCategoryHeader number={number} handle={handle} title="Biblioteca de botões em uso" hint={`${models.length} modelos · ${library.length} usos`} open={open || !!nameSearch.trim()} onToggle={() => setOpen(!open)} />
-    {(open || !!nameSearch.trim()) && <>
+    <CdeCategoryHeader number={number} handle={handle} title="Biblioteca de botões em uso" hint={`${models.length} modelos · ${library.length} usos`} open={open} onToggle={() => setOpen(!open)} />
+    {open && <>
       <div className="flex items-center gap-2">
         <Checkbox aria-label="Selecionar todos os cards visíveis" checked={cards.length > 0 && cards.flatMap(usesOf).every(b => checked.includes(libraryEntryKey(b)))} onCheckedChange={value => setChecked(value ? cards.flatMap(usesOf).map(libraryEntryKey) : [])} />
         <Button type="button" variant="ghost" size="compactIcon" title="Excluir cards selecionados" aria-label="Excluir cards selecionados" disabled={saving || !checked.length} onClick={() => removeCards(cards.filter(b => checked.includes(libraryEntryKey(b))))}><Trash2 /></Button>
         {checked.length > 0 && <span className="text-xs text-muted-foreground">{checked.length} selecionados</span>}
       </div>
-      <div className="flex items-center gap-2">{filters.menu}<Popover><PopoverTrigger asChild><Button type="button" variant="ghost" size="compactIcon" aria-label="Ordenar botões" title="Ordenar botões"><ArrowUpDown /></Button></PopoverTrigger><PopoverContent align="start" className="w-64 space-y-3"><Select value={sort} onValueChange={setSort}><SelectTrigger aria-label="Ordenar por"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="name">Nome do botão</SelectItem><SelectItem value="type">Tipo / grupo CDE</SelectItem><SelectItem value="file">Local de uso</SelectItem></SelectContent></Select><Select value={direction} onValueChange={setDirection}><SelectTrigger aria-label="Sentido da ordenação"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="asc">A → Z</SelectItem><SelectItem value="desc">Z → A</SelectItem></SelectContent></Select></PopoverContent></Popover></div>
+      <div className="flex min-w-0 items-center justify-end gap-2"><Input aria-label="Buscar botão pelo nome" placeholder="Nome do botão…" className="w-48 min-w-0" value={nameSearch} onChange={e => setNameSearch(e.target.value)} />{filters.menu}<Popover><PopoverTrigger asChild><Button type="button" variant="ghost" size="compactIcon" aria-label="Ordenar botões" title="Ordenar botões"><ArrowUpDown /></Button></PopoverTrigger><PopoverContent align="start" className="w-64 space-y-3"><Select value={sort} onValueChange={setSort}><SelectTrigger aria-label="Ordenar por"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="name">Nome do botão</SelectItem><SelectItem value="type">Tipo / grupo CDE</SelectItem><SelectItem value="file">Local de uso</SelectItem></SelectContent></Select><Select value={direction} onValueChange={setDirection}><SelectTrigger aria-label="Sentido da ordenação"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="asc">A → Z</SelectItem><SelectItem value="desc">Z → A</SelectItem></SelectContent></Select></PopoverContent></Popover></div>
       <p className="text-xs text-muted-foreground">{cards.length} modelos encontrados · {cards.flatMap(usesOf).length} usos</p>
       {([["common", "Botões de ação padrão", "Salvar, Cancelar, Excluir, Adicionar e demais ações que seguem o padrão visual comum"], ["specific", "Botões de funções específicas", "Botões com altura, borda, fundo ou modelo próprios"]] as const).map(([kind, title, hint], sectionIndex) => {
         const sectionCards = cards.filter(b => (classification(b) === "Função específica") === (kind === "specific"));

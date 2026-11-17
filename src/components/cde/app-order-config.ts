@@ -35,6 +35,17 @@ export function useAppOrder() {
 /** Tile look of portal apps: label font (desktop px; mobile is 2px smaller) and icon size (% of tile icon box). */
 /** Brand-manual colour choices for the portal (keys stored; values are myio brand tokens only). */
 export const APP_TILE_COLORS = {
+  headerBg: [
+    { key: "padrao", label: "Atual: branco / verde claro", value: "var(--card)", dark: false },
+    { key: "branco", label: "Branco", value: "var(--myio-white)", dark: false },
+    { key: "verde_claro", label: "Verde claro myio", value: "var(--myio-green-tint)", dark: false },
+    { key: "verde", label: "Verde myio", value: "var(--myio-green)", dark: false },
+    { key: "lilas", label: "Lilás myio", value: "var(--myio-lilac)", dark: false },
+    { key: "roxo", label: "Roxo myio", value: "var(--myio-purple)", dark: true },
+    { key: "escuro", label: "Escuro myio", value: "var(--myio-dark)", dark: true },
+    { key: "roxo_noite", label: "Roxo noite myio", value: "var(--erp-landing)", dark: true },
+    { key: "roxo_profundo", label: "Roxo profundo myio", value: "var(--erp-landing-soft)", dark: true },
+  ],
   bg: [
     { key: "padrao", label: "Cinza claro", value: "var(--background)", dark: false },
     { key: "branco", label: "Branco", value: "var(--myio-white)", dark: false },
@@ -92,8 +103,8 @@ export const APP_TILE_COLORS = {
   ],
 } as const;
 export type AppTileColorKind = keyof typeof APP_TILE_COLORS;
-export type AppTileConfig = { labelPx: number; iconPct: number; tilePct: number; gapX: number; gapY: number; bg: string; fill: string; border: string; symbol: string; inside: string; below: string };
-export const APP_TILE_DEFAULT: AppTileConfig = { labelPx: 14, iconPct: 100, tilePct: 100, gapX: 32, gapY: 40, bg: "padrao", fill: "padrao", border: "padrao", symbol: "padrao", inside: "padrao", below: "padrao" };
+export type AppTileConfig = { labelPx: number; iconPct: number; tilePct: number; mobileTilePct: number; mobileIconPct: number; gapX: number; gapY: number; headerBg: string; bg: string; fill: string; border: string; symbol: string; inside: string; below: string };
+export const APP_TILE_DEFAULT: AppTileConfig = { labelPx: 14, iconPct: 100, tilePct: 100, mobileTilePct: 100, mobileIconPct: 100, gapX: 32, gapY: 40, headerBg: "padrao", bg: "padrao", fill: "padrao", border: "padrao", symbol: "padrao", inside: "padrao", below: "padrao" };
 export function appTileColor(kind: AppTileColorKind, key: string) {
   const list = APP_TILE_COLORS[kind] as readonly { key: string; label: string; value: string; dark: boolean }[];
   return list.find((o) => o.key === key) ?? list[0];
@@ -101,6 +112,19 @@ export function appTileColor(kind: AppTileColorKind, key: string) {
 /** Portal CSS variables for the chosen colours (background, tile border, text inside and below the tiles). */
 export function appTileColorVars(tile: AppTileConfig): Record<string, string> {
   return { "--portal-bg": appTileColor("bg", tile.bg).value, "--tile-fill": appTileColor("fill", tile.fill).value, "--tile-border": appTileColor("border", tile.border).value, "--tile-symbol": appTileColor("symbol", tile.symbol).value, "--tile-inside": appTileColor("inside", tile.inside).value, "--tile-below": appTileColor("below", tile.below).value };
+}
+export function homeHeaderVars(tile: AppTileConfig): Record<string, string> {
+  const selected = appTileColor("headerBg", tile.headerBg);
+  if (selected.key === "padrao") return {};
+  const foreground = selected.dark ? "var(--myio-white)" : "var(--myio-dark)";
+  return { "--home-header-bg": selected.value, "--home-header-text": foreground, "--home-header-muted": selected.dark ? "var(--myio-white)" : "var(--muted-foreground)", "--foreground": foreground, "--ti-fg": foreground };
+}
+export function homeHeaderLogoTone(tile: AppTileConfig, mobile = false): "auto" | "light" | "dark" {
+  const selected = appTileColor("headerBg", tile.headerBg);
+  return selected.key === "padrao" ? (mobile ? "light" : "auto") : selected.dark ? "light" : "dark";
+}
+export function mobileTileVars(tile: AppTileConfig): Record<string, string> {
+  return { "--mobile-tile-size": `${80 * tile.mobileTilePct / 100}px`, "--mobile-symbol-box": `${44 * tile.mobileTilePct / 100}px`, "--mobile-grid-min": tile.mobileTilePct > 100 ? `${80 * tile.mobileTilePct / 100}px` : "calc((100% - 1.5rem) / 4)" };
 }
 /** True when the description text would vanish on the chosen background (same light/dark side). */
 export function appTileLowContrast(tile: AppTileConfig) {
@@ -112,10 +136,14 @@ export function parseAppTile(raw?: string): AppTileConfig {
   try {
     const p = JSON.parse(raw ?? "{}");
     const labelPx = Number(p.labelPx), iconPct = Number(p.iconPct), tilePct = Number(p.tilePct);
+    const mobileTilePct = Number(p.mobileTilePct), mobileIconPct = Number(p.mobileIconPct);
     const gapX = Number(p.gapX), gapY = Number(p.gapY);
     return { labelPx: labelPx >= 10 && labelPx <= 18 ? labelPx : APP_TILE_DEFAULT.labelPx, iconPct: iconPct >= 60 && iconPct <= 140 ? iconPct : APP_TILE_DEFAULT.iconPct, tilePct: tilePct >= 70 && tilePct <= 140 ? tilePct : APP_TILE_DEFAULT.tilePct,
+      mobileTilePct: mobileTilePct >= 70 && mobileTilePct <= 140 ? mobileTilePct : APP_TILE_DEFAULT.mobileTilePct,
+      mobileIconPct: mobileIconPct >= 60 && mobileIconPct <= 140 ? mobileIconPct : (iconPct >= 60 && iconPct <= 140 ? iconPct : APP_TILE_DEFAULT.mobileIconPct),
       gapX: Number.isFinite(gapX) && gapX >= 8 && gapX <= 80 ? gapX : APP_TILE_DEFAULT.gapX,
       gapY: Number.isFinite(gapY) && gapY >= 8 && gapY <= 80 ? gapY : APP_TILE_DEFAULT.gapY,
+      headerBg: appTileColor("headerBg", String(p.headerBg ?? "")).key,
       bg: appTileColor("bg", String(p.bg ?? "")).key, fill: appTileColor("fill", String(p.fill ?? "")).key, border: appTileColor("border", String(p.border ?? "")).key,
       symbol: appTileColor("symbol", String(p.symbol ?? "")).key, inside: appTileColor("inside", String(p.inside ?? "")).key, below: appTileColor("below", String(p.below ?? "")).key };
   } catch { return APP_TILE_DEFAULT; }

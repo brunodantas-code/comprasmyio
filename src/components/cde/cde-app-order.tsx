@@ -5,13 +5,14 @@ import { useQueryClient } from "@tanstack/react-query";
 import { DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, arrayMove, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, Minus, Plus, Save } from "lucide-react";
+import { GripVertical, Minus, Plus, Save, Menu } from "lucide-react";
+import { MyioPlatformLogo } from "@/components/myio-platform-logo";
 import { APP_DESCRIPTIONS, AppSymbol, AppTileFace } from "./app-tile";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { CdeCategoryHeader } from "./cde-category-header";
-import { APP_TILE_COLORS, APP_TILE_DEFAULT, PORTAL_APPS, appTileColor, appTileColorVars, appTileLowContrast, parseAppOrder, useAppOrder, useAppTile, type AppTileColorKind, type AppTileConfig } from "./app-order-config";
+import { APP_TILE_COLORS, APP_TILE_DEFAULT, PORTAL_APPS, appTileColor, appTileColorVars, appTileLowContrast, homeHeaderVars, homeHeaderLogoTone, mobileTileVars, parseAppOrder, useAppOrder, useAppTile, type AppTileColorKind, type AppTileConfig } from "./app-order-config";
 import { useCdeSwatchStyle } from "./cde-button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
@@ -27,7 +28,15 @@ function Row({ id, index }: { id: string; index: number }) {
   </div>;
 }
 
-const COLOR_FIELDS: [AppTileColorKind, string][] = [["bg", "Fundo da página"], ["fill", "Preenchimento dos ícones"], ["border", "Borda dos ícones"], ["symbol", "Símbolo dentro do ícone"], ["inside", "Texto dentro do ícone"], ["below", "Texto abaixo do ícone"]];
+const COLOR_FIELDS: [AppTileColorKind, string][] = [["headerBg", "Fundo da faixa superior"], ["bg", "Fundo da página"], ["fill", "Preenchimento dos ícones"], ["border", "Borda dos ícones"], ["symbol", "Símbolo dentro do ícone"], ["inside", "Texto dentro do ícone"], ["below", "Texto abaixo do ícone"]];
+
+function HeaderPreview({ tile, mobile = false }: { tile: AppTileConfig; mobile?: boolean }) {
+  const background = tile.headerBg === "padrao" ? (mobile ? "var(--accent)" : "var(--card)") : appTileColor("headerBg", tile.headerBg).value;
+  return <div aria-label={mobile ? "Prévia da faixa superior mobile" : "Prévia da faixa superior desktop"} style={{ ...homeHeaderVars(tile), "--home-header-bg": background } as React.CSSProperties} className="home-page-header px-4 py-5">
+    <div className="flex items-center justify-between gap-3"><MyioPlatformLogo tone={homeHeaderLogoTone(tile, mobile)} className="h-10" /><div className="flex min-w-0 items-center gap-3">{!mobile && <span className="text-sm">Usuário</span>}<Menu aria-hidden className="h-6 w-6 shrink-0" /></div></div>
+    {mobile && <p className="mt-8 text-xl font-bold">Olá, Usuário</p>}
+  </div>;
+}
 
 /** Brand-only colour picker: options come from APP_TILE_COLORS, swatch shape follows CDE color_swatch. */
 function ColorChoice({ kind, label, value, onChange }: { kind: AppTileColorKind; label: string; value: string; onChange: (v: string) => void }) {
@@ -56,10 +65,11 @@ export function CdeAppOrder({ number, handle }: { number: number; handle?: impor
       const existing = await supabase.from("cde_selected").select("variant_key").eq("group_key", "app_tile").eq("is_primary", true).maybeSingle();
       if (existing.error) throw existing.error;
       const row = { variant_key: JSON.stringify(tile), chosen_by: user.id };
-      const result = existing.data ? await supabase.from("cde_selected").update(row).eq("group_key", "app_tile").eq("variant_key", existing.data.variant_key) : await supabase.from("cde_selected").insert({ ...row, group_key: "app_tile" });
+      const result = existing.data ? await supabase.from("cde_selected").update(row).eq("group_key", "app_tile").eq("is_primary", true).eq("variant_key", existing.data.variant_key).select("variant_key").single() : await supabase.from("cde_selected").insert({ ...row, group_key: "app_tile" }).select("variant_key").single();
       if (result.error) throw result.error;
+      if (result.data?.variant_key !== row.variant_key) throw new Error("O padrão não foi salvo. Recarregue e tente novamente.");
       await qc.invalidateQueries({ queryKey: ["cde-app-tile"] });
-      setTileDraft(null); toast.success("Padrão dos ícones atualizado");
+      setTileDraft(null); toast.success("Padrão da Home Page atualizado");
     } catch { toast.error("Não foi possível salvar o padrão."); } finally { setSaving(false); }
   }
   const order = draft ?? data ?? parseAppOrder();
@@ -83,25 +93,35 @@ export function CdeAppOrder({ number, handle }: { number: number; handle?: impor
     } catch { toast.error("Não foi possível salvar a ordem."); } finally { setSaving(false); }
   }
   return <section className="space-y-4">
-    <CdeCategoryHeader handle={handle} number={number} title="Apps da página principal" hint="Ordem, fonte, tamanho, espaçamento e cores" open={open} onToggle={() => setOpen(!open)} />
+    <CdeCategoryHeader handle={handle} number={number} title="Home Page" hint="Faixa superior, apps, espaçamento e cores" open={open} onToggle={() => setOpen(!open)} />
     {open && <div className="w-full min-w-0 py-4"><DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={move}><SortableContext items={order} strategy={verticalListSortingStrategy}>{order.map((id, i) => <Row key={id} id={id} index={i} />)}</SortableContext></DndContext>
       <Button variant="action" className="mt-3" onClick={save} disabled={saving || !draft}><Save className="h-4 w-4" />Salvar</Button>
       <div className="mt-6 space-y-3 border-t border-border pt-4">
         <p className="text-sm font-medium">Ícones da página principal</p>
         <div role="group" aria-label="Ajustes dos ícones da página principal" className="grid w-full max-w-5xl grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-6">
           <div className="min-w-0 space-y-1"><Label className="flex min-h-10 items-end pb-1">Fonte do nome</Label><Select value={String(tile.labelPx)} onValueChange={(v) => setTileDraft({ ...tile, labelPx: Number(v) })}><SelectTrigger className="h-9"><SelectValue /></SelectTrigger><SelectContent>{[11, 12, 13, 14, 15, 16].map((n) => <SelectItem key={n} value={String(n)}>{n} px</SelectItem>)}</SelectContent></Select></div>
-          <div className="min-w-0 space-y-1"><Label className="flex min-h-10 items-end pb-1">Ícone</Label>
+          <div className="min-w-0 space-y-1"><Label className="flex min-h-10 items-end pb-1">Ícone Desktop</Label>
             <div className="grid h-9 w-36 grid-cols-[2rem_5rem_2rem] items-center justify-items-center">
-              <Button variant="outline" size="compactIcon" aria-label="Diminuir ícone" title="Diminuir" disabled={tile.tilePct <= 70} onClick={() => setTileDraft({ ...tile, tilePct: tile.tilePct - 5 })}><Minus /></Button>
+              <Button variant="outline" size="compactIcon" aria-label="Diminuir ícone Desktop" title="Diminuir ícone Desktop" disabled={tile.tilePct <= 70} onClick={() => setTileDraft({ ...tile, tilePct: tile.tilePct - 5 })}><Minus /></Button>
               <span className="w-20 text-center text-sm tabular-nums">{tile.tilePct}%</span>
-              <Button variant="outline" size="compactIcon" aria-label="Aumentar ícone" title="Aumentar" disabled={tile.tilePct >= 140} onClick={() => setTileDraft({ ...tile, tilePct: tile.tilePct + 5 })}><Plus /></Button>
+              <Button variant="outline" size="compactIcon" aria-label="Aumentar ícone Desktop" title="Aumentar ícone Desktop" disabled={tile.tilePct >= 140} onClick={() => setTileDraft({ ...tile, tilePct: tile.tilePct + 5 })}><Plus /></Button>
             </div></div>
-          <div className="min-w-0 space-y-1"><Label className="flex min-h-10 items-end pb-1">Símbolo interno</Label>
+          <div className="min-w-0 space-y-1"><Label className="flex min-h-10 items-end pb-1">Ícone Mobile</Label><div className="grid h-9 w-36 grid-cols-[2rem_5rem_2rem] items-center justify-items-center">
+            <Button variant="outline" size="compactIcon" aria-label="Diminuir ícone Mobile" title="Diminuir ícone Mobile" disabled={tile.mobileTilePct <= 70} onClick={() => setTileDraft({ ...tile, mobileTilePct: tile.mobileTilePct - 5 })}><Minus /></Button>
+            <span className="w-20 text-center text-sm tabular-nums">{tile.mobileTilePct}%</span>
+            <Button variant="outline" size="compactIcon" aria-label="Aumentar ícone Mobile" title="Aumentar ícone Mobile" disabled={tile.mobileTilePct >= 140} onClick={() => setTileDraft({ ...tile, mobileTilePct: tile.mobileTilePct + 5 })}><Plus /></Button>
+          </div></div>
+          <div className="min-w-0 space-y-1"><Label className="flex min-h-10 items-end pb-1">Símbolo Desktop</Label>
             <div className="grid h-9 w-36 grid-cols-[2rem_5rem_2rem] items-center justify-items-center">
-              <Button variant="outline" size="compactIcon" aria-label="Diminuir símbolo" title="Diminuir" disabled={tile.iconPct <= 60} onClick={() => setTileDraft({ ...tile, iconPct: tile.iconPct - 5 })}><Minus /></Button>
+              <Button variant="outline" size="compactIcon" aria-label="Diminuir símbolo Desktop" title="Diminuir símbolo Desktop" disabled={tile.iconPct <= 60} onClick={() => setTileDraft({ ...tile, iconPct: tile.iconPct - 5 })}><Minus /></Button>
               <span className="w-20 text-center text-sm tabular-nums">{tile.iconPct}%</span>
-              <Button variant="outline" size="compactIcon" aria-label="Aumentar símbolo" title="Aumentar" disabled={tile.iconPct >= 140} onClick={() => setTileDraft({ ...tile, iconPct: tile.iconPct + 5 })}><Plus /></Button>
+              <Button variant="outline" size="compactIcon" aria-label="Aumentar símbolo Desktop" title="Aumentar símbolo Desktop" disabled={tile.iconPct >= 140} onClick={() => setTileDraft({ ...tile, iconPct: tile.iconPct + 5 })}><Plus /></Button>
             </div></div>
+          <div className="min-w-0 space-y-1"><Label className="flex min-h-10 items-end pb-1">Símbolo Mobile</Label><div className="grid h-9 w-36 grid-cols-[2rem_5rem_2rem] items-center justify-items-center">
+            <Button variant="outline" size="compactIcon" aria-label="Diminuir símbolo Mobile" title="Diminuir símbolo Mobile" disabled={tile.mobileIconPct <= 60} onClick={() => setTileDraft({ ...tile, mobileIconPct: tile.mobileIconPct - 5 })}><Minus /></Button>
+            <span className="w-20 text-center text-sm tabular-nums">{tile.mobileIconPct}%</span>
+            <Button variant="outline" size="compactIcon" aria-label="Aumentar símbolo Mobile" title="Aumentar símbolo Mobile" disabled={tile.mobileIconPct >= 140} onClick={() => setTileDraft({ ...tile, mobileIconPct: tile.mobileIconPct + 5 })}><Plus /></Button>
+          </div></div>
           {([['gapX', 'Espaçamento horizontal'], ['gapY', 'Espaçamento vertical']] as const).map(([key, label]) => <div key={key} className="min-w-0 space-y-1"><Label className="flex min-h-10 items-end pb-1">{label}</Label><div className="grid h-9 w-36 grid-cols-[2rem_5rem_2rem] items-center justify-items-center">
             <Button variant="outline" size="compactIcon" aria-label={`Diminuir ${label.toLowerCase()}`} title="Diminuir" disabled={tile[key] <= 8} onClick={() => setTileDraft({ ...tile, [key]: Math.max(8, tile[key] - 4) })}><Minus /></Button>
             <span className="w-20 text-center text-sm tabular-nums">{tile[key]} px</span>
@@ -114,14 +134,16 @@ export function CdeAppOrder({ number, handle }: { number: number; handle?: impor
         </div>
         {appTileLowContrast(tile) && <p className="text-xs text-destructive">O texto abaixo dos ícones fica pouco visível neste fundo; escolha uma cor de texto contrastante.</p>}
         <div className="space-y-1"><Label>Prévia desktop</Label>
+          <HeaderPreview tile={tile} />
           <div aria-label="Prévia dos apps" style={{ columnGap: tile.gapX, rowGap: tile.gapY, ...appTileColorVars(tile) } as React.CSSProperties} className="flex w-full flex-wrap bg-[var(--portal-bg)] px-4 py-10 sm:py-14">
-            {order.map((key) => { const app = PORTAL_APPS.find((a) => a.key === key); return app ? <div key={key} style={{ zoom: tile.tilePct / 100 }} className="flex w-20 min-w-0 flex-col items-center text-center sm:w-28">
-              <div className="relative flex h-20 w-20 flex-col items-center justify-between rounded-2xl border-2 border-[color:var(--tile-border)] bg-[var(--tile-fill)] px-1.5 pb-2 pt-1 text-primary-foreground sm:h-28 sm:w-28 sm:rounded-3xl sm:px-2 sm:pt-1.5"><AppTileFace appKey={key} name={app.name} tile={tile} /></div>
-              <p className="mt-2 w-20 max-w-full break-words text-center text-[0.68rem] leading-4 text-[color:var(--tile-below)] sm:mt-3 sm:w-28 sm:text-sm sm:leading-5">{APP_DESCRIPTIONS[key]?.map(line => <span key={line} className="block sm:whitespace-nowrap">{line}</span>)}</p>
+            {order.map((key) => { const app = PORTAL_APPS.find((a) => a.key === key); return app ? <div key={key} style={{ zoom: tile.tilePct / 100 }} className="flex w-28 min-w-0 flex-col items-center text-center">
+              <div className="relative flex h-28 w-28 flex-col items-center justify-between rounded-3xl border-2 border-[color:var(--tile-border)] bg-[var(--tile-fill)] px-2 pb-2 pt-1.5 text-primary-foreground"><AppTileFace appKey={key} name={app.name} tile={tile} /></div>
+              <p className="mt-3 w-28 max-w-full break-words text-center text-sm leading-5 text-[color:var(--tile-below)]">{APP_DESCRIPTIONS[key]?.map(line => <span key={line} className="block">{line}</span>)}</p>
             </div> : null; })}
           </div></div>
         <div className="space-y-1"><Label>Prévia mobile</Label>
-          <div aria-label="Prévia mobile dos apps" style={appTileColorVars(tile) as React.CSSProperties} className="mobile-app-grid grid w-full max-w-[390px] bg-[var(--portal-bg)] px-3 py-8">
+          <div className="w-full max-w-[390px]"><HeaderPreview tile={tile} mobile /></div>
+          <div aria-label="Prévia mobile dos apps" style={{ ...appTileColorVars(tile), ...mobileTileVars(tile) } as React.CSSProperties} className="mobile-app-grid grid w-full max-w-[390px] bg-[var(--portal-bg)] px-3 py-8">
             {order.map(key => { const app = PORTAL_APPS.find(a => a.key === key); return app ? <div key={key} className="flex min-w-0 flex-col items-center text-center">
               <div className="mobile-app-tile relative flex flex-col items-center justify-between rounded-2xl border-2 border-[color:var(--tile-border)] bg-[var(--tile-fill)] px-1 pb-2 pt-1 text-primary-foreground"><AppTileFace appKey={key} name={app.name} tile={tile} mobile /></div>
               <p className="mt-2 w-full break-words text-center text-[0.68rem] leading-4 text-[color:var(--tile-below)]">{APP_DESCRIPTIONS[key]?.map(line => <span key={line} className="block">{line}</span>)}</p>
@@ -129,7 +151,7 @@ export function CdeAppOrder({ number, handle }: { number: number; handle?: impor
           </div>
         </div>
         <p className="text-xs text-muted-foreground">No celular, a fonte fica 2 px menor. Os símbolos mais finos recebem correção automática para parecerem do mesmo tamanho.</p>
-        <div className="flex items-center gap-2"><Button variant="action" onClick={saveTile} disabled={saving || !tileDraft}><Save className="h-4 w-4" />Salvar</Button>
+        <div className="flex items-center gap-2"><Button variant="action" aria-label="Salvar Home Page" title="Salvar Home Page" onClick={saveTile} disabled={saving || !tileDraft}><Save className="h-4 w-4" />Salvar</Button>
           {tileDraft && <Button variant="action" disabled={saving} onClick={() => setTileDraft(null)}>Cancelar</Button>}
         </div>
       </div></div>}

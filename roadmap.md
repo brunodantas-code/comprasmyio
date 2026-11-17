@@ -387,3 +387,9 @@
 - [x] Portal/Central: bolinhas vermelhas imediatamente antes das setas à direita, com 12 px de distância; computador 1085 px e celular 390 px conferidos autenticado, sem excesso lateral.
 - [x] To Dos: ordenação Etiqueta: A–Z salva e relida após recarga; ERP, Operação, Pagamento e Reembolsos conferidos, preferência anterior restaurada. Filtros, tarefas e ordem manual preservados; 9 testes passaram.
 - [x] Informado: ícones do portal no celular 80 × 80 px; no print do iPhone aproximadamente 64 × 64, portal 25% maior. Nenhuma dimensão alterada.
+- [x] CDE Home Page: fundo da faixa superior incluído nas prévias e na página; verde claro e escuro salvos/relidos no computador/celular, logo/texto com contraste; escolhas anteriores restauradas.
+- [x] Apps da Página principal renomeado para Home Page, inclusive manual e arraste.
+- [x] Home Page: tamanhos independentes de ícone/símbolo Desktop e Mobile; 64/112 px mobile e Desktop independente conferidos, incluindo 320 px sem excesso lateral; 12 testes passaram.
+- [x] Bolinhas do menu principal, apps e To Dos novamente medidas: todas 26 px conforme CDE, sem depender do tamanho dos ícones.
+- [x] CDE: busca Nome do botão dentro da Biblioteca de botões em uso; Salvar encontrou 50 modelos/129 usos; abertura, recolhimento e celular conferidos.
+- [x] Code: prévia CDE não carregava cores originais das quatro situações; inventário corrigido pelo scanner. Em aberto CDE/Code conferidos com a mesma cor vermelha; nenhuma mudança em tickets ou escolhas salvas.

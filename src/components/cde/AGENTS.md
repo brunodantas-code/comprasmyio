@@ -8,7 +8,7 @@
 - Model edits update custom IDs in place; inventory edits become custom models while preserving selected references and replacement history; UPDATE policies remain ERP-admin-only.
 - Portal app order is stored in cde_selected group app_order (JSON array of app keys) and read by the portal; unknown/missing apps fall back to default order.
 - New screens/improvements use CDE-connected shared components; ask only when a group lacks a chosen standard or a new element type appears.
-- Portal tiles read app_tile (label px, icon %, tile zoom %, brand-only colour keys for page background, tile border and texts) from cde_selected; per-app optical scale lives in APP_ICON_OPTICAL.
+- Home Page reads app_tile from cde_selected for header/page brand colors and independent desktop/mobile tile and symbol sizes; previews share its helpers, header foreground/logo adapt to contrast, and per-app optical scale lives in APP_ICON_OPTICAL.
 - main_menu config also stores userInfo (name/job/profile/both); every header renders it via UserNameBlock, never per-app badges.
 - Confirmations never use window.confirm: call confirmAction() (ConfirmDialogHost in __root) or ConfirmDeleteButton; AlertDialogContent reads the CDE confirm_dialog standard.
 - `add-text-usage.json` lists current + buttons with text (shown in CDE 4.2); regenerate by scanning CdeButton group="plus"/<Plus/> with text when such buttons change.

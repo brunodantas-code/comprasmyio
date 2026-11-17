@@ -106,7 +106,7 @@ const CDE_DEFAULT_ORDER: CdeOrder = {
   cats: ["cde_appearance", ...[...new Set(GROUPS.map((g) => groupParent(g.title) ? `p:${groupParent(g.title)}` : g.key))], "icons", "nav", "menu", "apps", "table_fonts", "title_texts", "tags", "corporate_messages", "button_library", "deadline_alerts"],
   subs: Object.fromEntries(Object.keys(PARENTS).map((p) => [p, GROUPS.filter((g) => groupParent(g.title) === p).map((g) => g.key)])),
 };
-const EXTRA_LABELS: Record<string, string> = { cde_appearance: "Aparência do CDE", icons: "Ícones dos Apps e menus", nav: "Navegação (UI/UX)", menu: "Menu principal", apps: "Apps da página principal", table_fonts: "Cabeçalhos e Listas", tags: "Tags", title_texts: "Títulos e Subtítulos", corporate_messages: "Mensagens corporativas", button_library: "Biblioteca de botões em uso", deadline_alerts: "Alertas de Prazo" };
+const EXTRA_LABELS: Record<string, string> = { cde_appearance: "Aparência do CDE", icons: "Ícones dos Apps e menus", nav: "Navegação (UI/UX)", menu: "Menu principal", apps: "Home Page", table_fonts: "Cabeçalhos e Listas", tags: "Tags", title_texts: "Títulos e Subtítulos", corporate_messages: "Mensagens corporativas", button_library: "Biblioteca de botões em uso", deadline_alerts: "Alertas de Prazo" };
 
 const inventoryKey = (v: Omit<Variant, "key">) => [v.tag, v.variant, v.size, v.className, v.icon, v.iconClass].join("|");
 
@@ -129,7 +129,6 @@ export function CdeWorkspace() {
   const qc = useQueryClient();
   const [open, setOpen] = useState<Set<string>>(new Set());
   const [collapseKey, setCollapseKey] = useState(0);
-  const [buttonSearch, setButtonSearch] = useState("");
   const appearance = useCdeAppearance().data ?? CDE_APPEARANCE_DEFAULT;
   const { order: cdeOrder, save: saveCdeOrder } = useCdeOrder(CDE_DEFAULT_ORDER);
   const catLabel = (c: string) => c.startsWith("p:") ? PARENTS[c.slice(2)] : EXTRA_LABELS[c] ?? baseTitle(GROUPS.find((x) => x.key === c)?.title ?? c);
@@ -435,7 +434,6 @@ export function CdeWorkspace() {
         <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-xl font-semibold">Ambiente de Desenvolvimento Colaborativo</h1>
         <div className="flex min-w-0 items-center gap-3">
-        <Input aria-label="Buscar botão pelo nome" placeholder="Nome do botão…" className="w-48 min-w-0" value={buttonSearch} onChange={e => setButtonSearch(e.target.value)} />
         <Button type="button" variant="ghost" size="sm" className="shrink-0 gap-1 text-xs" title="Recolher tudo" aria-label="Recolher tudo" onClick={() => { setOpen(new Set()); setCollapsedCategories(new Set(Object.keys(PARENTS))); setExpandedWhere(new Set()); setExpandedHistory(new Set()); setCollapseKey((k) => k + 1); }}><ChevronsDownUp className="h-4 w-4" />Recolher tudo</Button>
         </div>
         </div>
@@ -468,7 +466,7 @@ export function CdeWorkspace() {
           if (cat === "cde_appearance") return <CdeAppearance key={`CdeAppearance-${collapseKey}`} number={ci + 1} handle={handle} />;
           if (cat === "tags") return <CdeTags key={`CdeTags-${collapseKey}`} number={ci + 1} handle={handle} />;
           if (cat === "table_fonts") return <CdeTableFonts key={`CdeTableFonts-${collapseKey}`} number={ci + 1} handle={handle} />;
-          if (cat === "button_library") return <CdeButtonLibrary key={`CdeButtonLibrary-${collapseKey}`} nameSearch={buttonSearch} number={ci + 1} handle={handle} onEdit={(button, group, ids, modelKey) => {
+          if (cat === "button_library") return <CdeButtonLibrary key={`CdeButtonLibrary-${collapseKey}`} number={ci + 1} handle={handle} onEdit={(button, group, ids, modelKey) => {
             if (!group) { toast.info("Este botão ainda não possui um padrão CDE vinculado. A edição visual precisa desse vínculo para ser aplicada no app."); return; }
             const rows = (data?.selected ?? []).filter(s => s.group_key === group);
             const selection = rows.find(s => !s.is_primary && s.screens.includes(button.file)) ?? rows.find(s => s.is_primary);

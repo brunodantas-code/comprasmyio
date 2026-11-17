@@ -18,7 +18,7 @@ import { ErpAppAccessAdmin } from "@/components/erp-app-access-admin";
 import { CrmFunnelIcon } from "@/components/crm-funnel-icon";
 import { MytosisIcon } from "@/components/mytosis-icon";
 import { CdeIcon } from "@/components/cde-icon";
-import { useAppOrder, useAppTile, APP_TILE_DEFAULT, appTileColorVars } from "@/components/cde/app-order-config";
+import { useAppOrder, useAppTile, APP_TILE_DEFAULT, appTileColorVars, homeHeaderVars, homeHeaderLogoTone, mobileTileVars } from "@/components/cde/app-order-config";
 import { AppTileFace } from "@/components/cde/app-tile";
 import { CorporateBanner } from "@/components/corporate/corporate-banner";
 import { DEFAULT_PORTAL_SECTIONS, usePortalSections } from "@/components/corporate/portal-sections";
@@ -129,15 +129,15 @@ function PortalPage() {
 
   return (
     <div style={activeView === "apps" ? appTileColorVars(tile) as React.CSSProperties : undefined} className="flex h-dvh flex-col overflow-hidden bg-[var(--portal-bg,var(--background))] sm:block sm:h-auto sm:min-h-screen sm:overflow-visible">
-      <header className="sticky top-0 z-40 shrink-0 bg-accent text-accent-foreground sm:border-b sm:border-border sm:bg-card sm:text-foreground">
+      <header style={homeHeaderVars(tile) as React.CSSProperties} className="home-page-header sticky top-0 z-40 shrink-0 sm:border-b sm:border-border">
       <TopIconStyleVars /><ListItemStyleVars />
         <div className="app-header-workspace mx-auto max-w-7xl px-4 pb-9 pt-5 sm:flex sm:items-center sm:justify-between sm:gap-4 sm:px-6 sm:py-4">
           <div className="flex items-start justify-between gap-4 sm:block">
-            <MyioPlatformLogo tone="light" className="h-10 sm:hidden" />
-            <MyioPlatformLogo className="hidden h-10 sm:inline-flex" />
+            <MyioPlatformLogo tone={homeHeaderLogoTone(tile, true)} className="h-10 sm:hidden" />
+            <MyioPlatformLogo tone={homeHeaderLogoTone(tile)} className="hidden h-10 sm:inline-flex" />
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="shrink-0 !bg-transparent !p-0 !text-accent-foreground shadow-none hover:!bg-transparent hover:!text-accent-foreground sm:hidden" aria-label="Abrir menu">
+                <Button variant="ghost" size="icon" className="shrink-0 !bg-transparent !p-0 !text-[color:var(--home-header-text,var(--accent-foreground))] shadow-none hover:!bg-transparent sm:hidden" aria-label="Abrir menu">
                   <Menu className="!h-8 !w-8 stroke-[2]" />
                 </Button>
               </SheetTrigger>
@@ -185,7 +185,7 @@ function PortalPage() {
             </Sheet>
           </div>
           <div className="mt-8 sm:hidden">
-            <p className="text-xl font-bold text-accent-foreground">Olá, {firstName}</p>
+            <p className="text-xl font-bold">Olá, {firstName}</p>
           </div>
           <div className="hidden min-w-0 items-center gap-2 sm:flex">
             <UserNameBlock userName={data.name} />
@@ -207,7 +207,7 @@ function PortalPage() {
               const block = section === "messages" ? <CorporateBanner />
                 : section === "apps" ? (<>{apps.length ? (
                <>
-                  <div aria-label="Aplicativos disponíveis no mobile" className="mobile-app-grid grid pb-2 sm:hidden">
+                  <div aria-label="Aplicativos disponíveis no mobile" style={mobileTileVars(tile) as React.CSSProperties} className="mobile-app-grid grid pb-2 sm:hidden">
                     {apps.map(renderApp)}
                  </div>
                  <div aria-label="Aplicativos disponíveis" style={{ columnGap: tile.gapX, rowGap: tile.gapY }} className="hidden flex-wrap sm:flex">
