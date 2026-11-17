@@ -1,0 +1,1068 @@
+[
+ {
+  "label": "Aberto",
+  "variant": "status",
+  "className": "",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "routes/_authenticated/chamados.tsx"
+  ]
+ },
+ {
+  "label": "Aceita",
+  "variant": "outline",
+  "className": "",
+  "apps": [
+   "CRM"
+  ],
+  "files": [
+   "components/crm/crm-propostas.tsx"
+  ]
+ },
+ {
+  "label": "Acesso Customizado",
+  "variant": "default",
+  "className": "border-primary bg-primary/15 text-foreground hover:bg-primary/20",
+  "apps": [
+   "Usuários",
+   "Site Survey"
+  ],
+  "files": [
+   "components/access-profiles-tab.tsx",
+   "components/site-survey-profiles-admin.tsx"
+  ]
+ },
+ {
+  "label": "Admin do ERP",
+  "variant": "outline",
+  "className": "",
+  "apps": [
+   "Usuários"
+  ],
+  "files": [
+   "components/erp-app-access-admin.tsx"
+  ]
+ },
+ {
+  "label": "Agendada",
+  "variant": "status",
+  "className": "",
+  "apps": [
+   "Site Survey"
+  ],
+  "files": [
+   "routes/_authenticated/site-survey.tsx"
+  ]
+ },
+ {
+  "label": "Aguardando",
+  "variant": "status",
+  "className": "",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "routes/_authenticated/chamados.tsx"
+  ]
+ },
+ {
+  "label": "Aguardando aprovação",
+  "variant": "default",
+  "className": "",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "routes/_authenticated/dashboard.tsx"
+  ]
+ },
+ {
+  "label": "Aguardando definição do aprovador",
+  "variant": "outline",
+  "className": "",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "routes/_authenticated/dashboard.tsx"
+  ]
+ },
+ {
+  "label": "Aguardando liberação de menus",
+  "variant": "outline",
+  "className": "",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "routes/_authenticated/dashboard.tsx"
+  ]
+ },
+ {
+  "label": "Aguardando resposta",
+  "variant": "destructive",
+  "className": "mt-2",
+  "apps": [
+   "Supply",
+   "Code"
+  ],
+  "files": [
+   "components/supply-order-conversation.tsx",
+   "routes/_authenticated/development.tsx"
+  ]
+ },
+ {
+  "label": "Aguardando separação",
+  "variant": "status",
+  "className": "",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "routes/_authenticated/dashboard.tsx"
+  ]
+ },
+ {
+  "label": "Ajuste",
+  "variant": "outline",
+  "className": "",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/stock-tab.tsx",
+   "components/tools-assets.tsx"
+  ]
+ },
+ {
+  "label": "Almoxarifado",
+  "variant": "default",
+  "className": "",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/qr-check.tsx"
+  ]
+ },
+ {
+  "label": "Alta",
+  "variant": "outline",
+  "className": "",
+  "apps": [
+   "Supply",
+   "Code"
+  ],
+  "files": [
+   "routes/_authenticated/chamados.tsx",
+   "routes/_authenticated/development.tsx"
+  ]
+ },
+ {
+  "label": "Aprovado",
+  "variant": "status",
+  "className": "",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/approval-workflow.tsx",
+   "components/myio-orders-tab.tsx"
+  ]
+ },
+ {
+  "label": "Atendido",
+  "variant": "outline",
+  "className": "",
+  "apps": [
+   "Code"
+  ],
+  "files": [
+   "components/code-status-badge.tsx"
+  ]
+ },
+ {
+  "label": "Atendido pelo Suporte",
+  "variant": "status",
+  "className": "",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "routes/_authenticated/chamados.tsx"
+  ]
+ },
+ {
+  "label": "Avariado",
+  "variant": "status",
+  "className": "",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/damaged-items.tsx",
+   "components/qr-check.tsx"
+  ]
+ },
+ {
+  "label": "Baixa",
+  "variant": "outline",
+  "className": "",
+  "apps": [
+   "Supply",
+   "Code"
+  ],
+  "files": [
+   "routes/_authenticated/chamados.tsx",
+   "routes/_authenticated/development.tsx"
+  ]
+ },
+ {
+  "label": "Baixa registrada",
+  "variant": "outline",
+  "className": "border-emerald-300 bg-emerald-100 text-emerald-800",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/myio-demand.tsx"
+  ]
+ },
+ {
+  "label": "Bug",
+  "variant": "outline",
+  "className": "font-normal",
+  "apps": [
+   "Code"
+  ],
+  "files": [
+   "routes/_authenticated/development.tsx"
+  ]
+ },
+ {
+  "label": "Cancelada",
+  "variant": "status",
+  "className": "justify-self-start",
+  "apps": [
+   "Site Survey"
+  ],
+  "files": [
+   "components/site-survey-screen-summary.tsx",
+   "routes/_authenticated/site-survey.tsx"
+  ]
+ },
+ {
+  "label": "Cancelado",
+  "variant": "default",
+  "className": "",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/import-batches.tsx",
+   "routes/_authenticated/chamados.tsx"
+  ]
+ },
+ {
+  "label": "Classificar",
+  "variant": "status",
+  "className": "cursor-pointer",
+  "apps": [
+   "Cash Flow"
+  ],
+  "files": [
+   "components/cash-flow/payables-tab.tsx"
+  ]
+ },
+ {
+  "label": "Cliente",
+  "variant": "outline",
+  "className": "",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/myio-delivery-qr.tsx",
+   "components/qr-check.tsx",
+   "components/technician-items.tsx"
+  ]
+ },
+ {
+  "label": "Comprado e aguardando envio",
+  "variant": "default",
+  "className": "",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/import-batches.tsx"
+  ]
+ },
+ {
+  "label": "Concluída",
+  "variant": "status",
+  "className": "justify-self-start",
+  "apps": [
+   "Site Survey"
+  ],
+  "files": [
+   "components/site-survey-screen-summary.tsx",
+   "routes/_authenticated/site-survey.tsx"
+  ]
+ },
+ {
+  "label": "Concluído",
+  "variant": "status",
+  "className": "",
+  "apps": [
+   "Supply",
+   "Code"
+  ],
+  "files": [
+   "routes/_authenticated/chamados.tsx",
+   "components/code-status-badge.tsx"
+  ]
+ },
+ {
+  "label": "Configuração pendente",
+  "variant": "outline",
+  "className": "",
+  "apps": [
+   "Usuários"
+  ],
+  "files": [
+   "components/access-profiles-tab.tsx"
+  ]
+ },
+ {
+  "label": "Crítica",
+  "variant": "outline",
+  "className": "",
+  "apps": [
+   "Supply",
+   "Code"
+  ],
+  "files": [
+   "routes/_authenticated/chamados.tsx",
+   "routes/_authenticated/development.tsx"
+  ]
+ },
+ {
+  "label": "Disponível",
+  "variant": "outline",
+  "className": "border-green-300 bg-green-100 text-green-800 hover:bg-green-200",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/myio-demand.tsx"
+  ]
+ },
+ {
+  "label": "Em aberto",
+  "variant": "outline",
+  "className": "",
+  "apps": [
+   "Code"
+  ],
+  "files": [
+   "components/code-status-badge.tsx"
+  ]
+ },
+ {
+  "label": "Em andamento",
+  "variant": "status",
+  "className": "",
+  "apps": [
+   "Site Survey"
+  ],
+  "files": [
+   "routes/_authenticated/site-survey.tsx"
+  ]
+ },
+ {
+  "label": "Em aprovação",
+  "variant": "status",
+  "className": "",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/myio-orders-tab.tsx"
+  ]
+ },
+ {
+  "label": "Em atendimento",
+  "variant": "status",
+  "className": "",
+  "apps": [
+   "Supply",
+   "Code"
+  ],
+  "files": [
+   "routes/_authenticated/chamados.tsx",
+   "components/code-status-badge.tsx"
+  ]
+ },
+ {
+  "label": "Em preenchimento",
+  "variant": "status",
+  "className": "justify-self-start",
+  "apps": [
+   "Site Survey"
+  ],
+  "files": [
+   "components/site-survey-screen-summary.tsx"
+  ]
+ },
+ {
+  "label": "Em produção",
+  "variant": "status",
+  "className": "",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "routes/_authenticated/dashboard.tsx"
+  ]
+ },
+ {
+  "label": "Em revisão",
+  "variant": "status",
+  "className": "",
+  "apps": [
+   "Site Survey"
+  ],
+  "files": [
+   "routes/_authenticated/site-survey.tsx"
+  ]
+ },
+ {
+  "label": "Em trânsito",
+  "variant": "status",
+  "className": "",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "routes/_authenticated/dashboard.tsx"
+  ]
+ },
+ {
+  "label": "Entrada",
+  "variant": "outline",
+  "className": "",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/stock-tab.tsx",
+   "components/tools-assets.tsx"
+  ]
+ },
+ {
+  "label": "Entregue",
+  "variant": "default",
+  "className": "",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/import-batches.tsx",
+   "routes/_authenticated/dashboard.tsx"
+  ]
+ },
+ {
+  "label": "Entregue para o cliente",
+  "variant": "status",
+  "className": "",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/myio-demand.tsx",
+   "components/myio-orders-tab.tsx"
+  ]
+ },
+ {
+  "label": "Enviada",
+  "variant": "outline",
+  "className": "",
+  "apps": [
+   "CRM"
+  ],
+  "files": [
+   "components/crm/crm-propostas.tsx"
+  ]
+ },
+ {
+  "label": "Enviado à fábrica",
+  "variant": "outline",
+  "className": "border-slate-300 bg-slate-100 text-slate-700",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/myio-demand.tsx"
+  ]
+ },
+ {
+  "label": "Escritório",
+  "variant": "default",
+  "className": "",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/qr-check.tsx"
+  ]
+ },
+ {
+  "label": "Estoque",
+  "variant": "outline",
+  "className": "",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/myio-delivery-qr.tsx",
+   "components/qr-check.tsx",
+   "components/technician-items.tsx"
+  ]
+ },
+ {
+  "label": "Expedição",
+  "variant": "outline",
+  "className": "",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/myio-delivery-qr.tsx",
+   "components/qr-check.tsx"
+  ]
+ },
+ {
+  "label": "Fábrica",
+  "variant": "default",
+  "className": "",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/qr-check.tsx"
+  ]
+ },
+ {
+  "label": "Faltam",
+  "variant": "outline",
+  "className": "",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/myio-demand.tsx"
+  ]
+ },
+ {
+  "label": "Homologação",
+  "variant": "default",
+  "className": "",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/qr-check.tsx"
+  ]
+ },
+ {
+  "label": "Importação",
+  "variant": "outline",
+  "className": "",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/material-detail.tsx"
+  ]
+ },
+ {
+  "label": "Incompleta",
+  "variant": "destructive",
+  "className": "",
+  "apps": [
+   "CRM"
+  ],
+  "files": [
+   "components/crm/crm-propostas.tsx"
+  ]
+ },
+ {
+  "label": "Indisponível",
+  "variant": "outline",
+  "className": "border-amber-300 bg-amber-100 text-amber-800",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/myio-delivery-qr.tsx"
+  ]
+ },
+ {
+  "label": "Instalado",
+  "variant": "status",
+  "className": "",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/external-sync.tsx",
+   "components/myio-delivery-qr.tsx"
+  ]
+ },
+ {
+  "label": "Itens Avariados",
+  "variant": "outline",
+  "className": "",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/myio-delivery-qr.tsx",
+   "components/technician-items.tsx"
+  ]
+ },
+ {
+  "label": "limitante",
+  "variant": "status",
+  "className": "ml-2",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/stock-simulator.tsx"
+  ]
+ },
+ {
+  "label": "Loja cancelada",
+  "variant": "outline",
+  "className": "w-fit",
+  "apps": [
+   "Site Survey"
+  ],
+  "files": [
+   "routes/_authenticated/site-survey.tsx"
+  ]
+ },
+ {
+  "label": "Loja concluída",
+  "variant": "outline",
+  "className": "w-fit",
+  "apps": [
+   "Site Survey"
+  ],
+  "files": [
+   "routes/_authenticated/site-survey.tsx"
+  ]
+ },
+ {
+  "label": "Média",
+  "variant": "outline",
+  "className": "",
+  "apps": [
+   "Supply",
+   "Code"
+  ],
+  "files": [
+   "routes/_authenticated/chamados.tsx",
+   "routes/_authenticated/development.tsx"
+  ]
+ },
+ {
+  "label": "Melhoria",
+  "variant": "outline",
+  "className": "font-normal",
+  "apps": [
+   "Code"
+  ],
+  "files": [
+   "routes/_authenticated/development.tsx"
+  ]
+ },
+ {
+  "label": "Na fila de compras",
+  "variant": "outline",
+  "className": "border-slate-300 bg-slate-100 text-slate-700",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/myio-demand.tsx"
+  ]
+ },
+ {
+  "label": "Nacional",
+  "variant": "outline",
+  "className": "",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/material-detail.tsx"
+  ]
+ },
+ {
+  "label": "Não concluída",
+  "variant": "outline",
+  "className": "shrink-0",
+  "apps": [
+   "Site Survey"
+  ],
+  "files": [
+   "routes/_authenticated/site-survey.tsx"
+  ]
+ },
+ {
+  "label": "Não se aplica",
+  "variant": "outline",
+  "className": "",
+  "apps": [
+   "CRM"
+  ],
+  "files": [
+   "components/crm/crm-propostas.tsx"
+  ]
+ },
+ {
+  "label": "Orçamento excedido",
+  "variant": "destructive",
+  "className": "mt-1",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/approval-workflow.tsx",
+   "routes/_authenticated/dashboard.tsx"
+  ]
+ },
+ {
+  "label": "Parado",
+  "variant": "status",
+  "className": "",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/external-sync.tsx",
+   "components/myio-delivery-qr.tsx"
+  ]
+ },
+ {
+  "label": "Pendente",
+  "variant": "status",
+  "className": "",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/approval-workflow.tsx",
+   "components/import-batches.tsx",
+   "components/myio-demand.tsx",
+   "components/myio-orders-tab.tsx"
+  ]
+ },
+ {
+  "label": "Perdido",
+  "variant": "status",
+  "className": "",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/distribution.tsx",
+   "components/myio-delivery-qr.tsx",
+   "components/myio-demand.tsx",
+   "components/myio-orders-tab.tsx",
+   "components/qr-check.tsx",
+   "components/technician-items.tsx",
+   "routes/_authenticated/dashboard.tsx"
+  ]
+ },
+ {
+  "label": "Plataforma externa",
+  "variant": "outline",
+  "className": "border-purple-300 bg-purple-100 text-purple-800",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/external-sync.tsx"
+  ]
+ },
+ {
+  "label": "Produto unitário",
+  "variant": "outline",
+  "className": "",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/qr-check.tsx"
+  ]
+ },
+ {
+  "label": "Produzindo",
+  "variant": "status",
+  "className": "",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/myio-demand.tsx",
+   "components/myio-orders-tab.tsx"
+  ]
+ },
+ {
+  "label": "Produzir",
+  "variant": "outline",
+  "className": "",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/myio-demand.tsx"
+  ]
+ },
+ {
+  "label": "Pronto para entrega",
+  "variant": "status",
+  "className": "",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/distribution.tsx",
+   "components/myio-demand.tsx",
+   "components/myio-orders-tab.tsx"
+  ]
+ },
+ {
+  "label": "Pronto para retirada",
+  "variant": "status",
+  "className": "",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "routes/_authenticated/dashboard.tsx"
+  ]
+ },
+ {
+  "label": "QR da caixa",
+  "variant": "outline",
+  "className": "",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/homologation.tsx"
+  ]
+ },
+ {
+  "label": "Rascunho",
+  "variant": "outline",
+  "className": "",
+  "apps": [
+   "CRM"
+  ],
+  "files": [
+   "components/crm/crm-propostas.tsx"
+  ]
+ },
+ {
+  "label": "Recebido com problemas",
+  "variant": "default",
+  "className": "",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/import-batches.tsx"
+  ]
+ },
+ {
+  "label": "Recebido corretamente",
+  "variant": "default",
+  "className": "",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/import-batches.tsx"
+  ]
+ },
+ {
+  "label": "Recusada",
+  "variant": "outline",
+  "className": "",
+  "apps": [
+   "CRM"
+  ],
+  "files": [
+   "components/crm/crm-propostas.tsx"
+  ]
+ },
+ {
+  "label": "Rejeitado",
+  "variant": "status",
+  "className": "",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/approval-workflow.tsx",
+   "components/myio-orders-tab.tsx",
+   "routes/_authenticated/dashboard.tsx"
+  ]
+ },
+ {
+  "label": "Reposição",
+  "variant": "outline",
+  "className": "border-orange-300 bg-orange-100 text-orange-800",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/distribution.tsx",
+   "components/myio-demand.tsx"
+  ]
+ },
+ {
+  "label": "Resolvida",
+  "variant": "outline",
+  "className": "",
+  "apps": [
+   "CRM"
+  ],
+  "files": [
+   "components/crm/crm-propostas.tsx"
+  ]
+ },
+ {
+  "label": "Saída",
+  "variant": "outline",
+  "className": "",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/stock-tab.tsx",
+   "components/tools-assets.tsx"
+  ]
+ },
+ {
+  "label": "Sem QR/foto",
+  "variant": "outline",
+  "className": "border-amber-300 bg-amber-100 text-amber-800",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/technician-items.tsx"
+  ]
+ },
+ {
+  "label": "Sim",
+  "variant": "outline",
+  "className": "border-orange-300 bg-orange-100 text-orange-800",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/myio-orders-tab.tsx"
+  ]
+ },
+ {
+  "label": "Site Survey",
+  "variant": "outline",
+  "className": "",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "routes/_authenticated/chamados.tsx"
+  ]
+ },
+ {
+  "label": "Técnico",
+  "variant": "outline",
+  "className": "",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/myio-delivery-qr.tsx",
+   "components/qr-check.tsx"
+  ]
+ },
+ {
+  "label": "Transporte",
+  "variant": "status",
+  "className": "",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/distribution.tsx",
+   "components/myio-delivery-qr.tsx",
+   "components/myio-orders-tab.tsx",
+   "components/qr-check.tsx"
+  ]
+ },
+ {
+  "label": "Urgente",
+  "variant": "destructive",
+  "className": "",
+  "apps": [
+   "Code"
+  ],
+  "files": [
+   "routes/_authenticated/development.tsx"
+  ]
+ },
+ {
+  "label": "Ver baixa",
+  "variant": "outline",
+  "className": "cursor-pointer border-emerald-300 bg-emerald-100 text-emerald-800 hover:bg-emerald-200",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/distribution.tsx"
+  ]
+ },
+ {
+  "label": "Visita da loja não concluída",
+  "variant": "outline",
+  "className": "w-fit",
+  "apps": [
+   "Site Survey"
+  ],
+  "files": [
+   "routes/_authenticated/site-survey.tsx"
+  ]
+ },
+ {
+  "label": "Visita pausada",
+  "variant": "outline",
+  "className": "w-fit",
+  "apps": [
+   "Site Survey"
+  ],
+  "files": [
+   "routes/_authenticated/site-survey.tsx"
+  ]
+ }
+]

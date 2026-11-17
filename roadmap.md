@@ -366,3 +366,5 @@
 - [x] To Dos: etiqueta antes do título, mesma altura de linha das Pendências
 - [x] CDE Cabeçalhos e Listas: cinza claro e escuro como fundo
 - [x] CDE: fundo cinza claro atual das tabelas como opção
+- [x] CDE item Tags: todas as tags atuais com borda/fundo/texto independentes (partida = atual)
+- [ ] CDE Cabeçalhos e Listas: Títulos e subtítulos (texto/borda/fundo) com prévia

@@ -41,3 +41,4 @@
 - Portal block order (messages, apps, To Dos, pending) lives in cde_selected group portal_sections; corporate messages: users read only active rows, ERP admins read history and create/edit/delete.
 - Table header and list-cell alignment (independent H/V) live in table_fonts and reach every Table via --th-*/--td-* variables on .cde-th/.cde-td (base layer, so explicit screen classes win).
 - Corporate message look (fill, border, symbol, text) lives in cde_selected group message_style; options reuse the app-tile brand palette (message-style.ts).
+- Tags: shared Badge reads cde_selected tag_style ({label key → bg/text/border}) by visible label via tag-style.ts; CDE item Tags lists tag-inventory.json (regenerate with scripts/scan-cde-tags.mjs) plus active Supply statuses.
