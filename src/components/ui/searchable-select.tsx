@@ -4,6 +4,7 @@ import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover"
 import { cn } from "@/lib/utils";
 import { resolveCdeModel, useCdeStandards } from "@/components/cde/cde-button";
 import { styleOf } from "@/components/cde/cde-render";
+import { fieldClassWithoutHeight } from "@/components/ui/select";
 
 export type SearchableOption = {
   value: string;
@@ -100,7 +101,7 @@ export function SearchableSelect({ value, onChange, options, placeholder = "Digi
   return (
     <Popover open={open} onOpenChange={(o) => { if (!o) close(); }}>
       <PopoverAnchor asChild>
-        <div style={hasStandard ? appearance.css : undefined} className={cn("relative flex h-9 w-full items-center rounded-md border border-input bg-transparent text-sm shadow-sm ring-offset-background focus-within:border-primary focus-within:ring-1 focus-within:ring-primary", disabled && "cursor-not-allowed opacity-50", className, hasStandard && model.className, hasStandard && appearance.cls, hasStandard && /(?:^|\s)focus:ring-0(?:\s|$)/.test(model.className) && "focus-within:ring-0")}>
+        <div style={hasStandard ? appearance.css : undefined} className={cn("relative flex h-9 w-full items-center rounded-md border border-input bg-transparent text-sm shadow-sm ring-offset-background focus-within:border-primary focus-within:ring-1 focus-within:ring-primary", disabled && "cursor-not-allowed opacity-50", className, hasStandard && fieldClassWithoutHeight(model.className), hasStandard && appearance.cls, hasStandard && /(?:^|\s)focus:ring-0(?:\s|$)/.test(model.className) && "focus-within:ring-0")}>
           <input
             ref={inputRef}
             type="text"

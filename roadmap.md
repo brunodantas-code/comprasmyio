@@ -354,4 +354,4 @@
 - [x] Ordem arrastável dos blocos da tela principal (CDE)
 - [x] Seta exibir/recolher e busca no histórico de mensagens (CDE)
 
-- [ ] Alinhar sempre pela base as linhas verdes dos campos (seletores e campos lado a lado)
+- [x] Alinhar sempre pela base as linhas verdes dos campos (seletores e campos lado a lado)

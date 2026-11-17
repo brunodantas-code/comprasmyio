@@ -18,6 +18,11 @@ const SelectGroup = SelectPrimitive.Group;
 
 const SelectValue = SelectPrimitive.Value;
 
+/** Drops height utilities from the CDE field model so selects and inputs keep the same height and base line. */
+export function fieldClassWithoutHeight(cls?: string) {
+  return (cls ?? "").split(/\s+/).filter((t) => t && !/^(?:[a-z]+:)*!?h-(?:\d|\[|px|auto|full)/.test(t)).join(" ");
+}
+
 const SelectTrigger = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger>
@@ -37,7 +42,8 @@ const SelectTrigger = React.forwardRef<
     className={cn(
       "flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background cursor-pointer data-[placeholder]:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
       className,
-      selected ? model.className : undefined,
+      // Height follows the caller (default h-9, like Input) so green underlines of side-by-side fields share the same base line.
+      selected ? fieldClassWithoutHeight(model.className) : undefined,
       selected ? appearance.cls : undefined,
     )}
     style={selected ? { ...style, ...appearance.css } : style}
