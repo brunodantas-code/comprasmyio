@@ -35,7 +35,7 @@ const APPS: App[] = [
     { title: "Barra inferior", items: [i("Visitas", CalendarDays, "CalendarDays"), i("Checklists", ClipboardCheck, "ClipboardCheck"), i("Cadastro", Package, "Package"), i("Logs", History, "History")] },
     { title: "Submenus", items: [i("Nova visita", Plus, "Plus"), i("Realizar Visita", CalendarDays, "CalendarDays"), i("Sanar Pendências", ClipboardCheck, "ClipboardCheck"), i("Histórico de Visitas", FileText, "FileText")] },
   ] },
-  { name: "OpDesk", icon: Phone, iconName: "Phone", groups: [{ title: STD, items: [i("Adicionar chamado (redondo)", Plus, "Plus")] }] },
+  { name: "OpDesk", icon: Phone, iconName: "Phone", groups: [{ title: "Barra inferior", items: [i("Painel Global", LayoutGrid, "LayoutGrid"), i("Clientes", Building2, "Building2"), i("Responsáveis", UsersRound, "UsersRound"), i("Chamados", Phone, "Phone")] }, { title: "Ações", items: [i("Nova tarefa", Plus, "Plus"), i("Adicionar chamado (redondo)", Plus, "Plus")] }] },
   { name: "CRM", icon: CrmFunnelIcon, iconName: "CrmFunnelIcon", groups: [{ title: "Aplicativo externo", items: [] }] },
   { name: "Legal", icon: FileSignature, iconName: "FileSignature", groups: [
     { title: "Barra inferior", items: [i("Contratos", FileSignature, "FileSignature"), i("Atas de Reunião", Users, "Users"), i("Documentos Padrão", Files, "Files")] },

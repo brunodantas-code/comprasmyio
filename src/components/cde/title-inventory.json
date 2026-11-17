@@ -17,7 +17,7 @@
   "kind": "titulo",
   "text": "Acompanhamento",
   "files": [
-   "routes/_authenticated/chamados.tsx",
+   "components/opdesk/legacy-calls.tsx",
    "routes/_authenticated/development.tsx"
   ]
  },

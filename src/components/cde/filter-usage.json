@@ -100,6 +100,16 @@
     "general": 0
   },
   {
+    "file": "components/opdesk/legacy-calls.tsx",
+    "standard": 1,
+    "general": 0
+  },
+  {
+    "file": "components/opdesk/opdesk-workspace.tsx",
+    "standard": 1,
+    "general": 0
+  },
+  {
     "file": "components/personal-todos/todo-section.tsx",
     "standard": 1,
     "general": 0
@@ -151,11 +161,6 @@
   },
   {
     "file": "components/wishlist/workspace.tsx",
-    "standard": 1,
-    "general": 0
-  },
-  {
-    "file": "routes/_authenticated/chamados.tsx",
     "standard": 1,
     "general": 0
   },

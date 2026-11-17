@@ -845,9 +845,9 @@
     ]
   },
   {
-    "id": "routes/_authenticated/chamados.tsx|0",
-    "file": "routes/_authenticated/chamados.tsx",
-    "line": 99,
+    "id": "components/opdesk/legacy-calls.tsx|0",
+    "file": "components/opdesk/legacy-calls.tsx",
+    "line": 77,
     "context": "Acompanhamento",
     "headers": [
       "Nº",
@@ -858,6 +858,18 @@
       "Prioridade",
       "Situação",
       "Data"
+    ]
+  },
+  {
+    "id": "components/opdesk/opdesk-workspace.tsx|0",
+    "file": "components/opdesk/opdesk-workspace.tsx",
+    "line": 35,
+    "context": "Responsáveis",
+    "headers": [
+      "Nome",
+      "E-mail",
+      "Cadastrado em",
+      "Ações"
     ]
   },
   {

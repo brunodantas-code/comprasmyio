@@ -1,0 +1,20 @@
+import { describe, expect, it } from "vitest";
+import { boardEnabled, csvText, flowBlocks, taskDeadline, taskId, taskMatches, taskValuesSchema, type Task } from "./task-model";
+const task:Task={id:"00000000-0000-4000-8000-000000000001",task_number:123,client_id:"00000000-0000-4000-8000-000000000002",title:"Trocar sensor",action_type:"Substituição",action_custom:null,start_date:"2026-11-16",end_date:"2026-11-18",priority:"Alta",status:"Pendente",responsible_ids:[],agents:[],links:[],parent_task_id:null,subtask_number:null,flow_rule:"Nenhuma",created_by:"00000000-0000-4000-8000-000000000003",created_at:"2026-11-17T12:00:00Z",updated_at:"2026-11-17T12:00:00Z",completed_at:null};
+describe("OpDesk task flow rules",()=>{
+  it("option 1 blocks any advance while the child awaits",()=>{for(const status of ["Pendente","Em Execução","Em Revisão","Concluída","Fechado"] as const)expect(flowBlocks("Opção 1","Aguardando",status)).toBe(true);expect(flowBlocks("Opção 1","Pendente","Concluída")).toBe(false);});
+  it("option 2 blocks only completion and closing when awaiting",()=>{expect(flowBlocks("Opção 2","Aguardando","Em Execução")).toBe(false);expect(flowBlocks("Opção 2","Aguardando","Concluída")).toBe(true);expect(flowBlocks("Opção 2","Aguardando","Fechado")).toBe(true);});
+  it("option 3 requires a completed or closed child",()=>{expect(flowBlocks("Opção 3","Em Revisão","Concluída")).toBe(true);expect(flowBlocks("Opção 3","Concluída","Fechado")).toBe(false);expect(flowBlocks("Opção 3","Fechado","Concluída")).toBe(false);});
+  it("option 4 combines 1 and 3",()=>{expect(flowBlocks("Opção 4","Aguardando","Pendente")).toBe(true);expect(flowBlocks("Opção 4","Pendente","Concluída")).toBe(true);expect(flowBlocks("Opção 4","Concluída","Fechado")).toBe(false);});
+  it("no rule never blocks",()=>{expect(flowBlocks("Nenhuma","Aguardando","Fechado")).toBe(false);});
+});
+describe("task deadlines and visibility",()=>{
+  it("ignores waiting, completed and closed tasks",()=>{for(const status of ["Aguardando","Concluída","Fechado"] as const)expect(taskDeadline({...task,status,end_date:"2026-11-01"},"2026-11-17")).toBe("Dentro do prazo");});
+  it("review has a two-day attention window",()=>{expect(taskDeadline({...task,status:"Em Revisão",end_date:"2026-11-15"},"2026-11-17")).toBe("Atenção em revisão");expect(taskDeadline({...task,status:"Em Revisão",end_date:"2026-11-14"},"2026-11-17")).toBe("Atrasada para finalização");});
+  it("end-date delay precedes pending execution delay",()=>{expect(taskDeadline({...task,end_date:"2026-11-16"},"2026-11-17")).toBe("Atrasada para finalização");expect(taskDeadline(task,"2026-11-17")).toBe("Atrasada para execução");});
+  it("board needs deadline attention or high/urgent priority",()=>{expect(boardEnabled("Todos",[])).toBe(false);expect(boardEnabled("Dentro do prazo",["Média"])).toBe(false);expect(boardEnabled("Atenção em revisão",[])).toBe(true);expect(boardEnabled("Todos",["Alta"])).toBe(true);expect(boardEnabled("Todos",["Urgente"])).toBe(true);});
+  it("reserves the child's own number and uses parent suffix",()=>{const child={...task,id:"child",task_number:456,parent_task_id:task.id,subtask_number:2};expect(taskId(child,[task,child])).toBe("T-000123.2");expect(taskId({...child,parent_task_id:null},[task])).toBe("T-000456");});
+  it("search accepts full and suffix IDs",()=>{const child={...task,id:"child",task_number:456,parent_task_id:task.id,subtask_number:2};expect(taskMatches(child,[task,child],[],[],"123.2")).toBe(true);expect(taskMatches(task,[task],[],[],"T-000124")).toBe(false);});
+  it("Others requires its own action description",()=>{expect(taskValuesSchema.safeParse({...task,action_type:"Outros",action_custom:""}).success).toBe(false);expect(taskValuesSchema.safeParse({...task,action_type:"Outros",action_custom:"Inspeção de rede"}).success).toBe(true);});
+  it("CSV has UTF-8 BOM, semicolons and formula neutralization",()=>{expect(csvText([["Nome","=1+1"]])).toBe('\uFEFF"Nome";"\'=1+1"');});
+});

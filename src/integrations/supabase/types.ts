@@ -4937,6 +4937,287 @@ export type Database = {
           },
         ]
       }
+      opdesk_clients: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opdesk_clients_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      opdesk_responsibles: {
+        Row: {
+          created_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opdesk_responsibles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      opdesk_task_attachments: {
+        Row: {
+          content_type: string
+          created_at: string
+          file_name: string
+          file_size: number
+          id: string
+          storage_path: string
+          task_id: string
+          uploaded_by: string
+        }
+        Insert: {
+          content_type: string
+          created_at?: string
+          file_name: string
+          file_size: number
+          id?: string
+          storage_path: string
+          task_id: string
+          uploaded_by: string
+        }
+        Update: {
+          content_type?: string
+          created_at?: string
+          file_name?: string
+          file_size?: number
+          id?: string
+          storage_path?: string
+          task_id?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opdesk_task_attachments_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "opdesk_tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "opdesk_task_attachments_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      opdesk_task_logs: {
+        Row: {
+          actor_email: string
+          actor_id: string | null
+          created_at: string
+          id: string
+          task_id: string
+          text: string
+        }
+        Insert: {
+          actor_email: string
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          task_id: string
+          text: string
+        }
+        Update: {
+          actor_email?: string
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          task_id?: string
+          text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opdesk_task_logs_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "opdesk_task_logs_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "opdesk_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      opdesk_task_observations: {
+        Row: {
+          author_email: string
+          author_id: string
+          created_at: string
+          id: string
+          task_id: string
+          text: string
+        }
+        Insert: {
+          author_email: string
+          author_id: string
+          created_at?: string
+          id?: string
+          task_id: string
+          text: string
+        }
+        Update: {
+          author_email?: string
+          author_id?: string
+          created_at?: string
+          id?: string
+          task_id?: string
+          text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opdesk_task_observations_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "opdesk_task_observations_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "opdesk_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      opdesk_tasks: {
+        Row: {
+          action_custom: string | null
+          action_type: string
+          agents: Json
+          client_id: string
+          completed_at: string | null
+          created_at: string
+          created_by: string
+          deleted_at: string | null
+          end_date: string | null
+          flow_rule: string
+          id: string
+          links: string[]
+          next_subtask_number: number
+          parent_task_id: string | null
+          priority: string
+          responsible_ids: string[]
+          start_date: string | null
+          status: string
+          subtask_number: number | null
+          task_number: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          action_custom?: string | null
+          action_type: string
+          agents?: Json
+          client_id: string
+          completed_at?: string | null
+          created_at?: string
+          created_by: string
+          deleted_at?: string | null
+          end_date?: string | null
+          flow_rule?: string
+          id?: string
+          links?: string[]
+          next_subtask_number?: number
+          parent_task_id?: string | null
+          priority?: string
+          responsible_ids?: string[]
+          start_date?: string | null
+          status?: string
+          subtask_number?: number | null
+          task_number?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          action_custom?: string | null
+          action_type?: string
+          agents?: Json
+          client_id?: string
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string
+          deleted_at?: string | null
+          end_date?: string | null
+          flow_rule?: string
+          id?: string
+          links?: string[]
+          next_subtask_number?: number
+          parent_task_id?: string | null
+          priority?: string
+          responsible_ids?: string[]
+          start_date?: string | null
+          status?: string
+          subtask_number?: number | null
+          task_number?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opdesk_tasks_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "opdesk_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "opdesk_tasks_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "opdesk_tasks_parent_task_id_fkey"
+            columns: ["parent_task_id"]
+            isOneToOne: false
+            referencedRelation: "opdesk_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       operational_functions: {
         Row: {
           active: boolean
@@ -9893,6 +10174,37 @@ export type Database = {
       normalize_site_survey_point_name: {
         Args: { _value: string }
         Returns: string
+      }
+      opdesk_add_observation: {
+        Args: { _task_id: string; _text: string }
+        Returns: string
+      }
+      opdesk_close_completed: { Args: never; Returns: number }
+      opdesk_create_task: { Args: { _values: Json }; Returns: Json }
+      opdesk_delete_task: {
+        Args: { _expected_updated_at: string; _id: string }
+        Returns: undefined
+      }
+      opdesk_directory: {
+        Args: never
+        Returns: {
+          email: string
+          full_name: string
+          id: string
+        }[]
+      }
+      opdesk_flow_blocks: {
+        Args: { _main: string; _rule: string; _sub: string }
+        Returns: boolean
+      }
+      opdesk_has_access: { Args: never; Returns: boolean }
+      opdesk_remove_responsible: {
+        Args: { _user_id: string }
+        Returns: undefined
+      }
+      opdesk_save_task: {
+        Args: { _expected_updated_at?: string; _id: string; _values: Json }
+        Returns: Json
       }
       personal_todo_users: {
         Args: never

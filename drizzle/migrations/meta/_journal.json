@@ -1618,6 +1618,27 @@
       "when": 1794947940390,
       "tag": "0230_supply_directed_questions",
       "breakpoints": true
+    },
+    {
+      "idx": 231,
+      "version": "7",
+      "when": 1794954646100,
+      "tag": "0231_opdesk_painel_tarefas",
+      "breakpoints": true
+    },
+    {
+      "idx": 232,
+      "version": "7",
+      "when": 1794954817901,
+      "tag": "0232_opdesk_criacao_tarefas",
+      "breakpoints": true
+    },
+    {
+      "idx": 233,
+      "version": "7",
+      "when": 1794955507790,
+      "tag": "0233_opdesk_historico_integridade",
+      "breakpoints": true
     }
   ]
 }

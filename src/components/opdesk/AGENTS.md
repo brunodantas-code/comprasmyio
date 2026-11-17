@@ -1,0 +1,5 @@
+- OpDesk task data lives in independent opdesk_* tables and reuses ERP identities/app grants; legacy internal_calls and Site Survey links remain unchanged to preserve access and history.
+- Task changes use authenticated server functions and row-locked RPCs with expected updated_at; shared pure rules mirror database flow guards so board/form/automation enforce the same hierarchy.
+- Task deletion is audited soft deletion; principal tasks and registered responsibles cannot be removed while linked, preventing orphaned tasks and lost history.
+- New task screens reuse live CDE controls and combined filter summaries; CSV output uses authorized sorted rows, UTF-8 BOM, semicolons and formula neutralization.
+- Private task files use uploader/task/file paths with metadata-bound reads; author identity and timestamps for observations/history come from the authenticated account, never browser input.
