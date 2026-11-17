@@ -363,3 +363,4 @@
 - [ ] CRM Fase 3b: levantamento por arquivos com IA e memória de cálculo (depende da Fase 4 Custeio)
 - [x] Botões Escolher/Adicionar como padrão do CDE no padrão visual comum
 - [x] Textos longos seguem o modelo 1.3 escolhido (confirmado; tela do usuário estava desatualizada)
+- [x] To Dos: etiqueta antes do título, mesma altura de linha das Pendências
