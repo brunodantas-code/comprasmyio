@@ -110,6 +110,9 @@
 
 :root {
   --radius: 0.625rem;
+  /* Fontes de cabeçalhos de tabela e barras de filtro — padrão CDE (grupo table_fonts); valores iniciais até o CDE carregar */
+  --th-fs: 11px;
+  --filter-fs: 12px;
   /* Pantones exatos da marca myio (Manual da Marca) */
   --myio-green: #0fc482;
   --cde-number-soft: color-mix(in oklab, var(--myio-green) 10%, var(--card));

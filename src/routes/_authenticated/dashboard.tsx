@@ -2939,7 +2939,7 @@ function OrdersTable({
 
   return (
     <>
-      <div className="mb-2 flex items-center gap-2 overflow-x-auto py-1 text-xs [&>*]:shrink-0">
+      <div className="mb-2 flex items-center gap-2 overflow-x-auto py-1 text-[length:var(--filter-fs)] [&>*]:shrink-0">
         <TableFilterMenu triggerLabel="Filtros" rows={orders} columns={colDefs.filter(c => showRequester || c.key !== "req").map(c => ({ key: c.key, label: c.label, kind: c.kind, value: c.raw as (o: typeof orders[number]) => string | number | null | undefined, display: c.list }))} filters={cf} onChange={(key, value) => setCf(prev => ({ ...prev, [key]: value }))} clear={() => setCf({})} />
         {consolidatedSort && <TableSortMenu columns={colDefs} value={columnSort} onChange={setColumnSort} />}
         {toolbarActions}
@@ -3017,7 +3017,7 @@ function OrdersTable({
       </div>
 
       <div className="hidden lg:block">
-      <Table className="w-full table-fixed text-xs [&_th]:px-1 [&_th]:text-[11px] [&_td]:px-1 [&_td]:text-xs [&_td]:whitespace-normal [&_td]:break-words [&_td_*]:max-w-full [&_td_.text-sm]:text-xs">
+      <Table className="w-full table-fixed text-xs [&_th]:px-1 [&_td]:px-1 [&_td]:text-xs [&_td]:whitespace-normal [&_td]:break-words [&_td_*]:max-w-full [&_td_.text-sm]:text-xs">
         <TableHeader className="[&_tr]:border-b">
           <TableRow className="border-b">
             <TableHead className="w-[11%] text-left"><span className="inline-flex max-w-full items-center gap-0.5"><span className="min-w-0 whitespace-normal break-words">Approval</span>{colFilter("approval")}</span></TableHead>

@@ -23,6 +23,7 @@ import { CdeNavigation } from "./cde-navigation";
 import { CdeButton, CdeNumber, CdeToggleIcon, addTextKey } from "./cde-button";
 import { CdeMainMenu } from "./cde-main-menu";
 import { CdeAppOrder } from "./cde-app-order";
+import { CdeTableFonts } from "./cde-table-fonts";
 import { CdeCategoryHeader } from "./cde-category-header";
 import { FormatColorOptions } from "@/components/mytosis/format-color-options";
 import { CdeButtonLibrary } from "./cde-button-library";
@@ -96,10 +97,10 @@ const PARENTS: Record<string, string> = { "1": "Campos para preenchimento", "3":
 const baseTitle = (t: string) => t.split(" ").slice(1).join(" ");
 const groupParent = (t: string) => { const n = t.split(" ")[0].replace(/\.$/, ""); return n.includes(".") ? n.split(".")[0] : null; };
 const CDE_DEFAULT_ORDER: CdeOrder = {
-  cats: [...[...new Set(GROUPS.map((g) => groupParent(g.title) ? `p:${groupParent(g.title)}` : g.key))], "icons", "nav", "menu", "apps", "button_library", "deadline_alerts"],
+  cats: [...[...new Set(GROUPS.map((g) => groupParent(g.title) ? `p:${groupParent(g.title)}` : g.key))], "icons", "nav", "menu", "apps", "table_fonts", "button_library", "deadline_alerts"],
   subs: Object.fromEntries(Object.keys(PARENTS).map((p) => [p, GROUPS.filter((g) => groupParent(g.title) === p).map((g) => g.key)])),
 };
-const EXTRA_LABELS: Record<string, string> = { icons: "Ícones dos Apps e menus", nav: "Navegação (UI/UX)", menu: "Menu principal", apps: "Apps da página principal", button_library: "Biblioteca de botões em uso", deadline_alerts: "Alertas de Prazo" };
+const EXTRA_LABELS: Record<string, string> = { icons: "Ícones dos Apps e menus", nav: "Navegação (UI/UX)", menu: "Menu principal", apps: "Apps da página principal", table_fonts: "Fontes de cabeçalhos e filtros", button_library: "Biblioteca de botões em uso", deadline_alerts: "Alertas de Prazo" };
 
 const inventoryKey = (v: Omit<Variant, "key">) => [v.tag, v.variant, v.size, v.className, v.icon, v.iconClass].join("|");
 
@@ -454,6 +455,7 @@ export function CdeWorkspace() {
           if (cat === "nav") return <CdeNavigation key={`CdeNavigation-${collapseKey}`} number={ci + 1} handle={handle} />;
           if (cat === "menu") return <CdeMainMenu key={`CdeMainMenu-${collapseKey}`} number={ci + 1} handle={handle} />;
           if (cat === "apps") return <CdeAppOrder key={`CdeAppOrder-${collapseKey}`} number={ci + 1} handle={handle} />;
+          if (cat === "table_fonts") return <CdeTableFonts key={`CdeTableFonts-${collapseKey}`} number={ci + 1} handle={handle} />;
           if (cat === "button_library") return <CdeButtonLibrary key={`CdeButtonLibrary-${collapseKey}`} nameSearch={buttonSearch} number={ci + 1} handle={handle} onEdit={(button, group, ids, modelKey) => {
             if (!group) { toast.info("Este botão ainda não possui um padrão CDE vinculado. A edição visual precisa desse vínculo para ser aplicada no app."); return; }
             const rows = (data?.selected ?? []).filter(s => s.group_key === group);

@@ -15,6 +15,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
 import { ConfirmDialogHost } from "@/components/confirm-dialog";
 import { CdeHighlight } from "@/components/cde/cde-highlight";
+import { useApplyTableFonts } from "@/components/cde/table-fonts-config";
 import { supabase } from "@/integrations/supabase/client";
 
 function NotFoundComponent() {
@@ -132,6 +133,12 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+/** Aplica o padrão CDE de fontes de tabelas/filtros; precisa estar dentro do QueryClientProvider. */
+function CdeTableFontsApplier() {
+  useApplyTableFonts();
+  return null;
+}
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
@@ -152,6 +159,7 @@ function RootComponent() {
       <Toaster richColors position="top-right" />
       <ConfirmDialogHost />
       <CdeHighlight />
+      <CdeTableFontsApplier />
     </QueryClientProvider>
   );
 }

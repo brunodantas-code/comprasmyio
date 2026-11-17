@@ -338,5 +338,7 @@
 - [ ] CRM: usuário perguntou se dá para integrar o CRM dentro do ERP em vez de abrir em nova aba; resposta: sim, exige adaptação do código Next.js ao ERP, mapeamento de usuários/permissões e migração de dados; aguardando confirmação para iniciar o projeto.
 - [ ] CRM: ações futuras de Atas (Legal) e To Dos (Central) deverão vincular-se ao CRM; considerar na decisão de integração interna vs. aba externa.
 - [x] CRM: confirmado ao usuário que a integração não afeta o arquivo MD, o banco, o layout nem as customizações do CRM original; acesso externo do João preservado até a desativação na fase final.
-- [ ] Padronizar fontes de cabeçalhos de tabela (11px) e filtros (12px) em todos os apps, no padrão Supply/Tickets, antes de iniciar a integração do CRM.
-- [ ] Publicar alterações prontas (fontes do Tickets, busca PIX, botões, link externo do CRM) antes da padronização geral de fontes.
+- [x] Padronização de fontes de cabeçalhos e filtros em todos os apps via TableHead compartilhado (40+ telas) e barras de filtro principais, lendo o padrão CDE table_fonts.
+- [x] Publicação solicitada em 17/11/2026 12:2x UTC para https://erpmyio.lovable.app (fontes do Tickets, busca PIX, botões, link externo do CRM); deploy leva cerca de um minuto, sem achados críticos.
+- [x] CDE: seção 'Fontes de cabeçalhos e filtros' (grupo table_fonts) com cabeçalho 10-14px e filtros 11-14px, prévia e salvamento ao vivo via --th-fs/--filter-fs; TableHead e barras de filtro do Supply, Tickets e Legal leem o padrão. Testado ao vivo: 13px aplicado e 11px restaurado na conta Leonardo; Legal 12px; celular mantém 16px no foco. 4 testes; não publicado.
+- [ ] CDE: auditar e vincular todos os botões de ação de todos os apps ao CDE (biblioteca de botões), para o usuário padronizar telas/botões durante a integração do CRM; telas do CRM nascem vinculadas ao CDE.

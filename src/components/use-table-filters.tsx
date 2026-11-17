@@ -56,7 +56,7 @@ export function TableFilterMenu<T>({ rows, columns, filters, onChange, clear, tr
   const active = columns.filter(c => isFilterActive(filters[c.key])).length;
   const activeColumns = columns.filter(c => isFilterActive(filters[c.key]));
   const describe = (c: FilterColumn<T>) => { const v = filters[c.key]; return v?.selected?.join(", ") || [v?.value, v?.value2].filter(Boolean).join(" — ") || "ativo"; };
-  return <span className="inline-flex shrink-0 items-center gap-1 text-sm text-muted-foreground"><Popover open={open} onOpenChange={setOpen}>
+  return <span className="inline-flex shrink-0 items-center gap-1 text-[length:var(--filter-fs)] text-muted-foreground"><Popover open={open} onOpenChange={setOpen}>
     <PopoverTrigger asChild><CdeButton group="filter" screen="components/use-table-filters.tsx" active={!!active} aria-label="Filtros" title={active ? `Filtros (${active} ativos)` : "Filtros"} className="!bg-transparent gap-2 [&_svg]:!size-5 [&_svg]:stroke-[1.8]">{triggerLabel}</CdeButton></PopoverTrigger>
     <PopoverContent align="start" className="w-[min(18rem,calc(100vw-2rem))] space-y-3 p-3">
       <Select value={column?.key} onValueChange={setKey}>
