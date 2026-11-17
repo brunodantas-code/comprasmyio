@@ -6,7 +6,7 @@ import { CdeButton } from "@/components/cde/cde-button";
 import { ColumnSortButton } from "@/components/column-sort-button";
 import { CodeStatusBadge } from "@/components/code-status-badge";
 import { matchesCodeTicketSearch } from "@/lib/code-ticket-search";
-import { codeTicketProgressOutcome } from "@/lib/code-ticket-lifecycle";
+import { assertCodeProgressDraftSent, codeTicketProgressOutcome } from "@/lib/code-ticket-lifecycle";
 import { isFilterActive, OP_LABELS, type FilterOp } from "@/lib/column-filters";
 import { compareColumnValues, type SortDirection } from "@/lib/column-sort";
 import { useTableFilters, type FilterColumn } from "@/components/use-table-filters";
@@ -119,7 +119,7 @@ async function uploadTicketImages(ticketId: string, userId: string, files: File[
     const storagePath = `${ticketId}/${crypto.randomUUID()}-${safeName}`;
     const { error: uploadError } = await supabase.storage.from("development-ticket-attachments").upload(storagePath, file, { contentType: file.type });
     if (uploadError) throw uploadError;
-    const { error: attachmentError } = await supabase.from("development_ticket_attachments").insert({ ticket_id: ticketId, uploaded_by: userId, file_name: file.name, storage_path: storagePath, content_type: file.type, file_size: file.size, message_id: messageId ?? null });
+    const { error: attachmentError } = await supabase.from("development_ticket_attachments").insert({ ticket_id: ticketId, uploaded_by: userId, file_name: file.name, storage_path: storagePath, content_type: file.type, file_size: file.size, message_id: messageId ?? null }).select("id").single();
     if (attachmentError) {
       await supabase.storage.from("development-ticket-attachments").remove([storagePath]);
       throw attachmentError;
@@ -412,7 +412,7 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
      setReporterMode("answer");
      setMessageFiles([]);
      setMessageFileInputKey((key) => key + 1);
-   }, [ticket]);
+   }, [ticket?.id]);
   const details = useQuery({
     queryKey: ["development-ticket-details", ticket?.id], enabled: Boolean(ticket),
     queryFn: async () => {
@@ -441,7 +441,7 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
     mutationFn: async () => {
       if (!ticket || !canRecord) throw new Error("Sem permissão para registrar a solução.");
       const value = proposedSolutionSchema.parse(solution);
-      const { error } = await supabase.from("development_tickets").update({ proposed_solution: value || null }).eq("id", ticket.id);
+      const { error } = await supabase.from("development_tickets").update({ proposed_solution: value || null }).eq("id", ticket.id).select("id").single();
       if (error) throw error;
     },
     onSuccess: async () => { toast.success("Solução salva"); setEditingSolution(!solution.trim()); await details.refetch(); onUpdated(); },
@@ -458,6 +458,7 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
   });
   const flushPendingImages = async () => {
     if (!ticket || !data?.userId || !messageFiles.length) return;
+    if (message.trim()) return;
     await uploadTicketImages(ticket.id, data.userId, messageFiles);
     setMessageFiles([]);
     setMessageFileInputKey((key) => key + 1);
@@ -569,6 +570,7 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
   const update = useMutation({
     mutationFn: async () => {
       if (!ticket) throw new Error("Chamado não encontrado. Atualize e tente novamente.");
+      assertCodeProgressDraftSent(message);
       validateImages(messageFiles);
       const { data: saved, error } = await supabase.from("development_tickets").update({ status, assignee_id: assignee === "none" ? null : assignee, admin_notes: notes.trim() || null, proposed_solution: proposedSolutionSchema.parse(solution) || null }).eq("id", ticket.id).select("id,status").single();
       if (error) throw error;
@@ -592,7 +594,7 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
   const remove = useMutation({
     mutationFn: async () => {
       if (!ticket || ticket.status !== "aberto" || ticket.reporter_id !== data?.userId) throw new Error("Somente o solicitante pode excluir seu ticket em aberto");
-      const { error } = await supabase.from("development_tickets").update({ status: "excluido" }).eq("id", ticket.id).eq("reporter_id", data.userId).eq("status", "aberto");
+      const { error } = await supabase.from("development_tickets").update({ status: "excluido" }).eq("id", ticket.id).eq("reporter_id", data.userId).eq("status", "aberto").select("id").single();
       if (error) throw error;
     },
     onSuccess: () => { toast.success("Ticket excluído e mantido no histórico"); onClose(); onUpdated(); },

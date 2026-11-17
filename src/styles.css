@@ -484,6 +484,16 @@
 @layer base {
   .erp-entry-button { background: var(--primary) !important; color: var(--primary-foreground) !important; }
 }
+/* Dicas dos gráficos usam a mesma superfície neutra das dicas dos controles. */
+.recharts-default-tooltip {
+  background-color: var(--muted) !important;
+  border-color: var(--border) !important;
+  color: var(--foreground);
+}
+.recharts-default-tooltip .recharts-tooltip-label,
+.recharts-default-tooltip .recharts-tooltip-item {
+  color: var(--foreground) !important;
+}
 [role="menuitem"] { color: var(--li-text, inherit); }
 [role="menuitem"] svg { color: var(--li-fg, currentColor); }
 [role="menuitem"]:focus, [role="menuitem"][data-highlighted], [role="menuitem"][data-preview-hl] { background: var(--li-hl, var(--color-dropdown-highlight, var(--accent))) !important; }

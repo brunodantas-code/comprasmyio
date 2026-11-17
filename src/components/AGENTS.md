@@ -4,3 +4,4 @@
 - FilterColumn may provide a scoped filter renderer that writes existing ColumnFilterValue conditions; combined filtering and exports keep using the same source rows.
 - Code completion resolves the live CDE confirm look explicitly, preserving its scoped border exception and descriptive label without changing lifecycle guards.
 - Portal and app headers use one HeaderMenu popover on every viewport; shared CDE entries preserve desktop appearance, visibility and actions without divergent mobile lists.
+- Code editors initialize drafts by ticket identity, not refreshed row objects; progress saves reject unsent conversation text and verify returned rows, avoiding silent draft loss and false success.

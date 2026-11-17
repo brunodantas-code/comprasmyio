@@ -19,6 +19,10 @@ export function codeTicketProgressOutcome(requestedStatus: string, saved: { id: 
   throw new Error("A situação do chamado foi alterada. Atualize antes de salvar novamente.");
 }
 
+export function assertCodeProgressDraftSent(message: string) {
+  if (message.trim()) throw new Error("Há uma pergunta ou resposta ainda não enviada. Envie pelo avião de papel antes de salvar o andamento.");
+}
+
 // A rejected or dismissed confirmation must never execute the conclusion.
 export async function confirmCodeTicketConclusion(
   status: string,

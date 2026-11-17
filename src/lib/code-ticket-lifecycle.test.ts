@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { canReopenCodeTicket, codeReopenReasonSchema, codeTicketProgressOutcome, confirmCodeTicketConclusion } from "./code-ticket-lifecycle";
+import { canReopenCodeTicket, codeReopenReasonSchema, codeTicketProgressOutcome, assertCodeProgressDraftSent, confirmCodeTicketConclusion } from "./code-ticket-lifecycle";
 
 const ticket = { status: "concluido", reporter_id: "alexandre", assignee_id: "leonardo" };
 
@@ -48,6 +48,10 @@ describe("Confirmação antes de Concluir", () => {
 });
 
 describe("Confirmação do andamento salvo", () => {
+  it("não fecha nem salva o andamento com uma resposta ainda não enviada", () => {
+    expect(() => assertCodeProgressDraftSent("Ajustados CPF e CNPJ.")).toThrow();
+    expect(() => assertCodeProgressDraftSent("   ")).not.toThrow();
+  });
   it("não confirma Atendido quando a pergunta pendente mantém Em atendimento", () => {
     expect(codeTicketProgressOutcome("atendido", { id: "chamado-38", status: "em_atendimento" })).toBe("pending_requester_question");
   });
