@@ -2,7 +2,7 @@ import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
-import { tagCss, tagKey, useTagStyles, type TagLook } from "@/components/cde/tag-style";
+import { resolveTag, tagCss, useTagConfig, type TagLook } from "@/components/cde/tag-style";
 
 const badgeVariants = cva(
   "inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
@@ -34,9 +34,12 @@ const textOf = (n: React.ReactNode): string => (typeof n === "string" || typeof 
 
 /** Tags read their CDE look (item Tags) by visible label; unconfigured tags keep the caller's classes. */
 function Badge({ className, variant, style, children, cdeLook, ...props }: BadgeProps) {
-  const styles = useTagStyles();
-  const look = cdeLook ?? styles[tagKey(textOf(children))];
-  return <div className={cn(badgeVariants({ variant }), className)} style={look ? { ...style, ...tagCss(look) } : style} {...props}>{children}</div>;
+  const cfg = useTagConfig();
+  const plain = textOf(children);
+  const r = plain ? resolveTag(cfg, plain) : null;
+  const look = cdeLook ?? r?.look;
+  const shown = r && cdeLook === undefined && r.text !== plain && (typeof children === "string" || typeof children === "number" || Array.isArray(children)) ? r.text : children;
+  return <div className={cn(badgeVariants({ variant }), className)} style={look ? { ...style, ...tagCss(look) } : style} {...props}>{shown}</div>;
 }
 
 export { Badge, badgeVariants };

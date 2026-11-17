@@ -370,3 +370,4 @@
 - [x] CDE Cabeçalhos e Listas: Títulos e subtítulos (texto/borda/fundo) com prévia
 - [x] CDE Tags: texto menor ao lado da bolinha, coluna Menus/Submenus, Tag+Prévia juntas
 - [x] CDE item Títulos e Subtítulos: textos editáveis (screen|original → texto)
+- [x] CDE Tags: criar, renomear e excluir (vinculando a outra tag)

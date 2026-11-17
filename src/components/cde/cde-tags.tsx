@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Save, X } from "lucide-react";
+import { Pencil, Plus, RotateCcw, Save, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,9 +13,12 @@ import { CdeCategoryHeader } from "./cde-category-header";
 import { useCdeSwatchStyle } from "./cde-button";
 import inventory from "./tag-inventory.json";
 import { TAG_LOCATIONS } from "./tag-locations";
-import { TAG_COLORS, TAG_STYLE_GROUP, refreshTagStyles, tagColor, tagKey, useTagStyles, type TagLook, type TagPart, type TagStyles } from "./tag-style";
+import { TAG_COLORS, TAG_STYLE_GROUP, refreshTagStyles, tagColor, tagKey, useTagConfig, type TagConfig, type TagLook, type TagPart } from "./tag-style";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { SelectValue } from "@/components/ui/select";
 
-type Inv = { label: string; variant: string; className: string; apps: string[]; files: string[] };
+type Inv = { label: string; variant: string; className: string; apps: string[]; files: string[]; custom?: boolean };
 const PARTS: [TagPart, string][] = [["bg", "Fundo"], ["text", "Texto"], ["border", "Borda"]];
 
 function ColorSelect({ value, label, onChange }: { value?: string; label: string; onChange: (v: string) => void }) {
@@ -31,24 +34,55 @@ export function CdeTags({ number, handle }: { number: number; handle?: React.Rea
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
   const [saving, setSaving] = useState(false);
-  const saved = useTagStyles();
-  const [draft, setDraft] = useState<TagStyles | null>(null);
-  const styles = draft ?? saved;
+  const saved = useTagConfig();
+  const [draft, setDraft] = useState<TagConfig | null>(null);
+  const cfg = draft ?? saved;
+  const [renaming, setRenaming] = useState<string | null>(null); const [nameVal, setNameVal] = useState("");
+  const [novo, setNovo] = useState("");
+  const [removing, setRemoving] = useState<Inv | null>(null); const [target, setTarget] = useState(""); const [targetNew, setTargetNew] = useState("");
   const statuses = useQuery({ queryKey: ["cde-tag-supply-statuses"], enabled: open, queryFn: async () => (await supabase.from("supply_order_statuses").select("label").eq("active", true)).data ?? [] });
-  const rows = useMemo(() => {
+  const all = useMemo(() => {
     const m = new Map<string, Inv>();
     for (const t of inventory as Inv[]) m.set(tagKey(t.label), t);
     for (const s of statuses.data ?? []) if (s.label && !m.has(tagKey(s.label))) m.set(tagKey(s.label), { label: s.label, variant: "status", className: "", apps: ["Supply"], files: [] });
-    return [...m.values()].sort((a, b) => a.label.localeCompare(b.label, "pt-BR"));
-  }, [statuses.data]);
-  const where = (t: Inv) => { const seen = new Set<string>(); const apps: string[] = []; const menus: string[] = []; for (const f of t.files) { const l = TAG_LOCATIONS[f]; if (!l) continue; if (!apps.includes(l.app)) apps.push(l.app); const m = `${l.app}: ${l.menu}`; if (!seen.has(m)) { seen.add(m); menus.push(m); } } return { apps: apps.length ? apps : t.apps, menus: menus.length ? menus : t.apps.map((a) => `${a}: situações`) }; };
-  const shown = rows.filter((r) => !q.trim() || tagKey(r.label).includes(tagKey(q)) || [...where(r).apps, ...where(r).menus].some((a) => tagKey(a).includes(tagKey(q))));
+    for (const c of cfg.custom) if (!m.has(tagKey(c))) m.set(tagKey(c), { label: c, variant: "outline", className: "", apps: [], files: [], custom: true });
+    return [...m.values()];
+  }, [statuses.data, cfg.custom]);
+  const nameOf = (t: Inv) => cfg.renames[tagKey(t.label)] ?? t.label;
+  const rows = all.filter((t) => !cfg.removed[tagKey(t.label)]).sort((a, b) => nameOf(a).localeCompare(nameOf(b), "pt-BR"));
+  const removedRows = all.filter((t) => cfg.removed[tagKey(t.label)]);
+  const where = (t: Inv) => { const seen = new Set<string>(); const apps: string[] = []; const menus: string[] = []; for (const f of t.files) { const l = TAG_LOCATIONS[f]; if (!l) continue; if (!apps.includes(l.app)) apps.push(l.app); const m = `${l.app}: ${l.menu}`; if (!seen.has(m)) { seen.add(m); menus.push(m); } } const via = removedRows.filter((r) => tagKey(cfg.removed[tagKey(r.label)]) === tagKey(t.label)).map((r) => `Substitui “${r.label}”`); return { apps: apps.length ? apps : t.custom ? ["Criada no CDE"] : t.apps, menus: [...(menus.length ? menus : t.custom ? [] : t.apps.map((a) => `${a}: situações`)), ...via] }; };
+  const shown = rows.filter((r) => !q.trim() || tagKey(nameOf(r)).includes(tagKey(q)) || tagKey(r.label).includes(tagKey(q)) || [...where(r).apps, ...where(r).menus].some((a) => tagKey(a).includes(tagKey(q))));
+  const exists = (name: string) => all.some((t) => !cfg.removed[tagKey(t.label)] && (tagKey(t.label) === tagKey(name) || tagKey(nameOf(t)) === tagKey(name)));
   const set = (label: string, part: TagPart, v: string) => {
-    const k = tagKey(label); const look: TagLook = { ...(styles[k] ?? {}) };
+    const k = tagKey(label); const look: TagLook = { ...(cfg.looks[k] ?? {}) };
     if (v === "padrao") delete look[part]; else look[part] = v;
-    const next = { ...styles }; if (Object.keys(look).length) next[k] = look; else delete next[k];
-    setDraft(next);
+    const looks = { ...cfg.looks }; if (Object.keys(look).length) looks[k] = look; else delete looks[k];
+    setDraft({ ...cfg, looks });
   };
+  const rename = (t: Inv) => {
+    const v = nameVal.trim().replace(/\s+/g, " "); const k = tagKey(t.label); const renames = { ...cfg.renames };
+    if (!v) return toast.error("Informe o nome da tag.");
+    if (tagKey(v) !== tagKey(nameOf(t)) && exists(v)) return toast.error("Já existe uma tag com esse nome.");
+    if (v === t.label) delete renames[k]; else renames[k] = v;
+    setDraft({ ...cfg, renames }); setRenaming(null);
+  };
+  const create = () => {
+    const v = novo.trim().replace(/\s+/g, " ");
+    if (!v) return; if (exists(v)) return toast.error("Já existe uma tag com esse nome.");
+    setDraft({ ...cfg, custom: [...cfg.custom, v] }); setNovo("");
+  };
+  const confirmRemove = () => {
+    if (!removing) return;
+    let dest = target; const custom = [...cfg.custom];
+    if (target === "__nova") { const v = targetNew.trim().replace(/\s+/g, " "); if (!v) return toast.error("Informe o nome da nova tag."); if (exists(v)) return toast.error("Essa tag já existe: escolha-a na lista."); custom.push(v); dest = v; }
+    if (!dest) return toast.error("Escolha a tag que vai substituir a excluída.");
+    const k = tagKey(removing.label);
+    const removed = { ...cfg.removed, [k]: dest };
+    for (const [rk, rv] of Object.entries(removed)) if (tagKey(rv) === k) removed[rk] = dest; // re-point tags that pointed here
+    setDraft({ ...cfg, custom: removing.custom ? custom.filter((c) => tagKey(c) !== k) : custom, removed }); setRemoving(null);
+  };
+  const restore = (t: Inv) => { const removed = { ...cfg.removed }; delete removed[tagKey(t.label)]; setDraft({ ...cfg, removed }); };
   async function save() {
     if (!draft) return;
     setSaving(true);
@@ -61,25 +95,41 @@ export function CdeTags({ number, handle }: { number: number; handle?: React.Rea
       const r = existing.data ? await supabase.from("cde_selected").update(row).eq("group_key", TAG_STYLE_GROUP).eq("variant_key", existing.data.variant_key).select("group_key") : await supabase.from("cde_selected").insert({ ...row, group_key: TAG_STYLE_GROUP }).select("group_key");
       if (r.error || !r.data?.length) throw r.error ?? new Error("sem permissão");
       await refreshTagStyles(); setDraft(null); toast.success("Tags atualizadas em todos os apps");
-    } catch { toast.error("Não foi possível salvar as tags."); } finally { setSaving(false); }
+    } catch { toast.error("Não foi possível salvar as tags. Somente Admin do ERP altera o CDE."); } finally { setSaving(false); }
   }
+  const variantOf = (t: Inv) => (["default", "secondary", "destructive", "outline", "status"].includes(t.variant) ? t.variant : "default") as "default";
   return <section className="space-y-4">
-    <CdeCategoryHeader handle={handle} number={number} title="Tags" hint="Fundo, texto e borda de cada etiqueta de situação usada nos apps" open={open} onToggle={() => setOpen(!open)} />
+    <CdeCategoryHeader handle={handle} number={number} title="Tags" hint="Criar, renomear, excluir e definir fundo, texto e borda das etiquetas usadas nos apps" open={open} onToggle={() => setOpen(!open)} />
     {open && <div className="w-full min-w-0 space-y-3 py-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-xs text-muted-foreground">{rows.length} tags. “Atual (padrão)” mantém a aparência de hoje. A mesma etiqueta tem a mesma aparência em todos os apps.</p>
+        <p className="text-xs text-muted-foreground">{rows.length} tags. “Atual (padrão)” mantém a aparência de hoje. Renomear muda só o nome exibido; os registros continuam os mesmos.</p>
         <div className="flex items-center gap-1">
           {draft && <><Button variant="ghost" size="icon" aria-label="Salvar" title="Salvar tags" onClick={save} disabled={saving}><Save /></Button><Button variant="ghost" size="icon" aria-label="Cancelar" title="Cancelar" onClick={() => setDraft(null)}><X /></Button></>}
           <Input aria-label="Buscar tag" placeholder="Buscar tag ou app" value={q} onChange={(e) => setQ(e.target.value)} className="h-8 w-56 text-[length:var(--filter-fs)] md:text-[length:var(--filter-fs)]" />
         </div>
       </div>
-      <Table><TableHeader><TableRow><TableHead>Tag</TableHead><TableHead>Apps</TableHead><TableHead>Menus e submenus</TableHead>{PARTS.map(([, l]) => <TableHead key={l}>{l}</TableHead>)}</TableRow></TableHeader>
-        <TableBody>{shown.map((t) => { const look = styles[tagKey(t.label)]; return <TableRow key={t.label}>
-          <TableCell><Badge variant={(["default", "secondary", "destructive", "outline", "status"].includes(t.variant) ? t.variant : "default") as "default"} className={t.className} cdeLook={look ?? {}}>{t.label}</Badge></TableCell>
+      <div className="flex max-w-md items-end gap-2"><Input aria-label="Nova tag" placeholder="Nome da nova tag" value={novo} onChange={(e) => setNovo(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") create(); }} /><Button variant="ghost" onClick={create}><Plus className="h-4 w-4" />Nova tag</Button></div>
+      <Table><TableHeader><TableRow><TableHead>Tag</TableHead><TableHead>Apps</TableHead><TableHead>Menus e submenus</TableHead>{PARTS.map(([, l]) => <TableHead key={l}>{l}</TableHead>)}<TableHead>Ações</TableHead></TableRow></TableHeader>
+        <TableBody>{shown.map((t) => { const k = tagKey(t.label); const look = cfg.looks[k]; const renamed = cfg.renames[k]; return <TableRow key={k}>
+          <TableCell>{renaming === k ? <Input aria-label="Nome da tag" autoFocus className="h-8 w-48" value={nameVal} onChange={(e) => setNameVal(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") rename(t); if (e.key === "Escape") setRenaming(null); }} onBlur={() => rename(t)} />
+            : <span className="inline-flex flex-col items-start gap-0.5"><Badge variant={variantOf(t)} className={t.className} cdeLook={look ?? {}}>{nameOf(t)}</Badge>{renamed && <span className="text-[10px] text-muted-foreground">Original: {t.label}</span>}</span>}</TableCell>
           <TableCell className="text-xs text-muted-foreground">{where(t).apps.join(", ")}</TableCell><TableCell className="text-xs text-muted-foreground">{where(t).menus.map((m) => <div key={m}>{m}</div>)}</TableCell>
           {PARTS.map(([p, l]) => <TableCell key={p}><ColorSelect label={`${l} de ${t.label}`} value={look?.[p]} onChange={(v) => set(t.label, p, v)} /></TableCell>)}
+          <TableCell className="whitespace-nowrap"><Button variant="ghost" size="icon" aria-label="Renomear tag" title="Renomear tag" onClick={() => { setRenaming(k); setNameVal(nameOf(t)); }}><Pencil /></Button>
+            <Button variant="ghost" size="icon" aria-label="Excluir tag" title="Excluir tag" onClick={() => { setRemoving(t); setTarget(""); setTargetNew(""); }}><Trash2 /></Button></TableCell>
         </TableRow>; })}
-          {!shown.length && <TableRow><TableCell colSpan={6} className="text-muted-foreground">Nenhuma tag.</TableCell></TableRow>}</TableBody></Table>
+          {!shown.length && <TableRow><TableCell colSpan={7} className="text-muted-foreground">Nenhuma tag.</TableCell></TableRow>}</TableBody></Table>
+      {removedRows.length > 0 && <div className="space-y-1"><p className="text-sm font-medium">Tags excluídas ({removedRows.length})</p>
+        <ul className="space-y-1">{removedRows.map((t) => <li key={t.label} className="flex flex-wrap items-center gap-2 text-sm"><span className="text-muted-foreground line-through">{t.label}</span><span className="text-xs text-muted-foreground">→ exibida como “{cfg.renames[tagKey(cfg.removed[tagKey(t.label)])] ?? cfg.removed[tagKey(t.label)]}”</span><Button variant="ghost" size="icon" aria-label="Restaurar tag" title="Restaurar tag" onClick={() => restore(t)}><RotateCcw /></Button></li>)}</ul></div>}
     </div>}
+    <Dialog open={!!removing} onOpenChange={(o) => { if (!o) setRemoving(null); }}><DialogContent className="sm:max-w-md">
+      <DialogHeader><DialogTitle>Excluir a tag “{removing ? nameOf(removing) : ""}”</DialogTitle></DialogHeader>
+      <p className="text-sm text-muted-foreground">Onde ela aparece, passa a ser exibida a tag escolhida abaixo, com o nome e as cores dela. Os registros não são alterados e a exclusão pode ser desfeita.</p>
+      <div className="space-y-1"><Label>Substituir por</Label><Select value={target} onValueChange={setTarget}><SelectTrigger aria-label="Substituir por"><SelectValue placeholder="Escolha a tag" /></SelectTrigger>
+        <SelectContent><SelectItem value="__nova">+ Criar nova tag</SelectItem>{rows.filter((t) => t !== removing).map((t) => <SelectItem key={t.label} value={t.label}>{nameOf(t)}</SelectItem>)}</SelectContent></Select></div>
+      {target === "__nova" && <div className="space-y-1"><Label htmlFor="tag-nova-dest">Nome da nova tag</Label><Input id="tag-nova-dest" value={targetNew} onChange={(e) => setTargetNew(e.target.value)} /></div>}
+      <div className="flex gap-2 pt-2"><Button variant="ghost" onClick={confirmRemove}><Trash2 className="h-4 w-4" />Excluir e substituir</Button></div>
+      <p className="text-xs text-muted-foreground">A exclusão só vale nos apps depois de salvar no disquete.</p>
+    </DialogContent></Dialog>
   </section>;
 }
