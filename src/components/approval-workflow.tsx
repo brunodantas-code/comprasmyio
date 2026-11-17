@@ -1,4 +1,4 @@
-import { CdeButton } from "@/components/cde/cde-button";
+import { CdeButton, CdeDisclosureIcon } from "@/components/cde/cde-button";
 import { TableReportActions } from "@/components/table-report-actions";
 import { useTableFilters } from "@/components/use-table-filters";
 import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
@@ -607,13 +607,13 @@ export function PendingApprovalsByRole({ renderEditAction }: { renderEditAction?
                     onClick={() => toggleGroup(group.key)}
                     aria-expanded={isOpen}
                   >
-                    {isOpen ? <ChevronDown className="mr-2 h-4 w-4 shrink-0" /> : <ChevronRight className="mr-2 h-4 w-4 shrink-0" />}
                     <span className="grid min-w-0 flex-1 gap-2 sm:grid-cols-[minmax(0,1fr)_7rem_10rem_6rem] sm:items-center">
                       <span className="truncate font-semibold">{group.title}</span>
                       <span className="text-sm font-normal text-muted-foreground dark:text-primary-foreground">{group.steps.length} {group.steps.length === 1 ? "approval" : "approvals"}</span>
                       <span className="text-sm font-semibold">{BRL(group.value)}</span>
                       <span className="text-sm font-normal text-muted-foreground dark:text-primary-foreground">{share.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%</span>
                     </span>
+                    <span className="ml-auto flex shrink-0"><CdeDisclosureIcon open={isOpen} screen="components/approval-workflow.tsx" /></span>
                   </Button>
                   <div className="h-1 bg-muted" aria-hidden="true">
                     <div className="h-full bg-primary" style={{ width: `${Math.min(100, share)}%` }} />

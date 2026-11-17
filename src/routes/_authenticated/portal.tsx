@@ -242,9 +242,6 @@ function PortalPage() {
                 : section === "todos" ? <TodoSection />
                 : (<>{(pendingActions?.total ?? 0) > (pendingActions?.todoCount ?? 0) ? (
               <section aria-labelledby="pending-title">
-                <div className="mb-4 flex items-center justify-between gap-3">
-                  <h2 id="pending-title" className="flex items-center gap-2 text-xl font-bold"><Bell className="h-5 w-5" />Minhas pendências</h2>
-                </div>
                 <PendingGroups items={[
       ...((pendingActions?.approvals ?? 0) > 0 ? [{ key: "approvals", app: "Supply", requester: "Você", count: pendingActions?.approvals ?? 0, row: <PendingRow icon={CheckCircle2} label="Aguardando minha aprovação" count={pendingActions?.approvals ?? 0} to="/pendentes" /> }] : []),
       ...((pendingActions?.supplyQueue ?? 0) > 0 ? [{ key: "queue", app: "Supply", requester: "Você", count: pendingActions?.supplyQueue ?? 0, row: <PendingRow icon={ShoppingCart} label="Compras e serviços a executar · Fila do Supply" count={pendingActions?.supplyQueue ?? 0} to="/dashboard" search={{ section: "queue", subsection: "supply" }} /> }] : []),

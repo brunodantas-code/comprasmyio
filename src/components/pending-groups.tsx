@@ -4,6 +4,8 @@ import { CdeDisclosureIcon } from "@/components/cde/cde-button";
 import { cn } from "@/lib/utils";
 import { AppSymbol } from "@/components/cde/app-tile";
 import { Button } from "@/components/ui/button";
+import { Bell, ListFilter } from "lucide-react";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem } from "@/components/ui/dropdown-menu";
 
 export type PendingGroupItem = { key: string; app: string; requester: string; count: number; row: ReactNode };
 type GroupBy = "app" | "requester";
@@ -18,25 +20,30 @@ export function PendingGroups({ items, leading }: { items: PendingGroupItem[]; l
     return [...map.entries()].sort((a, b) => a[0].localeCompare(b[0], "pt-BR"));
   }, [items, groupBy]);
   const toggle = (k: string) => setOpen((s) => { const n = new Set(s); if (n.has(k)) n.delete(k); else n.add(k); return n; });
+  const changeGroup = (value: GroupBy) => { setGroupBy(value); setOpen(new Set()); };
   return <div className="space-y-2">
-    <div className="flex items-center justify-end gap-2 text-xs text-muted-foreground">
+    <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:flex sm:justify-between">
+      <h2 id="pending-title" className="flex min-w-0 items-center gap-2 text-xl font-bold"><Bell className="h-5 w-5 shrink-0" /><span className="min-w-0 break-words">Minhas pendências</span></h2>
+      <div className="sm:hidden"><DropdownMenu><DropdownMenuTrigger asChild><Button type="button" variant="ghost" size="compactIcon" aria-label="Agrupar pendências" title="Agrupar por"><ListFilter /></Button></DropdownMenuTrigger><DropdownMenuContent align="end"><DropdownMenuRadioGroup value={groupBy} onValueChange={value => { if (value === "app" || value === "requester") changeGroup(value); }}><DropdownMenuRadioItem value="app">App</DropdownMenuRadioItem><DropdownMenuRadioItem value="requester">Solicitante</DropdownMenuRadioItem></DropdownMenuRadioGroup></DropdownMenuContent></DropdownMenu></div>
+    <div className="hidden shrink-0 items-center justify-end gap-2 text-xs text-muted-foreground sm:flex">
       <span>Agrupar por</span>
       {([["app", "App"], ["requester", "Solicitante"]] as const).map(([value, label]) => (
-        <Button key={value} type="button" variant="ghost" size="sm" aria-pressed={groupBy === value} onClick={() => { setGroupBy(value); setOpen(new Set()); }} className={cn("h-8 w-28 border-0 px-2 text-center shadow-none", groupBy === value ? "font-semibold underline underline-offset-4" : "font-normal")}>{label}</Button>
+        <Button key={value} type="button" variant="ghost" size="sm" aria-pressed={groupBy === value} onClick={() => changeGroup(value)} className={cn("h-8 w-28 border-0 px-2 text-center shadow-none", groupBy === value ? "font-semibold underline underline-offset-4" : "font-normal")}>{label}</Button>
       ))}
     </div>
+    </header>
     <div className="divide-y divide-border overflow-hidden rounded-md border border-border bg-card">
       {leading}
       {groups.map(([name, rows]) => {
         const isOpen = open.has(name);
         const total = rows.reduce((s, r) => s + r.count, 0);
         return <div key={name}>
-          <div className="transition-colors hover:bg-primary/10 focus-within:bg-primary/10"><button type="button" onClick={() => toggle(name)} aria-expanded={isOpen} className="!flex !w-full !max-w-none items-center gap-3 !bg-transparent px-4 py-3 text-left">
-            <CdeDisclosureIcon open={isOpen} screen="components/pending-groups.tsx" />
+          <div className="transition-colors hover:bg-primary/10 focus-within:bg-primary/10"><Button variant="ghost" type="button" onClick={() => toggle(name)} aria-expanded={isOpen} className="!flex !h-auto !min-w-0 !w-full !max-w-none !justify-start items-center gap-3 !bg-transparent px-4 py-3 text-left">
             {groupBy === "app" ? <AppSymbol name={name} className="h-5 w-5 shrink-0 text-foreground" /> : <span aria-hidden className="h-5 w-5 shrink-0" />}
-            <span className="w-40 max-w-[40vw] shrink-0 break-words text-sm font-semibold">{name}</span>
+            <span className="min-w-0 w-40 max-w-[40vw] shrink-0 break-words text-sm font-semibold">{name}</span>
             <AlertMarker count={total} />
-          </button></div>
+            <span className="ml-auto flex shrink-0 items-center"><CdeDisclosureIcon open={isOpen} screen="components/pending-groups.tsx" /></span>
+          </Button></div>
           {isOpen ? <div className="divide-y divide-border border-t border-border bg-muted/30">{rows.map((r) => <div key={r.key} className="pl-8 transition-colors hover:bg-primary/10 focus-within:bg-primary/10 [&>a]:!bg-transparent">{r.row}</div>)}</div> : null}
         </div>;
       })}

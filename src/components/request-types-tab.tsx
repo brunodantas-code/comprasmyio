@@ -1,4 +1,4 @@
-import { CdeButton } from "@/components/cde/cde-button";
+import { CdeButton, CdeDisclosureIcon } from "@/components/cde/cde-button";
 import { Fragment, useState } from "react";
 import type React from "react";
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
@@ -130,10 +130,7 @@ export function RequestTypesTab() {
               {(types ?? []).map((type) => (
                 <Fragment key={type.code}>
                 <TableRow>
-                  <TableCell className="font-medium">{SUBTYPE_MODELS.includes(type.model_code) ? (
-                    <button type="button" className="inline-flex items-center gap-1 text-left" onClick={() => setOpenSubs((prev) => ({ ...prev, [type.code]: !prev[type.code] }))} aria-label={openSubs[type.code] ? `Recolher opções de ${type.name}` : `Exibir opções de ${type.name}`}>
-                      {openSubs[type.code] ? <ChevronUp className="h-3.5 w-3.5 text-primary" /> : <ChevronDown className="h-3.5 w-3.5 text-primary" />}{type.name}
-                    </button>) : <span className="pl-[18px]">{type.name}</span>}</TableCell>
+                  <TableCell className="font-medium">{type.name}</TableCell>
                   <TableCell>{REQUEST_TYPE_FALLBACKS[type.model_code] ?? type.model_code}</TableCell>
                   <TableCell><Switch checked={type.active} onCheckedChange={(active) => toggle.mutate({ code: type.code, active })} /></TableCell>
                   <TableCell className="text-right whitespace-nowrap">
@@ -150,6 +147,7 @@ export function RequestTypesTab() {
                         onDelete={() => remove.mutate(type.code)}
                         deleting={remove.isPending}
                       />
+                      {SUBTYPE_MODELS.includes(type.model_code) ? <Button type="button" variant="ghost" size="compactIcon" aria-expanded={Boolean(openSubs[type.code])} onClick={() => setOpenSubs((prev) => ({ ...prev, [type.code]: !prev[type.code] }))} aria-label={openSubs[type.code] ? `Recolher opções de ${type.name}` : `Exibir opções de ${type.name}`}><CdeDisclosureIcon open={Boolean(openSubs[type.code])} screen="components/request-types-tab.tsx" /></Button> : null}
                     </div>
                   </TableCell>
                 </TableRow>

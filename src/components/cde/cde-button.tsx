@@ -112,7 +112,7 @@ export const CdeButton = forwardRef<HTMLButtonElement, Props>(function CdeButton
       className={cn(visual.className, cls, children && "!w-auto !min-w-max shrink-0", group !== "filter" && active ? "!text-primary" : "", className, group === "filter" && "!border-0 !bg-transparent hover:!bg-muted focus-visible:!bg-muted", group === "filter" && (active ? "!text-primary hover:!text-primary focus-visible:!text-primary" : "!text-foreground hover:!text-foreground focus-visible:!text-foreground"))}
       {...rest}
     >
-      {group === "toggle" ? (rest["aria-expanded"] ? <ICONS.ChevronUp className={m.iconClass} /> : <ICONS.ChevronDown className={m.iconClass} />) : Icon ? <Icon className={m.iconClass} /> : null}
+      {group === "toggle" ? (rest["aria-expanded"] ? <ICONS.ChevronUp className={cn(m.iconClass, label && "order-last ml-auto shrink-0")} /> : <ICONS.ChevronDown className={cn(m.iconClass, label && "order-last ml-auto shrink-0")} />) : Icon ? <Icon className={m.iconClass} /> : null}
       {label}
     </Button>
   );
@@ -124,7 +124,7 @@ export function CdeDisclosureIcon({ open, screen, direction = "horizontal" }: { 
   const m = resolveCdeModel(data, "toggle", screen);
   const { css, cls } = styleOf(m.style);
   const Icon = direction === "vertical" ? (open ? ICONS.ChevronUp : ICONS.ChevronDown) : (open ? ICONS.ChevronDown : ICONS.ChevronRight);
-  return <span style={css} className={cn("inline-flex shrink-0 items-center justify-center !text-foreground", m.iconClass || "h-4 w-4", cls)}><Icon className="!size-full" /></span>;
+  return <span data-cde-disclosure="" style={css} className={cn("inline-flex shrink-0 items-center justify-center !text-foreground", m.iconClass || "h-4 w-4", cls)}><Icon className="!size-full" /></span>;
 }
 
 export function CdeToggleIcon({ open }: { open?: boolean }) {

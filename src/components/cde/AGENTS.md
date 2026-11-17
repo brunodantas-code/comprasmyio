@@ -47,3 +47,5 @@
 - CDE look of the CDE itself lives in cde_selected group cde_appearance (cde-appearance.ts) as --cde-cat-*/--cde-sub-* vars on the CDE main; header hints must avoid action words (excluir, salvar…) because shared Button detects action looks by label.
 
 - NumericMarker/AlertMarker read independent record_number/alert_marker CDE standards; identifiers remain complete, counters retain existing caps, and appearance never changes business rules.
+
+- Disclosure headers reserve their rightmost slot for expansion; labelled CdeButton toggles order the arrow after text, while toolbars remain separate from the expansion control.

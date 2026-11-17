@@ -120,7 +120,7 @@ export function KpisTab({ data, canEdit }: { data: MytosisData; canEdit: boolean
           const expanded = !!open[k.id];
           return <div key={k.id} className="p-3">
             <div className="flex items-start gap-3">
-              <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0 text-primary" aria-label={expanded ? "Recolher" : "Exibir"} onClick={() => setOpen({ ...open, [k.id]: !expanded })}>{expanded ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}</Button>
+              <Button variant="ghost" size="icon" className="order-last h-7 w-7 shrink-0 text-primary" aria-expanded={expanded} aria-label={expanded ? "Recolher" : "Exibir"} onClick={() => setOpen({ ...open, [k.id]: !expanded })}>{expanded ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}</Button>
               <span className={`mt-2 h-3 w-3 shrink-0 rounded-full ${STATUS[status].dot}`} title={STATUS[status].label} />
               <div className="min-w-0 flex-1">
                 <p className="break-words font-medium">{k.name}</p>

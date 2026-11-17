@@ -278,7 +278,7 @@ function DevelopmentPage() {
                 <TableBody>{filteredTickets.map(renderRow)}{!filteredTickets.length ? <TableRow><TableCell colSpan={9} className="h-24 text-center text-muted-foreground">Nenhum ticket encontrado.</TableCell></TableRow> : null}</TableBody>
               </Table>
             )}
-            {deletedTickets.length ? <div className="mt-4 border-t pt-3"><button type="button" className="flex items-center gap-2 text-sm font-semibold" aria-expanded={showDeleted} onClick={() => setShowDeleted(v => !v)}>Histórico de excluídos ({deletedTickets.length})<CdeDisclosureIcon open={showDeleted} screen="/development" direction="vertical" /></button>{showDeleted ? <Table className="mt-2"><TableBody>{deletedTickets.map(renderRow)}</TableBody></Table> : null}</div> : null}
+            {deletedTickets.length ? <div className="mt-4 border-t pt-3"><Button type="button" variant="ghost" className="!h-auto !w-full !max-w-none !justify-between gap-2 !bg-transparent px-0 py-2 text-sm font-semibold" aria-expanded={showDeleted} onClick={() => setShowDeleted(v => !v)}><span className="min-w-0 break-words">Histórico de excluídos ({deletedTickets.length})</span><CdeDisclosureIcon open={showDeleted} screen="/development" direction="vertical" /></Button>{showDeleted ? <Table className="mt-2"><TableBody>{deletedTickets.map(renderRow)}</TableBody></Table> : null}</div> : null}
           </CardContent>
         </Card>
       </main>

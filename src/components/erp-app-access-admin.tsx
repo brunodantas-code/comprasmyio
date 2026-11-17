@@ -1,3 +1,5 @@
+import { CdeDisclosureIcon } from "@/components/cde/cde-button";
+import { Button } from "@/components/ui/button";
 import { confirmAction } from "@/components/confirm-dialog";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -78,17 +80,17 @@ export function ErpAppAccessAdmin() {
             const isOpen = open.has(user.id);
             return (
             <div key={user.id} className={user.is_active ? "" : "opacity-60"}>
-              <div className="flex flex-wrap items-center gap-2 py-2">
-                <button type="button" onClick={() => toggle(user.id)} aria-expanded={isOpen} className="flex min-w-0 items-center gap-2 text-left">
-                  {isOpen ? <ChevronDown className="h-5 w-5 shrink-0 text-primary" /> : <ChevronRight className="h-5 w-5 shrink-0 text-primary" />}
+              <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 py-2 sm:flex">
+                <button type="button" onClick={() => toggle(user.id)} className="flex min-w-0 flex-1 flex-wrap items-center gap-2 text-left">
                   <span className="break-words font-semibold">{user.full_name || "Sem nome"}</span>
                   <span className="break-all text-xs text-muted-foreground">{user.email}</span>
                 </button>
-                {adminSet.has(user.id) ? <Badge variant="outline">Admin do ERP</Badge> : null}
-                <label className="ml-auto flex items-center gap-2 text-xs">
+                {adminSet.has(user.id) ? <Badge variant="outline" className="col-start-1 row-start-2 w-fit">Admin do ERP</Badge> : null}
+                <label className="col-start-1 flex items-center gap-2 text-xs sm:ml-auto">
                   <Switch checked={user.is_active} disabled={activate.isPending} onCheckedChange={async (active) => { if (active || await confirmAction(`Inativar ${user.full_name || user.email}? O usuário não conseguirá mais entrar.`)) activate.mutate({ data: { userId: user.id, active } }); }} aria-label={`Ativo: ${user.full_name || user.email || "usuário"}`} />
                   <span className={user.is_active ? "" : "text-destructive"}>{user.is_active ? "Ativo" : "Inativo"}</span>
                 </label>
+                <Button type="button" variant="ghost" size="compactIcon" className="col-start-2 row-start-1 shrink-0" aria-label={`${isOpen ? "Recolher" : "Exibir"} aplicativos de ${user.full_name || "usuário"}`} aria-expanded={isOpen} onClick={() => toggle(user.id)}><CdeDisclosureIcon open={isOpen} screen="components/erp-app-access-admin.tsx" /></Button>
               </div>
               {isOpen ? <div className="grid min-w-0 grid-cols-2 gap-x-4 gap-y-3 rounded-md border border-border p-3 sm:grid-cols-4 lg:grid-cols-6">
                 {APPS.map((app) => {

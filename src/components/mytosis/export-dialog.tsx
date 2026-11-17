@@ -1,3 +1,4 @@
+import { CdeDisclosureIcon } from "@/components/cde/cde-button";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronDown, ChevronRight, FileDown } from "lucide-react";
@@ -88,8 +89,7 @@ export function ExportDialog({ open, onClose, roots, currentId, onSelect, getCan
             const isOpen = expanded.has(root.id);
             return <div key={root.id} className="rounded-md border border-border">
               <button type="button" onClick={() => toggle(root.id)} aria-expanded={isOpen} className="flex w-full items-center gap-2 p-2 text-left text-sm">
-                {isOpen ? <ChevronDown className="h-4 w-4 text-primary" /> : <ChevronRight className="h-4 w-4 text-primary" />}
-                <span className="flex-1 truncate">{root.title}</span><span className="text-xs text-muted-foreground">{items.length}</span>
+                <span className="min-w-0 flex-1 truncate">{root.title}</span><span className="shrink-0 text-xs text-muted-foreground">{items.length}</span><CdeDisclosureIcon open={isOpen} screen="components/mytosis/export-dialog.tsx" />
               </button>
               {isOpen ? <ul className="border-t border-border">{items.map((v) => <li key={v.id} className="flex items-center justify-between gap-2 px-3 py-1.5 text-sm">
                 <span>{versionLabel(v.version, v.created_at)}</span>

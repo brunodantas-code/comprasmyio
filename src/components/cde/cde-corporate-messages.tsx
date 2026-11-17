@@ -119,7 +119,7 @@ export function CdeCorporateMessages({ number, handle }: { number: number; handl
         </div>
       </div>}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <button type="button" className="flex items-center gap-2 text-sm font-medium" aria-expanded={historyOpen} onClick={() => setHistoryOpen((v) => !v)}>Histórico de mensagens ({all.length})<CdeDisclosureIcon open={historyOpen} screen="components/cde/cde-corporate-messages.tsx" direction="vertical" /></button>
+        <Button type="button" variant="ghost" className="!h-auto !w-full !max-w-none !justify-between gap-2 !bg-transparent px-0 py-2 text-sm font-medium" aria-expanded={historyOpen} onClick={() => setHistoryOpen((v) => !v)}><span className="min-w-0 break-words">Histórico de mensagens ({all.length})</span><CdeDisclosureIcon open={historyOpen} screen="components/cde/cde-corporate-messages.tsx" direction="vertical" /></Button>
         {historyOpen && <div className="relative w-full max-w-xs"><Search className="pointer-events-none absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" /><Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Buscar mensagem" aria-label="Buscar mensagem" className="!pl-7 text-[length:var(--filter-fs)]" style={{ paddingLeft: 28 }} /></div>}
       </div>
       {historyOpen && <Table>
