@@ -364,3 +364,4 @@
 - [x] Botões Escolher/Adicionar como padrão do CDE no padrão visual comum
 - [x] Textos longos seguem o modelo 1.3 escolhido (confirmado; tela do usuário estava desatualizada)
 - [x] To Dos: etiqueta antes do título, mesma altura de linha das Pendências
+- [x] CDE Cabeçalhos e Listas: cinza claro e escuro como fundo
