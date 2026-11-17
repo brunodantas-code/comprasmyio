@@ -17,7 +17,7 @@ import { ErpAppAccessAdmin } from "@/components/erp-app-access-admin";
 import { CrmFunnelIcon } from "@/components/crm-funnel-icon";
 import { MytosisIcon } from "@/components/mytosis-icon";
 import { CdeIcon } from "@/components/cde-icon";
-import { useAppOrder, useAppTile, APP_TILE_DEFAULT } from "@/components/cde/app-order-config";
+import { useAppOrder, useAppTile, APP_TILE_DEFAULT, appTileColorVars } from "@/components/cde/app-order-config";
 import { AppTileFace } from "@/components/cde/app-tile";
 import { AppAccessLink } from "@/components/app-access-link";
 import { DesktopHeaderMenu, UserNameBlock } from "@/components/app-header";
@@ -111,7 +111,7 @@ function PortalPage() {
         to={to}
         aria-label={`Acessar ${name}`}
         title={`Acessar ${name}`}
-        className="mobile-app-tile group relative flex flex-col items-center justify-between rounded-2xl border-2 border-primary bg-primary px-1 pb-2 pt-1 text-primary-foreground outline-none hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring"
+        className="mobile-app-tile group relative flex flex-col items-center justify-between rounded-2xl border-2 border-[color:var(--tile-border,var(--primary))] bg-primary px-1 pb-2 pt-1 text-primary-foreground outline-none hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring"
       >
         {key === "supply" && (pendingActions?.supply ?? 0) > 0 ? <PendingBadge count={pendingActions?.supply ?? 0} label="pendências no Supply" /> : null}
         {key === "development" && (pendingActions?.codeTickets ?? 0) > 0 ? <PendingBadge count={pendingActions?.codeTickets ?? 0} label="tickets pendentes no Code" /> : null}
@@ -119,12 +119,12 @@ function PortalPage() {
         {key === "legal" && (pendingActions?.legalSignatures ?? 0) > 0 ? <PendingBadge count={pendingActions?.legalSignatures ?? 0} label="pendências no Legal" /> : null}
         <AppTileFace appKey={key} name={name} tile={tile} mobile />
       </AppAccessLink>
-      <p className="mt-2 w-full break-words text-center text-[0.68rem] leading-4 text-muted-foreground">{description.map((line) => <span key={line} className="block">{line}</span>)}</p>
+      <p className="mt-2 w-full break-words text-center text-[0.68rem] leading-4 text-[color:var(--tile-below,var(--muted-foreground))]">{description.map((line) => <span key={line} className="block">{line}</span>)}</p>
     </div>
   );
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden bg-background sm:block sm:h-auto sm:min-h-screen sm:overflow-visible">
+    <div style={activeView === "apps" ? appTileColorVars(tile) as React.CSSProperties : undefined} className="flex h-dvh flex-col overflow-hidden bg-[var(--portal-bg,var(--background))] sm:block sm:h-auto sm:min-h-screen sm:overflow-visible">
       <header className="sticky top-0 z-40 shrink-0 bg-accent text-accent-foreground sm:border-b sm:border-border sm:bg-card sm:text-foreground">
       <TopIconStyleVars /><ListItemStyleVars />
         <div className="app-header-workspace mx-auto max-w-7xl px-4 pb-9 pt-5 sm:flex sm:items-center sm:justify-between sm:gap-4 sm:px-6 sm:py-4">
@@ -196,7 +196,7 @@ function PortalPage() {
         </div>
       </header>
 
-      <main className="no-scrollbar relative z-10 -mt-3 min-h-0 flex-1 overflow-y-auto rounded-t-xl bg-background px-3 py-10 sm:mx-auto sm:mt-0 sm:min-h-0 sm:max-w-7xl sm:overflow-visible sm:rounded-none sm:px-6 sm:py-14">
+      <main className="no-scrollbar relative z-10 -mt-3 min-h-0 flex-1 overflow-y-auto rounded-t-xl bg-[var(--portal-bg,var(--background))] px-3 py-10 sm:mx-auto sm:mt-0 sm:min-h-0 sm:max-w-7xl sm:overflow-visible sm:rounded-none sm:px-6 sm:py-14">
         <Tabs value={activeView} onValueChange={(value) => setActiveView(value as "apps" | "users")}>
           <TabsContent value="apps">
             {apps.length ? (
@@ -212,7 +212,7 @@ function PortalPage() {
                         to={to}
                         aria-label={`Acessar ${name}`}
                         title={`Acessar ${name}`}
-                        className="group relative flex h-24 w-24 flex-col items-center justify-between rounded-3xl border-2 border-primary bg-primary px-2 pb-2 pt-1.5 text-primary-foreground outline-none transition-transform hover:scale-105 hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 sm:h-28 sm:w-28"
+                        className="group relative flex h-24 w-24 flex-col items-center justify-between rounded-3xl border-2 border-[color:var(--tile-border,var(--primary))] bg-primary px-2 pb-2 pt-1.5 text-primary-foreground outline-none transition-transform hover:scale-105 hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 sm:h-28 sm:w-28"
                       >
                          {key === "supply" && (pendingActions?.supply ?? 0) > 0 ? <PendingBadge count={pendingActions?.supply ?? 0} label="pendências no Supply" /> : null}
                           {key === "development" && (pendingActions?.codeTickets ?? 0) > 0 ? <PendingBadge count={pendingActions?.codeTickets ?? 0} label="tickets pendentes no Code" /> : null}
@@ -220,7 +220,7 @@ function PortalPage() {
                         {key === "legal" && (pendingActions?.legalSignatures ?? 0) > 0 ? <PendingBadge count={pendingActions?.legalSignatures ?? 0} label="pendências no Legal" /> : null}
         <AppTileFace appKey={key} name={name} tile={tile} />
                      </AppAccessLink>
-                      <p className="mt-3 w-24 max-w-full break-words text-center text-xs leading-4 text-muted-foreground sm:w-28 sm:text-sm sm:leading-5">
+                      <p className="mt-3 w-24 max-w-full break-words text-center text-xs leading-4 text-[color:var(--tile-below,var(--muted-foreground))] sm:w-28 sm:text-sm sm:leading-5">
                         {description.map((line) => <span key={line} className="block sm:whitespace-nowrap">{line}</span>)}
                       </p>
                      </div>

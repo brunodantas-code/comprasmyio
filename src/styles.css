@@ -120,6 +120,9 @@
   --whatsapp-border: #42d898;
   --myio-purple: #673ab6;
   --myio-dark: #0b0023;
+  /* Tons derivados da marca para o fundo da página principal (CDE app_tile) */
+  --myio-white: #ffffff;
+  --myio-green-tint: color-mix(in oklab, var(--myio-green) 8%, white);
   /* Paleta do Mytosis: só tons das cores da marca */
   --mytosis-green-soft: color-mix(in oklab, var(--myio-green) 14%, white);
   --mytosis-green-mid: color-mix(in oklab, var(--myio-green) 45%, white);

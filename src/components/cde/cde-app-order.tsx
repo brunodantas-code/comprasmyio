@@ -1,5 +1,6 @@
 import { CdeNumber } from "@/components/cde/cde-button";
 import { useState } from "react";
+import type React from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, arrayMove, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
@@ -10,7 +11,8 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { CdeCategoryHeader } from "./cde-category-header";
-import { APP_TILE_DEFAULT, PORTAL_APPS, parseAppOrder, useAppOrder, useAppTile, type AppTileConfig } from "./app-order-config";
+import { APP_TILE_COLORS, APP_TILE_DEFAULT, PORTAL_APPS, appTileColor, appTileColorVars, appTileLowContrast, parseAppOrder, useAppOrder, useAppTile, type AppTileColorKind, type AppTileConfig } from "./app-order-config";
+import { useCdeSwatchStyle } from "./cde-button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 
@@ -23,6 +25,18 @@ function Row({ id, index }: { id: string; index: number }) {
     <span className="flex h-7 w-7 shrink-0 items-center justify-center text-foreground"><AppSymbol name={app?.name ?? ""} className="h-5 w-5" /></span>
     <span className="flex-1 text-sm">{app?.name}</span>
   </div>;
+}
+
+const COLOR_FIELDS: [AppTileColorKind, string][] = [["bg", "Fundo da página"], ["border", "Borda dos ícones"], ["inside", "Texto dentro do ícone"], ["below", "Texto abaixo do ícone"]];
+
+/** Brand-only colour picker: options come from APP_TILE_COLORS, swatch shape follows CDE color_swatch. */
+function ColorChoice({ kind, label, value, onChange }: { kind: AppTileColorKind; label: string; value: string; onChange: (v: string) => void }) {
+  const swatch = useCdeSwatchStyle();
+  const dot = (color: string) => <span aria-hidden="true" style={{ background: color, ...swatch.css }} className={`inline-block h-4 w-4 shrink-0 rounded-full border border-border ${swatch.cls}`} />;
+  const current = appTileColor(kind, value);
+  return <div className="min-w-0 space-y-1"><Label className="flex min-h-10 items-end pb-1">{label}</Label>
+    <Select value={current.key} onValueChange={onChange}><SelectTrigger className="h-9" aria-label={label}><span className="flex min-w-0 items-center gap-2">{dot(current.value)}<span className="truncate">{current.label}</span></span></SelectTrigger>
+      <SelectContent>{APP_TILE_COLORS[kind].map((o) => <SelectItem key={o.key} value={o.key}><span className="flex items-center gap-2">{dot(o.value)}{o.label}</span></SelectItem>)}</SelectContent></Select></div>;
 }
 
 export function CdeAppOrder({ number, handle }: { number: number; handle?: import("react").ReactNode }) {
@@ -69,7 +83,7 @@ export function CdeAppOrder({ number, handle }: { number: number; handle?: impor
     } catch { toast.error("Não foi possível salvar a ordem."); } finally { setSaving(false); }
   }
   return <section className="space-y-4">
-    <CdeCategoryHeader handle={handle} number={number} title="Apps da página principal" hint="Ordem, fonte, tamanho e espaçamento" open={open} onToggle={() => setOpen(!open)} />
+    <CdeCategoryHeader handle={handle} number={number} title="Apps da página principal" hint="Ordem, fonte, tamanho, espaçamento e cores" open={open} onToggle={() => setOpen(!open)} />
     {open && <div className="w-full min-w-0 py-4"><DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={move}><SortableContext items={order} strategy={verticalListSortingStrategy}>{order.map((id, i) => <Row key={id} id={id} index={i} />)}</SortableContext></DndContext>
       <Button variant="action" className="mt-3" onClick={save} disabled={saving || !draft}><Save className="h-4 w-4" />Salvar</Button>
       <div className="mt-6 space-y-3 border-t border-border pt-4">
@@ -94,18 +108,23 @@ export function CdeAppOrder({ number, handle }: { number: number; handle?: impor
             <Button variant="outline" size="compactIcon" aria-label={`Aumentar ${label.toLowerCase()}`} title="Aumentar" disabled={tile[key] >= 80} onClick={() => setTileDraft({ ...tile, [key]: Math.min(80, tile[key] + 4) })}><Plus /></Button>
           </div></div>)}
         </div>
+        <p className="pt-2 text-sm font-medium">Cores da página principal (Manual da Marca myio)</p>
+        <div role="group" aria-label="Cores da página principal" className="grid w-full max-w-5xl grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-4">
+          {COLOR_FIELDS.map(([kind, label]) => <ColorChoice key={kind} kind={kind} label={label} value={tile[kind]} onChange={(v) => setTileDraft({ ...tile, [kind]: v })} />)}
+        </div>
+        {appTileLowContrast(tile) && <p className="text-xs text-destructive">O texto abaixo dos ícones fica pouco visível neste fundo; escolha uma cor de texto contrastante.</p>}
         <div className="space-y-1"><Label>Prévia desktop</Label>
-          <div aria-label="Prévia dos apps" style={{ columnGap: tile.gapX, rowGap: tile.gapY }} className="flex w-full flex-wrap bg-background py-10 sm:py-14">
+          <div aria-label="Prévia dos apps" style={{ columnGap: tile.gapX, rowGap: tile.gapY, ...appTileColorVars(tile) } as React.CSSProperties} className="flex w-full flex-wrap bg-[var(--portal-bg)] px-4 py-10 sm:py-14">
             {order.map((key) => { const app = PORTAL_APPS.find((a) => a.key === key); return app ? <div key={key} style={{ zoom: tile.tilePct / 100 }} className="flex w-20 min-w-0 flex-col items-center text-center sm:w-28">
-              <div className="relative flex h-20 w-20 flex-col items-center justify-between rounded-2xl border-2 border-primary bg-primary px-1.5 pb-2 pt-1 text-primary-foreground sm:h-28 sm:w-28 sm:rounded-3xl sm:px-2 sm:pt-1.5"><AppTileFace appKey={key} name={app.name} tile={tile} /></div>
-              <p className="mt-2 w-20 max-w-full break-words text-center text-[0.68rem] leading-4 text-muted-foreground sm:mt-3 sm:w-28 sm:text-sm sm:leading-5">{APP_DESCRIPTIONS[key]?.map(line => <span key={line} className="block sm:whitespace-nowrap">{line}</span>)}</p>
+              <div className="relative flex h-20 w-20 flex-col items-center justify-between rounded-2xl border-2 border-[color:var(--tile-border)] bg-primary px-1.5 pb-2 pt-1 text-primary-foreground sm:h-28 sm:w-28 sm:rounded-3xl sm:px-2 sm:pt-1.5"><AppTileFace appKey={key} name={app.name} tile={tile} /></div>
+              <p className="mt-2 w-20 max-w-full break-words text-center text-[0.68rem] leading-4 text-[color:var(--tile-below)] sm:mt-3 sm:w-28 sm:text-sm sm:leading-5">{APP_DESCRIPTIONS[key]?.map(line => <span key={line} className="block sm:whitespace-nowrap">{line}</span>)}</p>
             </div> : null; })}
           </div></div>
         <div className="space-y-1"><Label>Prévia mobile</Label>
-          <div aria-label="Prévia mobile dos apps" className="mobile-app-grid grid w-full max-w-[390px] bg-background px-3 py-8">
+          <div aria-label="Prévia mobile dos apps" style={appTileColorVars(tile) as React.CSSProperties} className="mobile-app-grid grid w-full max-w-[390px] bg-[var(--portal-bg)] px-3 py-8">
             {order.map(key => { const app = PORTAL_APPS.find(a => a.key === key); return app ? <div key={key} className="flex min-w-0 flex-col items-center text-center">
-              <div className="mobile-app-tile relative flex flex-col items-center justify-between rounded-2xl border-2 border-primary bg-primary px-1 pb-2 pt-1 text-primary-foreground"><AppTileFace appKey={key} name={app.name} tile={tile} mobile /></div>
-              <p className="mt-2 w-full break-words text-center text-[0.68rem] leading-4 text-muted-foreground">{APP_DESCRIPTIONS[key]?.map(line => <span key={line} className="block">{line}</span>)}</p>
+              <div className="mobile-app-tile relative flex flex-col items-center justify-between rounded-2xl border-2 border-[color:var(--tile-border)] bg-primary px-1 pb-2 pt-1 text-primary-foreground"><AppTileFace appKey={key} name={app.name} tile={tile} mobile /></div>
+              <p className="mt-2 w-full break-words text-center text-[0.68rem] leading-4 text-[color:var(--tile-below)]">{APP_DESCRIPTIONS[key]?.map(line => <span key={line} className="block">{line}</span>)}</p>
             </div> : null; })}
           </div>
         </div>
