@@ -12,6 +12,13 @@ export const codeReopenReasonSchema = z.string().trim()
   .min(1, "Informe o motivo da reabertura.")
   .max(2000, "O motivo deve ter no máximo 2000 caracteres.");
 
+export function codeTicketProgressOutcome(requestedStatus: string, saved: { id: string; status: string } | null) {
+  if (!saved) throw new Error("Não foi possível confirmar o salvamento do chamado. Atualize e tente novamente.");
+  if (saved.status === requestedStatus) return "updated" as const;
+  if (requestedStatus === "atendido" && saved.status === "em_atendimento") return "pending_requester_question" as const;
+  throw new Error("A situação do chamado foi alterada. Atualize antes de salvar novamente.");
+}
+
 // A rejected or dismissed confirmation must never execute the conclusion.
 export async function confirmCodeTicketConclusion(
   status: string,

@@ -6,6 +6,7 @@ import { CdeButton } from "@/components/cde/cde-button";
 import { ColumnSortButton } from "@/components/column-sort-button";
 import { CodeStatusBadge } from "@/components/code-status-badge";
 import { matchesCodeTicketSearch } from "@/lib/code-ticket-search";
+import { codeTicketProgressOutcome } from "@/lib/code-ticket-lifecycle";
 import { isFilterActive, OP_LABELS, type FilterOp } from "@/lib/column-filters";
 import { compareColumnValues, type SortDirection } from "@/lib/column-sort";
 import { useTableFilters, type FilterColumn } from "@/components/use-table-filters";
@@ -567,13 +568,25 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
   });
   const update = useMutation({
     mutationFn: async () => {
-      if (!ticket) return;
+      if (!ticket) throw new Error("Chamado não encontrado. Atualize e tente novamente.");
       validateImages(messageFiles);
-      const { error } = await supabase.from("development_tickets").update({ status, assignee_id: assignee === "none" ? null : assignee, admin_notes: notes.trim() || null, proposed_solution: proposedSolutionSchema.parse(solution) || null }).eq("id", ticket.id);
+      const { data: saved, error } = await supabase.from("development_tickets").update({ status, assignee_id: assignee === "none" ? null : assignee, admin_notes: notes.trim() || null, proposed_solution: proposedSolutionSchema.parse(solution) || null }).eq("id", ticket.id).select("id,status").single();
       if (error) throw error;
+      const outcome = codeTicketProgressOutcome(status, saved);
       await flushPendingImages();
+      return outcome;
     },
-    onSuccess: () => { toast.success("Ticket atualizado"); onClose(); onUpdated(); },
+    onSuccess: (outcome) => {
+      onUpdated();
+      if (outcome === "pending_requester_question") {
+        setStatus("em_atendimento");
+        toast.warning("O chamado permanece Em atendimento porque há pergunta do Solicitante sem resposta. Responda antes de marcar como Atendido.");
+        void details.refetch();
+        return;
+      }
+      toast.success("Ticket atualizado");
+      onClose();
+    },
     onError: (error: Error) => toast.error(error.message),
   });
   const remove = useMutation({

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { canReopenCodeTicket, codeReopenReasonSchema, confirmCodeTicketConclusion } from "./code-ticket-lifecycle";
+import { canReopenCodeTicket, codeReopenReasonSchema, codeTicketProgressOutcome, confirmCodeTicketConclusion } from "./code-ticket-lifecycle";
 
 const ticket = { status: "concluido", reporter_id: "alexandre", assignee_id: "leonardo" };
 
@@ -44,5 +44,21 @@ describe("Confirmação antes de Concluir", () => {
     expect(await confirmCodeTicketConclusion("aberto", true, confirm, conclude)).toBe(false);
     expect(confirm).not.toHaveBeenCalled();
     expect(conclude).not.toHaveBeenCalled();
+  });
+});
+
+describe("Confirmação do andamento salvo", () => {
+  it("não confirma Atendido quando a pergunta pendente mantém Em atendimento", () => {
+    expect(codeTicketProgressOutcome("atendido", { id: "chamado-38", status: "em_atendimento" })).toBe("pending_requester_question");
+  });
+  it("confirma quando o resultado salvo corresponde à situação escolhida", () => {
+    expect(codeTicketProgressOutcome("atendido", { id: "chamado-38", status: "atendido" })).toBe("updated");
+    expect(codeTicketProgressOutcome("em_atendimento", { id: "chamado-38", status: "em_atendimento" })).toBe("updated");
+  });
+  it("não confirma uma atualização sem registro retornado", () => {
+    expect(() => codeTicketProgressOutcome("atendido", null)).toThrow();
+  });
+  it("não trata outro status divergente como uma atualização concluída", () => {
+    expect(() => codeTicketProgressOutcome("atendido", { id: "chamado-38", status: "aberto" })).toThrow();
   });
 });
