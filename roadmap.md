@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] OpDesk: integrar o painel de tarefas do MD pelo mesmo processo do CRM; preservar chamados atuais e vínculos Site Survey, usar contas/acessos e CDE do ERP, definir etapas de implantação e migração dos registros externos.
 - [x] Acessos: rótulos soltos Nome/E-mail/Cargo aprovador/Cargo/Perfil removidos por não corresponderem a colunas; funil CDE à direita de Usuários cadastrados, ordenação com largura própria e fonte CDE. Conferidos 17 usuários reais em 1280/390 px, filtros Nome Alexandre + Perfil Customizado, remoção individual e ordenação por perfil, sem erros/excesso lateral; 24 testes passaram, biblioteca regenerada, nenhum acesso alterado. Não publicado.
 - [x] Explicado: Perfis por app reuniu os controles existentes de Supply, Site Survey, Mytosis e Code; os demais apps são liberados em Usuários e aplicativos, sem editor próprio de perfis. Nenhum perfil ou permissão criado nesta pergunta.
 - [x] Acessos: usuários/app grants, cadastro/cargos e perfis específicos de Supply, Site Survey, Mytosis e responsáveis Code reunidos em /acessos; contas, vínculos e autorizações preservados, sem alterações de dados ou permissões.
