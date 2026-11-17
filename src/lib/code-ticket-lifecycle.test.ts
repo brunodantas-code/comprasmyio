@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { canReopenCodeTicket, codeReopenReasonSchema, codeTicketProgressOutcome, assertCodeProgressDraftSent, confirmCodeTicketConclusion, reconcileCodeProgressField } from "./code-ticket-lifecycle";
+import { canReopenCodeTicket, codeReopenReasonSchema, codeTicketProgressOutcome, assertCodeProgressDraftSent, confirmCodeTicketConclusion, reconcileCodeProgressField, replaceSavedCodeTicket } from "./code-ticket-lifecycle";
 
 const ticket = { status: "concluido", reporter_id: "alexandre", assignee_id: "leonardo" };
 
@@ -68,6 +68,13 @@ describe("Confirmação do andamento salvo", () => {
 });
 
 describe("Atualização dos campos do mesmo chamado", () => {
+  it("substitui o chamado 40 pelo registro confirmado sem alterar outros chamados", () => {
+    const other = { id: "chamado-37", status: "atendido", assignee_id: "leonardo" };
+    const saved = { id: "chamado-40", status: "atendido", assignee_id: "leonardo" };
+    const result = replaceSavedCodeTicket([other, { ...saved, status: "em_atendimento" }], saved);
+    expect(result[1]).toEqual(saved);
+    expect(result[0]).toBe(other);
+  });
   it("mostra Atendido ao receber o status salvo sem uma alteração local", () => {
     expect(reconcileCodeProgressField("em_atendimento", "em_atendimento", "atendido")).toBe("atendido");
   });

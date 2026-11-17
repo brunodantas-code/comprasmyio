@@ -27,6 +27,10 @@ export function reconcileCodeProgressField<T extends string>(draft: T, previousS
   return draft === previousSaved ? saved : draft;
 }
 
+export function replaceSavedCodeTicket<T extends { id: string }>(tickets: readonly T[], saved: T): T[] {
+  return tickets.map((ticket) => ticket.id === saved.id ? saved : ticket);
+}
+
 // A rejected or dismissed confirmation must never execute the conclusion.
 export async function confirmCodeTicketConclusion(
   status: string,

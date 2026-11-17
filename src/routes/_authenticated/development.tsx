@@ -6,7 +6,7 @@ import { CdeButton } from "@/components/cde/cde-button";
 import { ColumnSortButton } from "@/components/column-sort-button";
 import { CodeStatusBadge } from "@/components/code-status-badge";
 import { matchesCodeTicketSearch } from "@/lib/code-ticket-search";
-import { assertCodeProgressDraftSent, codeTicketProgressOutcome, reconcileCodeProgressField } from "@/lib/code-ticket-lifecycle";
+import { assertCodeProgressDraftSent, codeTicketProgressOutcome, reconcileCodeProgressField, replaceSavedCodeTicket } from "@/lib/code-ticket-lifecycle";
 import { isFilterActive, OP_LABELS, type FilterOp } from "@/lib/column-filters";
 import { compareColumnValues, type SortDirection } from "@/lib/column-sort";
 import { useTableFilters, type FilterColumn } from "@/components/use-table-filters";
@@ -154,7 +154,7 @@ function DevelopmentPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [searchOp, setSearchOp] = useState<FilterOp>("contains");
   const [searchText, setSearchText] = useState("");
-  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
+  const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
 
 
   const { data, isLoading } = useQuery({
@@ -182,6 +182,8 @@ function DevelopmentPage() {
   });
 
   const profileNames = useMemo(() => new Map((data?.profiles ?? []).map((profile) => [profile.id, profile.full_name || profile.email || "Usuário"])), [data?.profiles]);
+  const selectedId = routeSearch.ticket ?? selectedTicketId;
+  const selectedTicket = data?.tickets.find((ticket) => ticket.id === selectedId) ?? null;
   const ticketColumns: FilterColumn<Ticket>[] = [
     { key: "number", label: "Nº", kind: "number", value: (t) => t.ticket_number },
     { key: "reporter", label: "Solicitante", value: (t) => profileNames.get(t.reporter_id) ?? "Usuário" },
@@ -205,7 +207,7 @@ function DevelopmentPage() {
   const filteredTickets = matchingTickets.filter(ticket => ticket.status !== "excluido");
   const deletedTickets = matchingTickets.filter(ticket => ticket.status === "excluido");
   const renderRow = (ticket: (typeof sortedTickets)[number]) => (
-                  <TableRow key={ticket.id} className="md:h-12 cursor-pointer [&>td]:py-2" onClick={() => setSelectedTicket(ticket)}>
+                  <TableRow key={ticket.id} className="md:h-12 cursor-pointer [&>td]:py-2" onClick={() => setSelectedTicketId(ticket.id)}>
                     <TableCell className="font-semibold"><NumericMarker>{ticket.ticket_number}</NumericMarker></TableCell>
                      <TableCell>{profileNames.get(ticket.reporter_id) ?? "Usuário"}</TableCell>
                     <TableCell>{APP_NAMES[ticket.app_key] ?? ticket.app_key}</TableCell>
@@ -222,15 +224,8 @@ function DevelopmentPage() {
     if (!column) return null;
     return <span className="inline-flex items-center gap-1 whitespace-nowrap">{column.label}<ColumnSortButton label={column.label} direction={sorting?.key === key ? sorting.direction : undefined} onClick={() => setSorting((current) => current?.key !== key ? { key, direction: "asc" } : current.direction === "asc" ? { key, direction: "desc" } : undefined)} /></span>;
   };
-  useEffect(() => {
-    const selectedId = routeSearch.ticket ?? selectedTicket?.id;
-    if (!selectedId || !data?.tickets.length) return;
-    const linkedTicket = data.tickets.find((ticket) => ticket.id === selectedId);
-    if (linkedTicket) setSelectedTicket(linkedTicket);
-  }, [data?.tickets, routeSearch.ticket, selectedTicket?.id]);
-
   const closeTicket = () => {
-    setSelectedTicket(null);
+    setSelectedTicketId(null);
     if (routeSearch.ticket) navigate({ to: "/development", search: { ticket: undefined }, replace: true });
   };
 
@@ -282,11 +277,13 @@ function DevelopmentPage() {
           </CardContent>
         </Card>
       </main>
-      <TicketDetails ticket={selectedTicket} onClose={closeTicket} data={data} onUpdated={() => {
-        queryClient.invalidateQueries({ queryKey: ["development-tickets"] });
-        queryClient.invalidateQueries({ queryKey: ["my-erp-access"] });
-        queryClient.invalidateQueries({ queryKey: ["pending-actions"] });
-        queryClient.invalidateQueries({ queryKey: ["central-admin"] });
+      <TicketDetails key={selectedTicket?.id ?? "closed"} ticket={selectedTicket} onClose={closeTicket} data={data} onUpdated={async () => {
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: ["development-tickets"] }),
+          queryClient.invalidateQueries({ queryKey: ["my-erp-access"] }),
+          queryClient.invalidateQueries({ queryKey: ["pending-actions"] }),
+          queryClient.invalidateQueries({ queryKey: ["central-admin"] }),
+        ]);
       }} />
     </div>
   );
@@ -380,7 +377,8 @@ function CodeSaveButton({ label, ...props }: Omit<ButtonProps, "children"> & { l
   return <TooltipProvider delayDuration={300}><Tooltip><TooltipTrigger asChild><span className="inline-flex"><Button {...props} variant="ghost" size="compactIcon" aria-label={label} title={label}><Save /></Button></span></TooltipTrigger><TooltipContent>{label}</TooltipContent></Tooltip></TooltipProvider>;
 }
 
-function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | null; onClose: () => void; data?: TicketPageData; onUpdated: () => void }) {
+function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | null; onClose: () => void; data?: TicketPageData; onUpdated: () => Promise<void> }) {
+  const queryClient = useQueryClient();
   const [status, setStatus] = useState<TicketStatus>("aberto");
   const [assignee, setAssignee] = useState("none");
   const savedProgress = useRef<{ id: string; status: TicketStatus; assignee: string } | null>(null);
@@ -580,14 +578,18 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
       if (!ticket) throw new Error("Chamado não encontrado. Atualize e tente novamente.");
       assertCodeProgressDraftSent(message);
       validateImages(messageFiles);
-      const { data: saved, error } = await supabase.from("development_tickets").update({ status, assignee_id: assignee === "none" ? null : assignee, admin_notes: notes.trim() || null, proposed_solution: proposedSolutionSchema.parse(solution) || null }).eq("id", ticket.id).select("id,status").single();
+      const { data: saved, error } = await supabase.from("development_tickets").update({ status, assignee_id: assignee === "none" ? null : assignee, admin_notes: notes.trim() || null, proposed_solution: proposedSolutionSchema.parse(solution) || null }).eq("id", ticket.id).select("*").single();
       if (error) throw error;
       const outcome = codeTicketProgressOutcome(status, saved);
+      queryClient.setQueryData<{ tickets: Ticket[] }>(["development-tickets"], (current) => current ? { ...current, tickets: replaceSavedCodeTicket(current.tickets, saved as Ticket) } : current);
+      savedProgress.current = { id: saved.id, status: saved.status as TicketStatus, assignee: saved.assignee_id ?? "none" };
+      setStatus(saved.status as TicketStatus);
+      setAssignee(saved.assignee_id ?? "none");
       await flushPendingImages();
       return outcome;
     },
-    onSuccess: (outcome) => {
-      onUpdated();
+    onSuccess: async (outcome) => {
+      await onUpdated();
       if (outcome === "pending_requester_question") {
         setStatus("em_atendimento");
         toast.warning("O chamado permanece Em atendimento porque há pergunta do Solicitante sem resposta. Responda antes de marcar como Atendido.");

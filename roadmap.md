@@ -1,4 +1,8 @@
 # Roadmap
+- [x] Code 40: Atendido salvo às 23:41:08 UTC; reproduzida confirmação seguida de janela reaberta/dado desatualizado. Seleção por ID e cache do registro confirmado corrigem a sequência; salvar/reabrir/fechar reais em computador/celular e 51 testes conferidos, sem mudar status/permissões; correção ainda não publicada.
+- [x] CRM zerado: explicado que conferência dos arquivos não executou a importação; restante das adaptações/importação continua pendente, não é ausência de dados enviados.
+- [ ] CRM: importar todos os dados e documentos recebidos conforme autorização de Leonardo; manter origem intacta, preservar os três vínculos ausentes e a identidade de Flavia sem ampliar permissões.
+- [ ] OpDesk: conferir o arquivo complementar anunciado por Leonardo; identificar o novo anexo e continuar a importação com registros filtrados e anexos privados.
 - [x] CRM: acesso com histórico esclarecido — consulta confirmou zero leads, oportunidades, propostas e atividades no ERP; ZIP conferido não equivale a importação concluída e CRM original não foi alterado.
 - [ ] Avisar Leonardo quando o cadastro/importação do CRM estiver concluído e conferido; a conferência do ZIP não significa dados já cadastrados.
 - [x] Code 37: resposta salva às 23:23:37 UTC e Atendido às 23:23:43 UTC, sem perguntas pendentes; divergência do seletor reproduzida ao atualizar o mesmo chamado e corrigida sem apagar rascunhos/escolhas locais. Conta real no computador/celular e 50 testes conferidos; nenhum registro do chamado alterado durante a investigação, correção ainda não publicada.
