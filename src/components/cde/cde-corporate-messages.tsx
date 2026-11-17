@@ -17,6 +17,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { GripVertical } from "lucide-react";
 import { CdeDisclosureIcon, CdeNumber } from "./cde-button";
 import { Search } from "lucide-react";
+import { MessageStyleEditor } from "./cde-message-style";
 import { PORTAL_SECTIONS, PORTAL_SECTIONS_GROUP, usePortalSections, type PortalSection } from "@/components/corporate/portal-sections";
 
 function SectionRow({ id, index }: { id: PortalSection; index: number }) {
@@ -104,6 +105,7 @@ export function CdeCorporateMessages({ number, handle }: { number: number; handl
     <CdeCategoryHeader handle={handle} number={number} title="Mensagens corporativas" hint="Avisos, local de exibição e histórico" open={open} onToggle={() => setOpen(!open)} />
     {open && <div className="w-full min-w-0 space-y-4 py-4">
       <PortalSectionsEditor />
+      <MessageStyleEditor />
       {!draft && <Button variant="ghost" onClick={() => setDraft({ message: "", starts_at: todayIso(), ends_at: "" })}><Plus className="h-4 w-4" />Nova mensagem</Button>}
       {draft && <div className="max-w-3xl space-y-3">
         <div className="space-y-1"><Label>Mensagem</Label><Textarea value={draft.message} onChange={(e) => setDraft({ ...draft, message: e.target.value })} rows={2} maxLength={300} /></div>
