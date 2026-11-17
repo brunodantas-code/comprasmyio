@@ -1,8 +1,18 @@
 [
   {
     "file": "components/cde/cde-app-order.tsx",
-    "line": 22,
+    "line": 24,
     "group": "number_section"
+  },
+  {
+    "file": "components/cde/cde-appearance-item.tsx",
+    "line": 55,
+    "group": "number_section"
+  },
+  {
+    "file": "components/cde/cde-appearance-item.tsx",
+    "line": 56,
+    "group": "number_subsection"
   },
   {
     "file": "components/cde/cde-button-library.tsx",
@@ -12,6 +22,11 @@
   {
     "file": "components/cde/cde-category-header.tsx",
     "line": 17,
+    "group": "number_section"
+  },
+  {
+    "file": "components/cde/cde-corporate-messages.tsx",
+    "line": 28,
     "group": "number_section"
   },
   {
@@ -26,27 +41,32 @@
   },
   {
     "file": "components/cde/cde-workspace.tsx",
-    "line": 324,
+    "line": 333,
+    "group": "number_subsection"
+  },
+  {
+    "file": "components/cde/numeric-marker-editor.tsx",
+    "line": 36,
     "group": "number_subsection"
   },
   {
     "file": "components/legal/legal-workspace.tsx",
-    "line": 126,
+    "line": 127,
     "group": "number_section"
   },
   {
     "file": "components/legal/legal-workspace.tsx",
-    "line": 134,
+    "line": 135,
     "group": "number_section"
   },
   {
     "file": "components/legal/minutes-list.tsx",
-    "line": 85,
+    "line": 98,
     "group": "number_section"
   },
   {
     "file": "components/legal/minutes-list.tsx",
-    "line": 94,
+    "line": 107,
     "group": "number_section"
   },
   {
@@ -61,17 +81,17 @@
   },
   {
     "file": "components/mytosis/flowchart.tsx",
-    "line": 225,
+    "line": 226,
     "group": "number_section"
   },
   {
     "file": "components/mytosis/flowchart.tsx",
-    "line": 336,
+    "line": 337,
     "group": "number_section"
   },
   {
     "file": "components/mytosis/flowchart.tsx",
-    "line": 534,
+    "line": 535,
     "group": "number_section"
   },
   {
@@ -141,17 +161,17 @@
   },
   {
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 431,
+    "line": 432,
     "group": "number_section"
   },
   {
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1683,
+    "line": 1684,
     "group": "number_subsection"
   },
   {
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1962,
+    "line": 1963,
     "group": "number_subsection"
   }
 ]

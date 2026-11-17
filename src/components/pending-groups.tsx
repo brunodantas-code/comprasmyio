@@ -1,3 +1,4 @@
+import { AlertMarker } from "@/components/cde/numeric-markers";
 import { useMemo, useState, type ReactNode } from "react";
 import { CdeDisclosureIcon } from "@/components/cde/cde-button";
 import { cn } from "@/lib/utils";
@@ -34,7 +35,7 @@ export function PendingGroups({ items, leading }: { items: PendingGroupItem[]; l
             <CdeDisclosureIcon open={isOpen} screen="components/pending-groups.tsx" />
             {groupBy === "app" ? <AppSymbol name={name} className="h-5 w-5 shrink-0 text-foreground" /> : <span aria-hidden className="h-5 w-5 shrink-0" />}
             <span className="w-40 max-w-[40vw] shrink-0 break-words text-sm font-semibold">{name}</span>
-            <span className="flex h-7 min-w-7 items-center justify-center rounded-full bg-destructive px-2 text-xs font-bold text-destructive-foreground">{total > 99 ? "99+" : total}</span>
+            <AlertMarker count={total} />
           </button></div>
           {isOpen ? <div className="divide-y divide-border border-t border-border bg-muted/30">{rows.map((r) => <div key={r.key} className="pl-8 transition-colors hover:bg-primary/10 focus-within:bg-primary/10 [&>a]:!bg-transparent">{r.row}</div>)}</div> : null}
         </div>;

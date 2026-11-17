@@ -45,3 +45,5 @@
 - Card titles/subtitles (CardTitle/CardDescription) read --title-*/--sub-* from table_fonts via .cde-title/.cde-subtitle in the base layer.
 - Card title/subtitle texts: CardTitle/CardDescription replace plain-text children from cde_selected title_text ("titulo|Original"→text) via title-text.ts; inventory title-inventory.json from scripts/scan-cde-titles.mjs.
 - CDE look of the CDE itself lives in cde_selected group cde_appearance (cde-appearance.ts) as --cde-cat-*/--cde-sub-* vars on the CDE main; header hints must avoid action words (excluir, salvar…) because shared Button detects action looks by label.
+
+- NumericMarker/AlertMarker read independent record_number/alert_marker CDE standards; identifiers remain complete, counters retain existing caps, and appearance never changes business rules.

@@ -1,3 +1,4 @@
+import { NumericMarker, AlertMarker } from "@/components/cde/numeric-markers";
 import { legalPendingLabel } from "@/lib/legal-pending";
 import { ListItemStyleVars } from "@/components/cde/list-item-style";
 import { TopIconStyleVars } from "@/components/cde/top-icon-style";
@@ -250,8 +251,8 @@ function PortalPage() {
       ...((pendingActions?.userDeletions ?? 0) > 0 ? [{ key: "deletions", app: "Admin", requester: "Você", count: pendingActions?.userDeletions ?? 0, row: <PendingRow icon={ShieldCheck} label="Exclusões de usuários aguardando decisão" count={pendingActions?.userDeletions ?? 0} to="/dashboard" search={{ section: "admin", subsection: "usuarios" }} /> }] : []),
       ...(pendingActions?.legalItems ?? []).map(item => ({ key: `legal-${item.recordId}`, app: "Legal", requester: "Você", count: item.count, row: <PendingRow icon={FileSignature} label={legalPendingLabel(item)} count={item.count} to="/legal" search={{ record: item.recordId }} /> })),
       ...(pendingActions?.supplyQuestions ?? []).map(q => ({ key: `sq-${q.orderId}`, app: "Supply", requester: "Solicitante", count: q.count, row: <PendingRow icon={MessageCircleQuestion} label={`${q.approvalNumber ?? "—"} · Pergunta aguardando sua resposta · ${q.title}`} count={q.count} to="/dashboard" search={{ order: q.orderId }} /> })),
-      ...(pendingActions?.codeItems ?? []).map((ticket) => ({ key: `c-${ticket.ticketId}`, app: "Code", requester: ticket.reporterName ?? "Solicitante", count: 1, row: <PendingRow icon={ticket.reason === "responder" ? MessageCircleQuestion : ticket.reason === "notificado" ? Bell : CodeXml} label={`${ticket.ticketNumber} · ${ticket.reason === "responder" ? "Pergunta aguardando sua resposta" : ticket.reason === "notificado" ? "Nova pergunta direcionada a outro usuário" : ticket.reason === "aceitar" ? "Confirmar atendimento" : "Ticket aguardando atendimento"} · ${new Date(ticket.createdAt).toLocaleDateString("pt-BR")} · ${ticket.title.length > 60 ? `${ticket.title.slice(0, 60)}…` : ticket.title}`} count={1} to="/development" search={{ ticket: ticket.ticketId }} /> })),
-      ...(pendingActions?.supportCallItems ?? []).map((call) => ({ key: `s-${call.callId}`, app: "Chamados", requester: call.reason === "confirmar" ? "Você" : "Clientes", count: 1, row: <PendingRow icon={Phone} label={`#${call.callNumber} · ${call.reason === "confirmar" ? "Confirmar conclusão" : call.title}`} count={1} to="/chamados" search={{ chamado: call.callId }} /> })),
+      ...(pendingActions?.codeItems ?? []).map((ticket) => ({ key: `c-${ticket.ticketId}`, app: "Code", requester: ticket.reporterName ?? "Solicitante", count: 1, row: <PendingRow icon={ticket.reason === "responder" ? MessageCircleQuestion : ticket.reason === "notificado" ? Bell : CodeXml} number={ticket.ticketNumber} label={`${ticket.reason === "responder" ? "Pergunta aguardando sua resposta" : ticket.reason === "notificado" ? "Nova pergunta direcionada a outro usuário" : ticket.reason === "aceitar" ? "Confirmar atendimento" : "Ticket aguardando atendimento"} · ${new Date(ticket.createdAt).toLocaleDateString("pt-BR")} · ${ticket.title.length > 60 ? `${ticket.title.slice(0, 60)}…` : ticket.title}`} count={1} to="/development" search={{ ticket: ticket.ticketId }} /> })),
+      ...(pendingActions?.supportCallItems ?? []).map((call) => ({ key: `s-${call.callId}`, app: "Chamados", requester: call.reason === "confirmar" ? "Você" : "Clientes", count: 1, row: <PendingRow icon={Phone} number={call.callNumber} label={`${call.reason === "confirmar" ? "Confirmar conclusão" : call.title}`} count={1} to="/chamados" search={{ chamado: call.callId }} /> })),
     ]} />
               </section>
             ) : null}</>);
@@ -272,11 +273,11 @@ function PortalPage() {
 }
 
 function PendingBadge({ count, label }: { count: number; label: string }) {
-  return <span className="absolute -right-2 -top-2 flex h-8 min-w-8 items-center justify-center rounded-full bg-destructive px-2 text-sm font-bold text-destructive-foreground shadow-md" aria-label={`${count} ${label}`}>{count > 99 ? "99+" : count}</span>;
+  return <AlertMarker count={count} className="absolute -right-2 -top-2 shadow-md" aria-label={`${count} ${label}`} />;
 }
 
-function PendingRow({ icon: Icon, label, count, to, search }: { icon: typeof Bell; label: string; count: number; to: "/legal" | "/pendentes" | "/dashboard" | "/development" | "/chamados"; search?: { record: string } | { section: "admin"; subsection: "usuarios" } | { section: "queue"; subsection?: "supply" } | { ticket: string } | { chamado: string } | { order: string } }) {
-  const content = <><Icon className={`h-5 w-5 shrink-0${(Icon === MessageCircleQuestion || Icon === FileSignature) ? " text-destructive" : ""}`} /><span className="min-w-0 flex-1 text-sm font-medium">{label}</span></>;
+function PendingRow({ icon: Icon, label, count, to, search, number }: { icon: typeof Bell; label: string; number?: string | number; count: number; to: "/legal" | "/pendentes" | "/dashboard" | "/development" | "/chamados"; search?: { record: string } | { section: "admin"; subsection: "usuarios" } | { section: "queue"; subsection?: "supply" } | { ticket: string } | { chamado: string } | { order: string } }) {
+  const content = <><Icon className={`h-5 w-5 shrink-0${(Icon === MessageCircleQuestion || Icon === FileSignature) ? " text-destructive" : ""}`} /><span className="min-w-0 flex-1 text-sm font-medium">{number !== undefined ? <><NumericMarker>{number}</NumericMarker>{" · "}</> : null}{label}</span></>;
   if (to === "/pendentes") return <Link to="/pendentes" className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-primary/10">{content}</Link>;
   if (to === "/legal") return <Link to="/legal" search={search && "record" in search ? search : {}} className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-primary/10">{content}</Link>;
   if (to === "/development") return <Link to="/development" search={(search && "ticket" in search) ? search : { ticket: undefined }} className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-primary/10">{content}</Link>;

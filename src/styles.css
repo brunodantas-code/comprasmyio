@@ -246,6 +246,23 @@
 }
 
 @layer base {
+  .cde-numeric-marker {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+    width: var(--marker-size);
+    height: var(--marker-size);
+    border-radius: var(--marker-radius);
+    border: 1px solid var(--marker-border);
+    background: var(--marker-bg);
+    color: var(--marker-text);
+    font-size: var(--marker-font);
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
   * {
     border-color: var(--color-border);
   }

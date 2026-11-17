@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { parseDeadlineAlerts, parseMinutesAlerts } from '@/lib/supply-deadlines';
 import { useCdeStandards } from './cde-button';
 import { CdeCategoryHeader } from './cde-category-header';
+import { NumericMarkerEditor } from './numeric-marker-editor';
 const rawAlerts = (data: ReturnType<typeof useCdeStandards>['data']) => data?.selected.find(s=>s.group_key==='deadline_alerts' && s.is_primary)?.variant_key;
 export function useDeadlineAlerts() {
   const {data}=useCdeStandards();
@@ -38,7 +39,8 @@ export function CdeDeadlineAlerts({number,handle}:{number:number;handle?:ReactNo
     } catch(e) {toast.error(e instanceof Error?e.message:'Não foi possível salvar');} finally {setBusy(false);}
   }
   const reset=()=>{setDraft(saved);setMinutes(savedMinutes);};
-  return <section className="space-y-4"><CdeCategoryHeader number={number} handle={handle} title="Alertas de Prazo" hint={`Approvals ${saved.warningDays} e ${saved.criticalDays} dias · Atas ${savedMinutes.warningDays} dias`} open={open} onToggle={()=>{reset();setOpen(!open);}}/>{open && <div className="space-y-5 px-4">
+  return <section className="space-y-4"><CdeCategoryHeader number={number} handle={handle} title="Alertas" hint={`Notificações e prazos · Approvals ${saved.warningDays} e ${saved.criticalDays} dias · Atas ${savedMinutes.warningDays} dias`} open={open} onToggle={()=>{reset();setOpen(!open);}}/>{open && <div className="space-y-5 px-4">
+    <NumericMarkerEditor kind="alert_marker" number={`${number}.3`} />
     <div className="space-y-3"><SubHeader n={`${number}.1`} title="Approvals — antes do recebimento"/><div className="grid max-w-lg gap-4 sm:grid-cols-2"><div className="space-y-2"><Label htmlFor="warning-days">Primeiro alerta (dias antes)</Label><Input id="warning-days" type="number" min={0} max={365} value={draft.warningDays} onChange={e=>setDraft({...draft,warningDays:Number(e.target.value)})}/></div><div className="space-y-2"><Label htmlFor="critical-days">Alerta crítico (dias antes)</Label><Input id="critical-days" type="number" min={0} max={365} value={draft.criticalDays} onChange={e=>setDraft({...draft,criticalDays:Number(e.target.value)})}/></div></div></div>
     <div className="space-y-3"><SubHeader n={`${number}.2`} title="Atas — ações pendentes antes da conclusão prevista"/><div className="grid max-w-lg gap-4 sm:grid-cols-2"><div className="space-y-2"><Label htmlFor="minutes-warning-days">Alerta (dias antes)</Label><Input id="minutes-warning-days" type="number" min={0} max={365} value={minutes.warningDays} onChange={e=>setMinutes({warningDays:Number(e.target.value)})}/></div></div></div>
     <div className="flex gap-2"><Button onClick={save} disabled={busy}>Salvar</Button><Button onClick={reset}>Cancelar</Button></div></div>}</section>;

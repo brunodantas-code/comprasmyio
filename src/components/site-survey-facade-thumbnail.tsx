@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { NumericMarker } from "@/components/cde/numeric-markers";
 import { Plus, Store } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -17,7 +18,7 @@ export type FacadeThumbnailAttachment = {
 
 function InterventionBadge({ count, name }: { count: number; name: string }) {
   if (!count) return null;
-  return <span className="pointer-events-none absolute -right-1 -top-1 z-10 grid h-4 min-w-4 place-items-center rounded-full bg-destructive px-1 text-[10px] font-bold leading-none text-destructive-foreground shadow-sm" title={`${count} intervenção(ões) para o cliente em ${name}`} aria-hidden="true">{count > 9 ? "9+" : count}</span>;
+  return <NumericMarker kind="alert_marker" scale={0.6} className="pointer-events-none absolute -right-1 -top-1 z-10 shadow-sm" title={`${count} intervenção(ões) para o cliente em ${name}`} aria-hidden="true">{count > 9 ? "9+" : count}</NumericMarker>;
 }
 
 export function SiteSurveyFacadeThumbnail({ attachment, name, interventionCount = 0, addedAfterOriginal = false }: { attachment?: FacadeThumbnailAttachment; name: string; interventionCount?: number; addedAfterOriginal?: boolean }) {

@@ -1,3 +1,4 @@
+import { AlertMarker } from "@/components/cde/numeric-markers";
 import { ListItemStyleVars } from "@/components/cde/list-item-style";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { usePendingActions } from "@/hooks/use-pending-actions";
@@ -113,7 +114,7 @@ function MainMenuEntries({ onSignOut, onChangePassword, supplyManual, itemClass,
 
 function CountBadge({ count, className = "" }: { count: number; className?: string }) {
   if (count <= 0) return null;
-  return <span className={`flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold leading-none text-destructive-foreground ${className}`}>{count > 99 ? "99+" : count}</span>;
+  return <AlertMarker count={count} className={className} />;
 }
 
 /** Red total on the three-bar button, only when Minhas Pendências is visible in the CDE menu. */

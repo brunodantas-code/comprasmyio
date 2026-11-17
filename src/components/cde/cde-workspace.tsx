@@ -1,4 +1,5 @@
 import { CdeAppearance } from "./cde-appearance-item";
+import { NumericMarkerEditor } from "./numeric-marker-editor";
 import { CDE_APPEARANCE_DEFAULT, cdeAppearanceVars, useCdeAppearance } from "./cde-appearance";
 import { CdeCorporateMessages } from "./cde-corporate-messages";
 import { useState } from "react";
@@ -97,7 +98,7 @@ function screenApp(f: string) {
 }
 
 /** Categorias-mãe das subcategorias numeradas (ex.: 3 → 3.1, 3.2). */
-const PARENTS: Record<string, string> = { "1": "Campos para preenchimento", "3": "Ordenação", "4": "Botões de ação", "5": "Boxes e mensagens", "6": "Numeração de categorias e subcategorias" };
+const PARENTS: Record<string, string> = { "1": "Campos para preenchimento", "3": "Ordenação", "4": "Botões de ação", "5": "Boxes e mensagens", "6": "Numeração" };
 
 const baseTitle = (t: string) => t.split(" ").slice(1).join(" ");
 const groupParent = (t: string) => { const n = t.split(" ")[0].replace(/\.$/, ""); return n.includes(".") ? n.split(".")[0] : null; };
@@ -454,6 +455,7 @@ export function CdeWorkspace() {
                     {(key, si, subHandle) => renderGroup(GROUPS.find((x) => x.key === key)!, `${n}.${si + 1}`, n, subHandle)}
                   </CdeSortableList>
                 ) : null}
+                {pk === "6" && !collapsedCategories.has(pk) ? <div className="pl-4 sm:pl-8"><NumericMarkerEditor kind="record_number" number={`${n}.${subs.length + 1}`} /></div> : null}
               </div>
             );
           }
