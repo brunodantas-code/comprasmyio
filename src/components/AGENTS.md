@@ -1,4 +1,5 @@
 - Signature and per-app manuals open from AppHeader's main menu (manualApp), since they serve every app.
+- Supply report and approval editors reuse the same conversation; explicit recipients come from an order-scoped authorized RPC and the insert guard validates recipients without changing legacy questions.
 - Code and personal tasks share ImageAttachmentField for gallery, drop, paste and temporary thumbnails; persistence and attachment authorization remain in each caller.
 - PendingGroups owns its heading and grouping controls, and TodoSection renders one shared toolbar; this prevents divergent portal/Central headers and duplicate dialogs.
 - FilterColumn may provide a scoped filter renderer that writes existing ColumnFilterValue conditions; combined filtering and exports keep using the same source rows.

@@ -3,6 +3,12 @@ import { supplyPendingQuestions, type SupplyMessage } from './supply-conversatio
 const order = { id: 'pedido', requester_id: 'solicitante', approval_number: '35', item_name: 'Material', status: 'pendente', request_type: 'materiais' };
 const q: SupplyMessage = { id: 'pergunta', order_id: 'pedido', author_id: 'solicitante', recipient_id: null, message_type: 'question', parent_message_id: null, message: 'Alternativa?', created_at: '2026-11-05' };
 describe('Pendências de conversa Supply', () => {
+  it('cobrança direcionada ao Alexandre gera pendência só para ele e desaparece após resposta', () => {
+    const directed = { ...q, author_id: 'leonardo', recipient_id: 'alexandre' };
+    expect(supplyPendingQuestions([directed], [order], 'alexandre', true)[0]?.count).toBe(1);
+    expect(supplyPendingQuestions([directed], [order], 'outro-comprador', true)).toEqual([]);
+    expect(supplyPendingQuestions([directed, { ...directed, id: 'resposta', author_id: 'alexandre', message_type: 'answer', parent_message_id: directed.id }], [order], 'alexandre', true)).toEqual([]);
+  });
   it('pergunta do solicitante aparece para Compras e não para autor ou terceiros', () => {
     expect(supplyPendingQuestions([q], [order], 'comprador', true)[0]?.count).toBe(1);
     expect(supplyPendingQuestions([q], [order], 'solicitante', true)).toEqual([]);

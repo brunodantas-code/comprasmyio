@@ -9970,6 +9970,13 @@ export type Database = {
         Args: { _count: number; _node_id: string }
         Returns: string[]
       }
+      supply_conversation_users: {
+        Args: { _order_id: string }
+        Returns: {
+          full_name: string
+          id: string
+        }[]
+      }
       supply_edit_purchase: {
         Args: {
           _changes: Json
