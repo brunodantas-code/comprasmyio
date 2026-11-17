@@ -14,3 +14,16 @@ describe("mensagens corporativas na tela principal", () => {
     expect(isMessageActive({ starts_at: "2026-11-17", ends_at: null }, "2027-05-01")).toBe(true);
   });
 });
+
+import { parsePortalSections } from "./portal-sections";
+describe("disposição da tela principal", () => {
+  it("segue a ordem arrastada no CDE", () => {
+    expect(parsePortalSections('["apps","messages","pending","todos"]')).toEqual(["apps", "messages", "pending", "todos"]);
+  });
+  it("sem escolha salva, mensagens ficam antes dos ícones, depois To Dos e pendências", () => {
+    expect(parsePortalSections(null)).toEqual(["messages", "apps", "todos", "pending"]);
+  });
+  it("blocos não salvos entram no fim e chaves desconhecidas são ignoradas", () => {
+    expect(parsePortalSections('["pending","xyz"]')).toEqual(["pending", "messages", "apps", "todos"]);
+  });
+});

@@ -350,3 +350,6 @@
 - [x] Preenchimento (fundo) dos ícones dos apps no item 11 do CDE
 - [x] Lilás e roxo myio nas cores da página principal
 - [x] Mensagens corporativas na tela principal + histórico no CDE
+- [x] Exclusão de mensagens corporativas (CDE)
+- [x] Ordem arrastável dos blocos da tela principal (CDE)
+- [x] Seta exibir/recolher e busca no histórico de mensagens (CDE)

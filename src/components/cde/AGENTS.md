@@ -38,3 +38,4 @@
 - Icon-only shared Save controls resolve CDE secondary controls/save-icon before the primary.
 - Library JSON writes share saveLibrarySelection with bounded group/primary URL filters and returned-row verification, avoiding bulk-consolidation URL limits.
 - Table column order: scripts/cde-table-sites.ts inventories <Table> headers (table-library.json, regenerate with scan-cde-tables.mjs) and Vite injects cdeTableId/data-cde-col; shared TableRow permutes cells from cde_selected table_column_order, so lists with dynamic header .map are excluded.
+- Portal block order (messages, apps, To Dos, pending) lives in cde_selected group portal_sections; corporate messages: users read only active rows, ERP admins read history and create/edit/delete.

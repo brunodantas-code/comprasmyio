@@ -1569,6 +1569,13 @@
       "when": 1794919870964,
       "tag": "0223_mensagens_corporativas",
       "breakpoints": true
+    },
+    {
+      "idx": 224,
+      "version": "7",
+      "when": 1794920367522,
+      "tag": "0224_mensagens_corporativas_exclusao_leitura",
+      "breakpoints": true
     }
   ]
 }

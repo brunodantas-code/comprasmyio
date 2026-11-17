@@ -20,6 +20,7 @@ import { CdeIcon } from "@/components/cde-icon";
 import { useAppOrder, useAppTile, APP_TILE_DEFAULT, appTileColorVars } from "@/components/cde/app-order-config";
 import { AppTileFace } from "@/components/cde/app-tile";
 import { CorporateBanner } from "@/components/corporate/corporate-banner";
+import { DEFAULT_PORTAL_SECTIONS, usePortalSections } from "@/components/corporate/portal-sections";
 import { AppAccessLink } from "@/components/app-access-link";
 import { DesktopHeaderMenu, UserNameBlock } from "@/components/app-header";
 import { usePendingActions } from "@/hooks/use-pending-actions";
@@ -55,6 +56,7 @@ function PortalPage() {
   const { data: pendingActions } = usePendingActions();
   const { data: appOrder } = useAppOrder();
   const tile = useAppTile().data ?? APP_TILE_DEFAULT;
+  const portalSections = usePortalSections().data ?? DEFAULT_PORTAL_SECTIONS;
   const { data, isLoading } = useQuery({
     queryKey: ["my-erp-access"],
     queryFn: async () => {
@@ -200,8 +202,9 @@ function PortalPage() {
       <main className="no-scrollbar relative z-10 -mt-3 min-h-0 flex-1 overflow-y-auto rounded-t-xl bg-[var(--portal-bg,var(--background))] px-3 py-10 sm:mx-auto sm:mt-0 sm:min-h-0 sm:max-w-7xl sm:overflow-visible sm:rounded-none sm:px-6 sm:py-14">
         <Tabs value={activeView} onValueChange={(value) => setActiveView(value as "apps" | "users")}>
           <TabsContent value="apps">
-            <CorporateBanner />
-            {apps.length ? (
+            {portalSections.map((section) => {
+              const block = section === "messages" ? <CorporateBanner />
+                : section === "apps" ? (<>{apps.length ? (
                <>
                   <div aria-label="Aplicativos disponíveis no mobile" className="mobile-app-grid grid pb-2 sm:hidden">
                     {apps.map(renderApp)}
@@ -234,11 +237,10 @@ function PortalPage() {
                 <h2 className="text-xl font-bold">Nenhum aplicativo liberado</h2>
                 <p className="mt-2 text-sm text-muted-foreground">Solicite ao Admin do ERP a liberação dos aplicativos necessários.</p>
               </div>
-            )}
-
-            <div className="mt-8"><TodoSection /></div>
-            {(pendingActions?.total ?? 0) > (pendingActions?.todoCount ?? 0) ? (
-              <section className="mt-12" aria-labelledby="pending-title">
+            )}</>)
+                : section === "todos" ? <TodoSection />
+                : (<>{(pendingActions?.total ?? 0) > (pendingActions?.todoCount ?? 0) ? (
+              <section aria-labelledby="pending-title">
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <h2 id="pending-title" className="flex items-center gap-2 text-xl font-bold"><Bell className="h-5 w-5" />Minhas pendências</h2>
                 </div>
@@ -252,7 +254,9 @@ function PortalPage() {
       ...(pendingActions?.supportCallItems ?? []).map((call) => ({ key: `s-${call.callId}`, app: "Chamados", requester: call.reason === "confirmar" ? "Você" : "Clientes", count: 1, row: <PendingRow icon={Phone} label={`#${call.callNumber} · ${call.reason === "confirmar" ? "Confirmar conclusão" : call.title}`} count={1} to="/chamados" search={{ chamado: call.callId }} /> })),
     ]} />
               </section>
-            ) : null}
+            ) : null}</>);
+              return <div key={section} data-portal-section={section} className="mb-10 empty:hidden">{block}</div>;
+            })}
           </TabsContent>
           {data.isErpAdmin ? <TabsContent value="users"><ErpAppAccessAdmin /></TabsContent> : null}
         </Tabs>
