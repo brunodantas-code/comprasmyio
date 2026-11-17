@@ -11,10 +11,10 @@ export const ALIGN_V: { key: AlignV; label: string }[] = [{ key: "top", label: "
 /** Headers and list rows align independently; screens with an explicit alignment class keep it. */
 /** Header colours use the brand palette (same options as app icons); "padrao" keeps today's look. */
 export const HEADER_COLORS = {
-  headerBg: [{ key: "padrao", label: "Sem fundo", value: "transparent" }, { key: "cinza_claro", label: "Cinza claro", value: "oklch(0.96 0 0)" }, { key: "cinza_escuro", label: "Cinza escuro", value: "oklch(0.86 0 0)" }, ...withDefault("", "transparent").slice(1)],
+  headerBg: [{ key: "padrao", label: "Sem fundo", value: "transparent" }, { key: "cinza_claro", label: "Cinza claro (atual)", value: "color-mix(in oklab, var(--muted) 50%, transparent)" }, { key: "cinza_escuro", label: "Cinza escuro", value: "oklch(0.86 0 0)" }, ...withDefault("", "transparent").slice(1)],
   headerText: withDefault("Cinza (atual)", "var(--muted-foreground)"),
   headerBorder: withDefault("Cinza claro (atual)", "var(--border)"),
-  cellBg: [{ key: "padrao", label: "Sem fundo", value: "transparent" }, { key: "cinza_claro", label: "Cinza claro", value: "oklch(0.96 0 0)" }, { key: "cinza_escuro", label: "Cinza escuro", value: "oklch(0.86 0 0)" }, ...withDefault("", "transparent").slice(1)],
+  cellBg: [{ key: "padrao", label: "Sem fundo", value: "transparent" }, { key: "cinza_claro", label: "Cinza claro (atual)", value: "color-mix(in oklab, var(--muted) 50%, transparent)" }, { key: "cinza_escuro", label: "Cinza escuro", value: "oklch(0.86 0 0)" }, ...withDefault("", "transparent").slice(1)],
   cellText: withDefault("Preto (atual)", "var(--foreground)"),
   cellBorder: withDefault("Cinza claro (atual)", "var(--border)"),
 } as const;
