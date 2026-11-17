@@ -380,3 +380,6 @@
 - [x] Setas à direita no portal, Central, Legal, Mytosis e cadastros revisados; controles dos To Dos fora do box, com uma única barra.
 - [x] Portal/Central: títulos To Dos e Minhas Pendências fora dos boxes, ícone à esquerda e Agrupar por alinhado; conferidos autenticado em 320/390/768/1085/1280 px.
 - [x] Site Survey: Número do LUC em lojas/quiosques sem LUC, sem alterar conclusão; filtros Todas/Com/Sem pendências verificados em 295 pontos (294 com, 1 sem), incluindo loja sem LUC. 73 testes passaram.
+- [x] To Dos: contador alinhado aos grupos, moldura também recolhido e setas baixo/cima conforme CDE; conferido no portal/Central em 320/390/1085/1280 px.
+- [x] Alertas: diâmetro único do CDE em todas as telas; prévias 7/59/99+ iguais em 28 px, sem redução por uso compacto.
+- [x] Chamados: diâmetro único independente (22 px atual), prévias 7/59/99+ iguais; identificadores preservados com texto ajustado internamente. 46 testes passaram.

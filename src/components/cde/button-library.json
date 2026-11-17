@@ -8100,24 +8100,24 @@
     "group": "plus"
   },
   {
-    "id": "components/personal-todos/todo-section.tsx|e3dee8fb3ceb7cb7|0",
+    "id": "components/personal-todos/todo-section.tsx|95caff4ee15f0c62|0",
     "file": "components/personal-todos/todo-section.tsx",
     "line": 59,
     "tag": "Button",
-    "label": "CdeDisclosureIcon",
+    "label": "span",
     "dynamic": false,
     "visualCustom": false,
     "autoCdeSafe": true,
-    "icon": "CdeDisclosureIcon",
+    "icon": "span",
     "variant": "ghost",
-    "size": "compactIcon",
-    "className": "shrink-0",
+    "size": "",
+    "className": "!flex !h-auto !min-w-0 !w-full !max-w-none !justify-start items-center gap-3 !bg-transparent px-4 py-3 text-left",
     "group": ""
   },
   {
     "id": "components/personal-todos/todo-section.tsx|0ab47e2fcfbf8fff|0",
     "file": "components/personal-todos/todo-section.tsx",
-    "line": 62,
+    "line": 66,
     "tag": "Button",
     "label": "· / - / / / Sem conclusão prevista",
     "dynamic": true,
@@ -8132,7 +8132,7 @@
   {
     "id": "components/personal-todos/todo-section.tsx|3b6db2b3ec61401f|0",
     "file": "components/personal-todos/todo-section.tsx",
-    "line": 62,
+    "line": 66,
     "tag": "Button",
     "label": "Concluídas",
     "dynamic": true,
@@ -8147,7 +8147,7 @@
   {
     "id": "components/personal-todos/todo-section.tsx|1d63c8c335e9e679|0",
     "file": "components/personal-todos/todo-section.tsx",
-    "line": 62,
+    "line": 66,
     "tag": "Button",
     "label": "· Concluída / pt-BR",
     "dynamic": true,
@@ -13502,7 +13502,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|eb6e7bef40ac0532|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1166,
+    "line": 1167,
     "tag": "CdeButton",
     "label": "Adicionar material ou equipamento",
     "dynamic": false,
@@ -13517,7 +13517,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|5da2603f1e976dd6|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1345,
+    "line": 1347,
     "tag": "CdeButton",
     "label": "Adicionar pergunta para o cliente",
     "dynamic": false,
@@ -13532,7 +13532,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|7a806b9fa8219d6e|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1345,
+    "line": 1347,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -13547,7 +13547,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|439484d97dcb8080|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1352,
+    "line": 1354,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -13562,7 +13562,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|d544fb3391e461fb|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1352,
+    "line": 1354,
     "tag": "Button",
     "label": "Editar pergunta",
     "dynamic": false,
@@ -13577,7 +13577,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|38d156755e802bc9|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1352,
+    "line": 1354,
     "tag": "Button",
     "label": "Excluir pergunta",
     "dynamic": false,
@@ -13592,7 +13592,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|614842c25317fc69|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1352,
+    "line": 1354,
     "tag": "Button",
     "label": "Marcar como respondida",
     "dynamic": false,
@@ -13607,7 +13607,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|e5d2f83f38509a8f|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1352,
+    "line": 1354,
     "tag": "Button",
     "label": "Editar resposta",
     "dynamic": false,
@@ -13622,7 +13622,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|4378a0ac946bcd55|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1352,
+    "line": 1354,
     "tag": "Button",
     "label": "Excluir resposta",
     "dynamic": false,
@@ -13637,7 +13637,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|416baeba9e5b01c6|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1352,
+    "line": 1354,
     "tag": "Button",
     "label": "Salvar resposta",
     "dynamic": false,
@@ -13652,7 +13652,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|da7717f93bee3775|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1352,
+    "line": 1354,
     "tag": "Button",
     "label": "facade",
     "dynamic": true,
@@ -13667,7 +13667,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|3394c832318ddb2a|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1358,
+    "line": 1360,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -13682,7 +13682,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|439484d97dcb8080|1",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1358,
+    "line": 1360,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -13697,7 +13697,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|15635c027a3c1428|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1367,
+    "line": 1369,
     "tag": "Button",
     "label": "Fechar",
     "dynamic": false,
@@ -13712,7 +13712,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|439484d97dcb8080|2",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1367,
+    "line": 1369,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -13727,7 +13727,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|15635c027a3c1428|1",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1367,
+    "line": 1369,
     "tag": "Button",
     "label": "Fechar",
     "dynamic": false,
@@ -13742,7 +13742,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|7a676072b624c695|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1371,
+    "line": 1373,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -13757,7 +13757,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|77fc7b4651293671|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1373,
+    "line": 1375,
     "tag": "Button",
     "label": "Salvar progresso",
     "dynamic": false,
@@ -13772,7 +13772,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|d2796d442a5370ec|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1377,
+    "line": 1379,
     "tag": "CdeButton",
     "label": "Ambiente",
     "dynamic": false,
@@ -13787,7 +13787,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|a27a426d016ecb18|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1377,
+    "line": 1379,
     "tag": "Button",
     "label": "Recolher loja ou ambiente",
     "dynamic": false,
@@ -13802,7 +13802,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|8b6798b19c37cab7|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1377,
+    "line": 1379,
     "tag": "Button",
     "label": "Selecione ou pesquise o LUC ou nome da loja",
     "dynamic": true,
@@ -13817,7 +13817,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|0da4049992d11ead|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1377,
+    "line": 1379,
     "tag": "Button",
     "label": "Limpar busca de lojas",
     "dynamic": false,
@@ -13832,7 +13832,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|bfb469600aba7b26|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1377,
+    "line": 1379,
     "tag": "Button",
     "label": "pt-BR / 2-digit / Iniciar visita",
     "dynamic": true,
@@ -13847,7 +13847,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|f6f4c14a5f3dd90d|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1377,
+    "line": 1379,
     "tag": "Button",
     "label": "Retomar visita / Pausar visita",
     "dynamic": true,
@@ -13862,7 +13862,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|77fc7b4651293671|1",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1381,
+    "line": 1383,
     "tag": "Button",
     "label": "Salvar progresso",
     "dynamic": false,
@@ -13877,7 +13877,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|02e049f45483919f|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1381,
+    "line": 1383,
     "tag": "Button",
     "label": "Conferindo... / Concluir visita",
     "dynamic": true,
@@ -13892,7 +13892,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|8a8731df53351ea9|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1381,
+    "line": 1383,
     "tag": "Button",
     "label": "Cancelar visita",
     "dynamic": false,
@@ -13907,7 +13907,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|f579d3c586485846|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1398,
+    "line": 1400,
     "tag": "Button",
     "label": "Recolher visita",
     "dynamic": false,
@@ -13922,7 +13922,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|f579d3c586485846|1",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1466,
+    "line": 1468,
     "tag": "Button",
     "label": "Recolher visita",
     "dynamic": false,
@@ -13937,7 +13937,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|ebe2e887f7ebc777|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1466,
+    "line": 1468,
     "tag": "Button",
     "label": "Iniciar visita",
     "dynamic": false,
@@ -13952,7 +13952,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|378be691e293d2cc|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1466,
+    "line": 1468,
     "tag": "Button",
     "label": "Concluir",
     "dynamic": false,
@@ -13967,7 +13967,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|06d552b413eac24c|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1466,
+    "line": 1468,
     "tag": "Button",
     "label": "Solicitar ajustes",
     "dynamic": false,
@@ -13982,7 +13982,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|1cd36a073b3e717e|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1490,
+    "line": 1492,
     "tag": "CdeButton",
     "label": "Técnico",
     "dynamic": false,
@@ -13997,7 +13997,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|8bc3eee31c830b6d|2",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1494,
+    "line": 1496,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -14012,7 +14012,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|d7080aff7892e375|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1494,
+    "line": 1496,
     "tag": "Button",
     "label": "Selecione um modelo",
     "dynamic": false,
@@ -14027,7 +14027,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|5443eedbdbe51c70|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1501,
+    "line": 1503,
     "tag": "Button",
     "label": "Disponível sem modelo base",
     "dynamic": true,
@@ -14042,7 +14042,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|686366697b299307|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1622,
+    "line": 1624,
     "tag": "Button",
     "label": "new",
     "dynamic": true,
@@ -14057,7 +14057,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|20e22cc6beda2b60|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1622,
+    "line": 1624,
     "tag": "CdeButton",
     "label": "Criar modelo",
     "dynamic": false,
@@ -14072,7 +14072,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|5498a86b6f4701e2|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1622,
+    "line": 1624,
     "tag": "Button",
     "label": "edit",
     "dynamic": true,
@@ -14087,7 +14087,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|289c2e2cfafb5df7|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1622,
+    "line": 1624,
     "tag": "Button",
     "label": "ChevronDown",
     "dynamic": true,
@@ -14102,7 +14102,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|7d0a9d25ab7e8fda|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1622,
+    "line": 1624,
     "tag": "Button",
     "label": "Salvar modelo",
     "dynamic": false,
@@ -14117,7 +14117,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|f4e9ed1e0d392d4a|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1622,
+    "line": 1624,
     "tag": "Button",
     "label": "sections",
     "dynamic": true,
@@ -14132,7 +14132,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|4d4be3b720f9f28d|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1622,
+    "line": 1624,
     "tag": "CdeButton",
     "label": "Adicionar seção",
     "dynamic": false,
@@ -14147,7 +14147,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|b0e331627f4ba3a5|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1622,
+    "line": 1624,
     "tag": "Button",
     "label": "Editar seção",
     "dynamic": false,
@@ -14162,7 +14162,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|8c6f20b2bb48f18a|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1622,
+    "line": 1624,
     "tag": "Button",
     "label": "Salvar seção",
     "dynamic": false,
@@ -14177,7 +14177,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|58556371ae221833|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1622,
+    "line": 1624,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -14192,7 +14192,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|9b901d6be1ac92a2|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1622,
+    "line": 1624,
     "tag": "CdeButton",
     "label": "Adicionar pergunta",
     "dynamic": false,
@@ -14207,7 +14207,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|d9521549804d6823|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1622,
+    "line": 1624,
     "tag": "Button",
     "label": "Editar pergunta",
     "dynamic": false,
@@ -14222,7 +14222,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|59e987744915d1a4|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1622,
+    "line": 1624,
     "tag": "Button",
     "label": "Salvar pergunta",
     "dynamic": false,
@@ -14237,7 +14237,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|e325e236904d1ee7|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1622,
+    "line": 1624,
     "tag": "CdeButton",
     "label": "Adicionar pergunta",
     "dynamic": false,
@@ -14252,7 +14252,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|439484d97dcb8080|3",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1758,
+    "line": 1760,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -14267,7 +14267,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|db59ed42a6bf9277|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1760,
+    "line": 1762,
     "tag": "CdeButton",
     "label": "Criar novo cadastro",
     "dynamic": false,
@@ -14282,7 +14282,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|4fc6a91fd6777a16|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1765,
+    "line": 1767,
     "tag": "Button",
     "label": "Editar cadastro",
     "dynamic": false,
@@ -14297,7 +14297,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|57d3f889944ca8fd|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1765,
+    "line": 1767,
     "tag": "CdeButton",
     "label": "Adicionar item",
     "dynamic": false,
@@ -14312,7 +14312,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|231a7abf9009e9c1|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1765,
+    "line": 1767,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -14327,7 +14327,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|aa96a102ec9d5d01|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1766,
+    "line": 1768,
     "tag": "Button",
     "label": "Editar",
     "dynamic": false,
@@ -14342,7 +14342,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|439484d97dcb8080|4",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1767,
+    "line": 1769,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -14357,7 +14357,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|273714851aff6a4a|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1771,
+    "line": 1773,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -14372,7 +14372,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|891aaa11be57c820|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1771,
+    "line": 1773,
     "tag": "Button",
     "label": "Salvando... / Salvar",
     "dynamic": true,
@@ -14387,7 +14387,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|eaec305d10b6c1a1|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1772,
+    "line": 1774,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -14402,7 +14402,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|891aaa11be57c820|1",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1772,
+    "line": 1774,
     "tag": "Button",
     "label": "Salvando... / Salvar",
     "dynamic": true,
@@ -14417,7 +14417,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|632a5db14784c7ce|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1795,
+    "line": 1797,
     "tag": "Button",
     "label": "Remover acesso",
     "dynamic": false,
@@ -14432,7 +14432,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|640c09521c9ba752|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1878,
+    "line": 1880,
     "tag": "Button",
     "label": "Escolher anexos para excluir",
     "dynamic": false,
@@ -14447,7 +14447,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|3df0f39e6b06c033|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1898,
+    "line": 1900,
     "tag": "button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -14462,7 +14462,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|03802a8f57d2d9b0|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1909,
+    "line": 1911,
     "tag": "Button",
     "label": "FileText",
     "dynamic": true,
@@ -14477,7 +14477,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|5d8b32552a03bf1e|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1917,
+    "line": 1919,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -14492,7 +14492,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|cf05cb89eb9438a0|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1978,
+    "line": 1980,
     "tag": "Button",
     "label": "Escolher ou arrastar arquivo",
     "dynamic": true,
@@ -14507,7 +14507,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|37e77b77ac2e703f|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 2036,
+    "line": 2038,
     "tag": "Button",
     "label": "Abrir calendário",
     "dynamic": false,

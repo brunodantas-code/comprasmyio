@@ -119,7 +119,7 @@ export const CdeButton = forwardRef<HTMLButtonElement, Props>(function CdeButton
 });
 
 /** Inline arrow for a labelled expanding header; shares the toggle look without styling its text. */
-export function CdeDisclosureIcon({ open, screen, direction = "horizontal" }: { open: boolean; screen: string; direction?: "horizontal" | "vertical" }) {
+export function CdeDisclosureIcon({ open, screen, direction = "vertical" }: { open: boolean; screen: string; direction?: "horizontal" | "vertical" }) {
   const { data } = useCdeStandards();
   const m = resolveCdeModel(data, "toggle", screen);
   const { css, cls } = styleOf(m.style);
