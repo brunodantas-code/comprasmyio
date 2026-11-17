@@ -46,3 +46,15 @@ describe("header colours", () => {
     expect(HEADER_COLORS.headerBg.map((o) => o.value)).toEqual(expect.arrayContaining(["var(--myio-purple)", "var(--myio-lilac)", "var(--myio-green-tint)"]));
   });
 });
+
+describe("list colours", () => {
+  it("parses list colours independently of headers and emits row variables", async () => {
+    const { parseTableFonts, tableAlignVars } = await import("./table-fonts-config");
+    const c = parseTableFonts('{"headerBg":"padrao","cellBg":"lilas","cellText":"x"}');
+    expect(c.headerBg).toBe("padrao");
+    expect(c.cellText).toBe("padrao");
+    const v = tableAlignVars(c);
+    expect(v["--td-color"]).toBe("var(--foreground)");
+    expect(v["--th-bg"]).toBe("transparent");
+  });
+});

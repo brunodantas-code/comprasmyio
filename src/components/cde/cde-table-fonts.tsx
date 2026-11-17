@@ -76,8 +76,8 @@ export function CdeTableFonts({ number, handle }: { number: number; handle?: imp
               </div>
             ))}
           </div>
-          <div role="group" aria-label="Cores dos cabeçalhos" className="grid w-full max-w-5xl grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-3">
-            {([["headerBg", "Cabeçalhos — fundo"], ["headerText", "Cabeçalhos — texto"], ["headerBorder", "Cabeçalhos — borda"]] as [HeaderColorKind, string][]).map(([k, l]) => <ColorPick key={k} kind={k} label={l} value={fonts[k]} onChange={(v) => setDraft({ ...fonts, [k]: v })} />)}
+          <div role="group" aria-label="Cores dos cabeçalhos e listas" className="grid w-full max-w-5xl grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-3">
+            {([["headerBg", "Cabeçalhos — fundo"], ["headerText", "Cabeçalhos — texto"], ["headerBorder", "Cabeçalhos — borda"], ["cellBg", "Listas — fundo"], ["cellText", "Listas — texto"], ["cellBorder", "Listas — borda"]] as [HeaderColorKind, string][]).map(([k, l]) => <ColorPick key={k} kind={k} label={l} value={fonts[k]} onChange={(v) => setDraft({ ...fonts, [k]: v })} />)}
           </div>
           <div className="space-y-1">
             <Label>Prévia</Label>

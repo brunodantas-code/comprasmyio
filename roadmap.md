@@ -358,3 +358,5 @@
 - [x] Links e botões das tabelas acompanham o alinhamento escolhido no CDE
 - [x] CRM Fase 2: telas dentro do ERP
 - [x] Cores de borda, fundo e texto dos cabeçalhos (CDE Cabeçalhos e Listas)
+- [x] Cores de texto, fundo e borda das listas + prévia dos cabeçalhos funcionando
+- [ ] CRM Fase 3: Propostas

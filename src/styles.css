@@ -117,6 +117,7 @@
   --th-align: left; --th-valign: middle; --th-justify: flex-start;
   --td-align: left; --td-valign: middle; --td-justify: flex-start;
   --th-bg: transparent; --th-color: var(--muted-foreground); --th-border: var(--border);
+  --td-bg: transparent; --td-color: inherit; --td-border: var(--border);
   /* Pantones exatos da marca myio (Manual da Marca) */
   --myio-green: #0fc482;
   --cde-number-soft: color-mix(in oklab, var(--myio-green) 10%, var(--card));
@@ -512,7 +513,8 @@
 @layer base {
   .cde-th { text-align: var(--th-align); vertical-align: var(--th-valign); background: var(--th-bg); color: var(--th-color); }
   :where(thead) > tr { border-color: var(--th-border); }
-  .cde-td { text-align: var(--td-align); vertical-align: var(--td-valign); }
+  .cde-td { text-align: var(--td-align); vertical-align: var(--td-valign); color: var(--td-color); }
+  :where(tbody) > tr { background-color: var(--td-bg); border-color: var(--td-border); }
   /* Botões, links e grupos de ações dentro das células acompanham o alinhamento escolhido */
   :where(.cde-th) :where(div, span, a, p, button):where(.flex, .inline-flex):where(:not(.flex-col)) { justify-content: var(--th-justify); }
   :where(.cde-td) :where(div, span, a, p, button):where(.flex, .inline-flex):where(:not(.flex-col)) { justify-content: var(--td-justify); }
