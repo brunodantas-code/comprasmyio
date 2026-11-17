@@ -1,4 +1,4 @@
-/** Where each tag source file appears: app and menu › submenu (CDE item Tags). */
+/** Where each tag source file appears: app and menu › submenu (CDE items Tags and Títulos e Subtítulos). */
 export const TAG_LOCATIONS: Record<string, { app: string; menu: string }> = {
   "components/access-profiles-tab.tsx": { app: "Usuários", menu: "Perfis de acesso" },
   "components/approval-workflow.tsx": { app: "Supply", menu: "Approvals › Fluxo de aprovação" },
@@ -27,4 +27,24 @@ export const TAG_LOCATIONS: Record<string, { app: string; menu: string }> = {
   "routes/_authenticated/dashboard.tsx": { app: "Supply", menu: "Minhas Solicitações / Fila" },
   "routes/_authenticated/development.tsx": { app: "Code", menu: "Chamados" },
   "routes/_authenticated/site-survey.tsx": { app: "Site Survey", menu: "Realizar Visita" },
+  "components/material-stock-types-tab.tsx": { app: "Supply", menu: "Diversos › Tipos de estoque" },
+  "components/client-categories-tab.tsx": { app: "Supply", menu: "Diversos › Categorias de clientes" },
+  "components/delivery-points-tab.tsx": { app: "Supply", menu: "Diversos › Pontos de entrega" },
+  "components/job-titles-tab.tsx": { app: "Usuários", menu: "Cargos" },
+  "components/cost-centers-tab.tsx": { app: "Supply", menu: "Diversos › Centros de custo" },
+  "components/unit-products.tsx": { app: "Supply", menu: "Produtos na unidade" },
+  "components/access-profile-definitions-tab.tsx": { app: "Usuários", menu: "Perfis de acesso › Definições" },
+  "components/request-types-tab.tsx": { app: "Supply", menu: "Diversos › Tipos de solicitação" },
+  "routes/reset-password.tsx": { app: "Acesso", menu: "Redefinir senha" },
+  "components/stock-destinations-tab.tsx": { app: "Supply", menu: "Diversos › Destinos de estoque" },
+  "components/materials-registry-tab.tsx": { app: "Supply", menu: "Diversos › Cadastro de materiais" },
+  "components/cash-flow/cash-register-tab.tsx": { app: "Cash Flow", menu: "Caixa" },
+  "components/supply-tags-tab.tsx": { app: "Supply", menu: "Diversos › Tags" },
+  "components/reminders-tab.tsx": { app: "Supply", menu: "Diversos › Lembretes" },
+  "components/user-manuals-tab.tsx": { app: "Todos os apps", menu: "Manuais do usuário" },
+  "components/damage-reasons-tab.tsx": { app: "Supply", menu: "Diversos › Motivos de avaria" },
+  "components/clients-tab.tsx": { app: "Supply", menu: "Diversos › Clientes" },
+  "components/additional-step-types-tab.tsx": { app: "Supply", menu: "Diversos › Etapas adicionais" },
+  "components/supply-order-statuses-tab.tsx": { app: "Supply", menu: "Diversos › Situações" },
+  "components/cash-flow/chart-of-accounts-tab.tsx": { app: "Cash Flow", menu: "Plano de contas" },
 };

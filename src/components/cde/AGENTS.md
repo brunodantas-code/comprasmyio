@@ -43,3 +43,4 @@
 - Corporate message look (fill, border, symbol, text) lives in cde_selected group message_style; options reuse the app-tile brand palette (message-style.ts).
 - Tags: shared Badge reads cde_selected tag_style ({label key → bg/text/border}) by visible label via tag-style.ts; CDE item Tags lists tag-inventory.json (regenerate with scripts/scan-cde-tags.mjs) plus active Supply statuses.
 - Card titles/subtitles (CardTitle/CardDescription) read --title-*/--sub-* from table_fonts via .cde-title/.cde-subtitle in the base layer.
+- Card title/subtitle texts: CardTitle/CardDescription replace plain-text children from cde_selected title_text ("titulo|Original"→text) via title-text.ts; inventory title-inventory.json from scripts/scan-cde-titles.mjs.

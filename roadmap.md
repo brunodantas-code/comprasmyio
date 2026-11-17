@@ -369,4 +369,4 @@
 - [x] CDE item Tags: todas as tags atuais com borda/fundo/texto independentes (partida = atual)
 - [x] CDE Cabeçalhos e Listas: Títulos e subtítulos (texto/borda/fundo) com prévia
 - [x] CDE Tags: texto menor ao lado da bolinha, coluna Menus/Submenus, Tag+Prévia juntas
-- [ ] CDE item Títulos e Subtítulos: textos editáveis (screen|original → texto)
+- [x] CDE item Títulos e Subtítulos: textos editáveis (screen|original → texto)

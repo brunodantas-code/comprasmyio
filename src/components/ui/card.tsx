@@ -1,6 +1,7 @@
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
+import { useTitleText } from "@/components/cde/title-text";
 import { useCdeBoxStyle } from "@/components/cde/cde-button";
 
 const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
@@ -27,20 +28,18 @@ const CardHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDiv
 CardHeader.displayName = "CardHeader";
 
 const CardTitle = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, ...props }, ref) => (
-    <div
-      ref={ref}
-      className={cn("cde-title font-semibold leading-none tracking-tight", className)}
-      {...props}
-    />
-  ),
+  ({ className, children, ...props }, ref) => {
+    const text = useTitleText("titulo", children);
+    return <div ref={ref} className={cn("cde-title font-semibold leading-none tracking-tight", className)} {...props}>{text}</div>;
+  },
 );
 CardTitle.displayName = "CardTitle";
 
 const CardDescription = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, ...props }, ref) => (
-    <div ref={ref} className={cn("cde-subtitle text-sm", className)} {...props} />
-  ),
+  ({ className, children, ...props }, ref) => {
+    const text = useTitleText("subtitulo", children);
+    return <div ref={ref} className={cn("cde-subtitle text-sm", className)} {...props}>{text}</div>;
+  },
 );
 CardDescription.displayName = "CardDescription";
 
