@@ -2,3 +2,6 @@
 - CRM screens use shared CDE-bound components (Table, Input, Select, Button) and pure rules in crm-logic.ts.
 - Proposals: items/totals/incompleteness/status guards live in DB triggers (crm_proposta_*); items editable only in draft, changes after sending go through a new version (same numero); DOCX is generated client-side with the docx package (proposta-docx.ts).
 - CRM pricing/costing: price list (crm_tabela_precos) readable by CRM users; costs, kits, batches, engine parameters and proposal cost memory are ERP-admin-only tables; pure rules in custeio-logic.ts and the ported motor-custeio.ts (keep it identical to the legacy CRM engine).
+- CRM configuration writes use existing admin-only RLS; stage synchronization preserves historical status, while UI filtering/boards use etapa_codigo. Foreign keys prevent deleting referenced configuration.
+- CNPJ/IBGE lookups use authenticated server functions with CRM access checks and bounded public-provider requests; unavailable lookups never block manual registration.
+- Message models are local copyable text, not approved Meta templates or delivery evidence; no automatic messaging occurs.

@@ -31,9 +31,9 @@ Trazer o CRM (hoje em crm-myio.vercel.app, app Next.js separado com login e banc
 ### Fase 4 — Custeio e Preços — CONCLUÍDA (tabela de preços, kits, lotes, parâmetros, memória de cálculo)
 - Insumos, produtos, kits, tabelas de preço, regras de medição/composição, análise de custos e motor de cálculo.
 
-### Fase 5 — Configurações e integrações
+### Fase 5 — Configurações e integrações — CONCLUÍDA (configurações e consultas verificadas; WhatsApp avaliado, sem envio)
 - Fases, etapas, templates, papéis de contato, busca de CNPJ e municípios IBGE.
-- Status de WhatsApp (avaliar viabilidade da integração atual dentro do ERP).
+- WhatsApp avaliado: o CRM original classifica telefones, não envia mensagens. Modelos locais podem ser copiados; envio real depende de conexão WhatsApp Business e implementação específica, não incluída nesta fase.
 
 ### Fase 6 — Migração dos dados atuais
 - **Preciso de um export dos dados atuais do CRM** (backup do banco, gerado pelo João Paulo com o script `backup-db.sh` do próprio CRM) para importar empresas, leads, oportunidades, propostas e tabelas de preço sem perder nada.

@@ -1436,6 +1436,7 @@ export type Database = {
           id: string
           nome: string
           observacoes: string | null
+          papel: string | null
           telefone: string | null
           updated_at: string
         }
@@ -1448,6 +1449,7 @@ export type Database = {
           id?: string
           nome: string
           observacoes?: string | null
+          papel?: string | null
           telefone?: string | null
           updated_at?: string
         }
@@ -1460,6 +1462,7 @@ export type Database = {
           id?: string
           nome?: string
           observacoes?: string | null
+          papel?: string | null
           telefone?: string | null
           updated_at?: string
         }
@@ -1470,6 +1473,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "crm_empresas"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_contatos_papel_fkey"
+            columns: ["papel"]
+            isOneToOne: false
+            referencedRelation: "crm_papeis_contato"
+            referencedColumns: ["codigo"]
           },
         ]
       }
@@ -1773,6 +1783,7 @@ export type Database = {
           email: string | null
           empresa_id: string | null
           empresa_texto: string | null
+          etapa_codigo: string | null
           id: string
           interesses: string | null
           nome: string
@@ -1795,6 +1806,7 @@ export type Database = {
           email?: string | null
           empresa_id?: string | null
           empresa_texto?: string | null
+          etapa_codigo?: string | null
           id?: string
           interesses?: string | null
           nome: string
@@ -1817,6 +1829,7 @@ export type Database = {
           email?: string | null
           empresa_id?: string | null
           empresa_texto?: string | null
+          etapa_codigo?: string | null
           id?: string
           interesses?: string | null
           nome?: string
@@ -1837,6 +1850,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "crm_empresas"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_leads_etapa_codigo_fkey"
+            columns: ["etapa_codigo"]
+            isOneToOne: false
+            referencedRelation: "crm_etapas_lead"
+            referencedColumns: ["codigo"]
           },
           {
             foreignKeyName: "crm_leads_oportunidade_fk"
@@ -2369,6 +2389,57 @@ export type Database = {
             columns: ["kit_id"]
             isOneToOne: false
             referencedRelation: "crm_kits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_templates_mensagem: {
+        Row: {
+          assunto: string | null
+          ativo: boolean
+          canal: string
+          corpo: string
+          etapa_lead: string | null
+          fase_id: string | null
+          id: string
+          nome: string
+          updated_at: string
+        }
+        Insert: {
+          assunto?: string | null
+          ativo?: boolean
+          canal?: string
+          corpo: string
+          etapa_lead?: string | null
+          fase_id?: string | null
+          id?: string
+          nome: string
+          updated_at?: string
+        }
+        Update: {
+          assunto?: string | null
+          ativo?: boolean
+          canal?: string
+          corpo?: string
+          etapa_lead?: string | null
+          fase_id?: string | null
+          id?: string
+          nome?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_templates_mensagem_etapa_lead_fkey"
+            columns: ["etapa_lead"]
+            isOneToOne: false
+            referencedRelation: "crm_etapas_lead"
+            referencedColumns: ["codigo"]
+          },
+          {
+            foreignKeyName: "crm_templates_mensagem_fase_id_fkey"
+            columns: ["fase_id"]
+            isOneToOne: false
+            referencedRelation: "crm_fases_funil"
             referencedColumns: ["id"]
           },
         ]

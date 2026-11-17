@@ -59,3 +59,4 @@
 - Only Supply execution enables consolidatedSort and compact=false reports; other screens retain column sorting/compact exports and all reports reuse sorted rows.
 - Reimbursement search normalizes authorized details; IDs and historical destinations remain unchanged.
 - CRM runs in-ERP at /crm (app grant "crm"); legacy external CRM only via panel link until migrated.
+- CRM config: admin RLS; custom lead stages preserve legacy status; lookups require app access.

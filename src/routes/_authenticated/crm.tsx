@@ -1,6 +1,7 @@
 import { Suspense, useState } from "react";
 import { createFileRoute, Link, redirect, useRouter } from "@tanstack/react-router";
-import { Building2, FileText, Gauge, KanbanSquare, ListChecks, Tags, UserPlus } from "lucide-react";
+import { Building2, FileText, Gauge, KanbanSquare, ListChecks, Settings, Tags, UserPlus } from "lucide-react";
+import { crmConfigOptions } from "@/components/crm/crm-config";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { MyioAppLogo } from "@/components/myio-app-logo";
@@ -17,7 +18,7 @@ export const Route = createFileRoute("/_authenticated/crm")({
     const { data } = await supabase.from("user_app_access").select("app_key").eq("user_id", context.user.id).eq("app_key", "crm").maybeSingle();
     if (!data) throw redirect({ to: "/portal" });
   },
-  loader: async ({ context }) => { await Promise.all([context.queryClient.ensureQueryData(crmOptions()), context.queryClient.ensureQueryData(propostasOptions())]); },
+  loader: async ({ context }) => { await Promise.all([context.queryClient.ensureQueryData(crmOptions()), context.queryClient.ensureQueryData(propostasOptions()), context.queryClient.ensureQueryData(crmConfigOptions())]); },
   component: CrmPage,
   errorComponent: CrmError,
   head: () => ({
@@ -44,6 +45,7 @@ function CrmPage() {
     { value: "oportunidades" as const, label: "Oportunidades", icon: ListChecks },
     { value: "propostas" as const, label: "Propostas", icon: FileText },
     { value: "precos" as const, label: "Preços", icon: Tags },
+    { value: "config" as const, label: "Configurações", icon: Settings },
   ], menuOrders?.["CRM|Barra inferior"]);
   return (
     <div className="min-h-screen bg-background">
@@ -52,7 +54,7 @@ function CrmPage() {
         <Suspense fallback={<p className="text-muted-foreground">Carregando...</p>}><CrmWorkspace section={section} /></Suspense>
       </main>
       <AppNavigation className={ml.nav} aria-label="Navegação do CRM">
-        <div className={`mx-auto grid max-w-2xl grid-cols-7 items-stretch rounded-[1.75rem] border border-border bg-card/95 p-1.5 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-card/90 ${ml.grid}`}>
+        <div className={`mx-auto grid max-w-3xl grid-cols-8 items-stretch rounded-[1.75rem] border border-border bg-card/95 p-1.5 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-card/90 ${ml.grid}`}>
           {tabs.map(({ value, label, icon: Icon }) => {
             const active = section === value;
             return <Button key={value} type="button" variant="ghost" className={`h-auto min-w-0 rounded-[1.35rem] p-0 shadow-none ${active ? "!bg-primary/15 !text-primary hover:!bg-primary/20 hover:!text-primary" : "!bg-transparent !text-muted-foreground hover:!bg-muted hover:!text-foreground"}`} onClick={() => setSection(value)} aria-current={active ? "page" : undefined}><span className="flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 px-1"><span className="menu-icon"><Icon className="h-5 w-5 shrink-0" /></span><span className="max-w-full truncate text-[10px] font-semibold leading-none">{label}</span></span></Button>;

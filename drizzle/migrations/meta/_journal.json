@@ -1597,6 +1597,13 @@
       "when": 1794926442614,
       "tag": "0227_crm_custeio_precos",
       "breakpoints": true
+    },
+    {
+      "idx": 228,
+      "version": "7",
+      "when": 1794928117519,
+      "tag": "0228_crm_configuracoes_integracoes",
+      "breakpoints": true
     }
   ]
 }

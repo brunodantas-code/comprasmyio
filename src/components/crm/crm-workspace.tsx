@@ -1,3 +1,7 @@
+import { CrmMessageModels } from "./crm-message-models";
+import { CrmConfig, crmConfigOptions } from "./crm-config";
+import { CnpjField, CidadeField, UfField } from "./company-lookups";
+import { leadStage } from "./config-logic";
 import { CrmCustos } from "./crm-custos";
 import { useMemo, useRef, useState } from "react";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
@@ -19,7 +23,7 @@ import { PropostasSection } from "./crm-propostas";
 import { CrmRecordDialog, nn, num, type FieldSpec } from "./crm-record-dialog";
 import { LEAD_ORIGENS, brl, funnelSummary, matchesSearch, needsReason, origemLabel, overdueActions, parseLeadsCsv, pipelineTotals, type Fase } from "./crm-logic";
 
-export type CrmSection = "painel" | "leads" | "empresas" | "funil" | "oportunidades" | "propostas" | "precos";
+export type CrmSection = "painel" | "leads" | "empresas" | "funil" | "oportunidades" | "propostas" | "precos" | "config";
 const today = () => new Date(Date.now() - 3 * 3600000).toISOString().slice(0, 10);
 const br = (d: string | null) => (d ? d.slice(0, 10).split("-").reverse().join("/") : "—");
 const uid = async () => { const u = (await supabase.auth.getUser()).data.user; if (!u) throw new Error("Sessão expirada."); return u.id; };
@@ -50,6 +54,7 @@ export function CrmWorkspace({ section }: { section: CrmSection }) {
     {section === "oportunidades" && <Oportunidades {...ctx} />}
     {section === "propostas" && <PropostasSection data={data} />}
     {section === "precos" && <CrmCustos />}
+    {section === "config" && <CrmConfig />}
     <EmpresaDialog value={empresa} onClose={() => setEmpresa(null)} refresh={refresh} />
     <ContatoDialog value={contato} data={data} onClose={() => setContato(null)} refresh={refresh} />
     <LeadDialog value={lead} data={data} onClose={() => setLead(null)} refresh={refresh} />
@@ -95,7 +100,7 @@ function Leads({ data, refresh, setLead }: Ctx) {
   const [status, setStatus] = useState("all");
   const [view, setView] = useState<"lista" | "quadro">("lista");
   const [importOpen, setImportOpen] = useState(false);
-  const rows = data.leads.filter((l) => (status === "all" || (l.status ?? "novo") === status) && matchesSearch(q, l.nome, l.empresa_texto, l.email, l.telefone, l.cnpj, l.cargo));
+  const rows = data.leads.filter((l) => (status === "all" || leadStage(l) === status) && matchesSearch(q, l.nome, l.empresa_texto, l.email, l.telefone, l.cnpj, l.cargo));
   const etapas = data.etapas.filter((e) => e.ativa !== false);
   return <div>
     <SectionTitle title={`Leads (${rows.length})`}>
@@ -106,9 +111,9 @@ function Leads({ data, refresh, setLead }: Ctx) {
       <AddButton label="Novo lead" onClick={() => setLead({ status: "novo", origem: "outro" })} />
     </SectionTitle>
     {view === "lista" ? <Table><TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>Empresa</TableHead><TableHead>Cargo</TableHead><TableHead>Contato</TableHead><TableHead>Origem</TableHead><TableHead>Etapa</TableHead><TableHead>Responsável</TableHead></TableRow></TableHeader>
-      <TableBody>{rows.map((l) => { const e = etapaOf(data, l.status); return <TableRow key={l.id} className="cursor-pointer" onClick={() => setLead(l)}><TableCell className="font-medium">{l.nome}</TableCell><TableCell>{l.empresa_id ? empresaName(data, l.empresa_id) : l.empresa_texto ?? "—"}</TableCell><TableCell>{l.cargo ?? "—"}</TableCell><TableCell className="text-xs">{[l.email, l.telefone].filter(Boolean).join(" · ") || "—"}</TableCell><TableCell>{origemLabel(l.origem)}</TableCell><TableCell><span className="inline-flex items-center gap-2"><Dot color={e?.cor} />{e?.nome ?? l.status}</span></TableCell><TableCell>{userName(data, l.dono_id)}</TableCell></TableRow>; })}
+      <TableBody>{rows.map((l) => { const e = etapaOf(data, leadStage(l)); return <TableRow key={l.id} className="cursor-pointer" onClick={() => setLead(l)}><TableCell className="font-medium">{l.nome}</TableCell><TableCell>{l.empresa_id ? empresaName(data, l.empresa_id) : l.empresa_texto ?? "—"}</TableCell><TableCell>{l.cargo ?? "—"}</TableCell><TableCell className="text-xs">{[l.email, l.telefone].filter(Boolean).join(" · ") || "—"}</TableCell><TableCell>{origemLabel(l.origem)}</TableCell><TableCell><span className="inline-flex items-center gap-2"><Dot color={e?.cor} />{e?.nome ?? l.status}</span></TableCell><TableCell>{userName(data, l.dono_id)}</TableCell></TableRow>; })}
         {!rows.length && <TableRow><TableCell colSpan={7} className="text-muted-foreground">Nenhum lead.</TableCell></TableRow>}</TableBody></Table>
-      : <Board columns={etapas.map((e) => ({ id: e.codigo, title: e.nome, color: e.cor }))} items={rows.map((l) => ({ id: l.id, column: l.status ?? "novo", title: l.nome, subtitle: l.empresa_texto ?? empresaName(data, l.empresa_id) }))} onOpen={(id) => setLead(data.leads.find((l) => l.id === id)!)} onMove={async (id, col) => { const r = await supabase.from("crm_leads").update({ status: col }).eq("id", id).select("id"); if (r.error || !r.data?.length) toast.error("Não foi possível mover o lead."); await refresh(); }} />}
+      : <Board columns={etapas.map((e) => ({ id: e.codigo, title: e.nome, color: e.cor }))} items={rows.map((l) => ({ id: l.id, column: leadStage(l), title: l.nome, subtitle: l.empresa_texto ?? empresaName(data, l.empresa_id) }))} onOpen={(id) => setLead(data.leads.find((l) => l.id === id)!)} onMove={async (id, col) => { const r = await supabase.from("crm_leads").update({ etapa_codigo: col }).eq("id", id).select("id"); if (r.error || !r.data?.length) toast.error("Não foi possível mover o lead."); await refresh(); }} />}
     <ImportDialog open={importOpen} onClose={() => setImportOpen(false)} refresh={refresh} />
   </div>;
 }
@@ -224,24 +229,26 @@ function Oportunidades({ data, setOp }: Ctx) {
 /* ---------- Editores ---------- */
 const s = (x: unknown) => (x == null ? "" : String(x));
 function EmpresaDialog({ value, onClose, refresh }: { value: Partial<Empresa> | null; onClose: () => void; refresh: () => Promise<void> }) {
-  const fields: FieldSpec[] = [{ key: "nome_fantasia", label: "Nome fantasia", required: true }, { key: "razao_social", label: "Razão social" }, { key: "cnpj", label: "CNPJ" }, { key: "segmento", label: "Segmento" }, { key: "cidade", label: "Cidade" }, { key: "uf", label: "UF", placeholder: "RJ" }, { key: "grupo_economico", label: "Grupo econômico" }, { key: "observacoes", label: "Observações", type: "textarea" }];
+  const fields: FieldSpec[] = [{ key: "nome_fantasia", label: "Nome fantasia", required: true }, { key: "razao_social", label: "Razão social" }, { key: "cnpj", label: "CNPJ", render: (values, change) => <CnpjField values={values} change={change} /> }, { key: "segmento", label: "Segmento", type: "select", options: ["shopping", "hospital", "logistica", "industria", "facilities", "varejo", "ferroviario", "outro"].map((x) => ({ value: x, label: x })) }, { key: "cidade", label: "Cidade", render: (values, change) => <CidadeField values={values} change={change} /> }, { key: "uf", label: "UF", render: (values, change) => <UfField values={values} change={change} /> }, { key: "grupo_economico", label: "Grupo econômico" }, { key: "observacoes", label: "Observações", type: "textarea" }];
   return <CrmRecordDialog open={!!value} title={value?.id ? "Editar empresa" : "Nova empresa"} fields={fields} initial={Object.fromEntries(fields.map((f) => [f.key, s(value?.[f.key as keyof Empresa])]))} onClose={onClose}
     onSave={async (v) => { const row = { nome_fantasia: v.nome_fantasia.trim(), razao_social: nn(v.razao_social), cnpj: nn(v.cnpj), segmento: nn(v.segmento), cidade: nn(v.cidade), uf: nn(v.uf)?.toUpperCase().slice(0, 2) ?? null, grupo_economico: nn(v.grupo_economico), observacoes: nn(v.observacoes) };
       check(value?.id ? await supabase.from("crm_empresas").update(row).eq("id", value.id).select("id") : await supabase.from("crm_empresas").insert({ ...row, created_by: await uid() }).select("id")); await refresh(); toast.success("Empresa salva"); }}
     onDelete={value?.id ? async () => { check(await supabase.from("crm_empresas").delete().eq("id", value.id!).select("id")); await refresh(); } : undefined} deleteTitle="Excluir empresa?" />;
 }
 function ContatoDialog({ value, data, onClose, refresh }: { value: Partial<Contato> | null; data: CrmData; onClose: () => void; refresh: () => Promise<void> }) {
-  const fields: FieldSpec[] = [{ key: "nome", label: "Nome", required: true }, { key: "empresa_id", label: "Empresa", type: "select", required: true, options: data.empresas.map((e) => ({ value: e.id, label: e.nome_fantasia })) }, { key: "cargo", label: "Cargo" }, { key: "email", label: "E-mail", type: "email" }, { key: "telefone", label: "Telefone" }, { key: "observacoes", label: "Observações", type: "textarea" }];
+  const { data: config } = useSuspenseQuery(crmConfigOptions());
+  const fields: FieldSpec[] = [{ key: "nome", label: "Nome", required: true }, { key: "empresa_id", label: "Empresa", type: "select", required: true, options: data.empresas.map((e) => ({ value: e.id, label: e.nome_fantasia })) }, { key: "cargo", label: "Cargo" }, { key: "papel", label: "Papel", type: "select", options: config.papeis.filter((p) => p.ativo || p.codigo === value?.papel).map((p) => ({ value: p.codigo, label: p.nome })) }, { key: "email", label: "E-mail", type: "email" }, { key: "telefone", label: "Telefone" }, { key: "observacoes", label: "Observações", type: "textarea" }];
   return <CrmRecordDialog open={!!value} title={value?.id ? "Editar contato" : "Novo contato"} fields={fields} initial={Object.fromEntries(fields.map((f) => [f.key, s(value?.[f.key as keyof Contato])]))} onClose={onClose}
-    onSave={async (v) => { const row = { nome: v.nome.trim(), empresa_id: v.empresa_id, cargo: nn(v.cargo), email: nn(v.email), telefone: nn(v.telefone), observacoes: nn(v.observacoes) };
+    onSave={async (v) => { const row = { nome: v.nome.trim(), empresa_id: v.empresa_id, cargo: nn(v.cargo), papel: nn(v.papel), email: nn(v.email), telefone: nn(v.telefone), observacoes: nn(v.observacoes) };
       check(value?.id ? await supabase.from("crm_contatos").update(row).eq("id", value.id).select("id") : await supabase.from("crm_contatos").insert({ ...row, created_by: await uid() }).select("id")); await refresh(); toast.success("Contato salvo"); }}
     onDelete={value?.id ? async () => { check(await supabase.from("crm_contatos").delete().eq("id", value.id!).select("id")); await refresh(); } : undefined} deleteTitle="Excluir contato?" />;
 }
 function LeadDialog({ value, data, onClose, refresh }: { value: Partial<FullLead> | null; data: CrmData; onClose: () => void; refresh: () => Promise<void> }) {
+  const { data: config } = useSuspenseQuery(crmConfigOptions());
   const users = data.users.map((u) => ({ value: u.id, label: u.full_name ?? "—" }));
-  const fields: FieldSpec[] = [{ key: "nome", label: "Nome", required: true }, { key: "empresa_texto", label: "Empresa (texto)" }, { key: "empresa_id", label: "Empresa cadastrada", type: "select", options: data.empresas.map((e) => ({ value: e.id, label: e.nome_fantasia })) }, { key: "cargo", label: "Cargo" }, { key: "email", label: "E-mail", type: "email" }, { key: "telefone", label: "Telefone" }, { key: "cnpj", label: "CNPJ" },
-    { key: "origem", label: "Origem", type: "select", required: true, options: LEAD_ORIGENS.map((o) => ({ value: o.key, label: o.label })) }, { key: "status", label: "Etapa", type: "select", required: true, options: data.etapas.map((e) => ({ value: e.codigo, label: e.nome })) }, { key: "dono_id", label: "Responsável", type: "select", options: users }, { key: "observacoes", label: "Observações", type: "textarea" }];
-  const rowOf = (v: Record<string, string>) => ({ nome: v.nome.trim(), empresa_texto: nn(v.empresa_texto), empresa_id: nn(v.empresa_id), cargo: nn(v.cargo), email: nn(v.email), telefone: nn(v.telefone), cnpj: nn(v.cnpj), origem: v.origem || "outro", status: v.status || "novo", dono_id: nn(v.dono_id), observacoes: nn(v.observacoes) });
+  const fields: FieldSpec[] = [{ key: "nome", label: "Nome", required: true }, { key: "empresa_texto", label: "Empresa (texto)" }, { key: "empresa_id", label: "Empresa cadastrada", type: "select", options: data.empresas.map((e) => ({ value: e.id, label: e.nome_fantasia })) }, { key: "cargo", label: "Cargo" }, { key: "papel", label: "Papel", type: "select", options: config.papeis.filter((p) => p.ativo || p.codigo === value?.papel).map((p) => ({ value: p.codigo, label: p.nome })) }, { key: "email", label: "E-mail", type: "email" }, { key: "telefone", label: "Telefone" }, { key: "cnpj", label: "CNPJ" },
+    { key: "origem", label: "Origem", type: "select", required: true, options: LEAD_ORIGENS.map((o) => ({ value: o.key, label: o.label })) }, { key: "etapa_codigo", label: "Etapa", type: "select", required: true, options: data.etapas.filter((e) => e.ativa !== false || e.codigo === (value ? leadStage(value as FullLead) : "novo")).map((e) => ({ value: e.codigo, label: e.nome })) }, { key: "dono_id", label: "Responsável", type: "select", options: users }, { key: "observacoes", label: "Observações", type: "textarea" }];
+  const rowOf = (v: Record<string, string>) => ({ nome: v.nome.trim(), empresa_texto: nn(v.empresa_texto), empresa_id: nn(v.empresa_id), cargo: nn(v.cargo), papel: nn(v.papel), email: nn(v.email), telefone: nn(v.telefone), cnpj: nn(v.cnpj), origem: v.origem || "outro", etapa_codigo: v.etapa_codigo || "novo", dono_id: nn(v.dono_id), observacoes: nn(v.observacoes) });
   async function convert(v: Record<string, string>) {
     const me = await uid();
     let empresaId = nn(v.empresa_id);
@@ -254,14 +261,14 @@ function LeadDialog({ value, data, onClose, refresh }: { value: Partial<FullLead
     if (!fase) throw new Error("Nenhuma fase aberta no funil.");
     const o = await supabase.from("crm_oportunidades").insert({ titulo: `${nn(v.empresa_texto) ?? v.nome.trim()}`, empresa_id: empresaId, fase_id: fase.id, dono_id: nn(v.dono_id) ?? me, lead_id: value?.id ?? null, created_by: me }).select("id").single();
     if (o.error) throw o.error;
-    const row = { ...rowOf(v), empresa_id: empresaId, status: "convertido", oportunidade_id: o.data.id };
+    const row = { ...rowOf(v), empresa_id: empresaId, status: "convertido", etapa_codigo: "convertido", oportunidade_id: o.data.id };
     check(value?.id ? await supabase.from("crm_leads").update(row).eq("id", value.id).select("id") : await supabase.from("crm_leads").insert({ ...row, created_by: me }).select("id"));
     await refresh(); toast.success("Lead convertido em oportunidade"); onClose();
   }
-  return <CrmRecordDialog open={!!value} title={value?.id ? "Editar lead" : "Novo lead"} fields={fields} initial={Object.fromEntries(fields.map((f) => [f.key, s(value?.[f.key as keyof FullLead])]))} onClose={onClose}
+  return <CrmRecordDialog open={!!value} title={value?.id ? "Editar lead" : "Novo lead"} fields={fields} initial={Object.fromEntries(fields.map((f) => [f.key, f.key === "etapa_codigo" ? (value ? leadStage(value as FullLead) : "novo") : s(value?.[f.key as keyof FullLead])]))} onClose={onClose}
     onSave={async (v) => { const me = await uid(); check(value?.id ? await supabase.from("crm_leads").update(rowOf(v)).eq("id", value.id).select("id") : await supabase.from("crm_leads").insert({ ...rowOf(v), dono_id: nn(v.dono_id) ?? me, created_by: me }).select("id")); await refresh(); toast.success("Lead salvo"); }}
     onDelete={value?.id ? async () => { check(await supabase.from("crm_leads").delete().eq("id", value.id!).select("id")); await refresh(); } : undefined} deleteTitle="Excluir lead?"
-    footer={(v) => value?.oportunidade_id ? <span className="text-xs text-muted-foreground">Já convertido em oportunidade</span> : <Button variant="ghost" disabled={!v.nome?.trim()} onClick={() => convert(v).catch((e) => toast.error(e instanceof Error ? e.message : "Não foi possível converter."))}><ArrowRightLeft className="h-4 w-4" />Converter em oportunidade</Button>} />;
+    footer={(v) => <div className="space-y-3"><CrmMessageModels etapa={v.etapa_codigo} vars={{ nome: v.nome, empresa: v.empresa_texto, shopping: v.empresa_texto }} />{value?.oportunidade_id ? <span className="text-xs text-muted-foreground">Já convertido em oportunidade</span> : <Button variant="ghost" disabled={!v.nome?.trim()} onClick={() => convert(v).catch((e) => toast.error(e instanceof Error ? e.message : "Não foi possível converter."))}><ArrowRightLeft className="h-4 w-4" />Converter em oportunidade</Button>}</div>} />;
 }
 function OpDialog({ value, data, onClose, refresh }: { value: Partial<FullOp> | null; data: CrmData; onClose: () => void; refresh: () => Promise<void> }) {
   const empresaId = value?.empresa_id;
@@ -278,5 +285,5 @@ function OpDialog({ value, data, onClose, refresh }: { value: Partial<FullOp> | 
       const row = { titulo: v.titulo.trim(), empresa_id: v.empresa_id, contato_id: nn(v.contato_id), fase_id: v.fase_id, dono_id: nn(v.dono_id), valor_setup: num(v.valor_setup), valor_mrr: num(v.valor_mrr), probabilidade: prob, data_prevista_fechamento: nn(v.data_prevista_fechamento), produto_alvo: nn(v.produto_alvo), proxima_acao_data: nn(v.proxima_acao_data), proxima_acao_descricao: nn(v.proxima_acao_descricao), motivo_encerramento: nn(v.motivo_encerramento), observacoes: nn(v.observacoes) };
       const me = await uid();
       check(value?.id ? await supabase.from("crm_oportunidades").update(row).eq("id", value.id).select("id") : await supabase.from("crm_oportunidades").insert({ ...row, dono_id: row.dono_id ?? me, created_by: me }).select("id")); await refresh(); toast.success("Oportunidade salva"); }}
-    footer={() => value?.id ? <span className="text-xs text-muted-foreground">Oportunidades não são excluídas: para encerrar, mova para Perdido ou Desqualificado.</span> : null} />;
+    footer={(v) => <div className="space-y-3"><CrmMessageModels fase={v.fase_id} vars={{ nome: data.contatos.find((c) => c.id === v.contato_id)?.nome ?? "", empresa: empresaName(data, v.empresa_id), shopping: empresaName(data, v.empresa_id) }} />{value?.id && <span className="text-xs text-muted-foreground">Oportunidades não são excluídas: para encerrar, mova para Perdido ou Desqualificado.</span>}</div>} />;
 }

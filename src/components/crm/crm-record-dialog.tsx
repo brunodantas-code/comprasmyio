@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 
-export type FieldSpec = { key: string; label: string; type?: "text" | "textarea" | "number" | "date" | "select" | "email"; options?: { value: string; label: string }[]; required?: boolean; wide?: boolean; placeholder?: string };
+export type FieldSpec = { key: string; label: string; type?: "text" | "textarea" | "number" | "date" | "select" | "email"; options?: { value: string; label: string }[]; required?: boolean; wide?: boolean; placeholder?: string; render?: (values: Values, change: (v: Values) => void) => ReactNode };
 type Values = Record<string, string>;
 
 /** Shared CRM editor: fields in a responsive grid, ghost floppy save, confirmed delete; caller persists. */
@@ -32,7 +32,7 @@ export function CrmRecordDialog({ open, title, fields, initial, onClose, onSave,
       <div className="grid grid-cols-1 items-end gap-x-6 gap-y-4 sm:grid-cols-2">
         {fields.map((f) => <div key={f.key} className={`min-w-0 space-y-1 ${f.wide || f.type === "textarea" ? "sm:col-span-2" : ""}`}>
           <Label htmlFor={`crm-${f.key}`}>{f.label}{f.required ? " *" : ""}</Label>
-          {f.type === "textarea" ? <Textarea id={`crm-${f.key}`} rows={3} value={v[f.key] ?? ""} onChange={(e) => setV({ ...v, [f.key]: e.target.value })} />
+          {f.render ? f.render(v, setV) : f.type === "textarea" ? <Textarea id={`crm-${f.key}`} rows={3} value={v[f.key] ?? ""} onChange={(e) => setV({ ...v, [f.key]: e.target.value })} />
             : f.type === "select" ? <Select value={v[f.key] || "__none"} onValueChange={(x) => setV({ ...v, [f.key]: x === "__none" ? "" : x })}>
               <SelectTrigger id={`crm-${f.key}`} aria-label={f.label}><SelectValue /></SelectTrigger>
               <SelectContent>{!f.required && <SelectItem value="__none">—</SelectItem>}{(f.options ?? []).map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}</SelectContent></Select>

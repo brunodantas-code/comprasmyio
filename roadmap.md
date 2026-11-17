@@ -374,3 +374,4 @@
 - [x] Item Tags (16) fora do padrão no cabeçalho
 - [x] CDE: item Aparência do CDE (categorias/subcategorias)
 - [x] CRM Fase 4: Custeio e Preços
+- [x] CRM Fase 5: Configurações (fases, etapas personalizadas, papéis, modelos de proposta/mensagem), consultas CNPJ e IBGE; criar/renomear/excluir fase temporária verificado autenticado; CNPJ preenchido, 92 municípios RJ e mobile 390 px. WhatsApp original apenas classifica telefone; sem conexão acessível, nenhum envio implementado. Modelos locais disponíveis para copiar em leads/oportunidades. 20 testes CRM passaram.
