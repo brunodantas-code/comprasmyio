@@ -1,5 +1,5 @@
 # Roadmap
-- [x] Mensagens: concordância com Alexandre; recomendação de mostrar “Resposta 2 · Leonardo Roedel”, sem “Destinatário” no autor; pergunta respondida, conversa não alterada.
+- [x] Code: sugestão de Alexandre aplicada; cabeçalhos mostram “Pergunta N · Nome do autor” e “Resposta N · Nome do autor”, sem rótulos de papel. Chamado real 44 conferido na conta Leonardo em computador/celular: Alexandre na pergunta, Leonardo na resposta e “Para” somente na pergunta; mensagens preservadas, 31 testes passaram e tela sem erros. Não publicado.
 - [x] Home Page: menu sem Voltar/Todos os apps, iniciando por Minhas Pendências e preservando a ordem CDE das demais ações; navegação mantida em Acessos/outros apps.
 - [x] Menu principal: mesmo HeaderMenu completo do Desktop no portal e nos apps, inclusive Mobile; aparência, ícones, nomes, ordem e visibilidade CDE compartilhados, sem mudar permissões.
 - [x] Menus conferidos em 1280/1085/390/320 px e alturas 1800/844/811/700/650: mesma aparência de 288 px, sem excesso lateral; senha/assinatura/tema/Central/Acessos abriram, menu fechou nas ações; 16 testes passaram, CDE salvo e dados preservados, sem erros de tela.
