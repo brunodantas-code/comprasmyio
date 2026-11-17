@@ -42,6 +42,8 @@ export const APP_TILE_COLORS = {
     { key: "lilas", label: "Lilás myio", value: "var(--myio-lilac)", dark: false },
     { key: "roxo", label: "Roxo myio", value: "var(--myio-purple)", dark: true },
     { key: "escuro", label: "Escuro myio", value: "var(--myio-dark)", dark: true },
+    { key: "roxo_noite", label: "Roxo noite myio (tela de acesso)", value: "var(--erp-landing)", dark: true },
+    { key: "roxo_profundo", label: "Roxo profundo myio (tela de acesso)", value: "var(--erp-landing-soft)", dark: true },
   ],
   fill: [
     { key: "padrao", label: "Verde myio", value: "var(--myio-green)", dark: false },
@@ -50,6 +52,8 @@ export const APP_TILE_COLORS = {
     { key: "branco", label: "Branco", value: "var(--myio-white)", dark: false },
     { key: "verde_claro", label: "Verde claro myio", value: "var(--myio-green-tint)", dark: false },
     { key: "lilas", label: "Lilás myio", value: "var(--myio-lilac)", dark: false },
+    { key: "roxo_noite", label: "Roxo noite myio (tela de acesso)", value: "var(--erp-landing)", dark: true },
+    { key: "roxo_profundo", label: "Roxo profundo myio (tela de acesso)", value: "var(--erp-landing-soft)", dark: true },
   ],
   border: [
     { key: "padrao", label: "Verde myio (igual ao ícone)", value: "var(--myio-green)", dark: false },
@@ -57,11 +61,14 @@ export const APP_TILE_COLORS = {
     { key: "roxo", label: "Roxo myio", value: "var(--myio-purple)", dark: true },
     { key: "branco", label: "Branco", value: "var(--myio-white)", dark: false },
     { key: "lilas", label: "Lilás myio", value: "var(--myio-lilac)", dark: false },
+    { key: "roxo_noite", label: "Roxo noite myio (tela de acesso)", value: "var(--erp-landing)", dark: true },
+    { key: "roxo_profundo", label: "Roxo profundo myio (tela de acesso)", value: "var(--erp-landing-soft)", dark: true },
   ],
   inside: [
     { key: "padrao", label: "Escuro myio", value: "var(--myio-dark)", dark: true },
     { key: "branco", label: "Branco", value: "var(--myio-white)", dark: false },
     { key: "roxo", label: "Roxo myio", value: "var(--myio-purple)", dark: true },
+    { key: "lilas_suave", label: "Lilás suave myio (tela de acesso)", value: "var(--erp-landing-muted)", dark: false },
   ],
   below: [
     { key: "padrao", label: "Cinza", value: "var(--muted-foreground)", dark: true },
@@ -69,6 +76,9 @@ export const APP_TILE_COLORS = {
     { key: "roxo", label: "Roxo myio", value: "var(--myio-purple)", dark: true },
     { key: "verde", label: "Verde myio", value: "var(--myio-green)", dark: false },
     { key: "branco", label: "Branco", value: "var(--myio-white)", dark: false },
+    { key: "roxo_noite", label: "Roxo noite myio (tela de acesso)", value: "var(--erp-landing)", dark: true },
+    { key: "roxo_profundo", label: "Roxo profundo myio (tela de acesso)", value: "var(--erp-landing-soft)", dark: true },
+    { key: "lilas_suave", label: "Lilás suave myio (tela de acesso)", value: "var(--erp-landing-muted)", dark: false },
   ],
 } as const;
 export type AppTileColorKind = keyof typeof APP_TILE_COLORS;
