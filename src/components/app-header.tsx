@@ -12,6 +12,7 @@ import { ArrowLeft, BookOpen, LayoutGrid, KeyRound, LogOut, Menu } from "lucide-
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Sheet, SheetContent, SheetTitle, SheetDescription, SheetTrigger } from "@/components/ui/sheet";
 import { ChangePasswordDialog } from "@/components/change-password-dialog";
 import { AppManualDialog } from "@/components/app-manual-dialog";
 import { PersonalSignature } from "@/components/personal-signature";
@@ -131,18 +132,38 @@ function ThemeEntry({ className }: { className: string }) {
   return <Button variant="ghost" className={className} onClick={() => setDark(toggleAppTheme() === "dark")}><Icon className="h-5 w-5" />{dark ? "Modo claro" : "Modo escuro"}</Button>;
 }
 
-/** The desktop CDE menu is shared by every app and viewport. */
+/** Shared CDE entries, with a bottom panel on mobile and a popover on desktop. */
 export function HeaderMenu({ userName, onSignOut, onChangePassword, buttonClass, supplyManual, homePage, ...extra }: HeaderMenuProps) {
   const [open, setOpen] = useState(false);
-  const itemClass = "h-10 w-full justify-start rounded-none px-4 !bg-transparent !text-foreground hover:!bg-muted hover:!text-foreground";
+  const [mobile, setMobile] = useState(false);
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 639px)");
+    const update = () => { setMobile(media.matches); setOpen(false); };
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+  const itemClass = "!h-10 !w-full !min-w-0 !justify-start !rounded-none !border-0 px-4 !bg-transparent !text-foreground !shadow-none hover:!bg-muted hover:!text-foreground focus-visible:!bg-muted focus-visible:!text-foreground";
+  const trigger = <Button variant="ghost" size="icon" className={`relative ${buttonClass}`} aria-label="Abrir menu"><Menu className="!h-6 !w-6" /><MenuTriggerBadge /></Button>;
+
+  if (mobile) return <Sheet open={open} onOpenChange={setOpen}>
+    <SheetTrigger asChild>{trigger}</SheetTrigger>
+    <SheetContent side="bottom" className="flex max-h-[85dvh] flex-col gap-0 rounded-t-3xl border-border bg-card px-5 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-5 [&>button:first-child]:!absolute [&>button:first-child]:!right-5 [&>button:first-child]:!top-5 [&>button:first-child]:!m-0 [&>button:first-child]:!h-7 [&>button:first-child]:!w-7 [&>button:first-child]:!min-w-0 [&>button:first-child]:!bg-transparent">
+      <SheetTitle className="shrink-0 pb-5 text-center text-xl font-medium">Menu</SheetTitle>
+      <SheetDescription className="sr-only">Menu de {userName}</SheetDescription>
+      <div className="min-h-0 overflow-y-auto">
+        <nav aria-label={`Menu de ${userName}`} className="flex flex-col [&>a]:!w-full [&>button]:!w-full [&>*:not(:last-child)]:!border-b [&>*:not(:last-child)]:!border-border" onClick={() => setOpen(false)}>
+          <MainMenuEntries {...extra} supplyManual={supplyManual} homePage={homePage} onSignOut={onSignOut} onChangePassword={onChangePassword} itemClass={`${itemClass} !h-auto !min-h-14 gap-3 !px-1 !py-4 !text-base whitespace-normal [&_svg]:!size-5`} />
+        </nav>
+        <div className="mt-5 rounded-2xl bg-muted px-4 py-3"><p className="break-words text-sm font-medium text-foreground">{userName}</p><p className="text-xs text-muted-foreground">Menu do usuário</p></div>
+      </div>
+    </SheetContent>
+  </Sheet>;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className={`relative ${buttonClass}`} aria-label="Abrir menu">
-          <Menu className="!h-6 !w-6" />
-          <MenuTriggerBadge />
-        </Button>
+        {trigger}
       </PopoverTrigger>
       <PopoverContent align="end" sideOffset={8} collisionPadding={12} className="max-h-[var(--radix-popover-content-available-height)] w-72 max-w-[calc(100vw-1.5rem)] overflow-y-auto rounded-lg border-border bg-popover p-0 shadow-lg">
         <nav className="py-1" aria-label={`Menu de ${userName}`} onClick={() => setOpen(false)}>
