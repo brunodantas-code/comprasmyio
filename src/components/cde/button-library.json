@@ -11882,7 +11882,7 @@
   {
     "id": "components/access/users-admin.tsx|b4d91fdc5984745b|0",
     "file": "components/access/users-admin.tsx",
-    "line": 292,
+    "line": 294,
     "tag": "Button",
     "label": "Rejeitar",
     "dynamic": false,
@@ -11897,7 +11897,7 @@
   {
     "id": "components/access/users-admin.tsx|8ddc1293855b9a2d|0",
     "file": "components/access/users-admin.tsx",
-    "line": 293,
+    "line": 295,
     "tag": "Button",
     "label": "Aprovar exclusão",
     "dynamic": false,
@@ -11912,7 +11912,7 @@
   {
     "id": "components/access/users-admin.tsx|b1ce6de64c432f1a|0",
     "file": "components/access/users-admin.tsx",
-    "line": 334,
+    "line": 336,
     "tag": "Button",
     "label": "Solicitar exclusão",
     "dynamic": false,

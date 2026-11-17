@@ -228,16 +228,18 @@ export function UsersAdmin() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Usuários cadastrados</CardTitle>
+        <div className="flex items-center justify-between gap-3">
+          <CardTitle>Usuários cadastrados</CardTitle>
+          {!isLoading ? userFilters.menu : null}
+        </div>
         <CardDescription>Defina o cargo principal da cadeia, cargos adicionais e o perfil de acesso.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
         <>
-          <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-            {["name", "email", "approver", "role", "profile"].map(key => <span key={key}>{userFilters.header(key)}</span>)}
+          <div className="flex justify-end">
             <Select value={sortBy} onValueChange={(value) => setSortBy(value as "name" | "profile")}>
-              <SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger>
+              <SelectTrigger aria-label="Ordenação dos usuários" className="h-8 w-auto min-w-0 text-[length:var(--filter-fs)]"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="name">Ordenar por nome</SelectItem>
                 <SelectItem value="profile">Ordenar por perfil</SelectItem>
