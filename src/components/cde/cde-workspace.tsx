@@ -1,5 +1,4 @@
 import { CdeCorporateMessages } from "./cde-corporate-messages";
-import { CdeTableOrder } from "./cde-table-order";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowDown, ArrowDownUp, ArrowUp, ArrowUpDown, Building2, Check, ChevronDown, ChevronsDownUp, ChevronLeft, ChevronRight, ChevronUp, ClipboardCheck, Filter, PackagePlus, Pencil, Percent, Plus, RotateCcw, Save, Settings2, Trash2, X, type LucideIcon } from "lucide-react";
@@ -99,10 +98,10 @@ const PARENTS: Record<string, string> = { "1": "Campos para preenchimento", "3":
 const baseTitle = (t: string) => t.split(" ").slice(1).join(" ");
 const groupParent = (t: string) => { const n = t.split(" ")[0].replace(/\.$/, ""); return n.includes(".") ? n.split(".")[0] : null; };
 const CDE_DEFAULT_ORDER: CdeOrder = {
-  cats: [...[...new Set(GROUPS.map((g) => groupParent(g.title) ? `p:${groupParent(g.title)}` : g.key))], "icons", "nav", "menu", "apps", "table_fonts", "table_order", "corporate_messages", "button_library", "deadline_alerts"],
+  cats: [...[...new Set(GROUPS.map((g) => groupParent(g.title) ? `p:${groupParent(g.title)}` : g.key))], "icons", "nav", "menu", "apps", "table_fonts", "corporate_messages", "button_library", "deadline_alerts"],
   subs: Object.fromEntries(Object.keys(PARENTS).map((p) => [p, GROUPS.filter((g) => groupParent(g.title) === p).map((g) => g.key)])),
 };
-const EXTRA_LABELS: Record<string, string> = { icons: "Ícones dos Apps e menus", nav: "Navegação (UI/UX)", menu: "Menu principal", apps: "Apps da página principal", table_fonts: "Fontes de cabeçalhos e filtros", table_order: "Ordenação de cabeçalhos", corporate_messages: "Mensagens corporativas", button_library: "Biblioteca de botões em uso", deadline_alerts: "Alertas de Prazo" };
+const EXTRA_LABELS: Record<string, string> = { icons: "Ícones dos Apps e menus", nav: "Navegação (UI/UX)", menu: "Menu principal", apps: "Apps da página principal", table_fonts: "Cabeçalhos e Listas", corporate_messages: "Mensagens corporativas", button_library: "Biblioteca de botões em uso", deadline_alerts: "Alertas de Prazo" };
 
 const inventoryKey = (v: Omit<Variant, "key">) => [v.tag, v.variant, v.size, v.className, v.icon, v.iconClass].join("|");
 
@@ -458,7 +457,6 @@ export function CdeWorkspace() {
           if (cat === "menu") return <CdeMainMenu key={`CdeMainMenu-${collapseKey}`} number={ci + 1} handle={handle} />;
           if (cat === "apps") return <CdeAppOrder key={`CdeAppOrder-${collapseKey}`} number={ci + 1} handle={handle} />;
           if (cat === "corporate_messages") return <CdeCorporateMessages key={`CdeCorporateMessages-${collapseKey}`} number={ci + 1} handle={handle} />;
-          if (cat === "table_order") return <CdeTableOrder key={`CdeTableOrder-${collapseKey}`} number={ci + 1} handle={handle} />;
           if (cat === "table_fonts") return <CdeTableFonts key={`CdeTableFonts-${collapseKey}`} number={ci + 1} handle={handle} />;
           if (cat === "button_library") return <CdeButtonLibrary key={`CdeButtonLibrary-${collapseKey}`} nameSearch={buttonSearch} number={ci + 1} handle={handle} onEdit={(button, group, ids, modelKey) => {
             if (!group) { toast.info("Este botão ainda não possui um padrão CDE vinculado. A edição visual precisa desse vínculo para ser aplicada no app."); return; }

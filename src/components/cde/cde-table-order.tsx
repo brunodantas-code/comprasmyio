@@ -47,8 +47,8 @@ function TableRowEditor({ site, order, onChange }: { site: Site; order: number[]
   </DndContext>;
 }
 
-export function CdeTableOrder({ number, handle }: { number: number; handle?: import("react").ReactNode }) {
-  const [open, setOpen] = useState(false);
+export function CdeTableOrder({ number, handle, embedded }: { number?: number; handle?: import("react").ReactNode; embedded?: boolean }) {
+  const [open, setOpen] = useState(!!embedded);
   const [search, setSearch] = useState("");
   const [draft, setDraft] = useState<TableColumnOrders | null>(null);
   const [saving, setSaving] = useState(false);
@@ -85,8 +85,8 @@ export function CdeTableOrder({ number, handle }: { number: number; handle?: imp
     } catch { toast.error("Não foi possível salvar a ordem."); } finally { setSaving(false); }
   }
   return <section className="space-y-4">
-    <CdeCategoryHeader handle={handle} number={number} title="Ordenação de cabeçalhos" hint="Arraste as colunas de cada lista de dados" open={open} onToggle={() => setOpen(!open)} />
-    {open && <div className="w-full min-w-0 space-y-6 py-4">
+    {embedded ? <p className="text-sm font-medium">Ordem das colunas <span className="font-normal text-muted-foreground">— arraste as colunas de cada lista de dados</span></p> : <CdeCategoryHeader handle={handle} number={number ?? 0} title="Ordenação de cabeçalhos" hint="Arraste as colunas de cada lista de dados" open={open} onToggle={() => setOpen(!open)} />}
+    {open && <div className={`w-full min-w-0 space-y-6 ${embedded ? "py-2" : "py-4"}`}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar app, menu ou coluna" className="max-w-xs text-[length:var(--filter-fs)]" />
         <Button variant="ghost" size="icon" aria-label="Salvar" title="Salvar ordem dos cabeçalhos" onClick={save} disabled={saving || !draft}><Save /></Button>

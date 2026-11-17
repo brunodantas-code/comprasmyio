@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { supabase } from "@/integrations/supabase/client";
 import { CdeCategoryHeader } from "./cde-category-header";
+import { CdeTableOrder } from "./cde-table-order";
 import { ALIGN_H, ALIGN_V, tableAlignVars, type AlignH, type AlignV } from "./table-fonts-config";
 import { TABLE_FILTER_SIZES, TABLE_FONTS_DEFAULT, TABLE_HEADER_SIZES, useTableFonts, type TableFontsConfig } from "./table-fonts-config";
 
@@ -44,7 +45,7 @@ export function CdeTableFonts({ number, handle }: { number: number; handle?: imp
 
   return (
     <section className="space-y-4">
-      <CdeCategoryHeader handle={handle} number={number} title="Fontes e alinhamento de cabeçalhos e listas" hint="Fonte dos cabeçalhos e filtros e alinhamento independente de cabeçalhos e listas em todos os apps" open={open} onToggle={() => setOpen(!open)} />
+      <CdeCategoryHeader handle={handle} number={number} title="Cabeçalhos e Listas" hint="Fontes, alinhamento e ordem das colunas das listas de dados em todos os apps" open={open} onToggle={() => setOpen(!open)} />
       {open && (
         <div className="w-full min-w-0 space-y-4 py-4">
           <div role="group" aria-label="Fontes de cabeçalhos e filtros" className="grid w-full max-w-3xl grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
@@ -105,6 +106,7 @@ export function CdeTableFonts({ number, handle }: { number: number; handle?: imp
             <Button variant="ghost" size="icon" aria-label="Salvar" title="Salvar padrão" onClick={save} disabled={saving || !draft}><Save /></Button>
             {draft && <Button variant="ghost" size="icon" aria-label="Cancelar" title="Cancelar" disabled={saving} onClick={() => setDraft(null)}><X /></Button>}
           </div>
+          <div className="border-t border-border pt-4"><CdeTableOrder embedded /></div>
         </div>
       )}
     </section>
