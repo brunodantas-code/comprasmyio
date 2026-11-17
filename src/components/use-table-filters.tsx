@@ -1,5 +1,5 @@
 import { X } from "lucide-react";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { ColumnFilter } from "@/components/column-filter";
 import { CdeButton } from "@/components/cde/cde-button";
 import { Filter } from "lucide-react";
@@ -14,6 +14,7 @@ export type FilterColumn<T> = {
   kind?: FilterKind;
   value: (row: T) => string | number | null | undefined;
   display?: (row: T) => string;
+  renderFilter?: (value: ColumnFilterValue | undefined, onChange: (value: ColumnFilterValue | undefined) => void) => ReactNode;
 };
 
 /** Filters authorized source rows, not DOM text, so callers can reuse results for exports. */
@@ -63,7 +64,7 @@ export function TableFilterMenu<T>({ rows, columns, filters, onChange, clear, tr
         <SelectTrigger aria-label="Tipo de filtro" className="h-8 text-xs"><SelectValue /></SelectTrigger>
         <SelectContent>{columns.map(c => <SelectItem key={c.key} value={c.key}>{c.label}{isFilterActive(filters[c.key]) ? " •" : ""}</SelectItem>)}</SelectContent>
       </Select>
-      {column && <ColumnFilter key={column.key} label={column.label} kind={column.kind ?? "text"} values={rows.map(row => column.display?.(row) ?? String(column.value(row) ?? ""))} value={filters[column.key]} onChange={value => onChange(column.key, value)} embedded onClose={() => setOpen(false)} />}
+      {column && (column.renderFilter ? column.renderFilter(filters[column.key], value => onChange(column.key, value)) : <ColumnFilter key={column.key} label={column.label} kind={column.kind ?? "text"} values={rows.map(row => column.display?.(row) ?? String(column.value(row) ?? ""))} value={filters[column.key]} onChange={value => onChange(column.key, value)} embedded onClose={() => setOpen(false)} />)}
       {activeColumns.length > 0 && <div className="space-y-1 border-t pt-2"><p className="text-xs text-muted-foreground">Filtros combinados ({activeColumns.length}) — escolha outra coluna acima para somar mais um</p>{activeColumns.map(c => <div key={c.key} className="flex items-center gap-1 text-xs"><button type="button" className="min-w-0 flex-1 truncate text-left hover:underline" onClick={() => setKey(c.key)} title={`${c.label}: ${describe(c)}`}>{c.label}: {describe(c)}</button><Button type="button" variant="ghost" size="compactIcon" aria-label={`Remover filtro ${c.label}`} onClick={() => onChange(c.key, undefined)}><X /></Button></div>)}</div>}
       {active > 0 && <Button variant="outline" size="sm" className="h-7 w-full text-xs" onClick={clear}>Limpar todos os filtros ({active})</Button>}
     </PopoverContent>

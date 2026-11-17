@@ -41,10 +41,10 @@ function PendentesPage() {
       <AppHeader logo={<MyioLogo className="text-xl sm:text-2xl" label={null} />} />
       <main className="mx-auto max-w-7xl px-3 py-5 sm:px-6 sm:py-8">
         <div className="mb-6">
-          <h1 className="flex items-center gap-2 text-2xl font-bold"><Bell className="h-6 w-6" />Central de Pendências</h1>
+          <h1 className="flex min-w-0 items-center gap-2 break-words text-2xl font-bold"><Bell className="h-6 w-6 shrink-0" />Central de Pendências</h1>
           <p className="mt-1 text-sm text-muted-foreground">Ações que dependem de você...</p>
         </div>
-        {me?.isAdmin && <div className="mb-6 flex gap-2"><Button variant="ghost" aria-pressed={!adminView} onClick={() => change({central:"mine"})}>Minhas Pendências</Button><Button variant="ghost" aria-pressed={!!adminView} onClick={() => change({central:"all"})}>Todas as Pendências</Button></div>}
+        {me?.isAdmin && <div className="mb-6 grid grid-cols-2 gap-2 sm:flex"><Button variant="ghost" className="!h-auto !min-w-0 whitespace-normal" aria-pressed={!adminView} onClick={() => change({central:"mine"})}>Minhas Pendências</Button><Button variant="ghost" className="!h-auto !min-w-0 whitespace-normal" aria-pressed={!!adminView} onClick={() => change({central:"all"})}>Todas as Pendências</Button></div>}
         {adminView ? <Suspense fallback={<p>Carregando Dashboard...</p>}><CentralDashboard user={search.user ?? ""} app={search.app ?? ""} sort={search.sort ?? "critical"} view={search.view ?? "users"} onChange={change} /></Suspense> : <><div className="mb-6"><TodoSection key={search.todo ?? "list"} initialTask={search.todo} /></div>
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando pendências...</p> : (
           <div className="space-y-6">

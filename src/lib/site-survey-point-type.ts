@@ -9,6 +9,8 @@ export const surveyPointTypeLabel = (type: SurveyPointType) => type === "environ
 export const isSurveyVacant = (type: SurveyPointType) => type === "vacant" || type === "vacant_kiosk";
 export const requiresSurveyFacade = (type: SurveyPointType) => !isSurveyVacant(type) && type !== "environment";
 export const requiresSurveyLuc = (type: SurveyPointType) => isSurveyVacant(type);
+/** Missing LUC is a follow-up, not a new completion requirement. */
+export const hasSurveyLucPending = (type: SurveyPointType, lucNumber?: string | null) => type !== "environment" && !lucNumber?.trim();
 
 export type SurveyPointTotals = Record<SurveyPointType, number>;
 

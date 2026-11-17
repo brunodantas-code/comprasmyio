@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { surveyPointTotals, surveyPointTypeLabel, requiresSurveyLuc, requiresSurveyFacade } from "./site-survey-point-type";
+import { surveyPointTotals, surveyPointTypeLabel, requiresSurveyLuc, requiresSurveyFacade, hasSurveyLucPending } from "./site-survey-point-type";
 
 test("Loja Vaga exige LUC, mas não exige fachada; loja comum mantém LUC opcional", () => {
   assert.equal(requiresSurveyLuc("vacant"), true);
@@ -15,6 +15,22 @@ test("Quiosque vago exige LUC, dispensa fachada e tem rótulo próprio", () => {
   assert.equal(requiresSurveyFacade("vacant_kiosk"), false);
   assert.equal(surveyPointTypeLabel("vacant_kiosk"), "Quiosque vago");
   assert.equal(surveyPointTypeLabel("kiosk"), "Quiosque");
+});
+
+test("LUC vazio gera pendência para lojas e quiosques sem torná-lo obrigatório para concluir", () => {
+  assert.equal(hasSurveyLucPending("shop", ""), true);
+  assert.equal(hasSurveyLucPending("kiosk", "  "), true);
+  assert.equal(requiresSurveyLuc("shop"), false);
+  assert.equal(requiresSurveyLuc("kiosk"), false);
+});
+
+test("Ambientes não geram pendência de LUC", () => {
+  assert.equal(hasSurveyLucPending("environment", null), false);
+});
+
+test("LUC informado, inclusive Não identificado, não gera pendência", () => {
+  assert.equal(hasSurveyLucPending("shop", "Não identificado"), false);
+  assert.equal(hasSurveyLucPending("kiosk", "102"), false);
 });
 
 test("Totaliza lojas, quiosques e ambientes pela classificação efetiva", () => {

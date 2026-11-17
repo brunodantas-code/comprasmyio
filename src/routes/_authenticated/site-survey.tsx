@@ -34,7 +34,7 @@ import { SiteSurveyReportTexts } from "@/components/site-survey-report-texts";
 import { SiteSurveyScreenSummary } from "@/components/site-survey-screen-summary";
 import { SiteSurveyProgressChart } from "@/components/site-survey-progress-chart";
 import { useSurveyImage } from "@/hooks/use-survey-image";
-import { surveyPointType, requiresSurveyFacade, requiresSurveyLuc, isSurveyVacant, type SurveyPointType } from "@/lib/site-survey-point-type";
+import { surveyPointType, requiresSurveyFacade, requiresSurveyLuc, hasSurveyLucPending, isSurveyVacant, type SurveyPointType } from "@/lib/site-survey-point-type";
 import { energyWaterTotals as surveyEnergyWaterTotals } from "@/lib/site-survey-energy-water";
 import { visitSearchHaystack } from "@/lib/site-survey-visit-search";
 import { SiteSurveyCustomerQuestions } from "@/components/site-survey-customer-questions";
@@ -1124,7 +1124,7 @@ function VisitDetails({ pointSearch = "", visit, data, onClose, onChanged, close
       const currentPoint = points.find((point) => point.value === selectedPoint)?.pointType;
       if (currentPoint && isSurveyVacant(currentPoint)) {
         const luc = detail?.lucs.find((point) => `luc:${point.id}` === selectedPoint);
-        return luc?.luc_number?.trim() ? [] : ["LUC não informado"];
+        return hasSurveyLucPending(currentPoint, luc?.luc_number) ? ["Número do LUC"] : [];
       }
       const values = form ? new FormData(form) : null;
       const currentAnswers = new Map(answers);
@@ -1140,6 +1140,8 @@ function VisitDetails({ pointSearch = "", visit, data, onClose, onChanged, close
         .flatMap((section) => questions
           .filter((question) => question.section_id === section.id && isQuestionVisible(question, currentAnswers) && isNotInformedAnswer(answerParts(currentAnswers.get(question.id)).value))
           .map((question) => `${section.title}: ${question.prompt}`));
+      const currentLucNumber = selectedPointRecord && "luc_number" in selectedPointRecord ? selectedPointRecord.luc_number : null;
+      if (currentPoint && hasSurveyLucPending(currentPoint, currentLucNumber)) fields.push("Número do LUC");
       if (requiresSurveyFacade(points.find((point) => point.value === selectedPoint)?.pointType ?? "environment") && !facadeAttachment) fields.push("Foto da fachada");
       return fields;
     };
@@ -1179,10 +1181,9 @@ function VisitDetails({ pointSearch = "", visit, data, onClose, onChanged, close
       const items: { key: string; label: string; sectionId?: string; groupKey?: string; groupLabel?: string; customer?: boolean; customerResponse?: string }[] = [];
       if (requiresSurveyFacade(point.pointType) && !detail.attachments.some((item) => item.attachment_kind === "facade" && scope(item))) items.push({ key: "facade", label: "Foto da fachada" });
       const luc = kind === "luc" ? detail.lucs.find((item) => item.id === id) : null;
-      // Loja vaga e quiosque vago exigem LUC, sem exigir foto de fachada ou localização.
-      if (isSurveyVacant(point.pointType)) {
-        if (!luc?.luc_number?.trim()) items.push({ key: "luc", label: "LUC não informado" });
-      }
+      // Registration follow-ups include empty LUCs without changing completion requirements.
+      const lucNumber = record && "luc_number" in record ? record.luc_number : null;
+      if (hasSurveyLucPending(point.pointType, lucNumber)) items.push({ key: "luc", label: "Número do LUC" });
       if (!isSurveyVacant(point.pointType) && luc && !luc.location?.trim()) items.push({ key: "location", label: "Localização (andar)" });
       for (const section of isSurveyVacant(point.pointType) ? [] : sectionsFor(point.templateId ?? visit.template_id, own)) {
         if (skipped.has(section.id)) continue;

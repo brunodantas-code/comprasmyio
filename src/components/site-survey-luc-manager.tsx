@@ -1,5 +1,5 @@
 import { addedAfterSurveyOriginalList } from "@/lib/site-survey-point-origin";
-import { matchesSurveyCompletion, type SurveyCompletionFilter } from "@/lib/site-survey-completion-filter";
+import { matchesSurveyCompletion, surveyPendingFilterValue, type SurveyCompletionFilter } from "@/lib/site-survey-completion-filter";
 import { SiteSurveyPointChoice } from "@/components/site-survey-point-choice";
 import { resolveSurveyPointChoice, surveyDepotType, surveyPointChoice } from "@/lib/site-survey-point-choice";
 import { CdeDisclosureIcon, CdeButton } from "@/components/cde/cde-button";
@@ -404,7 +404,7 @@ export function SiteSurveyLucManager({ checklistData, visitTemplateId: visitTemp
     { key: "location", label: "Localização", value: r => r.location },
     { key: "meter", label: "Nº do medidor", value: r => r.meter_number },
     { key: "type", label: "Tipo", value: r => surveyPointTypeLabel(surveyPointType(r)) },
-    { key: "pending", label: "Pendências", kind: "number", value: r => pendingCount?.(`${r.source}:${r.id}`) ?? 0 },
+    { key: "pending", label: "Pendências", kind: "number", value: r => pendingCount?.(`${r.source}:${r.id}`) ?? 0, renderFilter: (value, onChange) => <Select value={value?.op === "gt" ? "with" : value?.op === "eq" ? "without" : "all"} onValueChange={next => { if (next === "all" || next === "with" || next === "without") onChange(surveyPendingFilterValue(next)); }}><SelectTrigger aria-label="Filtrar pendências" className="h-8 text-xs"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">Todas</SelectItem><SelectItem value="with">Com pendências</SelectItem><SelectItem value="without">Sem pendências</SelectItem></SelectContent></Select> },
     { key: "approval", label: "Instalação aprovada", value: r => { const a = scope.approvals.find(a => a.point_kind === r.source && a.point_id === r.id); return a?.hydraulic_approved && a?.electrical_approved ? "Água + Energia" : a?.hydraulic_approved ? "Água" : a?.electrical_approved ? "Energia" : "Sem aprovação"; } },
   ]);
   const baseSortedRows = useMemo(() => pointFilters.filtered.filter((row) => {
