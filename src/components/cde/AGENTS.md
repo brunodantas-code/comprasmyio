@@ -44,3 +44,4 @@
 - Tags: shared Badge resolves cde_selected tag_style ({looks, renames, removed→replacement label, custom}) by visible label via tag-style.ts — display only, stored values never change; CDE item Tags lists tag-inventory.json (scripts/scan-cde-tags.mjs) plus active Supply statuses and CDE-created tags.
 - Card titles/subtitles (CardTitle/CardDescription) read --title-*/--sub-* from table_fonts via .cde-title/.cde-subtitle in the base layer.
 - Card title/subtitle texts: CardTitle/CardDescription replace plain-text children from cde_selected title_text ("titulo|Original"→text) via title-text.ts; inventory title-inventory.json from scripts/scan-cde-titles.mjs.
+- CDE look of the CDE itself lives in cde_selected group cde_appearance (cde-appearance.ts) as --cde-cat-*/--cde-sub-* vars on the CDE main; header hints must avoid action words (excluir, salvar…) because shared Button detects action looks by label.

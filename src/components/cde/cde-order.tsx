@@ -19,7 +19,10 @@ export function mergeCdeOrder(raw: string | null | undefined, defaults: CdeOrder
   };
   const subs: Record<string, string[]> = {};
   for (const [k, v] of Object.entries(defaults.subs)) subs[k] = keep(saved.subs?.[k], v);
-  return { cats: keep(saved.cats, defaults.cats), subs };
+  // New categories enter at their default position (e.g. a new first item stays first) instead of the end.
+  const cats = Array.isArray(saved.cats) ? saved.cats.filter((x): x is string => typeof x === "string" && defaults.cats.includes(x)) : [];
+  defaults.cats.forEach((k, i) => { if (!cats.includes(k)) cats.splice(Math.min(i, cats.length), 0, k); });
+  return { cats: [...new Set(cats)], subs };
 }
 
 export function useCdeOrder(defaults: CdeOrder) {

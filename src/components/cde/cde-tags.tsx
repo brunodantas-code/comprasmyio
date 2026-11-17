@@ -21,7 +21,7 @@ import { SelectValue } from "@/components/ui/select";
 type Inv = { label: string; variant: string; className: string; apps: string[]; files: string[]; custom?: boolean };
 const PARTS: [TagPart, string][] = [["bg", "Fundo"], ["text", "Texto"], ["border", "Borda"]];
 
-function ColorSelect({ value, label, onChange }: { value?: string; label: string; onChange: (v: string) => void }) {
+export function ColorSelect({ value, label, onChange }: { value?: string; label: string; onChange: (v: string) => void }) {
   const swatch = useCdeSwatchStyle();
   const dot = (o: { key: string; value: string }) => <span aria-hidden="true" style={o.key === "padrao" ? undefined : { background: o.value, ...swatch.css }} className={cn("block h-4 w-4 shrink-0 rounded-full border border-border", o.key === "padrao" && "bg-[repeating-linear-gradient(45deg,var(--muted),var(--muted)_2px,transparent_2px,transparent_4px)]", swatch.cls)} />;
   const cur = tagColor(value);
@@ -99,7 +99,7 @@ export function CdeTags({ number, handle }: { number: number; handle?: React.Rea
   }
   const variantOf = (t: Inv) => (["default", "secondary", "destructive", "outline", "status"].includes(t.variant) ? t.variant : "default") as "default";
   return <section className="space-y-4">
-    <CdeCategoryHeader handle={handle} number={number} title="Tags" hint="Criar, renomear, excluir e definir fundo, texto e borda das etiquetas usadas nos apps" open={open} onToggle={() => setOpen(!open)} />
+    <CdeCategoryHeader handle={handle} number={number} title="Tags" hint="Nome, fundo, texto e borda de cada etiqueta usada nos apps" open={open} onToggle={() => setOpen(!open)} />
     {open && <div className="w-full min-w-0 space-y-3 py-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-xs text-muted-foreground">{rows.length} tags. “Atual (padrão)” mantém a aparência de hoje. Renomear muda só o nome exibido; os registros continuam os mesmos.</p>

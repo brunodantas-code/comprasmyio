@@ -1,3 +1,5 @@
+import { CdeAppearance } from "./cde-appearance-item";
+import { CDE_APPEARANCE_DEFAULT, cdeAppearanceVars, useCdeAppearance } from "./cde-appearance";
 import { CdeCorporateMessages } from "./cde-corporate-messages";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -100,10 +102,10 @@ const PARENTS: Record<string, string> = { "1": "Campos para preenchimento", "3":
 const baseTitle = (t: string) => t.split(" ").slice(1).join(" ");
 const groupParent = (t: string) => { const n = t.split(" ")[0].replace(/\.$/, ""); return n.includes(".") ? n.split(".")[0] : null; };
 const CDE_DEFAULT_ORDER: CdeOrder = {
-  cats: [...[...new Set(GROUPS.map((g) => groupParent(g.title) ? `p:${groupParent(g.title)}` : g.key))], "icons", "nav", "menu", "apps", "table_fonts", "title_texts", "tags", "corporate_messages", "button_library", "deadline_alerts"],
+  cats: ["cde_appearance", ...[...new Set(GROUPS.map((g) => groupParent(g.title) ? `p:${groupParent(g.title)}` : g.key))], "icons", "nav", "menu", "apps", "table_fonts", "title_texts", "tags", "corporate_messages", "button_library", "deadline_alerts"],
   subs: Object.fromEntries(Object.keys(PARENTS).map((p) => [p, GROUPS.filter((g) => groupParent(g.title) === p).map((g) => g.key)])),
 };
-const EXTRA_LABELS: Record<string, string> = { icons: "Ícones dos Apps e menus", nav: "Navegação (UI/UX)", menu: "Menu principal", apps: "Apps da página principal", table_fonts: "Cabeçalhos e Listas", tags: "Tags", title_texts: "Títulos e Subtítulos", corporate_messages: "Mensagens corporativas", button_library: "Biblioteca de botões em uso", deadline_alerts: "Alertas de Prazo" };
+const EXTRA_LABELS: Record<string, string> = { cde_appearance: "Aparência do CDE", icons: "Ícones dos Apps e menus", nav: "Navegação (UI/UX)", menu: "Menu principal", apps: "Apps da página principal", table_fonts: "Cabeçalhos e Listas", tags: "Tags", title_texts: "Títulos e Subtítulos", corporate_messages: "Mensagens corporativas", button_library: "Biblioteca de botões em uso", deadline_alerts: "Alertas de Prazo" };
 
 const inventoryKey = (v: Omit<Variant, "key">) => [v.tag, v.variant, v.size, v.className, v.icon, v.iconClass].join("|");
 
@@ -127,6 +129,7 @@ export function CdeWorkspace() {
   const [open, setOpen] = useState<Set<string>>(new Set());
   const [collapseKey, setCollapseKey] = useState(0);
   const [buttonSearch, setButtonSearch] = useState("");
+  const appearance = useCdeAppearance().data ?? CDE_APPEARANCE_DEFAULT;
   const { order: cdeOrder, save: saveCdeOrder } = useCdeOrder(CDE_DEFAULT_ORDER);
   const catLabel = (c: string) => c.startsWith("p:") ? PARENTS[c.slice(2)] : EXTRA_LABELS[c] ?? baseTitle(GROUPS.find((x) => x.key === c)?.title ?? c);
   const groupTitle = (key: string) => {
@@ -323,14 +326,14 @@ export function CdeWorkspace() {
         const isOpen = open.has(g.key);
         return (
           <section className={cn(parent ? "min-w-0 overflow-hidden border-b border-border" : "min-w-0")}>
-            {!parent ? <CdeCategoryHeader handle={handle} number={num} title={g.title.split(" ").slice(1).join(" ")} hint={`${list.length} modelos · ${g.hint}`} open={isOpen} onToggle={() => setOpen((s) => { const n = new Set(s); if (n.has(g.key)) n.delete(g.key); else n.add(g.key); return n; })} action={<CdeButton group="plus" screen="components/cde/cde-workspace.tsx" title="Criar modelo" aria-label={`Criar modelo em ${g.title}`} onClick={() => { setDraft({ ...emptyDraft, tag: (g.key === "box" || g.key === "confirm_dialog") ? "div" : "Button" }); setCreating(g.key); }} />} /> : <div className="flex items-center gap-3 bg-accent px-5 py-2">{handle}
+            {!parent ? <CdeCategoryHeader handle={handle} number={num} title={g.title.split(" ").slice(1).join(" ")} hint={`${list.length} modelos · ${g.hint}`} open={isOpen} onToggle={() => setOpen((s) => { const n = new Set(s); if (n.has(g.key)) n.delete(g.key); else n.add(g.key); return n; })} action={<CdeButton group="plus" screen="components/cde/cde-workspace.tsx" title="Criar modelo" aria-label={`Criar modelo em ${g.title}`} onClick={() => { setDraft({ ...emptyDraft, tag: (g.key === "box" || g.key === "confirm_dialog") ? "div" : "Button" }); setCreating(g.key); }} />} /> : <div className="cde-sub-band flex items-center gap-3 px-5 py-2">{handle}
               <button type="button" aria-expanded={isOpen} onClick={() => setOpen((s) => { const n = new Set(s); if (n.has(g.key)) n.delete(g.key); else n.add(g.key); return n; })} className="flex min-w-0 flex-1 items-center gap-4 text-left">
                 <span className="flex flex-col">
                   <CdeNumber subcategory={!!parent}>{num}</CdeNumber>
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-normal">{g.title.split(" ").slice(1).join(" ")}</span>
-                  <span className="mt-0.5 block text-xs text-muted-foreground">{list.length} modelos · {g.hint}</span>
+                  <span className="cde-sub-title block font-normal">{g.title.split(" ").slice(1).join(" ")}</span>
+                  <span className="cde-sub-hint mt-0.5 block">{list.length} modelos · {g.hint}</span>
                 </span>
               </button>
               <CdeButton group="plus" screen="components/cde/cde-workspace.tsx" title="Criar modelo" aria-label={`Criar modelo em ${g.title}`} onClick={() => { setDraft({ ...emptyDraft, tag: FIELD_TAGS[g.key]?.[0] ?? (NUMBER_MODELS[g.key] ? "span" : (g.key === "box" || g.key === "confirm_dialog") ? "div" : "Button"), label: NUMBER_MODELS[g.key] ? "1" : "" }); setCreating(g.key); }} />
@@ -426,7 +429,7 @@ export function CdeWorkspace() {
   };
 
   return (
-    <main className="app-workspace mx-auto max-w-7xl space-y-4 overflow-x-clip px-4 py-6 sm:px-6">
+    <main style={cdeAppearanceVars(appearance)} className="app-workspace mx-auto max-w-7xl space-y-4 overflow-x-clip px-4 py-6 sm:px-6">
       <div>
         <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-xl font-semibold">Ambiente de Desenvolvimento Colaborativo</h1>
@@ -460,6 +463,7 @@ export function CdeWorkspace() {
           if (cat === "apps") return <CdeAppOrder key={`CdeAppOrder-${collapseKey}`} number={ci + 1} handle={handle} />;
           if (cat === "corporate_messages") return <CdeCorporateMessages key={`CdeCorporateMessages-${collapseKey}`} number={ci + 1} handle={handle} />;
           if (cat === "title_texts") return <CdeTitleTexts key={`CdeTitleTexts-${collapseKey}`} number={ci + 1} handle={handle} />;
+          if (cat === "cde_appearance") return <CdeAppearance key={`CdeAppearance-${collapseKey}`} number={ci + 1} handle={handle} />;
           if (cat === "tags") return <CdeTags key={`CdeTags-${collapseKey}`} number={ci + 1} handle={handle} />;
           if (cat === "table_fonts") return <CdeTableFonts key={`CdeTableFonts-${collapseKey}`} number={ci + 1} handle={handle} />;
           if (cat === "button_library") return <CdeButtonLibrary key={`CdeButtonLibrary-${collapseKey}`} nameSearch={buttonSearch} number={ci + 1} handle={handle} onEdit={(button, group, ids, modelKey) => {

@@ -371,3 +371,5 @@
 - [x] CDE Tags: texto menor ao lado da bolinha, coluna Menus/Submenus, Tag+Prévia juntas
 - [x] CDE item Títulos e Subtítulos: textos editáveis (screen|original → texto)
 - [x] CDE Tags: criar, renomear e excluir (vinculando a outra tag)
+- [x] Item Tags (16) fora do padrão no cabeçalho
+- [x] CDE: item Aparência do CDE (categorias/subcategorias)
