@@ -64,6 +64,16 @@ export const APP_TILE_COLORS = {
     { key: "roxo_noite", label: "Roxo noite myio (tela de acesso)", value: "var(--erp-landing)", dark: true },
     { key: "roxo_profundo", label: "Roxo profundo myio (tela de acesso)", value: "var(--erp-landing-soft)", dark: true },
   ],
+  symbol: [
+    { key: "padrao", label: "Escuro myio", value: "var(--myio-dark)", dark: true },
+    { key: "branco", label: "Branco", value: "var(--myio-white)", dark: false },
+    { key: "verde", label: "Verde myio", value: "var(--myio-green)", dark: false },
+    { key: "roxo", label: "Roxo myio", value: "var(--myio-purple)", dark: true },
+    { key: "lilas", label: "Lilás myio", value: "var(--myio-lilac)", dark: false },
+    { key: "roxo_noite", label: "Roxo noite myio (tela de acesso)", value: "var(--erp-landing)", dark: true },
+    { key: "roxo_profundo", label: "Roxo profundo myio (tela de acesso)", value: "var(--erp-landing-soft)", dark: true },
+    { key: "lilas_suave", label: "Lilás suave myio (tela de acesso)", value: "var(--erp-landing-muted)", dark: false },
+  ],
   inside: [
     { key: "padrao", label: "Escuro myio", value: "var(--myio-dark)", dark: true },
     { key: "branco", label: "Branco", value: "var(--myio-white)", dark: false },
@@ -82,15 +92,15 @@ export const APP_TILE_COLORS = {
   ],
 } as const;
 export type AppTileColorKind = keyof typeof APP_TILE_COLORS;
-export type AppTileConfig = { labelPx: number; iconPct: number; tilePct: number; gapX: number; gapY: number; bg: string; fill: string; border: string; inside: string; below: string };
-export const APP_TILE_DEFAULT: AppTileConfig = { labelPx: 14, iconPct: 100, tilePct: 100, gapX: 32, gapY: 40, bg: "padrao", fill: "padrao", border: "padrao", inside: "padrao", below: "padrao" };
+export type AppTileConfig = { labelPx: number; iconPct: number; tilePct: number; gapX: number; gapY: number; bg: string; fill: string; border: string; symbol: string; inside: string; below: string };
+export const APP_TILE_DEFAULT: AppTileConfig = { labelPx: 14, iconPct: 100, tilePct: 100, gapX: 32, gapY: 40, bg: "padrao", fill: "padrao", border: "padrao", symbol: "padrao", inside: "padrao", below: "padrao" };
 export function appTileColor(kind: AppTileColorKind, key: string) {
   const list = APP_TILE_COLORS[kind] as readonly { key: string; label: string; value: string; dark: boolean }[];
   return list.find((o) => o.key === key) ?? list[0];
 }
 /** Portal CSS variables for the chosen colours (background, tile border, text inside and below the tiles). */
 export function appTileColorVars(tile: AppTileConfig): Record<string, string> {
-  return { "--portal-bg": appTileColor("bg", tile.bg).value, "--tile-fill": appTileColor("fill", tile.fill).value, "--tile-border": appTileColor("border", tile.border).value, "--tile-inside": appTileColor("inside", tile.inside).value, "--tile-below": appTileColor("below", tile.below).value };
+  return { "--portal-bg": appTileColor("bg", tile.bg).value, "--tile-fill": appTileColor("fill", tile.fill).value, "--tile-border": appTileColor("border", tile.border).value, "--tile-symbol": appTileColor("symbol", tile.symbol).value, "--tile-inside": appTileColor("inside", tile.inside).value, "--tile-below": appTileColor("below", tile.below).value };
 }
 /** True when the description text would vanish on the chosen background (same light/dark side). */
 export function appTileLowContrast(tile: AppTileConfig) {
@@ -107,7 +117,7 @@ export function parseAppTile(raw?: string): AppTileConfig {
       gapX: Number.isFinite(gapX) && gapX >= 8 && gapX <= 80 ? gapX : APP_TILE_DEFAULT.gapX,
       gapY: Number.isFinite(gapY) && gapY >= 8 && gapY <= 80 ? gapY : APP_TILE_DEFAULT.gapY,
       bg: appTileColor("bg", String(p.bg ?? "")).key, fill: appTileColor("fill", String(p.fill ?? "")).key, border: appTileColor("border", String(p.border ?? "")).key,
-      inside: appTileColor("inside", String(p.inside ?? "")).key, below: appTileColor("below", String(p.below ?? "")).key };
+      symbol: appTileColor("symbol", String(p.symbol ?? "")).key, inside: appTileColor("inside", String(p.inside ?? "")).key, below: appTileColor("below", String(p.below ?? "")).key };
   } catch { return APP_TILE_DEFAULT; }
 }
 export function useAppTile() {

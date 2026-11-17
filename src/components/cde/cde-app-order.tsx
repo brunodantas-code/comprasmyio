@@ -27,7 +27,7 @@ function Row({ id, index }: { id: string; index: number }) {
   </div>;
 }
 
-const COLOR_FIELDS: [AppTileColorKind, string][] = [["bg", "Fundo da página"], ["fill", "Preenchimento dos ícones"], ["border", "Borda dos ícones"], ["inside", "Texto dentro do ícone"], ["below", "Texto abaixo do ícone"]];
+const COLOR_FIELDS: [AppTileColorKind, string][] = [["bg", "Fundo da página"], ["fill", "Preenchimento dos ícones"], ["border", "Borda dos ícones"], ["symbol", "Símbolo dentro do ícone"], ["inside", "Texto dentro do ícone"], ["below", "Texto abaixo do ícone"]];
 
 /** Brand-only colour picker: options come from APP_TILE_COLORS, swatch shape follows CDE color_swatch. */
 function ColorChoice({ kind, label, value, onChange }: { kind: AppTileColorKind; label: string; value: string; onChange: (v: string) => void }) {
@@ -88,7 +88,7 @@ export function CdeAppOrder({ number, handle }: { number: number; handle?: impor
       <Button variant="action" className="mt-3" onClick={save} disabled={saving || !draft}><Save className="h-4 w-4" />Salvar</Button>
       <div className="mt-6 space-y-3 border-t border-border pt-4">
         <p className="text-sm font-medium">Ícones da página principal</p>
-        <div role="group" aria-label="Ajustes dos ícones da página principal" className="grid w-full max-w-5xl grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-5">
+        <div role="group" aria-label="Ajustes dos ícones da página principal" className="grid w-full max-w-5xl grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-6">
           <div className="min-w-0 space-y-1"><Label className="flex min-h-10 items-end pb-1">Fonte do nome</Label><Select value={String(tile.labelPx)} onValueChange={(v) => setTileDraft({ ...tile, labelPx: Number(v) })}><SelectTrigger className="h-9"><SelectValue /></SelectTrigger><SelectContent>{[11, 12, 13, 14, 15, 16].map((n) => <SelectItem key={n} value={String(n)}>{n} px</SelectItem>)}</SelectContent></Select></div>
           <div className="min-w-0 space-y-1"><Label className="flex min-h-10 items-end pb-1">Ícone</Label>
             <div className="grid h-9 w-36 grid-cols-[2rem_5rem_2rem] items-center justify-items-center">
