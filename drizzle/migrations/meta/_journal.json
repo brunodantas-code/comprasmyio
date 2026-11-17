@@ -1555,6 +1555,13 @@
       "when": 1794868641406,
       "tag": "0221_assigned_approver_order_access_and_atomic_decisions",
       "breakpoints": true
+    },
+    {
+      "idx": 222,
+      "version": "7",
+      "when": 1794918597639,
+      "tag": "0222_crm_fase1_nucleo_comercial",
+      "breakpoints": true
     }
   ]
 }

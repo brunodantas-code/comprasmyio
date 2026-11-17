@@ -1348,6 +1348,542 @@ export type Database = {
         }
         Relationships: []
       }
+      crm_atividades: {
+        Row: {
+          autor_id: string | null
+          created_at: string
+          data: string
+          id: string
+          lead_id: string | null
+          oportunidade_id: string | null
+          payload: Json
+          tipo: string
+        }
+        Insert: {
+          autor_id?: string | null
+          created_at?: string
+          data?: string
+          id?: string
+          lead_id?: string | null
+          oportunidade_id?: string | null
+          payload?: Json
+          tipo: string
+        }
+        Update: {
+          autor_id?: string | null
+          created_at?: string
+          data?: string
+          id?: string
+          lead_id?: string | null
+          oportunidade_id?: string | null
+          payload?: Json
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_atividades_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "crm_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_atividades_oportunidade_id_fkey"
+            columns: ["oportunidade_id"]
+            isOneToOne: false
+            referencedRelation: "crm_oportunidades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_contatos: {
+        Row: {
+          cargo: string | null
+          created_at: string
+          created_by: string | null
+          email: string | null
+          empresa_id: string
+          id: string
+          nome: string
+          observacoes: string | null
+          telefone: string | null
+          updated_at: string
+        }
+        Insert: {
+          cargo?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          empresa_id: string
+          id?: string
+          nome: string
+          observacoes?: string | null
+          telefone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          cargo?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          empresa_id?: string
+          id?: string
+          nome?: string
+          observacoes?: string | null
+          telefone?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_contatos_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "crm_empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_empresas: {
+        Row: {
+          cidade: string | null
+          cnpj: string | null
+          created_at: string
+          created_by: string | null
+          dominio: string | null
+          grupo_economico: string | null
+          id: string
+          nome_fantasia: string
+          observacoes: string | null
+          razao_social: string | null
+          segmento: string | null
+          uf: string | null
+          updated_at: string
+        }
+        Insert: {
+          cidade?: string | null
+          cnpj?: string | null
+          created_at?: string
+          created_by?: string | null
+          dominio?: string | null
+          grupo_economico?: string | null
+          id?: string
+          nome_fantasia: string
+          observacoes?: string | null
+          razao_social?: string | null
+          segmento?: string | null
+          uf?: string | null
+          updated_at?: string
+        }
+        Update: {
+          cidade?: string | null
+          cnpj?: string | null
+          created_at?: string
+          created_by?: string | null
+          dominio?: string | null
+          grupo_economico?: string | null
+          id?: string
+          nome_fantasia?: string
+          observacoes?: string | null
+          razao_social?: string | null
+          segmento?: string | null
+          uf?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      crm_etapas_lead: {
+        Row: {
+          ativa: boolean
+          codigo: string
+          cor: string | null
+          created_at: string
+          id: string
+          nome: string
+          ordem: number
+          tipo: string
+          updated_at: string
+        }
+        Insert: {
+          ativa?: boolean
+          codigo: string
+          cor?: string | null
+          created_at?: string
+          id?: string
+          nome: string
+          ordem?: number
+          tipo?: string
+          updated_at?: string
+        }
+        Update: {
+          ativa?: boolean
+          codigo?: string
+          cor?: string | null
+          created_at?: string
+          id?: string
+          nome?: string
+          ordem?: number
+          tipo?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      crm_fases_funil: {
+        Row: {
+          ativa: boolean
+          checklist_saida: Json
+          cor: string | null
+          created_at: string
+          id: string
+          nome: string
+          ordem: number
+          probabilidade: number
+          tempo_max_dias: number | null
+          tipo: string
+          updated_at: string
+        }
+        Insert: {
+          ativa?: boolean
+          checklist_saida?: Json
+          cor?: string | null
+          created_at?: string
+          id?: string
+          nome: string
+          ordem: number
+          probabilidade?: number
+          tempo_max_dias?: number | null
+          tipo?: string
+          updated_at?: string
+        }
+        Update: {
+          ativa?: boolean
+          checklist_saida?: Json
+          cor?: string | null
+          created_at?: string
+          id?: string
+          nome?: string
+          ordem?: number
+          probabilidade?: number
+          tempo_max_dias?: number | null
+          tipo?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      crm_lead_contatos: {
+        Row: {
+          cargo: string | null
+          created_at: string
+          decisor: boolean
+          email: string | null
+          id: string
+          lead_id: string
+          nome: string
+          origem_lead_id: string | null
+          papel: string | null
+          telefone: string | null
+        }
+        Insert: {
+          cargo?: string | null
+          created_at?: string
+          decisor?: boolean
+          email?: string | null
+          id?: string
+          lead_id: string
+          nome: string
+          origem_lead_id?: string | null
+          papel?: string | null
+          telefone?: string | null
+        }
+        Update: {
+          cargo?: string | null
+          created_at?: string
+          decisor?: boolean
+          email?: string | null
+          id?: string
+          lead_id?: string
+          nome?: string
+          origem_lead_id?: string | null
+          papel?: string | null
+          telefone?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_lead_contatos_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "crm_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_lead_contatos_origem_lead_id_fkey"
+            columns: ["origem_lead_id"]
+            isOneToOne: false
+            referencedRelation: "crm_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_lead_contatos_papel_fkey"
+            columns: ["papel"]
+            isOneToOne: false
+            referencedRelation: "crm_papeis_contato"
+            referencedColumns: ["codigo"]
+          },
+        ]
+      }
+      crm_lead_origens: {
+        Row: {
+          lead_id: string
+          origem: string
+        }
+        Insert: {
+          lead_id: string
+          origem: string
+        }
+        Update: {
+          lead_id?: string
+          origem?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_lead_origens_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "crm_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_leads: {
+        Row: {
+          cargo: string | null
+          cnpj: string | null
+          created_at: string
+          created_by: string | null
+          dono_id: string | null
+          email: string | null
+          empresa_id: string | null
+          empresa_texto: string | null
+          id: string
+          interesses: string | null
+          nome: string
+          observacoes: string | null
+          oportunidade_id: string | null
+          origem: string
+          origem_detalhe: string | null
+          papel: string | null
+          status: string
+          telefone: string | null
+          toques: number
+          updated_at: string
+        }
+        Insert: {
+          cargo?: string | null
+          cnpj?: string | null
+          created_at?: string
+          created_by?: string | null
+          dono_id?: string | null
+          email?: string | null
+          empresa_id?: string | null
+          empresa_texto?: string | null
+          id?: string
+          interesses?: string | null
+          nome: string
+          observacoes?: string | null
+          oportunidade_id?: string | null
+          origem?: string
+          origem_detalhe?: string | null
+          papel?: string | null
+          status?: string
+          telefone?: string | null
+          toques?: number
+          updated_at?: string
+        }
+        Update: {
+          cargo?: string | null
+          cnpj?: string | null
+          created_at?: string
+          created_by?: string | null
+          dono_id?: string | null
+          email?: string | null
+          empresa_id?: string | null
+          empresa_texto?: string | null
+          id?: string
+          interesses?: string | null
+          nome?: string
+          observacoes?: string | null
+          oportunidade_id?: string | null
+          origem?: string
+          origem_detalhe?: string | null
+          papel?: string | null
+          status?: string
+          telefone?: string | null
+          toques?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_leads_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "crm_empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_leads_oportunidade_fk"
+            columns: ["oportunidade_id"]
+            isOneToOne: false
+            referencedRelation: "crm_oportunidades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_leads_papel_fkey"
+            columns: ["papel"]
+            isOneToOne: false
+            referencedRelation: "crm_papeis_contato"
+            referencedColumns: ["codigo"]
+          },
+        ]
+      }
+      crm_municipios: {
+        Row: {
+          id: number
+          nome: string
+          uf: string
+        }
+        Insert: {
+          id: number
+          nome: string
+          uf: string
+        }
+        Update: {
+          id?: number
+          nome?: string
+          uf?: string
+        }
+        Relationships: []
+      }
+      crm_oportunidades: {
+        Row: {
+          contato_id: string | null
+          created_at: string
+          created_by: string | null
+          data_prevista_fechamento: string | null
+          dono_id: string | null
+          empresa_id: string
+          fase_desde: string
+          fase_id: string
+          id: string
+          lead_id: string | null
+          motivo_encerramento: string | null
+          observacoes: string | null
+          probabilidade: number | null
+          produto_alvo: string | null
+          proxima_acao_data: string | null
+          proxima_acao_descricao: string | null
+          titulo: string
+          updated_at: string
+          valor_mrr: number | null
+          valor_setup: number | null
+        }
+        Insert: {
+          contato_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          data_prevista_fechamento?: string | null
+          dono_id?: string | null
+          empresa_id: string
+          fase_desde?: string
+          fase_id: string
+          id?: string
+          lead_id?: string | null
+          motivo_encerramento?: string | null
+          observacoes?: string | null
+          probabilidade?: number | null
+          produto_alvo?: string | null
+          proxima_acao_data?: string | null
+          proxima_acao_descricao?: string | null
+          titulo: string
+          updated_at?: string
+          valor_mrr?: number | null
+          valor_setup?: number | null
+        }
+        Update: {
+          contato_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          data_prevista_fechamento?: string | null
+          dono_id?: string | null
+          empresa_id?: string
+          fase_desde?: string
+          fase_id?: string
+          id?: string
+          lead_id?: string | null
+          motivo_encerramento?: string | null
+          observacoes?: string | null
+          probabilidade?: number | null
+          produto_alvo?: string | null
+          proxima_acao_data?: string | null
+          proxima_acao_descricao?: string | null
+          titulo?: string
+          updated_at?: string
+          valor_mrr?: number | null
+          valor_setup?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_oportunidades_contato_id_fkey"
+            columns: ["contato_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contatos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_oportunidades_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "crm_empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_oportunidades_fase_id_fkey"
+            columns: ["fase_id"]
+            isOneToOne: false
+            referencedRelation: "crm_fases_funil"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_oportunidades_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "crm_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_papeis_contato: {
+        Row: {
+          ativo: boolean
+          codigo: string
+          decisor_padrao: boolean
+          nome: string
+          ordem: number
+        }
+        Insert: {
+          ativo?: boolean
+          codigo: string
+          decisor_padrao?: boolean
+          nome: string
+          ordem?: number
+        }
+        Update: {
+          ativo?: boolean
+          codigo?: string
+          decisor_padrao?: boolean
+          nome?: string
+          ordem?: number
+        }
+        Relationships: []
+      }
       damage_reasons: {
         Row: {
           active: boolean
