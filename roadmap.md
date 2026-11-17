@@ -1,9 +1,15 @@
 # Roadmap
+- [x] CRM: conferidos 13 arquivos de marca, oito arquivos do gerador original, seis exemplos DOCX e Levantamento_MYIO.xlsx (Instruções, SHOPPING 1, SHOPPING 2); recebidos como referências, nenhum documento/visual do ERP substituído.
+- [ ] CRM: adaptar os modelos originais BAS/Shoppings/Expansão/Realocação e levantamento ao ERP após completar o mapeamento dos dados; gerador depende de tipos/condições/composição ausentes no modelo atual, preservando separação da memória interna.
+- [x] CRM: indice.csv conferido — 139 arquivos: 41 gerados, 16 importados, 68 legados e 14 levantamentos; nenhum destes arquivos corresponde aos anexos enviados até agora.
+- [ ] CRM: importar arquivos privados históricos — aguarda o ZIP/pastas dos 139 documentos relacionados em indice.csv; índice contém caminhos/tamanhos/hashes, não os arquivos.
 - [x] Avisar Leonardo ao concluir OpDesk para receber o banco de dados do CRM enviado pelo João.
 - [x] OpDesk: base isolada de clientes/tarefas/subtarefas, colaboração autenticada para usuários com acesso, regras de fluxo e histórico auditado; criação, bloqueio da principal e liberação após conclusão da sub-tarefa conferidos.
 - [x] OpDesk: painel global Quadro/Tabela, clientes próprios, responsáveis do ERP, filtros múltiplos CDE, ordenação/exportações e editor com observações/anexos; download original, CSV e exclusão auditada do anexo conferidos.
 - [x] OpDesk: chamado anterior e 44 links Site Survey preservados; fechamento 48h agendado a cada 15 minutos com execução conferida, bucket privado 20 MB; computador/celular verificados, arraste salvo e relido com histórico, registros temporários removidos. 20 testes passaram; não publicado.
-- [ ] CRM: receber o banco enviado pelo João para analisar a importação — aguarda o arquivo de Leonardo.
+- [x] CRM: recebido public.dump, manifest.txt e contagem-por-tabela.csv do João via Leonardo; analisar sem restaurar sobre o ERP ou alterar o CRM original.
+- [x] CRM: integridade SHA-256 e contagens do backup conferidas sem escrita no ERP: 47 tabelas e 19.045 registros; 1.627 leads, 136 oportunidades, 141 propostas, 7.567 atividades. Sem logins/senhas no backup. CRM original intacto.
+- [ ] CRM: mapear as 47 tabelas de origem para as 23 atuais do ERP, completar lacunas de insumos/composição/levantamentos/regras e mapear quatro perfis sem conceder acessos; importar com preservação de valores e vínculos após conferência.
 - [ ] OpDesk: importar dados do painel anterior — depende de exportação dos registros/anexos; o MD recebido contém apenas a especificação.
 - [x] Acessos: rótulos soltos Nome/E-mail/Cargo aprovador/Cargo/Perfil removidos por não corresponderem a colunas; funil CDE à direita de Usuários cadastrados, ordenação com largura própria e fonte CDE. Conferidos 17 usuários reais em 1280/390 px, filtros Nome Alexandre + Perfil Customizado, remoção individual e ordenação por perfil, sem erros/excesso lateral; 24 testes passaram, biblioteca regenerada, nenhum acesso alterado. Não publicado.
 - [x] Explicado: Perfis por app reuniu os controles existentes de Supply, Site Survey, Mytosis e Code; os demais apps são liberados em Usuários e aplicativos, sem editor próprio de perfis. Nenhum perfil ou permissão criado nesta pergunta.

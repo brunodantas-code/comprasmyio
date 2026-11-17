@@ -36,7 +36,12 @@ Trazer o CRM (hoje em crm-myio.vercel.app, app Next.js separado com login e banc
 - WhatsApp avaliado: o CRM original classifica telefones, não envia mensagens. Modelos locais podem ser copiados; envio real depende de conexão WhatsApp Business e implementação específica, não incluída nesta fase.
 
 ### Fase 6 — Migração dos dados atuais
-- **Preciso de um export dos dados atuais do CRM** (backup do banco, gerado pelo João Paulo com o script `backup-db.sh` do próprio CRM) para importar empresas, leads, oportunidades, propostas e tabelas de preço sem perder nada.
+- Backup recebido em 17/11/2026: `public.dump`, `manifest.txt` e `contagem-por-tabela.csv`. Integridade SHA-256 confirmada e todas as contagens conferidas: 47 tabelas, 19.045 registros, incluindo 1.627 leads, 136 oportunidades e 141 propostas.
+- O CRM interno possui 23 tabelas; a origem também contém cadastros de insumos, composição, levantamentos e regras ainda sem correspondência direta. Mapear e completar a estrutura antes de importar, preservando valores históricos, vínculos e identificadores.
+- Mapear os quatro perfis de origem aos usuários existentes do ERP, sem importar papéis administrativos ou substituir o login. O backup não contém usuários/senhas de autenticação nem arquivos privados.
+- Recebidos 13 arquivos de marca, oito arquivos do gerador, seis exemplos DOCX e o modelo `Levantamento_MYIO.xlsx`; adaptar os modelos originais sem substituir as regras pela versão simplificada do ERP. Memória interna e rateio continuam fora dos documentos enviados ao cliente.
+- `indice.csv` relaciona 139 arquivos privados (41 gerados, 16 importados, 68 legados, 14 levantamentos); o conteúdo desses arquivos ainda precisa ser enviado em ZIP/pastas para preservar anexos históricos. Os seis exemplos são referências, não substituem os documentos listados.
+- Importar somente dados transformados para as tabelas CRM do ERP; nunca executar o backup integral sobre o banco do ERP nem importar permissões, funções e gatilhos do CRM antigo.
 
 ### Fase 7 — Vínculos e desativação do CRM antigo
 - Ações de Atas (Legal) e To Dos (Central) vinculadas a registros do CRM, como solicitado.
