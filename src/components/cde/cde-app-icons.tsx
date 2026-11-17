@@ -25,15 +25,15 @@ const STD = "Sem barra inferior";
 
 const APPS: App[] = [
   { name: "Supply", icon: Settings, iconName: "Settings", groups: [
-    { title: "Barra inferior", items: [i("Solicitações", ClipboardList, "ClipboardList"), i("Approvals", ShoppingCart, "ShoppingCart"), i("Armazém", Boxes, "Boxes"), i("Cadastro", FolderKanban, "FolderKanban"), i("Usuários e logs", Users, "Users")] },
-    { title: "Submenus", items: [i("Novas Solicitações", Plus, "Plus"), i("Approvals (todos)", ShoppingCart, "ShoppingCart"), i("Armazém (todos)", Boxes, "Boxes"), i("Clientes", Building2, "Building2"), i("Centro de Custo", Landmark, "Landmark"), i("Etiquetas", Tag, "Tag"), i("Cargos", Briefcase, "Briefcase"), i("Lembretes", Bell, "Bell"), i("Diversos", Layers3, "Layers3"), i("Perfis de acesso", ShieldCheck, "ShieldCheck"), i("Alçadas/Organograma", CheckCircle2, "CheckCircle2"), i("Logs", ScrollText, "ScrollText"), i("Backup", DatabaseBackup, "DatabaseBackup"), i("Manual do Usuário", BookOpen, "BookOpen")] },
+    { title: "Barra inferior", items: [i("Solicitações", ClipboardList, "ClipboardList"), i("Approvals", ShoppingCart, "ShoppingCart"), i("Armazém", Boxes, "Boxes"), i("Cadastro", FolderKanban, "FolderKanban"), i("Aprovações e logs", CheckCircle2, "CheckCircle2")] },
+    { title: "Submenus", items: [i("Novas Solicitações", Plus, "Plus"), i("Approvals (todos)", ShoppingCart, "ShoppingCart"), i("Armazém (todos)", Boxes, "Boxes"), i("Clientes", Building2, "Building2"), i("Centro de Custo", Landmark, "Landmark"), i("Etiquetas", Tag, "Tag"), i("Cargos", Briefcase, "Briefcase"), i("Lembretes", Bell, "Bell"), i("Diversos", Layers3, "Layers3"), i("Alçadas/Organograma", CheckCircle2, "CheckCircle2"), i("Logs", ScrollText, "ScrollText"), i("Backup", DatabaseBackup, "DatabaseBackup"), i("Manual do Usuário", BookOpen, "BookOpen")] },
   ] },
   { name: "Cash Flow", icon: DollarSign, iconName: "DollarSign", groups: [
     { title: "Barra inferior", items: [i("Contas a pagar", ReceiptText, "ReceiptText"), i("Plano de Contas", ListTree, "ListTree"), i("Caixa", WalletCards, "WalletCards")] },
   ] },
   { name: "Site Survey", icon: Search, iconName: "Search", groups: [
-    { title: "Barra inferior", items: [i("Visitas", CalendarDays, "CalendarDays"), i("Checklists", ClipboardCheck, "ClipboardCheck"), i("Cadastro", Package, "Package"), i("Usuários", UsersRound, "UsersRound")] },
-    { title: "Submenus", items: [i("Nova visita", Plus, "Plus"), i("Realizar Visita", CalendarDays, "CalendarDays"), i("Sanar Pendências", ClipboardCheck, "ClipboardCheck"), i("Histórico de Visitas", FileText, "FileText"), i("Perfis de acesso", ShieldCheck, "ShieldCheck"), i("Logs", History, "History")] },
+    { title: "Barra inferior", items: [i("Visitas", CalendarDays, "CalendarDays"), i("Checklists", ClipboardCheck, "ClipboardCheck"), i("Cadastro", Package, "Package"), i("Logs", History, "History")] },
+    { title: "Submenus", items: [i("Nova visita", Plus, "Plus"), i("Realizar Visita", CalendarDays, "CalendarDays"), i("Sanar Pendências", ClipboardCheck, "ClipboardCheck"), i("Histórico de Visitas", FileText, "FileText")] },
   ] },
   { name: "OpDesk", icon: Phone, iconName: "Phone", groups: [{ title: STD, items: [i("Adicionar chamado (redondo)", Plus, "Plus")] }] },
   { name: "CRM", icon: CrmFunnelIcon, iconName: "CrmFunnelIcon", groups: [{ title: "Aplicativo externo", items: [] }] },
@@ -44,15 +44,15 @@ const APPS: App[] = [
   { name: "RH", icon: UsersRound, iconName: "UsersRound", groups: [{ title: STD, items: [] }] },
   { name: "Code", icon: CodeXml, iconName: "CodeXml", groups: [{ title: STD, items: [i("Tickets", CodeXml, "CodeXml"), i("Novo ticket", Plus, "Plus")] }] },
   { name: "Mytosis", icon: MytosisIcon, iconName: "MytosisIcon", groups: [
-    { title: "Barra inferior", items: [i("OKRs", Target, "Target"), i("Fluxogramas", Workflow, "Workflow"), i("Processos", BookOpen, "BookOpen"), i("KPIs", Gauge, "Gauge"), i("Usuários", UsersRound, "UsersRound")] },
+    { title: "Barra inferior", items: [i("OKRs", Target, "Target"), i("Fluxogramas", Workflow, "Workflow"), i("Processos", BookOpen, "BookOpen"), i("KPIs", Gauge, "Gauge")] },
   ] },
   { name: "CDE", icon: CdeIcon, iconName: "CdeIcon", groups: [{ title: STD, items: [i("Criar modelo", Plus, "Plus")] }] },
 ];
 
 /** Submenu → main menu it belongs to, per app (used to draw the menu tree). */
 const SUB_PARENT: Record<string, Record<string, string>> = {
-  Supply: { "Novas Solicitações": "Solicitações", "Approvals (todos)": "Approvals", "Armazém (todos)": "Armazém", Clientes: "Cadastro", "Centro de Custo": "Cadastro", Etiquetas: "Cadastro", Cargos: "Cadastro", Lembretes: "Cadastro", Diversos: "Cadastro", "Manual do Usuário": "Cadastro", "Perfis de acesso": "Usuários e logs", "Alçadas/Organograma": "Usuários e logs", Logs: "Usuários e logs", Backup: "Usuários e logs" },
-  "Site Survey": { "Nova visita": "Visitas", "Realizar Visita": "Visitas", "Sanar Pendências": "Visitas", "Histórico de Visitas": "Visitas", "Perfis de acesso": "Usuários", Logs: "Usuários" },
+  Supply: { "Novas Solicitações": "Solicitações", "Approvals (todos)": "Approvals", "Armazém (todos)": "Armazém", Clientes: "Cadastro", "Centro de Custo": "Cadastro", Etiquetas: "Cadastro", Cargos: "Cadastro", Lembretes: "Cadastro", Diversos: "Cadastro", "Manual do Usuário": "Cadastro", "Alçadas/Organograma": "Aprovações e logs", Logs: "Aprovações e logs", Backup: "Aprovações e logs" },
+  "Site Survey": { "Nova visita": "Visitas", "Realizar Visita": "Visitas", "Sanar Pendências": "Visitas", "Histórico de Visitas": "Visitas" },
 };
 
 function MenuTree({ app, groups }: { app: string; groups: Group[] }) {

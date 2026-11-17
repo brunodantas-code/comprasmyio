@@ -25,7 +25,6 @@ import { SiteSurveyVisitDelete } from "@/components/site-survey-visit-delete";
 import { SiteSurveyVisitReset } from "@/components/site-survey-visit-reset";
 import { SiteSurveyEnvironmentManager } from "@/components/site-survey-environment-manager";
 import { SiteSurveyLucManager, type ShopCatalogOption } from "@/components/site-survey-luc-manager";
-import { SiteSurveyProfilesAdmin } from "@/components/site-survey-profiles-admin";
 import { SiteSurveyReportButton } from "@/components/site-survey-report";
 import { SiteSurveyProposalButton } from "@/components/site-survey-proposal";
 import { SiteSurveyClientPendingReport } from "@/components/site-survey-client-pending-report";
@@ -183,7 +182,6 @@ function SiteSurveyPage() {
   const qc = useQueryClient();
   const [section, setSection] = useState("visitas");
   const [visitsSection, setVisitsSection] = useState("minhas");
-  const [userSection, setUserSection] = useState("lista");
   const statusFilter = "todos";
   const search = "";
   const [selected, setSelected] = useState<Visit | null>(null);
@@ -299,14 +297,9 @@ function SiteSurveyPage() {
     { value: "visitas", label: "Visitas", icon: CalendarDays, allowed: can("site_survey_visitas_minhas") || can("site_survey_visitas_todas") },
     { value: "checklists", label: "Checklists", icon: ClipboardCheck, allowed: can("site_survey_configuracoes") },
     { value: "cadastro", label: "Cadastro", icon: Package, allowed: can("site_survey_cadastro") || can("site_survey_configuracoes") },
-    { value: "usuarios", label: "Usuários", icon: UsersRound, allowed: can("site_survey_usuarios") || can("site_survey_perfis") || can("site_survey_logs") },
-  ].filter((item) => item.allowed);
-  const orderedTabs = sortByMenuOrder(tabs, menuOrders?.["Site Survey|Barra inferior"]);
-  const userTabs = [
-    { value: "lista", label: "Usuários", icon: UsersRound, allowed: can("site_survey_usuarios") },
-    { value: "perfis", label: "Perfis de acesso", icon: ShieldCheck, allowed: can("site_survey_perfis") },
     { value: "logs", label: "Logs", icon: History, allowed: can("site_survey_logs") },
   ].filter((item) => item.allowed);
+  const orderedTabs = sortByMenuOrder(tabs, menuOrders?.["Site Survey|Barra inferior"]);
 
   return <div className="min-h-screen bg-background">
     <AppHeader manualApp="Site Survey" logo={<MyioAppLogo appName="Site Survey" className="text-base sm:text-2xl" />} />
@@ -362,28 +355,22 @@ function SiteSurveyPage() {
         </TabsContent>
         <TabsContent value="checklists"><ChecklistAdmin data={data} onChanged={invalidate} /></TabsContent>
         <TabsContent value="cadastro"><SurveyCatalogAdmin data={data} onChanged={invalidate} /></TabsContent>
-        <TabsContent value="usuarios">
-          <Tabs value={userSection} onValueChange={setUserSection}>
-            {can("site_survey_usuarios") ? <TabsContent value="lista"><SurveyUsersAdmin /></TabsContent> : null}
-            {can("site_survey_perfis") ? <TabsContent value="perfis"><SiteSurveyProfilesAdmin /></TabsContent> : null}
-            {can("site_survey_logs") ? <TabsContent value="logs"><SurveyLogs names={names} /></TabsContent> : null}
-          </Tabs>
-        </TabsContent>
+        {can("site_survey_logs") ? <TabsContent value="logs"><SurveyLogs names={names} /></TabsContent> : null}
       </Tabs>
     </main>
     <AppNavigation className={ml.nav} aria-label="Navegação do Site Survey">
       <div className={`mx-auto grid max-w-md grid-cols-4 items-stretch ${ml.grid} rounded-[1.75rem] border border-border bg-card/95 p-1.5 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-card/90`}>
         {orderedTabs.map(({ value, label, icon: Icon }) => {
           const active = section === value;
-          const hasSubmenu = value === "visitas" || value === "usuarios";
+          const hasSubmenu = value === "visitas";
           const selectSection = () => setSection(value);
           const item = <span className="flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 px-1"><span className="menu-icon"><Icon className="h-5 w-5 shrink-0" /></span><span className="max-w-full truncate text-[10px] font-semibold leading-none">{label}</span></span>;
           const itemClassName = `h-auto min-w-0 rounded-[1.35rem] p-0 shadow-none ${active ? "!bg-primary/15 !text-primary hover:!bg-primary/20 hover:!text-primary" : "!bg-transparent !text-muted-foreground hover:!bg-muted hover:!text-foreground"}`;
           if (!hasSubmenu) return <Button key={value} type="button" variant="ghost" className={itemClassName} onClick={selectSection} aria-current={active ? "page" : undefined}>{item}</Button>;
           const submenuItems = value === "visitas"
             ? [...(can("site_survey_agendar") ? [{ value: "nova", label: "Nova visita", icon: Plus }] : []), { value: "minhas", label: "Realizar Visita", icon: CalendarDays }, { value: "pendencias", label: "Sanar Pendências", icon: ClipboardCheck }, ...(can("site_survey_agendar") ? [{ value: "realizada", label: "Cadastrar visita realizada", icon: ClipboardCheck }] : []), { value: "resumo", label: "Histórico de Visitas", icon: FileText }]
-            : userTabs;
-          return <DropdownMenu key={value}><DropdownMenuTrigger asChild><Button type="button" variant="ghost" className={itemClassName} onClick={selectSection} aria-current={active ? "page" : undefined}>{item}</Button></DropdownMenuTrigger><DropdownMenuContent side={ml.drop} align="center" sideOffset={10} className="w-56 rounded-lg p-1.5 shadow-xl"><DropdownMenuLabel>{label}</DropdownMenuLabel><DropdownMenuSeparator />{submenuItems.map(({ value: subValue, label: subLabel, icon: SubIcon }) => { const subActive = value === "visitas" ? visitsSection === subValue : userSection === subValue; return <DropdownMenuItem key={subValue} className="min-h-11 rounded-md" onSelect={() => { selectSection(); if (value === "visitas") setVisitsSection(subValue); else setUserSection(subValue); }}><SubIcon className="h-4 w-4" /><span className="flex-1">{subLabel}</span>{subActive ? <Check className="h-4 w-4 text-primary" /> : null}</DropdownMenuItem>; })}</DropdownMenuContent></DropdownMenu>;
+            : [];
+          return <DropdownMenu key={value}><DropdownMenuTrigger asChild><Button type="button" variant="ghost" className={itemClassName} onClick={selectSection} aria-current={active ? "page" : undefined}>{item}</Button></DropdownMenuTrigger><DropdownMenuContent side={ml.drop} align="center" sideOffset={10} className="w-56 rounded-lg p-1.5 shadow-xl"><DropdownMenuLabel>{label}</DropdownMenuLabel><DropdownMenuSeparator />{submenuItems.map(({ value: subValue, label: subLabel, icon: SubIcon }) => { const subActive = visitsSection === subValue; return <DropdownMenuItem key={subValue} className="min-h-11 rounded-md" onSelect={() => { selectSection(); setVisitsSection(subValue); }}><SubIcon className="h-4 w-4" /><span className="flex-1">{subLabel}</span>{subActive ? <Check className="h-4 w-4 text-primary" /> : null}</DropdownMenuItem>; })}</DropdownMenuContent></DropdownMenu>;
         })}
       </div>
     </AppNavigation>
@@ -1778,24 +1765,6 @@ function SurveyCatalogAdmin({ data, onChanged }: { data: NonNullable<ReturnType<
 
 function CatalogQuantityFields({ quantity = 1, unit = "un" }: { quantity?: number; unit?: string }) {
   return <div className="grid grid-cols-2 gap-3"><div className="space-y-2"><Label htmlFor="catalog-quantity">Quantidade por ponto</Label><Input id="catalog-quantity" name="quantity" type="number" min="0.0001" step="any" defaultValue={quantity} required /></div><div className="space-y-2"><Label htmlFor="catalog-unit">Unidade</Label><Select name="unit" defaultValue={unit}><SelectTrigger id="catalog-unit"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="m">m</SelectItem><SelectItem value="un">un</SelectItem></SelectContent></Select></div></div>;
-}
-
-function SurveyUsersAdmin() {
-  const [userToRemove, setUserToRemove] = useState<{ id: string; name: string } | null>(null);
-  const [removing, setRemoving] = useState(false);
-  const qc = useQueryClient(); const { data } = useQuery({ queryKey: ["site-survey-users-admin"], queryFn: async () => { const [{ data: accesses }, { data: profiles }, { data: definitions }, { data: surveyProfiles }] = await Promise.all([supabase.from("user_app_access").select("user_id").eq("app_key", "site_survey"), supabase.from("profiles").select("id,full_name,email").is("deleted_at", null).order("full_name"), supabase.from("site_survey_access_profiles").select("code,name").eq("active", true).order("name"), supabase.from("site_survey_user_profiles").select("user_id,profile_code,is_customized")]); const ids = new Set((accesses ?? []).map((item) => item.user_id)); return { users: (profiles ?? []).filter((item) => ids.has(item.id)), definitions: definitions ?? [], surveyProfiles: new Map((surveyProfiles ?? []).map((item) => [item.user_id, item])) }; } });
-  const setProfile = async (userId: string, profileCode: string) => { const { error } = await supabase.from("site_survey_user_profiles").upsert({ user_id: userId, profile_code: profileCode, is_customized: false }); if (error) return toast.error(error.message); await supabase.from("site_survey_user_permissions").delete().eq("user_id", userId); toast.success("Perfil atualizado"); qc.invalidateQueries({ queryKey: ["site-survey-users-admin"] }); };
-  const removeAccess = async () => {
-    if (!userToRemove) return;
-    setRemoving(true);
-    const { error } = await supabase.from("user_app_access").delete().eq("user_id", userToRemove.id).eq("app_key", "site_survey");
-    setRemoving(false);
-    if (error) return toast.error(error.message);
-    setUserToRemove(null);
-    toast.success("Acesso ao Site Survey removido");
-    await qc.invalidateQueries({ queryKey: ["site-survey-users-admin"] });
-  };
-  return <Card><CardHeader><CardTitle>Usuários</CardTitle><CardDescription>Atribua um perfil do Site Survey aos usuários liberados no portal.</CardDescription></CardHeader><CardContent className="space-y-2">{data?.users.map((user) => <div key={user.id} className="grid gap-3 rounded-md border p-3 sm:grid-cols-[1fr_280px_auto] sm:items-center"><div className="min-w-0"><p className="truncate font-medium">{user.full_name || "Sem nome"}</p><p className="truncate text-xs text-muted-foreground">{user.email}</p></div><div className="flex min-w-0 items-center gap-2"><Select value={data.surveyProfiles.get(user.id)?.profile_code ?? "tecnico"} onValueChange={(value) => void setProfile(user.id, value)}><SelectTrigger className="min-w-0 flex-1"><SelectValue /></SelectTrigger><SelectContent>{data.definitions.map((profile) => <SelectItem key={profile.code} value={profile.code}>{profile.name}</SelectItem>)}</SelectContent></Select><Button type="button" variant="ghost" size="compactIcon" aria-label={`Remover ${user.full_name || "usuário"} do Site Survey`} title="Remover acesso" onClick={() => setUserToRemove({ id: user.id, name: user.full_name || user.email || "este usuário" })}><Trash2 className="h-4 w-4" /></Button></div></div>)}<AlertDialog open={Boolean(userToRemove)} onOpenChange={(open) => { if (!open && !removing) setUserToRemove(null); }}><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Remover acesso ao Site Survey?</AlertDialogTitle><AlertDialogDescription>Esta ação removerá o acesso de {userToRemove?.name} somente ao Site Survey. A conta e os acessos aos demais aplicativos serão mantidos.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" disabled={removing} onClick={(event) => { event.preventDefault(); void removeAccess(); }}>{removing ? "Excluindo..." : "Excluir"}</AlertDialogAction><AlertDialogCancel disabled={removing}>Cancelar</AlertDialogCancel></AlertDialogFooter></AlertDialogContent></AlertDialog></CardContent></Card>;
 }
 
 function SurveyLogs({ names }: { names: { clients: Map<string, string>; projects: Map<string, string>; technicians: Map<string, string> } }) {

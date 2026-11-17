@@ -1,7 +1,7 @@
 [
   {
     "file": "components/cde/cde-app-order.tsx",
-    "line": 24,
+    "line": 25,
     "group": "number_section"
   },
   {
@@ -16,7 +16,7 @@
   },
   {
     "file": "components/cde/cde-button-library.tsx",
-    "line": 147,
+    "line": 149,
     "group": "number_subsection"
   },
   {
@@ -51,12 +51,12 @@
   },
   {
     "file": "components/legal/legal-workspace.tsx",
-    "line": 127,
+    "line": 128,
     "group": "number_section"
   },
   {
     "file": "components/legal/legal-workspace.tsx",
-    "line": 135,
+    "line": 136,
     "group": "number_section"
   },
   {
@@ -116,17 +116,7 @@
   },
   {
     "file": "components/site-survey-screen-summary.tsx",
-    "line": 214,
-    "group": "number_subsection"
-  },
-  {
-    "file": "components/site-survey-screen-summary.tsx",
-    "line": 214,
-    "group": "number_subsection"
-  },
-  {
-    "file": "components/site-survey-screen-summary.tsx",
-    "line": 214,
+    "line": 215,
     "group": "number_subsection"
   },
   {
@@ -137,6 +127,16 @@
   {
     "file": "components/site-survey-screen-summary.tsx",
     "line": 215,
+    "group": "number_subsection"
+  },
+  {
+    "file": "components/site-survey-screen-summary.tsx",
+    "line": 216,
+    "group": "number_subsection"
+  },
+  {
+    "file": "components/site-survey-screen-summary.tsx",
+    "line": 216,
     "group": "number_subsection"
   },
   {
@@ -161,17 +161,17 @@
   },
   {
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 432,
+    "line": 419,
     "group": "number_section"
   },
   {
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1683,
+    "line": 1673,
     "group": "number_subsection"
   },
   {
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1962,
+    "line": 1934,
     "group": "number_subsection"
   }
 ]

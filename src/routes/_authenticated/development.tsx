@@ -37,7 +37,6 @@ import { filterCodeUsers } from "@/lib/code-user-search";
 import { isCodeQuestionForUser, unansweredCodeQuestions } from "@/lib/code-pending";
 import { codeQuestionResponders } from "@/lib/code-pending";
 import { CdeDisclosureIcon } from "@/components/cde/cde-button";
-import { CodeAppAttendants } from "@/components/code-app-attendants";
 import { CodeTicketLifecycleActions } from "@/components/code-ticket-lifecycle-actions";
 import { UsersRound, X, Save } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -153,7 +152,6 @@ function DevelopmentPage() {
   const navigate = useNavigate();
   const routeSearch = Route.useSearch();
   const [createOpen, setCreateOpen] = useState(false);
-  const [usersOpen, setUsersOpen] = useState(false);
   const [searchOp, setSearchOp] = useState<FilterOp>("contains");
   const [searchText, setSearchText] = useState("");
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
@@ -238,8 +236,7 @@ function DevelopmentPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <AppHeader manualApp="Code" logo={<MyioAppLogo appName="Code" className="text-base sm:text-2xl" />} menuActions={data?.isAdmin ? [{ label: "Usuários", icon: <UsersRound className="h-5 w-5" />, onClick: () => setUsersOpen(true) }] : undefined} />
-      {data?.isAdmin ? <CodeAppAttendants open={usersOpen} onOpenChange={setUsersOpen} admins={data.codeAdmins} appNames={APP_NAMES} /> : null}
+      <AppHeader manualApp="Code" logo={<MyioAppLogo appName="Code" className="text-base sm:text-2xl" />} />
       <main className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>

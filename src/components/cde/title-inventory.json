@@ -131,7 +131,7 @@
   "kind": "subtitulo",
   "text": "Atribua um perfil do Site Survey aos usuários liberados no portal.",
   "files": [
-   "routes/_authenticated/site-survey.tsx"
+   "components/access/survey-users-admin.tsx"
   ]
  },
  {
@@ -263,6 +263,13 @@
  },
  {
   "kind": "subtitulo",
+  "text": "Custo capitalizável = custo-base do produto no lote vigente + peças de terceiros (importadas e nacionais).",
+  "files": [
+   "components/crm/crm-custos.tsx"
+  ]
+ },
+ {
+  "kind": "subtitulo",
   "text": "Dê um nome, anexe documentos e escolha as quantidades dos itens importados.",
   "files": [
    "components/import-batches.tsx"
@@ -272,7 +279,7 @@
   "kind": "subtitulo",
   "text": "Defina o cargo principal da cadeia, cargos adicionais e o perfil de acesso.",
   "files": [
-   "routes/_authenticated/dashboard.tsx"
+   "components/access/users-admin.tsx"
   ]
  },
  {
@@ -424,6 +431,13 @@
  },
  {
   "kind": "titulo",
+  "text": "Kits",
+  "files": [
+   "components/crm/crm-custos.tsx"
+  ]
+ },
+ {
+  "kind": "titulo",
   "text": "Lembretes de approvals pendentes",
   "files": [
    "components/reminders-tab.tsx"
@@ -448,6 +462,13 @@
   "text": "Logs de pedidos",
   "files": [
    "routes/_authenticated/dashboard.tsx"
+  ]
+ },
+ {
+  "kind": "titulo",
+  "text": "Lotes de custo e custo-base",
+  "files": [
+   "components/crm/crm-custos.tsx"
   ]
  },
  {
@@ -606,6 +627,13 @@
   ]
  },
  {
+  "kind": "titulo",
+  "text": "Parâmetros do cálculo",
+  "files": [
+   "components/crm/crm-custos.tsx"
+  ]
+ },
+ {
   "kind": "subtitulo",
   "text": "Pedidos com mercadoria extraviada ou perdida em transporte.",
   "files": [
@@ -755,6 +783,13 @@
  },
  {
   "kind": "titulo",
+  "text": "Tabela de preços",
+  "files": [
+   "components/crm/crm-custos.tsx"
+  ]
+ },
+ {
+  "kind": "titulo",
   "text": "Tipos de Etapa Adicional",
   "files": [
    "components/additional-step-types-tab.tsx"
@@ -796,17 +831,31 @@
   ]
  },
  {
+  "kind": "subtitulo",
+  "text": "Usados na memória de cálculo das propostas (rateio locação/serviços e testes).",
+  "files": [
+   "components/crm/crm-custos.tsx"
+  ]
+ },
+ {
   "kind": "titulo",
   "text": "Usuários",
   "files": [
-   "routes/_authenticated/site-survey.tsx"
+   "components/access/survey-users-admin.tsx"
   ]
  },
  {
   "kind": "titulo",
   "text": "Usuários cadastrados",
   "files": [
-   "routes/_authenticated/dashboard.tsx"
+   "components/access/users-admin.tsx"
+  ]
+ },
+ {
+  "kind": "subtitulo",
+  "text": "Vale o lote dentro da vigência e não encerrado; um lote validado tem prioridade sobre um de exemplo.",
+  "files": [
+   "components/crm/crm-custos.tsx"
   ]
  },
  {

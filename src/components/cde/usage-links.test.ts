@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 import { usageTargets } from "./usage-links";
 
 describe("CDE usage destinations", () => {
-  it("opens access profiles under Supply administration", () => {
-    expect(usageTargets("components/access-profiles-tab.tsx")[0]).toEqual({ to: "/dashboard", label: "Supply", search: { section: "admin", subsection: "acesso-restrito" } });
+  it("opens Supply access profiles under centralized Acessos", () => {
+    expect(usageTargets("components/access-profiles-tab.tsx")[0]).toEqual({ to: "/acessos", label: "Acessos", search: { section: "perfis", app: "supply" } });
   });
   it("opens client categories under Diversos", () => {
     expect(usageTargets("components/client-categories-tab.tsx")[0]?.search).toEqual({ section: "projects", subsection: "diversos" });

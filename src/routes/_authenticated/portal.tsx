@@ -5,14 +5,13 @@ import { TopIconStyleVars } from "@/components/cde/top-icon-style";
 import { PendingGroups } from "@/components/pending-groups";
 import { useState } from "react";
 import type React from "react";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, redirect } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { MessageCircleQuestion, Bell, CheckCircle2, CodeXml, FileSignature, LayoutGrid, Phone, ShieldCheck, ShoppingCart, PackageCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { MyioPlatformLogo } from "@/components/myio-platform-logo";
-import { ErpAppAccessAdmin } from "@/components/erp-app-access-admin";
 import { useAppOrder, useAppTile, APP_TILE_DEFAULT, appTileColorVars, homeHeaderVars, homeHeaderLogoTone, mobileTileVars } from "@/components/cde/app-order-config";
 import { AppTileFace } from "@/components/cde/app-tile";
 import { CorporateBanner } from "@/components/corporate/corporate-banner";
@@ -28,6 +27,7 @@ import { CriticalGroup, useCriticalPending } from "@/components/central/critical
 
 export const Route = createFileRoute("/_authenticated/portal")({
   validateSearch: (search: Record<string, unknown>): { view?: "users" } => (search.view === "users" ? { view: "users" } : {}),
+  beforeLoad: ({ search }) => { if (search.view === "users") throw redirect({ to: "/acessos", search: { section: "usuarios" } }); },
   component: PortalPage,
   head: () => ({
     meta: [
@@ -208,7 +208,6 @@ function PortalPage() {
               return <div key={section} data-portal-section={section} className="mb-10 empty:hidden">{block}</div>;
             })}
           </TabsContent>
-          {data.isErpAdmin ? <TabsContent value="users"><ErpAppAccessAdmin /></TabsContent> : null}
         </Tabs>
       </main>
       <ChangePasswordDialog open={passwordOpen} onOpenChange={setPasswordOpen} />

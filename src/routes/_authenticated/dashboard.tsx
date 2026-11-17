@@ -22,7 +22,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { MyioLogo } from "@/components/myio-logo";
 import { supabase } from "@/integrations/supabase/client";
 import { exportDatabaseBackup } from "@/lib/backup.functions";
-import { decideUserDeletion, requestUserDeletion, setUserAccessProfile, setUserAdditionalJobTitles } from "@/lib/user-admin.functions";
 import { lookupLinkPrice } from "@/lib/price-lookup.functions";
 import { getProjectBudgetSummaries, type ProjectBudgetSummary } from "@/lib/project-budget.functions";
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -73,8 +72,6 @@ import { DamageReasonsTab } from "@/components/damage-reasons-tab";
 import { MaterialStockTypesTab, useMaterialStockTypes } from "@/components/material-stock-types-tab";
 import { MaterialsRegistryTab, MyioDevicesRegistryTab } from "@/components/materials-registry-tab";
 import { ClientCategoriesTab } from "@/components/client-categories-tab";
-import { AccessProfilesTab } from "@/components/access-profiles-tab";
-import { AccessProfileDefinitionsTab, useAccessProfileDefinitions } from "@/components/access-profile-definitions-tab";
 import { ImportBatchesSection, NewImportDialog } from "@/components/import-batches";
 import { AddressAutocomplete } from "@/components/address-autocomplete";
 import { LinkedRecordDeletionDialog } from "@/components/linked-record-deletion-dialog";
@@ -92,6 +89,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Save } from "lucide-react";
 import { MilestoneTimeline } from "@/components/milestone-timeline";
 import { UserManualsTab } from "@/components/user-manuals-tab";
+import { legacySupplyAccessDestination } from "@/lib/access-management";
 
 
 
@@ -101,7 +99,11 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
     subsection: typeof search.subsection === "string" ? search.subsection : undefined,
     ...(typeof search.order === "string" ? { order: search.order } : {}),
   }),
-  beforeLoad: async ({ context }) => {
+  beforeLoad: async ({ context, search }) => {
+    if (search.section === "admin") {
+      const destination = legacySupplyAccessDestination(search.subsection ?? "usuarios");
+      if (destination) throw redirect({ to: "/acessos", search: destination });
+    }
     const { data } = await supabase.from("user_app_access").select("app_key").eq("user_id", context.user.id).eq("app_key", "supply").maybeSingle();
     if (!data) throw redirect({ to: "/portal" });
   },
@@ -631,7 +633,8 @@ function Dashboard() {
       return data as Order | null;
     },
   });
-  const linkedDialog = linkedOrder ? <OrderReportDialog key={linkedOrder.id} order={linkedOrder} projectName={() => '—'} initiallyOpen /> : null;
+  const navigate = Route.useNavigate();
+  const linkedDialog = linkedOrder ? <OrderReportDialog key={linkedOrder.id} order={linkedOrder} projectName={() => '—'} initiallyOpen onLinkedClose={() => void navigate({ search: previous => ({ ...previous, order: undefined }), replace: true })} /> : null;
   const { data: me, isLoading: meLoading } = useCurrentUser();
   const [section, setSection] = useState(search.section);
   const [requestSection, setRequestSection] = useState<string | undefined>(search.section === "pedidos" ? search.subsection : undefined);
@@ -669,8 +672,6 @@ function Dashboard() {
     { value: "diversos", allowed: me.canAccess("cadastro_diversos") },
   ].filter((tab) => tab.allowed);
   const administrationTabs = [
-    { value: "usuarios", allowed: me.canAccess("usuarios_lista") },
-    { value: "acesso-restrito", allowed: me.canAccess("usuarios_acesso_restrito") },
     { value: "workflow", allowed: me.canAccess("usuarios_workflow") },
     { value: "logs", allowed: me.canAccess("usuarios_logs") },
     { value: "backup", allowed: me.canAccess("usuarios_backup") },
@@ -694,7 +695,7 @@ function Dashboard() {
     { value: "queue", label: "Approvals", icon: ShoppingCart, allowed: canSeeQueue },
     { value: "stock", label: "Armazém", icon: Boxes, allowed: canSeeStock },
     { value: "projects", label: "Cadastro", icon: FolderKanban, allowed: canSeeRegistration },
-    { value: "admin", label: "Usuários e logs", icon: Users, allowed: canSeeAdministration },
+    { value: "admin", label: "Aprovações e logs", icon: CheckCircle2, allowed: canSeeAdministration },
   ].filter((item) => item.allowed);
   const orderedNavigationTabs = sortByMenuOrder(navigationTabs, menuOrders?.["Supply|Barra inferior"]);
 
@@ -767,13 +768,6 @@ function Dashboard() {
           {canSeeAdministration && (
             <TabsContent value="admin">
               <Tabs value={activeAdministrationSection} onValueChange={setAdministrationSection}>
-                {me.canAccess("usuarios_lista") && <TabsContent value="usuarios"><UsersAdmin /></TabsContent>}
-                {me.canAccess("usuarios_acesso_restrito") && <TabsContent value="acesso-restrito">
-                  <div className="space-y-6">
-                    <AccessProfileDefinitionsTab />
-                    <AccessProfilesTab />
-                  </div>
-                </TabsContent>}
                 {me.canAccess("usuarios_workflow") && <TabsContent value="workflow"><ApprovalWorkflow section={workflowSection} /></TabsContent>}
                 {me.canAccess("usuarios_logs") && <TabsContent value="logs"><LogsAdmin /></TabsContent>}
                 {me.canAccess("usuarios_backup") && <TabsContent value="backup">
@@ -827,7 +821,7 @@ function Dashboard() {
               : value === "projects"
                 ? [{ value: "projetos", label: "Projetos", icon: FolderKanban, allowed: me.canAccess("cadastro_projetos") }, { value: "clientes", label: "Clientes", icon: Building2, allowed: me.canAccess("cadastro_clientes") }, { value: "centros", label: "Centro de Custo", icon: Landmark, allowed: me.canAccess("cadastro_centros") }, { value: "etiquetas", label: "Etiquetas", icon: Tag, allowed: me.canAccess("cadastro_etiquetas") }, { value: "cargos", label: "Cargos", icon: Briefcase, allowed: me.canAccess("cadastro_cargos") }, { value: "lembretes", label: "Lembretes", icon: Bell, allowed: me.canAccess("cadastro_lembretes") }, { value: "diversos", label: "Diversos", icon: Layers3, allowed: me.canAccess("cadastro_diversos") }].filter((item) => item.allowed)
                 : value === "admin"
-                  ? [{ value: "usuarios", label: "Usuários", icon: Users, allowed: me.canAccess("usuarios_lista") }, { value: "acesso-restrito", label: "Perfis de acesso", icon: ShieldCheck, allowed: me.canAccess("usuarios_acesso_restrito") }, { value: "workflow:organograma", label: "Organograma de Aprovação", icon: CheckCircle2, allowed: me.canAccess("usuarios_workflow") }, { value: "workflow:padrao", label: "Alçadas de Aprovação", icon: CheckCircle2, allowed: me.canAccess("usuarios_workflow") }, { value: "workflow:etapas-adicionais", label: "Etapas Adicionais", icon: CheckCircle2, allowed: me.canAccess("usuarios_workflow") }, { value: "logs", label: "Logs", icon: ScrollText, allowed: me.canAccess("usuarios_logs") }, { value: "backup", label: "Backup", icon: DatabaseBackup, allowed: me.canAccess("usuarios_backup") }].filter((item) => item.allowed)
+                  ? [{ value: "workflow:organograma", label: "Organograma de Aprovação", icon: CheckCircle2, allowed: me.canAccess("usuarios_workflow") }, { value: "workflow:padrao", label: "Alçadas de Aprovação", icon: CheckCircle2, allowed: me.canAccess("usuarios_workflow") }, { value: "workflow:etapas-adicionais", label: "Etapas Adicionais", icon: CheckCircle2, allowed: me.canAccess("usuarios_workflow") }, { value: "logs", label: "Logs", icon: ScrollText, allowed: me.canAccess("usuarios_logs") }, { value: "backup", label: "Backup", icon: DatabaseBackup, allowed: me.canAccess("usuarios_backup") }].filter((item) => item.allowed)
                   : [];
             const selectedSubsection = value === "pedidos" ? activeRequestSection : value === "queue" ? activeApprovalSection : value === "stock" ? stockSection : value === "projects" ? activeRegistrationSection : activeAdministrationSection === "workflow" ? `workflow:${workflowSection}` : activeAdministrationSection;
             const selectMain = () => setSection(value);
@@ -3147,13 +3141,14 @@ function fmtDateTime(v?: string | null) {
 }
 
 function OrderReportDialog({
-  order, projectName, requesterName, items = [], initiallyOpen = false,
+  order, projectName, requesterName, items = [], initiallyOpen = false, onLinkedClose,
 }: {
   order: Order;
   projectName: (id: string) => string;
   requesterName?: (id: string) => string;
   items?: PurchaseOrderItem[];
   initiallyOpen?: boolean;
+  onLinkedClose?: () => void;
 }) {
   const [open, setOpen] = useState(initiallyOpen);
   const { data: me } = useCurrentUser();
@@ -3237,12 +3232,12 @@ function OrderReportDialog({
   );
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+    <Dialog open={open} onOpenChange={next => { setOpen(next); if (!next) onLinkedClose?.(); }}>
+      {!initiallyOpen && <DialogTrigger asChild>
         <button type="button" className="text-xs font-normal text-foreground transition-colors hover:text-myio-green data-[state=open]:text-myio-green hover:underline" title="Ver relatório completo">
           {order.approval_number ?? "—"}
         </button>
-      </DialogTrigger>
+      </DialogTrigger>}
       <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Relatório da solicitação {order.approval_number ?? ""}</DialogTitle>
@@ -4178,391 +4173,6 @@ function EditProjectDialog({
 }
 
 /* ---------- Users admin ---------- */
-
-function AdditionalJobTitlesSelect({ titles, value, onChange, disabled = false }: {
-  titles: Array<{ id: string; name: string }>;
-  value: string[];
-  onChange: (value: string[]) => void;
-  disabled?: boolean;
-}) {
-  const [open, setOpen] = useState(false);
-  const selected = new Set(value);
-  const label = value.length === 0 ? "Nenhum" : value.length === 1 ? titles.find((title) => title.id === value[0])?.name ?? "1 cargo" : `${value.length} cargos`;
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          type="button"
-          variant="ghost"
-          className="h-8 w-full min-w-0 justify-start truncate border border-input !bg-background px-2 text-xs font-normal !text-foreground shadow-sm hover:!bg-muted hover:!text-foreground"
-          disabled={disabled}
-        >
-          {label}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent align="start" className="w-72 p-0">
-        <Command>
-          <CommandInput placeholder="Buscar cargo" />
-          <CommandList>
-            <CommandEmpty>Nenhum cargo encontrado.</CommandEmpty>
-            <CommandGroup>
-              {titles.map((title) => {
-                const checked = selected.has(title.id);
-                return (
-                  <CommandItem
-                    key={title.id}
-                    value={title.name}
-                    onSelect={() => onChange(checked ? value.filter((id) => id !== title.id) : [...value, title.id])}
-                  >
-                    <Checkbox checked={checked} aria-label={`Selecionar ${title.name}`} />
-                    <span>{title.name}</span>
-                  </CommandItem>
-                );
-              })}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
-  );
-}
-
-function UsersAdmin() {
-  const qc = useQueryClient();
-  const { data: currentUser } = useCurrentUser();
-  const setAccessProfileFn = useServerFn(setUserAccessProfile);
-  const setAdditionalJobTitlesFn = useServerFn(setUserAdditionalJobTitles);
-  const requestDeletionFn = useServerFn(requestUserDeletion);
-  const decideDeletionFn = useServerFn(decideUserDeletion);
-  const { data, isLoading } = useQuery({
-    queryKey: ["admin-users"],
-    queryFn: async () => {
-      const [{ data: profiles, error: pe }, { data: accessProfiles, error: ae }, { data: menuPermissions, error: me }, { data: titles, error: te }, { data: additionalTitleLinks, error: oe }] = await Promise.all([
-        supabase.from("profiles").select("*").is("deleted_at", null).order("created_at", { ascending: false }),
-        supabase.from("user_access_profiles").select("user_id, profile, profile_definition_id, is_customized, access_profile_definitions(name,base_profile)"),
-        supabase.from("user_menu_permissions").select("user_id, allowed").eq("allowed", true),
-        supabase.from("job_titles").select("id,name").eq("active", true).order("name"),
-        supabase.from("user_additional_job_titles").select("user_id,job_title_id,job_titles(id,name,active)"),
-      ]);
-      if (pe) throw pe;
-      if (ae) throw ae;
-      if (me) throw me;
-      if (te) throw te;
-      if (oe) throw oe;
-      const titleById = new Map((titles ?? []).map((title) => [title.id, title.name]));
-      const accessByUser = new Map((accessProfiles ?? []).map((item) => [item.user_id, item]));
-      const configuredUsers = new Set((menuPermissions ?? []).map((item) => item.user_id));
-      const additionalByUser = new Map<string, Array<{ id: string; name: string; active: boolean }>>();
-      for (const item of additionalTitleLinks ?? []) {
-        const title = item.job_titles as { id: string; name: string; active: boolean } | null;
-        if (!title) continue;
-        const current = additionalByUser.get(item.user_id) ?? [];
-        current.push(title);
-        additionalByUser.set(item.user_id, current);
-      }
-      return (profiles ?? []).map((p) => ({
-        ...p,
-        jobTitleId: p.job_title_id,
-        jobTitleName: p.job_title_id ? titleById.get(p.job_title_id) ?? null : null,
-        accessProfile: accessByUser.get(p.id)?.is_customized ? "customizado" : accessByUser.get(p.id)?.profile_definition_id ?? "restrito",
-        accessProfileBase: accessByUser.get(p.id)?.profile ?? "restrito",
-        accessProfileName: accessByUser.get(p.id)?.is_customized ? "Customizado" : (accessByUser.get(p.id)?.access_profile_definitions as { name?: string } | null)?.name ?? "Restrito",
-        hasConfiguredAccess: configuredUsers.has(p.id),
-        additionalJobTitles: additionalByUser.get(p.id) ?? [],
-      }));
-    },
-  });
-
-  const setJobTitle = useMutation({
-    mutationFn: async ({ userId, jobTitleId }: { userId: string; jobTitleId: string | null }) => {
-      if (jobTitleId) {
-        const { error: cleanupError } = await supabase.from("user_additional_job_titles").delete().eq("user_id", userId).eq("job_title_id", jobTitleId);
-        if (cleanupError) throw cleanupError;
-      }
-      const { error } = await supabase.from("profiles").update({ job_title_id: jobTitleId }).eq("id", userId);
-      if (error) throw error;
-    },
-    onSuccess: () => { toast.success("Cargo atualizado"); qc.invalidateQueries({ queryKey: ["admin-users"] }); },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  const setAccessProfile = useMutation({
-    mutationFn: async ({ userId, profile }: { userId: string; profile: string }) => {
-      await setAccessProfileFn({ data: { userId, profile } });
-    },
-    onSuccess: () => {
-      toast.success("Perfil de acesso atualizado");
-      qc.invalidateQueries({ queryKey: ["admin-users"] });
-      qc.invalidateQueries({ queryKey: ["custom-access-profiles"] });
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  const setAdditionalJobTitles = useMutation({
-    mutationFn: async ({ userId, jobTitleIds }: { userId: string; jobTitleIds: string[] }) => {
-      await setAdditionalJobTitlesFn({ data: { userId, jobTitleIds } });
-    },
-    onSuccess: () => {
-      toast.success("Cargos adicionais atualizados");
-      qc.invalidateQueries({ queryKey: ["admin-users"] });
-      qc.invalidateQueries({ queryKey: ["current-user"] });
-      qc.invalidateQueries({ queryKey: ["pending-actions"] });
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  const { data: deletionRequests } = useQuery({
-    queryKey: ["user-deletion-requests"],
-    queryFn: async () => {
-      const { data: requests, error } = await supabase
-        .from("user_deletion_requests")
-        .select("id, target_user_id, requested_by, decided_by, status, requested_at, decided_at")
-        .order("requested_at", { ascending: false });
-      if (error) throw error;
-      return requests ?? [];
-    },
-  });
-
-  const requestDeletion = useMutation({
-    mutationFn: async (userId: string) => requestDeletionFn({ data: { userId } }),
-    onSuccess: () => {
-      toast.success("Exclusão enviada para aprovação de outro Admin");
-      qc.invalidateQueries({ queryKey: ["user-deletion-requests"] });
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  const decideDeletion = useMutation({
-    mutationFn: async ({ requestId, approve }: { requestId: string; approve: boolean }) => decideDeletionFn({ data: { requestId, approve } }),
-    onSuccess: (_, variables) => {
-      toast.success(variables.approve ? "Exclusão aprovada" : "Exclusão rejeitada");
-      qc.invalidateQueries({ queryKey: ["admin-users"] });
-      qc.invalidateQueries({ queryKey: ["user-deletion-requests"] });
-      qc.invalidateQueries({ queryKey: ["profiles-list"] });
-      qc.invalidateQueries({ queryKey: ["profiles-map"] });
-      qc.invalidateQueries({ queryKey: ["pending-actions"] });
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  const { data: jobTitles } = useJobTitles();
-  const { data: accessProfileDefinitions = [] } = useAccessProfileDefinitions();
-
-  const { data: roleHierarchy } = useQuery({
-    queryKey: ["role-hierarchy"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("job_title_hierarchy").select("job_title_id, approver_job_title_id");
-      if (error) throw error;
-      const map = new Map<string, string | null>();
-      (data ?? []).forEach((r) => map.set(r.job_title_id, r.approver_job_title_id));
-      return map;
-    },
-  });
-
-  const approverLabelOf = (jobTitleId: string | null) => {
-    const next = jobTitleId ? roleHierarchy?.get(jobTitleId) ?? null : null;
-    return next ? jobTitles?.find((title) => title.id === next)?.name ?? "" : "";
-  };
-
-  const [sortBy, setSortBy] = useState<"name" | "profile">("name");
-
-  const isPendingRestrictedUser = (user: NonNullable<typeof data>[number]) =>
-    user.accessProfile === "customizado" && (!user.hasConfiguredAccess || !approverLabelOf(user.jobTitleId));
-  const pendingUsers = (data ?? []).filter(isPendingRestrictedUser);
-  const activeUsers = (data ?? []).filter((user) => !isPendingRestrictedUser(user));
-  const userFilters = useTableFilters(activeUsers, [
-    { key: "name", label: "Nome", value: u => u.full_name },
-    { key: "email", label: "E-mail", value: u => u.email },
-    { key: "approver", label: "Cargo aprovador", value: u => approverLabelOf(u.jobTitleId) },
-    { key: "role", label: "Cargo", value: u => jobTitles?.find(t => t.id === u.jobTitleId)?.name },
-    { key: "profile", label: "Perfil", value: u => u.accessProfileName },
-  ]);
-  const rows = [...userFilters.filtered].sort((a, b) => {
-    if (sortBy === "profile") {
-      const byProfile = String(a.accessProfileName).localeCompare(String(b.accessProfileName), "pt-BR");
-      if (byProfile !== 0) return byProfile;
-    }
-    return String(a.full_name ?? "").localeCompare(String(b.full_name ?? ""), "pt-BR");
-  });
-
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Usuários cadastrados</CardTitle>
-        <CardDescription>Defina o cargo principal da cadeia, cargos adicionais e o perfil de acesso.</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
-        <>
-          <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-            {["name", "email", "approver", "role", "profile"].map(key => <span key={key}>{userFilters.header(key)}</span>)}
-            <Select value={sortBy} onValueChange={(value) => setSortBy(value as "name" | "profile")}>
-              <SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="name">Ordenar por nome</SelectItem>
-                <SelectItem value="profile">Ordenar por perfil</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          {userFilters.summary}
-          {pendingUsers.length > 0 ? (
-            <div className="space-y-2">
-              <h4 className="text-sm font-bold">Usuários pendentes</h4>
-              {pendingUsers.map((user) => (
-                <div key={user.id} className="grid gap-3 rounded-lg border border-border p-3 sm:grid-cols-[minmax(0,1fr)_minmax(180px,260px)_auto] sm:items-end">
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-medium">{user.full_name || user.email || "Usuário"}</p>
-                    <p className="truncate text-xs text-muted-foreground">{user.email || "E-mail não informado"}</p>
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <span className="text-[10px] font-medium text-muted-foreground">Cargo</span>
-                    <Select
-                      value={user.jobTitleId ?? "none"}
-                      onValueChange={(value) => setJobTitle.mutate({ userId: user.id, jobTitleId: value === "none" ? null : value })}
-                    >
-                      <SelectTrigger className="h-8 w-full text-xs"><SelectValue placeholder="Sem cargo" /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">Sem cargo</SelectItem>
-                        {(jobTitles ?? []).map((title) => <SelectItem key={title.id} value={title.id}>{title.name}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="flex flex-wrap gap-1 sm:justify-end">
-                    {!user.hasConfiguredAccess ? <Badge variant="outline">Aguardando liberação de menus</Badge> : null}
-                    {!approverLabelOf(user.jobTitleId) ? <Badge variant="outline">Aguardando definição do aprovador</Badge> : null}
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : null}
-          {(deletionRequests ?? []).some((request) => request.status === "pendente") ? (
-            <div className="space-y-2">
-              <h4 className="text-sm font-bold">Exclusões pendentes</h4>
-              {(deletionRequests ?? []).filter((request) => request.status === "pendente").map((request) => {
-                const target = data?.find((user) => user.id === request.target_user_id);
-                const requester = data?.find((user) => user.id === request.requested_by);
-                const canDecide = request.requested_by !== currentUser?.id;
-                return (
-                  <div key={request.id} className="flex flex-col gap-2 rounded-lg border border-border p-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                      <p className="text-sm font-medium">{target?.full_name || target?.email || "Usuário"}</p>
-                      <p className="text-xs text-muted-foreground">Solicitado por {requester?.full_name || requester?.email || "Admin"}</p>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="outline" disabled={!canDecide || decideDeletion.isPending} onClick={() => decideDeletion.mutate({ requestId: request.id, approve: false })}>Rejeitar</Button>
-                      <Button size="sm" disabled={!canDecide || decideDeletion.isPending} onClick={() => decideDeletion.mutate({ requestId: request.id, approve: true })}>Aprovar exclusão</Button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : null}
-          {(() => {
-            const groupOrder = sortBy === "profile" ? accessProfileDefinitions.map((item) => item.code) : ["all"];
-            const groupLabel: Record<string, string> = Object.fromEntries(accessProfileDefinitions.map((item) => [item.code, `Perfil ${item.name}`]));
-            groupLabel.all = "Usuários";
-            const groups = groupOrder
-              .map((g) => ({
-                key: g,
-                label: groupLabel[g] ?? g,
-                users: rows.filter((u) => {
-                  return g === "all" || u.accessProfile === g;
-                }),
-              }))
-              .filter((g) => g.users.length > 0);
-            if (groups.length === 0) return <p className="text-sm text-muted-foreground">Nenhum usuário.</p>;
-            return groups.map((g) => (
-              <div key={g.key} className="overflow-hidden rounded-lg border border-border bg-card">
-                <div className="flex items-center justify-between bg-primary/10 px-3 py-2">
-                  <h4 className="text-sm font-bold">{g.label}</h4>
-                  <span className="text-xs text-muted-foreground">{g.users.length}</span>
-                </div>
-                <div className="divide-y divide-border">
-                  {g.users.map((u) => {
-                    const primary = u.jobTitleId ?? "none";
-                    return (
-                      <div key={u.id} className="p-3">
-                        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
-                          <div className="min-w-0">
-                            <div className="truncate font-medium">{u.full_name || "—"}</div>
-                            <div className="truncate text-xs text-muted-foreground">{u.email}</div>
-                          </div>
-                          <div className="flex justify-end">
-                            {u.id !== currentUser?.id ? (
-                              <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                  <Button variant="ghost" size="compactIcon" className="text-destructive hover:text-destructive" title="Solicitar exclusão" aria-label={`Solicitar exclusão de ${u.full_name || u.email}`}>
-                                    <Trash2 className="h-3.5 w-3.5" />
-                                  </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                  <AlertDialogHeader>
-                                    <AlertDialogTitle>Solicitar exclusão do usuário?</AlertDialogTitle>
-                                    <AlertDialogDescription>A exclusão de {u.full_name || u.email} ficará pendente até outro Admin aprovar.</AlertDialogDescription>
-                                  </AlertDialogHeader>
-                                  <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                    <AlertDialogAction disabled={requestDeletion.isPending} onClick={() => requestDeletion.mutate(u.id)}>Solicitar exclusão</AlertDialogAction>
-                                  </AlertDialogFooter>
-                                </AlertDialogContent>
-                              </AlertDialog>
-                            ) : null}
-                          </div>
-                        </div>
-                        <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-2 sm:grid-cols-4">
-                          <div className="flex flex-col gap-1">
-                            <span className="text-[10px] font-medium text-muted-foreground">Cargo</span>
-                            <Select
-                              value={primary}
-                              onValueChange={(v) => setJobTitle.mutate({ userId: u.id, jobTitleId: v === "none" ? null : v })}
-                            >
-                              <SelectTrigger className="h-8 w-full text-xs"><SelectValue placeholder="Sem cargo" /></SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="none">Sem cargo</SelectItem>
-                                {(jobTitles ?? []).map((title) => <SelectItem key={title.id} value={title.id}>{title.name}</SelectItem>)}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="flex flex-col gap-1">
-                            <span className="text-[10px] font-medium text-muted-foreground">Cargos adicionais</span>
-                            <AdditionalJobTitlesSelect
-                              titles={(jobTitles ?? []).filter((title) => title.id !== u.jobTitleId)}
-                              value={u.additionalJobTitles.map((title) => title.id)}
-                              disabled={setAdditionalJobTitles.isPending}
-                              onChange={(jobTitleIds) => setAdditionalJobTitles.mutate({ userId: u.id, jobTitleIds })}
-                            />
-                          </div>
-                          <div className="flex flex-col gap-1">
-                            <span className="text-[10px] font-medium text-muted-foreground">Perfil de acesso</span>
-                            <Select value={u.accessProfile} onValueChange={(value) => setAccessProfile.mutate({ userId: u.id, profile: value })}>
-                              <SelectTrigger className="h-8 w-full text-xs"><SelectValue /></SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="customizado">Customizado</SelectItem>
-                                {accessProfileDefinitions.filter((definition) => definition.active || definition.code === u.accessProfile).map((definition) => <SelectItem key={definition.code} value={definition.code}>{definition.name}</SelectItem>)}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="flex flex-col gap-1">
-                            <span className="text-[10px] font-medium text-muted-foreground">Aprovado por (cargo)</span>
-                            <div className="flex h-8 items-center rounded-md border border-input bg-muted/40 px-2 text-xs text-muted-foreground">
-                              {approverLabelOf(u.jobTitleId) || "—"}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            ));
-          })()}
-        </>
-        }
-      </CardContent>
-    </Card>
-  );
-}
 
 /* ---------- Logs ---------- */
 

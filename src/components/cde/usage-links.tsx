@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { ExternalLink } from "lucide-react";
 import { cdeHighlightHash } from "./cde-highlight";
 
-type UsageTarget = { to: "/dashboard" | "/cash-flow" | "/legal" | "/mytosis" | "/cde" | "/site-survey" | "/portal" | "/development" | "/chamados" | "/" | "/reset-password"; label: string; search?: { section: string; subsection: string } };
+type UsageTarget = { to: "/acessos" | "/dashboard" | "/cash-flow" | "/legal" | "/mytosis" | "/cde" | "/site-survey" | "/portal" | "/development" | "/chamados" | "/" | "/reset-password"; label: string; search?: { section: string; subsection?: string; app?: string } };
 const supply = (section: string, subsection: string): UsageTarget => ({ to: "/dashboard", label: "Supply", search: { section, subsection } });
 const supplyFiles: Record<string, UsageTarget> = {
   "access-profile-definitions-tab": supply("admin", "acesso-restrito"),
@@ -23,6 +23,12 @@ const shared = new Set(["app-header", "column-filter", "column-sort-button", "co
 /** Only known destinations are linked; shared controls expose their consumer apps. */
 export function usageTargets(file: string): UsageTarget[] {
   const name = file.split("/").at(-1)?.replace(/\.tsx$/, "") ?? "";
+  if (file.includes("/access/") || name === "acessos") return [{ to: "/acessos", label: "Acessos", ...(name === "users-admin" ? { search: { section: "cadastro" } } : name === "survey-users-admin" ? { search: { section: "perfis", app: "site_survey" } } : {}) }];
+  if (["access-profile-definitions-tab", "access-profiles-tab"].includes(name)) return [{ to: "/acessos", label: "Acessos", search: { section: "perfis", app: "supply" } }];
+  if (name === "erp-app-access-admin") return [{ to: "/acessos", label: "Acessos", search: { section: "usuarios" } }];
+  if (name === "site-survey-profiles-admin") return [{ to: "/acessos", label: "Acessos", search: { section: "perfis", app: "site_survey" } }];
+  if (file === "components/mytosis/users-tab.tsx") return [{ to: "/acessos", label: "Acessos", search: { section: "perfis", app: "mytosis" } }];
+  if (name === "code-app-attendants") return [{ to: "/acessos", label: "Acessos", search: { section: "perfis", app: "development" } }];
   if (file === "routes/index.tsx") return [{ to: "/", label: "Entrada" }];
   if (file === "routes/reset-password.tsx") return [{ to: "/reset-password", label: "Senha" }];
   const routes: Record<string, UsageTarget> = { dashboard: supply("queue", "all"), development: { to: "/development", label: "Code" }, chamados: { to: "/chamados", label: "OpDesk" }, portal: { to: "/portal", label: "Todos os apps" } };

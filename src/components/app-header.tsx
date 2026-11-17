@@ -18,6 +18,8 @@ import { AppManualDialog } from "@/components/app-manual-dialog";
 import { PersonalSignature } from "@/components/personal-signature";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { MENU_ITEMS, menuOrderForContext, parseMenuConfig, useMainMenuConfig, userInfoLine } from "@/components/cde/main-menu-config";
+import { accessManagementOptions } from "@/components/access/access-context";
+import { canOpenAccessManagement } from "@/lib/access-management";
 
 export function AppHeader({ logo, children, supplyManual = false, manualApp, menuActions }: { logo: ReactNode; children?: ReactNode; supplyManual?: boolean; manualApp?: string; menuActions?: MenuAction[] }) {
   const [manualOpen, setManualOpen] = useState(false);
@@ -92,13 +94,8 @@ function MainMenuEntries({ onSignOut, onChangePassword, supplyManual, homePage, 
   const { data } = useMainMenuConfig();
   const config = data ?? parseMenuConfig();
   const pendingTotal = usePendingActions().data?.total ?? 0;
-  const { data: isErpAdmin } = useQuery({ queryKey: ["is-erp-admin-menu"], queryFn: async () => {
-    const { data: auth } = await supabase.auth.getUser();
-    if (!auth.user) return false;
-    const { data: row } = await supabase.from("erp_admins").select("user_id").eq("user_id", auth.user.id).maybeSingle();
-    return !!row;
-  } });
-  return <>{menuActions?.map(action => <Button key={action.label} variant="ghost" className={itemClass} onClick={action.onClick}>{action.icon}{action.label}</Button>)}{menuOrderForContext(config, homePage).filter((id) => (id !== "manual" || supplyManual || !!manualApp) && (id !== "access" || isErpAdmin)).map((id) => {
+  const { data: accessCapabilities } = useQuery(accessManagementOptions);
+  return <>{menuActions?.map(action => <Button key={action.label} variant="ghost" className={itemClass} onClick={action.onClick}>{action.icon}{action.label}</Button>)}{menuOrderForContext(config, homePage).filter((id) => (id !== "manual" || supplyManual || !!manualApp) && (id !== "access" || accessCapabilities && canOpenAccessManagement(accessCapabilities))).map((id) => {
     const item = MENU_ITEMS.find((i) => i.id === id);
     if (!item) return null;
     const Icon = item.icon;
@@ -106,7 +103,7 @@ function MainMenuEntries({ onSignOut, onChangePassword, supplyManual, homePage, 
     if (id === "manual" && supplyManual) return <Button key={id} asChild variant="ghost" className={itemClass}><Link to="/supply-manual"><Icon className="h-5 w-5" />{item.label}</Link></Button>;
     if (id === "manual") return <Button key={id} variant="ghost" className={itemClass} onClick={onOpenManual}><Icon className="h-5 w-5" />{item.label}</Button>;
     if (id === "signature") return <Button key={id} variant="ghost" className={itemClass} onClick={onOpenSignature}><Icon className="h-5 w-5" />{item.label}</Button>;
-    if (id === "access") return <Button key={id} asChild variant="ghost" className={itemClass}><Link to="/portal" search={{ view: "users" }}><Icon className="h-5 w-5" />Acessos</Link></Button>;
+    if (id === "access") return <Button key={id} asChild variant="ghost" className={itemClass}><Link to="/acessos"><Icon className="h-5 w-5" />Acessos</Link></Button>;
     if (id === "theme") return <ThemeEntry key={id} className={itemClass} />;
     return <Button key={id} variant="ghost" className={`${itemClass}`} onClick={id === "logout" ? onSignOut : id === "password" ? onChangePassword : () => window.history.back()}><Icon className="h-5 w-5" />{item.label}</Button>;
   })}</>;

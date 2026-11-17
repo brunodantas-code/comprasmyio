@@ -54,7 +54,7 @@
   {
     "id": "components/approval-workflow.tsx|2",
     "file": "components/approval-workflow.tsx",
-    "line": 1168,
+    "line": 1169,
     "context": "Nova Etapa Adicional",
     "headers": [
       "Ordem",
@@ -69,7 +69,7 @@
   {
     "id": "components/approval-workflow.tsx|3",
     "file": "components/approval-workflow.tsx",
-    "line": 1424,
+    "line": 1425,
     "context": "Alçadas de Dispositivos myio",
     "headers": [
       "Usuário",
@@ -81,7 +81,7 @@
   {
     "id": "components/approval-workflow.tsx|4",
     "file": "components/approval-workflow.tsx",
-    "line": 1445,
+    "line": 1446,
     "context": "Alçadas de Dispositivos myio",
     "headers": [
       "Usuário",
@@ -95,7 +95,7 @@
   {
     "id": "components/approval-workflow.tsx|5",
     "file": "components/approval-workflow.tsx",
-    "line": 1789,
+    "line": 1790,
     "context": "Organograma de Aprovação",
     "headers": [
       "Cargo",
@@ -107,7 +107,7 @@
   {
     "id": "components/assembly-release.tsx|0",
     "file": "components/assembly-release.tsx",
-    "line": 874,
+    "line": 875,
     "context": "Excluir liberação",
     "headers": [
       "Data",
@@ -226,6 +226,131 @@
       "Código",
       "Descrição",
       "(sem título)"
+    ]
+  },
+  {
+    "id": "components/crm/crm-config.tsx|0",
+    "file": "components/crm/crm-config.tsx",
+    "line": 75,
+    "context": "Configurações do CRM",
+    "headers": [
+      "Nome",
+      "Código / Tipo",
+      "Ordem / Canal",
+      "Ativo",
+      "Ações (condicional)"
+    ]
+  },
+  {
+    "id": "components/crm/crm-custos.tsx|1",
+    "file": "components/crm/crm-custos.tsx",
+    "line": 108,
+    "context": "Kits",
+    "headers": [
+      "Kit",
+      "Grupo",
+      "Produto",
+      "Terceiros importados",
+      "Terceiros nacionais",
+      "Custo capitalizável",
+      "Ativo",
+      "Ações"
+    ]
+  },
+  {
+    "id": "components/crm/crm-propostas.tsx|0",
+    "file": "components/crm/crm-propostas.tsx",
+    "line": 69,
+    "context": "Propostas ( )",
+    "headers": [
+      "Número",
+      "Oportunidade",
+      "Empresa",
+      "Modelo",
+      "Data",
+      "Situação",
+      "Setup",
+      "Mensal"
+    ]
+  },
+  {
+    "id": "components/crm/crm-propostas.tsx|1",
+    "file": "components/crm/crm-propostas.tsx",
+    "line": 246,
+    "context": "Itens",
+    "headers": [
+      "Ambiente",
+      "Categoria",
+      "Item",
+      "Modelo",
+      "Qtd",
+      "Un.",
+      "Setup unit.",
+      "Mensal unit.",
+      "Total setup",
+      "Total mensal",
+      "Ressalva",
+      "Ações"
+    ]
+  },
+  {
+    "id": "components/crm/crm-workspace.tsx|0",
+    "file": "components/crm/crm-workspace.tsx",
+    "line": 91,
+    "context": "Próximas ações vencidas ou para hoje ( )",
+    "headers": [
+      "Data",
+      "Oportunidade",
+      "Empresa",
+      "Ação",
+      "Responsável"
+    ]
+  },
+  {
+    "id": "components/crm/crm-workspace.tsx|1",
+    "file": "components/crm/crm-workspace.tsx",
+    "line": 125,
+    "context": "Próximas ações vencidas ou para hoje ( )",
+    "headers": [
+      "Nome",
+      "Empresa",
+      "Cargo",
+      "Contato",
+      "Origem",
+      "Etapa",
+      "Responsável"
+    ]
+  },
+  {
+    "id": "components/crm/crm-workspace.tsx|2",
+    "file": "components/crm/crm-workspace.tsx",
+    "line": 173,
+    "context": "Importar leads (CSV)",
+    "headers": [
+      "Nome fantasia",
+      "Razão social",
+      "CNPJ",
+      "Cidade/UF",
+      "Segmento",
+      "Contatos",
+      "Oportunidades"
+    ]
+  },
+  {
+    "id": "components/crm/crm-workspace.tsx|3",
+    "file": "components/crm/crm-workspace.tsx",
+    "line": 262,
+    "context": "Motivo para “ ”",
+    "headers": [
+      "Título",
+      "Empresa",
+      "Fase",
+      "Setup",
+      "MRR",
+      "Prob.",
+      "Fechamento previsto",
+      "Próxima ação",
+      "Responsável"
     ]
   },
   {
@@ -720,69 +845,9 @@
     ]
   },
   {
-    "id": "components/crm/crm-workspace.tsx|0",
-    "file": "components/crm/crm-workspace.tsx",
-    "line": 81,
-    "context": "Próximas ações vencidas ou para hoje ( )",
-    "headers": [
-      "Data",
-      "Oportunidade",
-      "Empresa",
-      "Ação",
-      "Responsável"
-    ]
-  },
-  {
-    "id": "components/crm/crm-workspace.tsx|1",
-    "file": "components/crm/crm-workspace.tsx",
-    "line": 104,
-    "context": "Próximas ações vencidas ou para hoje ( )",
-    "headers": [
-      "Nome",
-      "Empresa",
-      "Cargo",
-      "Contato",
-      "Origem",
-      "Etapa",
-      "Responsável"
-    ]
-  },
-  {
-    "id": "components/crm/crm-workspace.tsx|2",
-    "file": "components/crm/crm-workspace.tsx",
-    "line": 143,
-    "context": "Importar leads (CSV)",
-    "headers": [
-      "Nome fantasia",
-      "Razão social",
-      "CNPJ",
-      "Cidade/UF",
-      "Segmento",
-      "Contatos",
-      "Oportunidades"
-    ]
-  },
-  {
-    "id": "components/crm/crm-workspace.tsx|3",
-    "file": "components/crm/crm-workspace.tsx",
-    "line": 214,
-    "context": "Motivo para “ ”",
-    "headers": [
-      "Título",
-      "Empresa",
-      "Fase",
-      "Setup",
-      "MRR",
-      "Prob.",
-      "Fechamento previsto",
-      "Próxima ação",
-      "Responsável"
-    ]
-  },
-  {
     "id": "routes/_authenticated/chamados.tsx|0",
     "file": "routes/_authenticated/chamados.tsx",
-    "line": 98,
+    "line": 99,
     "context": "Acompanhamento",
     "headers": [
       "Nº",
@@ -798,7 +863,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3020,
+    "line": 3012,
     "context": "Itens e valores",
     "headers": [
       "Approval",
@@ -818,7 +883,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|1",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3308,
+    "line": 3305,
     "context": "Aprovações",
     "headers": [
       "Etapa",
@@ -831,7 +896,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|2",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3927,
+    "line": 3924,
     "context": "Projetos",
     "headers": [
       "Nome do projeto",
@@ -845,7 +910,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|3",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 4771,
+    "line": 4385,
     "context": "Logs de pedidos",
     "headers": [
       "Quando",
@@ -858,7 +923,7 @@
   {
     "id": "routes/_authenticated/development.tsx|0",
     "file": "routes/_authenticated/development.tsx",
-    "line": 263,
+    "line": 264,
     "context": "Acompanhamento",
     "headers": [
       "Nº",

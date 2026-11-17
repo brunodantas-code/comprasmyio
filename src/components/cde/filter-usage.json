@@ -5,6 +5,11 @@
     "general": 0
   },
   {
+    "file": "components/access/users-admin.tsx",
+    "standard": 1,
+    "general": 0
+  },
+  {
     "file": "components/approval-workflow.tsx",
     "standard": 2,
     "general": 0
@@ -156,7 +161,7 @@
   },
   {
     "file": "routes/_authenticated/dashboard.tsx",
-    "standard": 4,
+    "standard": 3,
     "general": 0
   },
   {

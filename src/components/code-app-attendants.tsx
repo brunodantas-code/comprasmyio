@@ -37,13 +37,15 @@ function AttendantField({ appKey, appName, currentId, admins }: { appKey: string
 }
 
 export function CodeAppAttendants({ open, onOpenChange, admins, appNames }: { open: boolean; onOpenChange: (open: boolean) => void; admins: Admin[]; appNames: Record<string, string> }) {
-  const query = useQuery({ queryKey: ["code-app-attendants"], enabled: open, queryFn: async () => {
+  return <Dialog open={open} onOpenChange={onOpenChange}><DialogContent className="max-h-[90dvh] max-w-2xl overflow-y-auto"><DialogHeader><DialogTitle>Responsáveis · Code</DialogTitle></DialogHeader><CodeAttendantsPanel admins={admins} appNames={appNames} enabled={open} /></DialogContent></Dialog>;
+}
+
+export function CodeAttendantsPanel({ admins, appNames, enabled = true }: { admins: Admin[]; appNames: Record<string, string>; enabled?: boolean }) {
+  const query = useQuery({ queryKey: ["code-app-attendants"], enabled, queryFn: async () => {
     const [apps, assignments] = await Promise.all([supabase.from("erp_apps").select("key,name").eq("active", true).order("position"), supabase.from("code_app_attendants").select("app_key,attendant_id")]);
     if (apps.error) throw apps.error;
     if (assignments.error) throw assignments.error;
     return { apps: apps.data, assignments: new Map(assignments.data.map(a => [a.app_key, a.attendant_id])) };
   } });
-  return <Dialog open={open} onOpenChange={onOpenChange}><DialogContent className="max-h-[90dvh] max-w-2xl overflow-y-auto"><DialogHeader><DialogTitle>Usuários · Code</DialogTitle></DialogHeader>
-    {query.isPending ? <p className="text-sm text-muted-foreground">Carregando responsáveis...</p> : query.isError ? <p className="text-sm text-destructive">Não foi possível carregar os responsáveis.</p> : <div className="grid min-w-0 gap-5 sm:grid-cols-2">{query.data.apps.map(app => <AttendantField key={`${app.key}:${query.data.assignments.get(app.key) ?? ""}`} appKey={app.key} appName={appNames[app.key] ?? app.name} currentId={query.data.assignments.get(app.key) ?? ""} admins={admins} />)}</div>}
-  </DialogContent></Dialog>;
+  return query.isPending ? <p className="text-sm text-muted-foreground">Carregando responsáveis...</p> : query.isError ? <p className="text-sm text-destructive">Não foi possível carregar os responsáveis.</p> : <div className="grid min-w-0 gap-5 sm:grid-cols-2">{query.data.apps.map(app => <AttendantField key={`${app.key}:${query.data.assignments.get(app.key) ?? ""}`} appKey={app.key} appName={appNames[app.key] ?? app.name} currentId={query.data.assignments.get(app.key) ?? ""} admins={admins} />)}</div>;
 }

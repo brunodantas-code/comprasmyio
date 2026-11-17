@@ -17,7 +17,7 @@ const ROLES = [
   { value: "viewer", label: "Visualizador", hint: "Somente consulta" },
 ];
 
-export function UsersTab({ data }: { data: MytosisData }) {
+export function UsersTab({ data }: { data: Pick<MytosisData, "users" | "role"> }) {
   const queryClient = useQueryClient();
   const isAdmin = data.role === "admin";
   const [newUser, setNewUser] = useState("");
