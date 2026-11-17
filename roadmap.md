@@ -1,8 +1,9 @@
 # Roadmap
-- [ ] Avisar Leonardo ao concluir OpDesk para receber o banco de dados do CRM enviado pelo João; importação aguarda o arquivo.
-- [ ] OpDesk: criar base isolada de clientes/tarefas/subtarefas, colaboração autenticada para usuários com acesso, regras de fluxo e histórico auditado.
-- [ ] OpDesk: painel global Quadro/Tabela, clientes próprios, responsáveis do ERP, filtros múltiplos CDE, ordenação/exportações e editor completo com observações/anexos.
-- [ ] OpDesk: preservar chamados anteriores e links Site Survey; concluir automação de fechamento 48h e conferir fluxos computador/celular com dados de teste removidos.
+- [x] Avisar Leonardo ao concluir OpDesk para receber o banco de dados do CRM enviado pelo João.
+- [x] OpDesk: base isolada de clientes/tarefas/subtarefas, colaboração autenticada para usuários com acesso, regras de fluxo e histórico auditado; criação, bloqueio da principal e liberação após conclusão da sub-tarefa conferidos.
+- [x] OpDesk: painel global Quadro/Tabela, clientes próprios, responsáveis do ERP, filtros múltiplos CDE, ordenação/exportações e editor com observações/anexos; download original, CSV e exclusão auditada do anexo conferidos.
+- [x] OpDesk: chamado anterior e 44 links Site Survey preservados; fechamento 48h agendado a cada 15 minutos com execução conferida, bucket privado 20 MB; computador/celular verificados, arraste salvo e relido com histórico, registros temporários removidos. 20 testes passaram; não publicado.
+- [ ] CRM: receber o banco enviado pelo João para analisar a importação — aguarda o arquivo de Leonardo.
 - [ ] OpDesk: importar dados do painel anterior — depende de exportação dos registros/anexos; o MD recebido contém apenas a especificação.
 - [x] Acessos: rótulos soltos Nome/E-mail/Cargo aprovador/Cargo/Perfil removidos por não corresponderem a colunas; funil CDE à direita de Usuários cadastrados, ordenação com largura própria e fonte CDE. Conferidos 17 usuários reais em 1280/390 px, filtros Nome Alexandre + Perfil Customizado, remoção individual e ordenação por perfil, sem erros/excesso lateral; 24 testes passaram, biblioteca regenerada, nenhum acesso alterado. Não publicado.
 - [x] Explicado: Perfis por app reuniu os controles existentes de Supply, Site Survey, Mytosis e Code; os demais apps são liberados em Usuários e aplicativos, sem editor próprio de perfis. Nenhum perfil ou permissão criado nesta pergunta.
