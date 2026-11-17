@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Code: Baixar anexo usa URL privada preparada com disposição de download e nome original, sem substituir a tela. Anexo real PNG de 64.550 bytes baixado em computador/celular na conta Leonardo; nome preservado, visualização mantida, sem erros de clique/rede. 27 testes passaram; Safari físico não conferido, não publicado.
 - [x] Code: sugestão de Alexandre aplicada; cabeçalhos mostram “Pergunta N · Nome do autor” e “Resposta N · Nome do autor”, sem rótulos de papel. Chamado real 44 conferido na conta Leonardo em computador/celular: Alexandre na pergunta, Leonardo na resposta e “Para” somente na pergunta; mensagens preservadas, 31 testes passaram e tela sem erros. Não publicado.
 - [x] Home Page: menu sem Voltar/Todos os apps, iniciando por Minhas Pendências e preservando a ordem CDE das demais ações; navegação mantida em Acessos/outros apps.
 - [x] Menu principal: mesmo HeaderMenu completo do Desktop no portal e nos apps, inclusive Mobile; aparência, ícones, nomes, ordem e visibilidade CDE compartilhados, sem mudar permissões.

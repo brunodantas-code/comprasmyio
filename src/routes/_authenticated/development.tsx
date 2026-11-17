@@ -390,7 +390,7 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
   const [reporterMode, setReporterMode] = useState<"question" | "answer">("answer");
    const [messageFiles, setMessageFiles] = useState<File[]>([]);
    const [messageFileInputKey, setMessageFileInputKey] = useState(0);
-  const [preview, setPreview] = useState<{ url: string; name: string; contentType: string } | null>(null);
+  const [preview, setPreview] = useState<{ url: string; downloadUrl: string; name: string; contentType: string } | null>(null);
   useEffect(() => {
     if (!ticket) return;
     setStatus(ticket.status);
@@ -579,15 +579,16 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
     onSuccess: () => { toast.success("Ticket excluído e mantido no histórico"); onClose(); onUpdated(); },
     onError: (error: Error) => toast.error(error.message),
   });
-  async function download(path: string, name: string) {
-    const { data: signed, error } = await supabase.storage.from("development-ticket-attachments").createSignedUrl(path, 60);
-    if (error) return toast.error(error.message);
-    const anchor = document.createElement("a"); anchor.href = signed.signedUrl; anchor.download = name; anchor.click();
-  }
   async function openPreview(path: string, name: string, contentType: string | null) {
-    const { data: signed, error } = await supabase.storage.from("development-ticket-attachments").createSignedUrl(path, 300);
+    const storage = supabase.storage.from("development-ticket-attachments");
+    const [viewResult, downloadResult] = await Promise.all([
+      storage.createSignedUrl(path, 300),
+      storage.createSignedUrl(path, 300, { download: name }),
+    ]);
+    const error = viewResult.error ?? downloadResult.error;
     if (error) return toast.error(error.message);
-    setPreview({ url: signed.signedUrl, name, contentType: contentType ?? "application/octet-stream" });
+    if (!viewResult.data || !downloadResult.data) return toast.error("Não foi possível preparar o anexo. Tente novamente.");
+    setPreview({ url: viewResult.data.signedUrl, downloadUrl: downloadResult.data.signedUrl, name, contentType: contentType ?? "application/octet-stream" });
   }
   return <>
     <Dialog open={Boolean(ticket)} onOpenChange={(open) => { if (!open) onClose(); }}>
@@ -622,7 +623,7 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
           {preview && !preview.contentType.startsWith("image/") && preview.contentType !== "application/pdf" ? <p className="px-6 text-center text-sm text-muted-foreground">Este formato não possui visualização. Use o botão Baixar anexo.</p> : null}
         </div>
         <DialogFooter className="shrink-0 flex-row justify-end gap-2">
-          {preview ? <Button onClick={() => { const anchor = document.createElement("a"); anchor.href = preview.url; anchor.download = preview.name; anchor.click(); }}><Download className="h-4 w-4" />Baixar anexo</Button> : null}
+          {preview ? <Button asChild><a href={preview.downloadUrl} download={preview.name}><Download className="h-4 w-4" />Baixar anexo</a></Button> : null}
         </DialogFooter>
       </DialogContent>
     </Dialog>
