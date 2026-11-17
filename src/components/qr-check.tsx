@@ -487,7 +487,7 @@ export function QrCheckSection() {
                   if (e.key === "Enter") setCode(input.trim());
                 }}
                 placeholder="Código do QR (https://...)"
-                className="pl-8"
+                className="!pl-8" style={{ paddingLeft: 32 }}
               />
             </div>
             <Button type="button" variant="ghost" className="text-primary hover:bg-transparent hover:text-primary/70" onClick={() => setCode(input.trim())} disabled={!input.trim()}>
