@@ -24,6 +24,7 @@ import { ChangePasswordDialog } from "@/components/change-password-dialog";
 import { PersonalSignature } from "@/components/personal-signature";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { TodoSection } from "@/components/personal-todos/todo-section";
+import { CriticalGroup, useCriticalPending } from "@/components/central/critical-group";
 
 export const Route = createFileRoute("/_authenticated/portal")({
   validateSearch: (search: Record<string, unknown>): { view?: "users" } => (search.view === "users" ? { view: "users" } : {}),
@@ -48,6 +49,7 @@ function PortalPage() {
   const activeView: "apps" | "users" = search.view === "users" ? "users" : "apps";
   const setActiveView = (view: "apps" | "users") => navigateView({ to: "/portal", search: view === "users" ? { view: "users" } : {} });
   const { data: pendingActions } = usePendingActions();
+  const { data: criticalPending } = useCriticalPending();
   const { data: appOrder } = useAppOrder();
   const tile = useAppTile().data ?? APP_TILE_DEFAULT;
   const portalSections = usePortalSections().data ?? DEFAULT_PORTAL_SECTIONS;
@@ -189,9 +191,9 @@ function PortalPage() {
               </div>
             )}</>)
                 : section === "todos" ? <TodoSection />
-                : (<>{(pendingActions?.total ?? 0) > (pendingActions?.todoCount ?? 0) ? (
+                : (<>{(pendingActions?.total ?? 0) > (pendingActions?.todoCount ?? 0) || (criticalPending?.length ?? 0) > 0 ? (
               <section aria-labelledby="pending-title">
-                <PendingGroups items={[
+                <PendingGroups leading={<CriticalGroup />} items={[
       ...((pendingActions?.approvals ?? 0) > 0 ? [{ key: "approvals", app: "Supply", requester: "Você", count: pendingActions?.approvals ?? 0, row: <PendingRow icon={CheckCircle2} label="Aguardando minha aprovação" count={pendingActions?.approvals ?? 0} to="/pendentes" /> }] : []),
       ...((pendingActions?.supplyQueue ?? 0) > 0 ? [{ key: "queue", app: "Supply", requester: "Você", count: pendingActions?.supplyQueue ?? 0, row: <PendingRow icon={ShoppingCart} label="Compras e serviços a executar · Fila do Supply" count={pendingActions?.supplyQueue ?? 0} to="/dashboard" search={{ section: "queue", subsection: "supply" }} /> }] : []),
       ...((pendingActions?.userDeletions ?? 0) > 0 ? [{ key: "deletions", app: "Admin", requester: "Você", count: pendingActions?.userDeletions ?? 0, row: <PendingRow icon={ShieldCheck} label="Exclusões de usuários aguardando decisão" count={pendingActions?.userDeletions ?? 0} to="/dashboard" search={{ section: "admin", subsection: "usuarios" }} /> }] : []),

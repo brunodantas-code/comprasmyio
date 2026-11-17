@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useQueryClient, queryOptions } from "@tanstack/react-query";
-import { Tag, Pencil, Trash2, Plus } from "lucide-react";
+import { Tag, Pencil, Trash2, Plus, Save } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -9,8 +9,9 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { SearchableSelect } from "@/components/ui/searchable-select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { CdeColorSwatches } from "@/components/cde/top-icon-style-editor";
-import { ICONS } from "@/components/cde/cde-render";
+import { ICONS, ICON_LABELS } from "@/components/cde/cde-render";
 import { confirmAction } from "@/components/confirm-dialog";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -66,6 +67,6 @@ export function TodoLabelsManager({ userId }: { userId: string }) {
   return <><Button variant="ghost" size="compactIcon" className="!text-foreground hover:!text-foreground" style={{ color: "var(--foreground)" }} aria-label="Gerenciar etiquetas" title="Gerenciar etiquetas" onClick={() => setOpen(true)}><Tag /></Button><Dialog open={open} onOpenChange={setOpen}><DialogContent className="max-h-[85vh] overflow-y-auto"><DialogHeader><DialogTitle>Minhas etiquetas</DialogTitle></DialogHeader>
     <div className="divide-y divide-border">{data?.labels.map(l => <div key={l.id} className="flex items-center justify-between gap-2 py-2"><TodoLabelMark label={l} /><div className="flex shrink-0 gap-1"><Button variant="ghost" size="compactIcon" aria-label={`Editar etiqueta ${l.name}`} title="Editar etiqueta" onClick={() => { setEdit(l); setName(l.name); setColor(l.color); setIcon(l.icon); }}><Pencil /></Button><Button variant="ghost" size="compactIcon" aria-label={`Excluir etiqueta ${l.name}`} title="Excluir etiqueta" onClick={async () => { if (!await confirmAction(`Excluir a etiqueta “${l.name}”? As tarefas serão preservadas.`, { title: "Excluir etiqueta" })) return; const r = await supabase.from("personal_todo_labels").delete().eq("id", l.id).eq("owner_id", userId); if (r.error) return toast.error("Não foi possível excluir a etiqueta."); if (edit?.id === l.id) reset(); await qc.invalidateQueries({ queryKey: ["todo-labels"] }); }}><Trash2 /></Button></div></div>)}</div>
     <form className="space-y-4" onSubmit={e => { e.preventDefault(); void save(); }}><div className="flex items-center justify-between"><Label htmlFor="todo-label-name">{edit ? "Editar etiqueta" : "Nova etiqueta"}</Label>{edit && <Button type="button" variant="ghost" size="compactIcon" title="Nova etiqueta" aria-label="Nova etiqueta" onClick={reset}><Plus /></Button>}</div><Input id="todo-label-name" value={name} onChange={e => setName(e.target.value)} required maxLength={80} />
-    <CdeColorSwatches label="Cor do símbolo" value={color} onChange={setColor} /><div className="space-y-2"><Label>Símbolo</Label><div className="grid grid-cols-6 gap-1">{Object.entries(ICONS).map(([key, Icon]) => <Button key={key} type="button" variant="ghost" size="compactIcon" title={key === "DollarSign" ? "Cifrão" : key} aria-label={`Símbolo ${key === "DollarSign" ? "Cifrão" : key}`} aria-pressed={key === icon} className={key === icon ? "ring-2 ring-primary" : ""} style={{ color: color || "var(--foreground)" }} onClick={() => setIcon(key)}><Icon style={{ color: color || "var(--foreground)" }} /></Button>)}</div></div><div className="flex justify-end gap-2">{edit && <Button type="button" variant="outline" onClick={reset}>Cancelar</Button>}<Button type="submit" disabled={busy || !name.trim()}>{busy ? "Salvando..." : "Salvar"}</Button></div></form>
+    <CdeColorSwatches label="Cor do símbolo" value={color} onChange={setColor} /><div className="space-y-2"><Label>Símbolo</Label><div className="grid grid-cols-6 gap-1">{Object.entries(ICONS).map(([key, Icon]) => <Button key={key} type="button" variant="ghost" size="compactIcon" title={ICON_LABELS[key] ?? key} aria-label={`Símbolo ${ICON_LABELS[key] ?? key}`} aria-pressed={key === icon} className={key === icon ? "ring-2 ring-primary" : ""} style={{ color: color || "var(--foreground)" }} onClick={() => setIcon(key)}><Icon style={{ color: color || "var(--foreground)" }} /></Button>)}</div></div><div className="flex justify-end gap-2">{edit && <Button type="button" variant="outline" onClick={reset}>Cancelar</Button>}<TooltipProvider><Tooltip><TooltipTrigger asChild><Button type="submit" variant="ghost" size="compactIcon" aria-label={busy ? "Salvando etiqueta..." : "Salvar etiqueta"} title={busy ? "Salvando etiqueta..." : "Salvar etiqueta"} disabled={busy || !name.trim()}><Save /></Button></TooltipTrigger><TooltipContent>{busy ? "Salvando etiqueta..." : "Salvar etiqueta"}</TooltipContent></Tooltip></TooltipProvider></div></form>
   </DialogContent></Dialog></>;
 }

@@ -2552,7 +2552,7 @@
   {
     "id": "components/central/critical-group.tsx|0e56206343e3b0a2|0",
     "file": "components/central/critical-group.tsx",
-    "line": 27,
+    "line": 30,
     "tag": "Button",
     "label": "Prazo crítico",
     "dynamic": false,
@@ -7832,7 +7832,7 @@
   {
     "id": "components/personal-todos/labels.tsx|9a972f9e858c9c9b|0",
     "file": "components/personal-todos/labels.tsx",
-    "line": 66,
+    "line": 67,
     "tag": "Button",
     "label": "Gerenciar etiquetas",
     "dynamic": false,
@@ -7847,7 +7847,7 @@
   {
     "id": "components/personal-todos/labels.tsx|4ef09820402572fd|0",
     "file": "components/personal-todos/labels.tsx",
-    "line": 67,
+    "line": 68,
     "tag": "Button",
     "label": "Editar etiqueta",
     "dynamic": false,
@@ -7862,7 +7862,7 @@
   {
     "id": "components/personal-todos/labels.tsx|0744f7bf89e702b9|0",
     "file": "components/personal-todos/labels.tsx",
-    "line": 67,
+    "line": 68,
     "tag": "Button",
     "label": "Excluir etiqueta",
     "dynamic": false,
@@ -7877,7 +7877,7 @@
   {
     "id": "components/personal-todos/labels.tsx|c3a1d9154b743849|0",
     "file": "components/personal-todos/labels.tsx",
-    "line": 68,
+    "line": 69,
     "tag": "Button",
     "label": "Nova etiqueta",
     "dynamic": false,
@@ -7892,7 +7892,7 @@
   {
     "id": "components/personal-todos/labels.tsx|fc0887a8802ec0ee|0",
     "file": "components/personal-todos/labels.tsx",
-    "line": 69,
+    "line": 70,
     "tag": "Button",
     "label": "Icon",
     "dynamic": false,
@@ -7907,7 +7907,7 @@
   {
     "id": "components/personal-todos/labels.tsx|2388ca47daed9c6c|0",
     "file": "components/personal-todos/labels.tsx",
-    "line": 69,
+    "line": 70,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -7920,17 +7920,17 @@
     "group": ""
   },
   {
-    "id": "components/personal-todos/labels.tsx|891aaa11be57c820|0",
+    "id": "components/personal-todos/labels.tsx|6f7ad6a28f23d7c0|0",
     "file": "components/personal-todos/labels.tsx",
-    "line": 69,
+    "line": 70,
     "tag": "Button",
-    "label": "Salvando... / Salvar",
-    "dynamic": true,
+    "label": "Save",
+    "dynamic": false,
     "visualCustom": false,
     "autoCdeSafe": true,
-    "icon": "",
-    "variant": "",
-    "size": "",
+    "icon": "Save",
+    "variant": "ghost",
+    "size": "compactIcon",
     "className": "",
     "group": ""
   },
@@ -13157,7 +13157,7 @@
   {
     "id": "routes/_authenticated/portal.tsx|d0125df1157dca00|0",
     "file": "routes/_authenticated/portal.tsx",
-    "line": 141,
+    "line": 143,
     "tag": "Button",
     "label": "Voltar aos aplicativos",
     "dynamic": false,

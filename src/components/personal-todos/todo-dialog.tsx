@@ -40,7 +40,7 @@ export function TodoDialog({ task, userId, users, messages, onClose }: { task: P
   const [observation, setObservation] = useState("");
   const [preview, setPreview] = useState<{ url: string; name: string } | null>(null);
   const nameFor = (id: string) => users.find(p => p.id === id)?.full_name ?? "Usuário";
-  const refresh = async () => { await Promise.all([qc.invalidateQueries({ queryKey: ["personal-todos"] }), qc.invalidateQueries({ queryKey: ["todo-details"] }), qc.invalidateQueries({ queryKey: ["pending-actions"] }), qc.invalidateQueries({ queryKey: ["todo-labels"] })]); };
+  const refresh = async () => { await Promise.all([qc.invalidateQueries({ queryKey: ["personal-todos"] }), qc.invalidateQueries({ queryKey: ["todo-details"] }), qc.invalidateQueries({ queryKey: ["pending-actions"] }), qc.invalidateQueries({ queryKey: ["critical-pending"] }), qc.invalidateQueries({ queryKey: ["todo-labels"] })]); };
   const details = useQuery({ queryKey: ["todo-details", task?.id], enabled: Boolean(task), queryFn: async () => {
     if (!task) return { logs: [], attachments: [] };
     const [logs, attachments] = await Promise.all([supabase.from("personal_todo_logs").select("*").eq("todo_id", task.id).order("created_at"), supabase.from("personal_todo_attachments").select("*").eq("todo_id", task.id).order("created_at")]);

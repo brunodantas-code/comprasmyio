@@ -1,7 +1,12 @@
-import { ArrowDown, ArrowDownUp, ArrowUp, ArrowUpDown, Building2, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ClipboardCheck, DollarSign, FileSpreadsheet, FileText, Filter, Layers3, Lock, Tag, PackagePlus, Paperclip, Pencil, Percent, Plane, Plus, Save, Send, Settings2, Trash2, Upload, X, type LucideIcon } from "lucide-react";
+import { ArrowDown, ArrowDownUp, ArrowUp, ArrowUpDown, Blocks, Building2, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ClipboardCheck, Cog, ContactRound, DollarSign, FileSpreadsheet, FileText, Filter, Handshake, Layers3, LayoutDashboard, Lock, Network, Tag, PackagePlus, Paperclip, Pencil, Percent, Plane, Plus, Save, Send, Settings2, Trash2, Upload, UsersRound, Workflow, Wrench, X, type LucideIcon } from "lucide-react";
 import { BORDERS, FILLS } from "@/components/mytosis/shapes";
 
-export const ICONS: Record<string, LucideIcon> = { Lock, ArrowDown, ArrowDownUp, ArrowUp, ArrowUpDown, Building2, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ClipboardCheck, DollarSign, FileSpreadsheet, FileText, Filter, Layers3, Tag, PackagePlus, Paperclip, Pencil, Percent, Plane, Plus, Save, Send, Settings2, Trash2, Upload, X };
+export const ICONS: Record<string, LucideIcon> = { Lock, ArrowDown, ArrowDownUp, ArrowUp, ArrowUpDown, Building2, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ClipboardCheck, DollarSign, FileSpreadsheet, FileText, Filter, Layers3, Tag, PackagePlus, Paperclip, Pencil, Percent, Plane, Plus, Save, Send, Settings2, Trash2, Upload, X, UsersRound, ContactRound, Handshake, Blocks, Network, LayoutDashboard, Cog, Wrench, Workflow };
+export const ICON_LABELS: Record<string, string> = {
+  DollarSign: "Cifrão", UsersRound: "Pessoas / Clientes", ContactRound: "Contato", Handshake: "Relacionamento / Clientes",
+  Blocks: "Módulos / ERP", Network: "Integração / ERP", LayoutDashboard: "Painel de gestão / ERP",
+  Cog: "Engrenagem / Operação", Wrench: "Ferramenta / Operação", Workflow: "Fluxo de trabalho / Operação",
+};
 export type CdeStyle = { shape?: string; fill?: string; border?: string; borderWidth?: string; text?: string; fontSize?: string; description?: string; actionSpecific?: boolean };
 export const FONT_SIZES = ["10px","11px","12px","13px","14px","16px","18px"];
 export const FORMS = [

@@ -9,9 +9,9 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { CdeDisclosureIcon } from '@/components/cde/cde-button';
 import { parseLegalContent,legalSubjectResponsibles } from '@/lib/legal';
 import { criticalSupplyOrders,dueToday,type CriticalPending } from '@/lib/critical-pending';
-export function CriticalGroup(){
- const {data:me}=useCurrentUser();const [open,setOpen]=useState(false);const today=new Date().toLocaleDateString('en-CA',{timeZone:'America/Sao_Paulo'});
- const q=useQuery({queryKey:['critical-pending',me?.id,today],enabled:!!me,queryFn:async()=>{
+export function useCriticalPending(){
+ const {data:me}=useCurrentUser();const today=new Date().toLocaleDateString('en-CA',{timeZone:'America/Sao_Paulo'});
+ return useQuery({queryKey:['critical-pending',me?.id,today],enabled:!!me,queryFn:async()=>{
  if(!me)return [] as CriticalPending[];
  const [actions,records,completions,allActions,orders,steps,nodes,tasks,todos]=await Promise.all([
  supabase.from('legal_actions').select('id,title,record_id,due_date,completed_at,archived').eq('responsible_id',me.id),supabase.from('legal_records').select('id,title,content').eq('category','minutes'),supabase.from('legal_subject_completions').select('record_id,subject_id'),supabase.from('legal_actions').select('record_id,subject_id,archived'),supabase.from('purchase_orders').select('id,item_name,status,approval_status,created_at,deadline_type,deadline_date,delivery_forecast,payment_date,request_model,requester_id,recipient_user_id'),supabase.from('approval_steps').select('order_id,approver_id,step_index,status').eq('status','pendente'),supabase.from('mytosis_nodes').select('id,title,due_date,progress,is_process').eq('responsible_id',me.id).eq('is_process',false),supabase.from('mytosis_tasks').select('id,node_id,title,due_date,completed').eq('responsible_id',me.id),supabase.from('personal_todos').select('id,title,due_date,status').or(`owner_id.eq.${me.id},shared_user_ids.cs.{${me.id}}`)]);
@@ -23,6 +23,9 @@ export function CriticalGroup(){
  for(const n of nodes.data??[])if(n.due_date===today&&n.progress<100)out.push({key:`n:${n.id}`,title:n.title,app:'Mytosis',due:today,route:'/mytosis',record:n.id});
  for(const t of tasks.data??[])if(t.due_date===today&&!t.completed)out.push({key:`mt:${t.id}`,title:t.title,app:'Mytosis',due:today,route:'/mytosis',record:t.node_id,task:t.id});
  for(const t of todos.data??[])if(t.due_date===today&&!['concluido','excluido'].includes(t.status))out.push({key:`todo:${t.id}`,title:t.title,app:'To Dos',due:today,route:'/pendentes',record:t.id});return out;}});
+}
+export function CriticalGroup(){
+ const [open,setOpen]=useState(false);const q=useCriticalPending();const today=new Date().toLocaleDateString('en-CA',{timeZone:'America/Sao_Paulo'});
  const rows=dueToday(q.data??[],today);if(!rows.length)return null;
  return <div><div className="transition-colors hover:bg-primary/10 focus-within:bg-primary/10"><Button type="button" variant="ghost" onClick={()=>setOpen(!open)} aria-expanded={open} className="!flex !h-auto !min-w-0 !w-full !max-w-none !justify-start items-center gap-3 !bg-transparent px-4 py-3 text-left"><ClockAlert className="size-5 shrink-0 text-destructive"/><span className="min-w-0 flex-1 break-words text-sm font-semibold">Prazo crítico</span><span className="ml-auto flex shrink-0 items-center gap-3"><AlertMarker count={rows.length} /><CdeDisclosureIcon open={open} screen="components/central/critical-group.tsx"/></span></Button></div>{open&&<div className="divide-y divide-border border-t border-border">{rows.map(r=><div key={r.key} className="px-8 py-3 text-sm"><p className="text-xs text-muted-foreground">{r.app} · Vence hoje</p>{r.route==='/legal'?<Link to="/legal" search={{record:r.record}}>{r.title}</Link>:r.route==='/dashboard'?<Link to="/dashboard" search={{order:r.record,section:undefined,subsection:undefined}}>{r.title}</Link>:r.route==='/mytosis'?<Link to="/mytosis" search={{node:r.record,task:r.task}}>{r.title}</Link>:<Link to="/pendentes" search={{todo:r.record}}>{r.title}</Link>}</div>)}</div>}</div>;
 }
