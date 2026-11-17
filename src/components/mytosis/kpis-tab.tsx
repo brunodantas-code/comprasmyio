@@ -109,6 +109,7 @@ export function KpisTab({ data, canEdit }: { data: MytosisData; canEdit: boolean
       {canEdit ? <CdeButton group="plus" screen="components/mytosis/kpis-tab.tsx" title="Novo KPI" aria-label="Novo KPI" onClick={() => setDraft(emptyDraft())}></CdeButton> : null}
     </div>
 
+    {kpiFilters.summary}
     {grouped.length === 0 ? <p className="py-10 text-center text-sm text-muted-foreground">Nenhum KPI cadastrado.</p> : null}
     {grouped.map(([segId, kpis]) => <section key={segId} className="space-y-2">
       <h2 className="text-sm text-muted-foreground">{segName(segId)}</h2>

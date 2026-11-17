@@ -35,8 +35,28 @@
     "general": 0
   },
   {
+    "file": "components/cde/cde-filter-standard.tsx",
+    "standard": 1,
+    "general": 0
+  },
+  {
     "file": "components/clients-tab.tsx",
     "standard": 1,
+    "general": 0
+  },
+  {
+    "file": "components/crm/crm-custos.tsx",
+    "standard": 1,
+    "general": 0
+  },
+  {
+    "file": "components/crm/crm-propostas.tsx",
+    "standard": 1,
+    "general": 0
+  },
+  {
+    "file": "components/crm/crm-workspace.tsx",
+    "standard": 4,
     "general": 0
   },
   {

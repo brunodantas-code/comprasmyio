@@ -9,7 +9,7 @@ import { useAppMenuLayout } from "@/components/cde/cde-menu-type";
 import { AppNavigation } from "@/components/ui/app-navigation";
 import { useMenuOrders, sortByMenuOrder } from "@/components/cde/menu-order";
 import { CdeButton } from "@/components/cde/cde-button";
-import { TableFilterMenu } from "@/components/use-table-filters";
+import { TableFilterMenu, TableFilterSummary } from "@/components/use-table-filters";
 import { TableReportActions, TableReportProvider, useRegisterTableReport } from "@/components/table-report-actions";
 import { ProjectTypeFields, useProjectTypes } from "@/components/project-type-fields";
 import { composeProjectName, splitProjectName } from "@/lib/project-naming";
@@ -2948,13 +2948,8 @@ function OrdersTable({
         {toolbarActions}
         <SupplyDeadlineIndicators orders={visibleOrders} />
         <TableReportActions title={showRequester ? "Todos os approvals" : "Minhas Solicitações"} compact={reportCompact} />
-        {activeColFilters.length > 0 && (
-          <>
-            <span className="text-muted-foreground">{activeColFilters.length} filtro(s) ativo(s): {activeColFilters.map((c) => c.label).join(", ")}</span>
-            <Button type="button" variant="outline" size="sm" className="h-7 text-xs" onClick={() => setCf({})}>Limpar filtros</Button>
-          </>
-        )}
       </div>
+      <TableFilterSummary columns={colDefs.map(c => ({ key: c.key, label: c.label, kind: c.kind, value: c.raw as (o: typeof orders[number]) => string | number | null | undefined, display: c.list }))} filters={cf} onChange={(key, value) => setCf(prev => ({ ...prev, [key]: value }))} />
       {/* Mobile: cartões com rótulo à esquerda e informação à direita */}
       <div className="space-y-3 lg:hidden">
         <div className="flex flex-wrap gap-1.5">
@@ -3007,7 +3002,7 @@ function OrdersTable({
               <Row label={o.delivery_mode === "retirada" ? "Endereço de Retirada" : "Endereço de Entrega"}>{o.delivery_point}</Row>
               <Row label="Prazo de recebimento"><DeadlineForecast order={o} part="requested" /></Row>
               <Row label="Previsão de entrega"><DeadlineForecast order={o} canEdit={canEdit} part="forecast" /></Row>
-              <Row label="Status"><div className="flex flex-col items-start gap-1"><StatusHistoryDialog order={o} canEdit={canEdit} />{canEditRequester && canConfirmPhysicalReceipt(o) && <ConfirmReceiptActions order={o} />}</div></Row>
+              <Row label="Status"><div className="flex flex-col items-start gap-1"><StatusHistoryDialog order={o} canEdit={canEdit} />{canEditRequester && me?.id === o.requester_id && canConfirmPhysicalReceipt(o) && <ConfirmReceiptActions order={o} />}</div></Row>
               <Row label="Código">
                 <InlineField order={o} field="passphrase" type="text" canEdit={canEdit} display={o.passphrase || "—"} maxLength={PASSPHRASE_MAX} collapseSpaces />
               </Row>
@@ -3087,7 +3082,7 @@ function OrdersTable({
               </TableCell>
               <TableCell className="text-center"><DeadlineForecast order={o} canEdit={canEdit} part="forecast" align="center" />
               </TableCell>
-              <TableCell className="text-center"><div className="flex flex-col items-center gap-1"><StatusHistoryDialog order={o} canEdit={canEdit} />{canEditRequester && canConfirmPhysicalReceipt(o) && <ConfirmReceiptActions order={o} />}</div></TableCell>
+              <TableCell className="text-center"><div className="flex flex-col items-center gap-1"><StatusHistoryDialog order={o} canEdit={canEdit} />{canEditRequester && me?.id === o.requester_id && canConfirmPhysicalReceipt(o) && <ConfirmReceiptActions order={o} />}</div></TableCell>
               <TableCell className="text-sm break-words text-center">
                 <InlineField order={o} field="passphrase" type="text" canEdit={canEdit} display={o.passphrase || "—"} align="center" maxLength={PASSPHRASE_MAX} collapseSpaces />
               </TableCell>
@@ -3103,23 +3098,25 @@ function OrdersTable({
 
 function ConfirmReceiptActions({ order }: { order: Order }) {
   const qc = useQueryClient();
+  const { data: me } = useCurrentUser();
   const setStatus = useMutation({
-    mutationFn: async (status: Order["status"]) => {
-      const { error } = await supabase.from("purchase_orders").update({ status }).eq("id", order.id);
+    mutationFn: async (status: "recebido_ok" | "recebido_problema") => {
+      if (!me || me.id !== order.requester_id || !canConfirmPhysicalReceipt(order)) throw new Error("Somente o Solicitante pode confirmar este recebimento.");
+      const { data, error } = await supabase.from("purchase_orders").update({ status }).eq("id", order.id).eq("requester_id", me.id).eq("status", "entregue").select("status").single();
       if (error) throw error;
+      if (data.status !== status) throw new Error("O recebimento não foi confirmado. Atualize o pedido e tente novamente.");
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["orders"] });
-      qc.invalidateQueries({ queryKey: ["material-stock"] });
-      qc.invalidateQueries({ queryKey: ["stock-movements"] });
+      for (const key of ["orders", "linked-supply-order", "material-stock", "stock-movements", "pending-actions", "central-admin", "order-report-logs", "order-logs", "logs"]) void qc.invalidateQueries({ queryKey: [key] });
       toast.success("Recebimento confirmado.");
     },
     onError: (e: Error) => toast.error(e.message),
   });
 
+  if (me?.id !== order.requester_id || !canConfirmPhysicalReceipt(order)) return null;
   return (
     <>
-      <Select value="" onValueChange={(v) => setStatus.mutate(v as Order["status"])} disabled={setStatus.isPending}>
+      <Select value="" onValueChange={(v) => { if (v === "recebido_ok" || v === "recebido_problema") setStatus.mutate(v); }} disabled={setStatus.isPending}>
         <SelectTrigger aria-label="Confirmar recebimento" className="h-auto w-auto gap-1 rounded-full border-border bg-transparent px-2.5 py-0.5 text-xs font-normal text-foreground">
           <SelectValue placeholder="Recebimento" />
         </SelectTrigger>
@@ -3159,6 +3156,7 @@ function OrderReportDialog({
   initiallyOpen?: boolean;
 }) {
   const [open, setOpen] = useState(initiallyOpen);
+  const { data: me } = useCurrentUser();
   const { data: requestTypes } = useRequestTypes();
   const { data: profiles } = useProfilesMap();
   const { data: clients } = useClients();
@@ -3266,6 +3264,7 @@ function OrderReportDialog({
             <Row label="Prazo" value={`${DEADLINE_LABELS[order.deadline_type]}${order.deadline_date ? ` — ${new Date(order.deadline_date + "T00:00:00").toLocaleDateString("pt-BR")}` : ""}`} />
             <Row label="Previsão de entrega" value={order.delivery_forecast ? new Date(order.delivery_forecast + "T00:00:00").toLocaleDateString("pt-BR") : "—"} />
             <Row label="Status" value={orderStatusLabel(order)} />
+            {me?.id === order.requester_id && canConfirmPhysicalReceipt(order) && <Row label="Recebimento" value={<ConfirmReceiptActions order={order} />} />}
             <Row label="Código" value={order.passphrase || "—"} />
             <Row label="Criado em" value={fmtDateTime(order.created_at)} />
             {order.payment_date && <Row label="Data do pagamento" value={new Date(order.payment_date + "T00:00:00").toLocaleDateString("pt-BR")} />}
@@ -3927,7 +3926,7 @@ function ProjectsAdmin({ userId }: { userId: string }) {
           {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
             !projects?.length ? <p className="text-sm text-muted-foreground">Sem projetos.</p> :
             !visibleProjects.length ? <p className="text-sm text-muted-foreground">Nenhum projeto corresponde aos filtros.</p> :
-             <Table data-responsive="true" className="table-fixed">
+             <>{projectFilters.summary}<Table data-responsive="true" className="table-fixed">
                <TableHeader><TableRow><TableHead className="w-[30%]">Nome do projeto</TableHead><TableHead className="w-[14%] text-right">Orçamento</TableHead><TableHead className="w-[14%] text-right">Solicitado</TableHead><TableHead className="w-[20%]">% do orçamento</TableHead><TableHead className="w-[13%] text-center">Status</TableHead><TableHead className="w-[9%] text-center">Data</TableHead></TableRow></TableHeader>
               <TableBody>
                  {visibleProjects.map((p) => {
@@ -4019,7 +4018,7 @@ function ProjectsAdmin({ userId }: { userId: string }) {
                   );
                 })}
               </TableBody>
-            </Table>
+            </Table></>
           }
         </CardContent>
       </Card>
@@ -4406,6 +4405,7 @@ function UsersAdmin() {
               </SelectContent>
             </Select>
           </div>
+          {userFilters.summary}
           {pendingUsers.length > 0 ? (
             <div className="space-y-2">
               <h4 className="text-sm font-bold">Usuários pendentes</h4>
@@ -4584,6 +4584,7 @@ function StatusHistoryDialog({ order, canEdit }: { order: Order; canEdit?: boole
       qc.invalidateQueries({ queryKey: ["orders"] });
       qc.invalidateQueries({ queryKey: ["logs"] });
       qc.invalidateQueries({ queryKey: ["order-logs", order.id] });
+      for (const key of ["pending-actions", "central-admin", "linked-supply-order", "order-report-logs"]) void qc.invalidateQueries({ queryKey: [key] });
       toast.success("Status atualizado");
     },
     onError: (e: Error) => toast.error(e.message),
@@ -4771,7 +4772,7 @@ function LogsAdmin() {
       <CardContent className="space-y-4">
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
           !logs?.length ? <p className="text-sm text-muted-foreground">Nada registrado ainda.</p> :
-          <Table>
+          <>{logFilters.summary}<Table>
             <TableHeader><TableRow>{["date", "action", "order", "actor", "details"].map(key => <TableHead key={key}>{logFilters.header(key)}</TableHead>)}</TableRow></TableHeader>
             <TableBody>
               {filtered.map((l) => {
@@ -4788,7 +4789,7 @@ function LogsAdmin() {
                 );
               })}
             </TableBody>
-          </Table>
+          </Table></>
         }
       </CardContent>
     </Card>

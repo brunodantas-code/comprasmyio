@@ -363,7 +363,7 @@ export function BomSettingsDialog() {
         </div>
 
         <div className="rounded border">
-          <Table>
+          <>{componentFilters.summary}<Table>
             <TableHeader>
               <TableRow>
                 <TableHead>{componentFilters.header("component")}</TableHead>
@@ -406,7 +406,7 @@ export function BomSettingsDialog() {
                 ))
               )}
             </TableBody>
-          </Table>
+          </Table></>
         </div>
 
         <div className="space-y-2 rounded border p-3">

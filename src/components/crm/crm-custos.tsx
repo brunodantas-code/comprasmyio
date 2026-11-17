@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTableFilters } from "@/components/use-table-filters";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus, Save } from "lucide-react";
 import { toast } from "sonner";
@@ -66,10 +67,18 @@ function TabelaPrecos({ d, reload }: { d: Custeio; reload: () => unknown }) {
     await run(c ? supabase.from("crm_tabela_precos_custo").upsert({ item_id: r.id, kit_id: c.kit_id, custo_manual: c.custo_manual, markup_percentual: c.markup_percentual }) : Promise.resolve({ error: null }), "Item salvo", reload);
   }
   const add = () => run(supabase.from("crm_tabela_precos").insert({ nome: "Novo item", ordem: rows.length }), "Item criado", reload);
-  const shown = rows.filter((r) => !busca.trim() || `${r.nome} ${r.modelo ?? ""}`.toLowerCase().includes(busca.toLowerCase()));
+  const filters = useTableFilters(rows, [
+    { key: "name", label: "Item", value: r => r.nome },
+    { key: "model", label: "Modelo", value: r => r.modelo },
+    { key: "category", label: "Categoria", value: r => CATEGORIAS_ITEM.find(x => x.value === r.categoria)?.label },
+    { key: "setup", label: "Setup", kind: "number", value: r => r.preco_setup },
+    { key: "monthly", label: "Mensal", kind: "number", value: r => r.preco_mensal },
+    { key: "active", label: "Ativo", value: r => r.ativo ? "Sim" : "Não" },
+  ]);
+  const shown = filters.filtered.filter((r) => !busca.trim() || `${r.nome} ${r.modelo ?? ""}`.toLowerCase().includes(busca.toLowerCase()));
   return <Card><CardHeader className="flex-row flex-wrap items-start justify-between gap-2"><div><CardTitle>Tabela de preços</CardTitle><CardDescription>Preços de setup e mensalidade usados nas propostas{d.admin ? `. Lote de custo vigente: ${d.lote ? `${d.lote.codigo}${d.lote.status === "exemplo" ? " (exemplo)" : ""}` : "nenhum"}` : ""}.</CardDescription></div>
     <div className="flex items-end gap-2"><Input aria-label="Buscar item" placeholder="Buscar item" value={busca} onChange={(e) => setBusca(e.target.value)} className="w-48" />{d.admin && <Button variant="ghost" onClick={add}><Plus className="h-4 w-4" />Novo item</Button>}</div></CardHeader>
-    <CardContent className="overflow-x-auto"><Table><TableHeader><TableRow><TableHead>Categoria</TableHead><TableHead>Item</TableHead><TableHead>Modelo</TableHead><TableHead>Un.</TableHead><TableHead>Setup</TableHead><TableHead>Mensal</TableHead>
+    <CardContent className="overflow-x-auto"><div className="mb-2 flex justify-end">{filters.menu}</div>{filters.summary}<Table><TableHeader><TableRow><TableHead>Categoria</TableHead><TableHead>Item</TableHead><TableHead>Modelo</TableHead><TableHead>Un.</TableHead><TableHead>Setup</TableHead><TableHead>Mensal</TableHead>
       {d.admin && <><TableHead>Kit</TableHead><TableHead>Custo manual</TableHead><TableHead>Custo efetivo</TableHead><TableHead>Markup %</TableHead><TableHead>Setup sugerido</TableHead><TableHead>Ativo</TableHead><TableHead>Ações</TableHead></>}</TableRow></TableHeader>
       <TableBody>{shown.map((r) => { const c = custos.find((x) => x.item_id === r.id); const ef = custoEfetivo(c, d.kits, d.bases, d.lote); const ro = !d.admin; return <TableRow key={r.id} className={r.ativo ? undefined : "opacity-60"}>
         <TableCell>{ro ? CATEGORIAS_ITEM.find((x) => x.value === r.categoria)?.label : <Select value={r.categoria} onValueChange={(v) => set(r.id, { categoria: v })}><SelectTrigger aria-label="Categoria" className="h-8 min-w-32"><SelectValue /></SelectTrigger><SelectContent>{CATEGORIAS_ITEM.map((x) => <SelectItem key={x.value} value={x.value}>{x.label}</SelectItem>)}</SelectContent></Select>}</TableCell>

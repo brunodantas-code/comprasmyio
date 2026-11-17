@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { activeFilterRules, emptyGeneralFilter, type FilterField, type FilterRule, type GeneralFilter } from "@/lib/site-survey-general-filter";
+import { ActiveFilterTags } from "@/components/active-filter-tags";
 
 export function SiteSurveyGeneralFilter({ fields, value, onChange, countMatches }: { fields: FilterField[]; value: GeneralFilter; onChange: (value: GeneralFilter) => void; countMatches: (value: GeneralFilter) => number }) {
   const [open, setOpen] = useState(false);
@@ -17,7 +18,7 @@ export function SiteSurveyGeneralFilter({ fields, value, onChange, countMatches 
   const filtered = useMemo(() => fields.filter((field) => `${field.section} ${field.prompt} ${field.label} ${field.options.join(" ")}`.toLocaleLowerCase("pt-BR").includes(search.toLocaleLowerCase("pt-BR"))), [fields, search]);
   const sections = [...new Set(filtered.map((field) => field.section))];
   const update = (key: string, patch: Partial<FilterRule>) => setDraft((current) => ({ ...current, rules: { ...current.rules, [key]: { ...(current.rules[key] ?? { values: [] }), ...patch } } }));
-  return <>
+  return <div className="flex min-w-0 max-w-full flex-wrap items-center justify-end gap-2">
     <CdeButton group="filter" screen="components/site-survey-general-filter.tsx" active={!!activeCount} className="h-8 shrink-0 gap-1 px-2 text-xs" aria-label="Filtro geral do checklist" title="Filtro geral do checklist" onClick={() => { setDraft(structuredClone(value)); setSearch(""); setExpanded(new Set(fields.filter((f) => activeFilterRules(value).some(([key]) => key === f.key)).map((f) => f.section))); setOpen(true); }}>Filtro geral{activeCount ? <span className="tabular-nums">({activeCount})</span> : null}</CdeButton>
     <Dialog open={open} onOpenChange={setOpen}><DialogContent className="flex max-h-[90dvh] min-h-0 w-[calc(100%-2rem)] flex-col gap-3 sm:max-w-4xl" aria-describedby={undefined}>
       <DialogHeader><DialogTitle>Filtro geral do checklist</DialogTitle></DialogHeader>
@@ -28,5 +29,6 @@ export function SiteSurveyGeneralFilter({ fields, value, onChange, countMatches 
       </div>
       <DialogFooter className="flex-wrap items-center"><span aria-live="polite" className="mr-auto text-sm tabular-nums">{countMatches(draft)} pontos selecionados</span><Button type="button" variant="action" onClick={() => { const cleared = emptyGeneralFilter(); setDraft(cleared); setSearch(""); onChange(cleared); }}><RotateCcw className="h-4 w-4" />Limpar filtros</Button><Button type="button" variant="action" onClick={() => setOpen(false)}>Cancelar</Button><Button type="button" variant="action" onClick={() => { onChange(draft); setOpen(false); }}><Check className="h-4 w-4" />Aplicar filtros</Button></DialogFooter>
     </DialogContent></Dialog>
-  </>;
+    <ActiveFilterTags items={activeFilterRules(value).map(([key, rule]) => ({ key, label: fields.find(field => field.key === key)?.label ?? "Pergunta", description: [...rule.values, rule.text ? `${rule.operator === "lte" ? "Menor ou igual a" : rule.operator === "gte" ? "Maior ou igual a" : rule.operator === "equals" ? "É igual a" : "Contém"} ${rule.text}` : ""].filter(Boolean).join(", "), remove: () => { const rules = { ...value.rules }; delete rules[key]; onChange({ ...value, rules }); } }))} />
+  </div>;
 }

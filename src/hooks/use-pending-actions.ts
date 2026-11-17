@@ -8,6 +8,7 @@ import { legalSignaturePendingItems } from "@/lib/legal-pending";
 import { mergeConfidentialSubjects } from "@/lib/legal";
 import { todoPendingItems } from "@/lib/personal-todos";
 import { pendingApprovalSteps, type ApprovalStepOrder } from "@/lib/approval-pending";
+import { pendingPhysicalReceiptOrders } from "@/lib/supply-fulfillment";
 
 type ApprovalStep = {
   order_id: string;
@@ -99,12 +100,13 @@ export function usePendingActions() {
       const pendingCodeTickets = pendingCodeItems.length;
       const [supplyMessages, supplyOrders] = await Promise.all([
         supabase.from('supply_order_messages').select('*'),
-        supabase.from('purchase_orders').select('id,requester_id,approval_number,item_name,status,request_type'),
+        supabase.from('purchase_orders').select('id,requester_id,approval_number,item_name,status,request_type,request_model'),
       ]);
       if (supplyMessages.error) throw supplyMessages.error;
       if (supplyOrders.error) throw supplyOrders.error;
       const supplyQuestions = supplyPendingQuestions(supplyMessages.data ?? [], supplyOrders.data ?? [], userId, Boolean(currentUser?.canEditSupplyPurchase));
       const supplyQuestionCount = supplyQuestions.reduce((sum, q) => sum + q.count, 0);
+      const supplyReceipts = pendingPhysicalReceiptOrders(supplyOrders.data ?? [], userId);
       const pendingSupplyQueue = supplyQueueResult.count ?? 0;
       const supportCallItems = (supportCallsResult.data ?? [])
         .filter((call) => currentUser?.isCustomerSupportAnalyst
@@ -119,6 +121,7 @@ export function usePendingActions() {
         legalItems,
         legalSignatures: legalCount,
         supplyQuestions,
+        supplyReceipts,
         mytosisItems: mytosisResult.data ?? [],
         mytosisQuestions: mytosisResult.data?.length ?? 0,
         approvals: pendingApprovals,
@@ -129,8 +132,8 @@ export function usePendingActions() {
         supportCalls,
         supportCallItems,
         isCustomerSupportAnalyst: currentUser?.isCustomerSupportAnalyst ?? false,
-        supply: pendingApprovals + pendingUserDeletions + pendingSupplyQueue + supplyQuestionCount,
-        total: todos.length + legalCount + pendingApprovals + pendingUserDeletions + pendingCodeTickets + pendingSupplyQueue + supportCalls + supplyQuestionCount + (mytosisResult.data?.length ?? 0),
+        supply: pendingApprovals + pendingUserDeletions + pendingSupplyQueue + supplyQuestionCount + supplyReceipts.length,
+        total: todos.length + legalCount + pendingApprovals + pendingUserDeletions + pendingCodeTickets + pendingSupplyQueue + supportCalls + supplyQuestionCount + supplyReceipts.length + (mytosisResult.data?.length ?? 0),
       };
     },
     staleTime: 30_000,

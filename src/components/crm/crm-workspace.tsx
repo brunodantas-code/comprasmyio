@@ -1,4 +1,5 @@
 import { CrmMessageModels } from "./crm-message-models";
+import { useTableFilters } from "@/components/use-table-filters";
 import { CrmConfig, crmConfigOptions } from "./crm-config";
 import { CnpjField, CidadeField, UfField } from "./company-lookups";
 import { leadStage } from "./config-logic";
@@ -100,16 +101,27 @@ function Leads({ data, refresh, setLead }: Ctx) {
   const [status, setStatus] = useState("all");
   const [view, setView] = useState<"lista" | "quadro">("lista");
   const [importOpen, setImportOpen] = useState(false);
-  const rows = data.leads.filter((l) => (status === "all" || leadStage(l) === status) && matchesSearch(q, l.nome, l.empresa_texto, l.email, l.telefone, l.cnpj, l.cargo));
+  const filters = useTableFilters(data.leads, [
+    { key: "name", label: "Nome", value: l => l.nome },
+    { key: "company", label: "Empresa", value: l => l.empresa_id ? empresaName(data, l.empresa_id) : l.empresa_texto },
+    { key: "position", label: "Cargo", value: l => l.cargo },
+    { key: "contact", label: "Contato", value: l => [l.email, l.telefone].filter(Boolean).join(" · ") },
+    { key: "origin", label: "Origem", value: l => origemLabel(l.origem) },
+    { key: "stage", label: "Etapa", value: l => etapaOf(data, leadStage(l))?.nome ?? l.status },
+    { key: "owner", label: "Responsável", value: l => userName(data, l.dono_id) },
+  ]);
+  const rows = filters.filtered.filter((l) => (status === "all" || leadStage(l) === status) && matchesSearch(q, l.nome, l.empresa_texto, l.email, l.telefone, l.cnpj, l.cargo));
   const etapas = data.etapas.filter((e) => e.ativa !== false);
   return <div>
     <SectionTitle title={`Leads (${rows.length})`}>
       <Select value={view} onValueChange={(v) => setView(v as "lista" | "quadro")}><SelectTrigger aria-label="Visualização" className="h-8 w-28 text-[length:var(--filter-fs)]"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="lista">Lista</SelectItem><SelectItem value="quadro">Quadro</SelectItem></SelectContent></Select>
       <Select value={status} onValueChange={setStatus}><SelectTrigger aria-label="Etapa" className="h-8 w-40 text-[length:var(--filter-fs)]"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">Todas as etapas</SelectItem>{etapas.map((e) => <SelectItem key={e.codigo} value={e.codigo}>{e.nome}</SelectItem>)}</SelectContent></Select>
       <SearchBox value={q} onChange={setQ} placeholder="Buscar lead" />
+      {filters.menu}
       <Button variant="ghost" onClick={() => setImportOpen(true)}><FileUp className="h-4 w-4" />Importar CSV</Button>
       <AddButton label="Novo lead" onClick={() => setLead({ status: "novo", origem: "outro" })} />
     </SectionTitle>
+    {filters.summary}
     {view === "lista" ? <Table><TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>Empresa</TableHead><TableHead>Cargo</TableHead><TableHead>Contato</TableHead><TableHead>Origem</TableHead><TableHead>Etapa</TableHead><TableHead>Responsável</TableHead></TableRow></TableHeader>
       <TableBody>{rows.map((l) => { const e = etapaOf(data, leadStage(l)); return <TableRow key={l.id} className="cursor-pointer" onClick={() => setLead(l)}><TableCell className="font-medium">{l.nome}</TableCell><TableCell>{l.empresa_id ? empresaName(data, l.empresa_id) : l.empresa_texto ?? "—"}</TableCell><TableCell>{l.cargo ?? "—"}</TableCell><TableCell className="text-xs">{[l.email, l.telefone].filter(Boolean).join(" · ") || "—"}</TableCell><TableCell>{origemLabel(l.origem)}</TableCell><TableCell><span className="inline-flex items-center gap-2"><Dot color={e?.cor} />{e?.nome ?? l.status}</span></TableCell><TableCell>{userName(data, l.dono_id)}</TableCell></TableRow>; })}
         {!rows.length && <TableRow><TableCell colSpan={7} className="text-muted-foreground">Nenhum lead.</TableCell></TableRow>}</TableBody></Table>
@@ -146,9 +158,18 @@ function ImportDialog({ open, onClose, refresh }: { open: boolean; onClose: () =
 function Empresas({ data, setEmpresa, setContato }: Ctx) {
   const [q, setQ] = useState("");
   const [open, setOpen] = useState<string | null>(null);
-  const rows = data.empresas.filter((e) => matchesSearch(q, e.nome_fantasia, e.razao_social, e.cnpj, e.cidade, e.segmento, e.grupo_economico, ...data.contatos.filter((c) => c.empresa_id === e.id).map((c) => `${c.nome} ${c.email ?? ""}`)));
+  const filters = useTableFilters(data.empresas, [
+    { key: "name", label: "Nome fantasia", value: e => e.nome_fantasia },
+    { key: "legal", label: "Razão social", value: e => e.razao_social },
+    { key: "cnpj", label: "CNPJ", value: e => e.cnpj },
+    { key: "city", label: "Cidade/UF", value: e => [e.cidade, e.uf].filter(Boolean).join("/") },
+    { key: "segment", label: "Segmento", value: e => e.segmento },
+    { key: "contacts", label: "Contatos", value: e => data.contatos.filter(c => c.empresa_id === e.id).map(c => `${c.nome} ${c.email ?? ""}`).join(", ") },
+  ]);
+  const rows = filters.filtered.filter((e) => matchesSearch(q, e.nome_fantasia, e.razao_social, e.cnpj, e.cidade, e.segmento, e.grupo_economico, ...data.contatos.filter((c) => c.empresa_id === e.id).map((c) => `${c.nome} ${c.email ?? ""}`)));
   return <div>
-    <SectionTitle title={`Empresas e contatos (${rows.length})`}><SearchBox value={q} onChange={setQ} placeholder="Buscar empresa, CNPJ ou contato" /><AddButton label="Nova empresa" onClick={() => setEmpresa({})} /></SectionTitle>
+    <SectionTitle title={`Empresas e contatos (${rows.length})`}><SearchBox value={q} onChange={setQ} placeholder="Buscar empresa, CNPJ ou contato" />{filters.menu}<AddButton label="Nova empresa" onClick={() => setEmpresa({})} /></SectionTitle>
+    {filters.summary}
     <Table><TableHeader><TableRow><TableHead>Nome fantasia</TableHead><TableHead>Razão social</TableHead><TableHead>CNPJ</TableHead><TableHead>Cidade/UF</TableHead><TableHead>Segmento</TableHead><TableHead>Contatos</TableHead><TableHead>Oportunidades</TableHead></TableRow></TableHeader>
       <TableBody>{rows.map((e) => { const cs = data.contatos.filter((c) => c.empresa_id === e.id); return [
         <TableRow key={e.id}><TableCell><button type="button" className="font-medium hover:text-primary" onClick={() => setEmpresa(e)}>{e.nome_fantasia}</button></TableCell><TableCell>{e.razao_social ?? "—"}</TableCell><TableCell>{e.cnpj ?? "—"}</TableCell><TableCell>{[e.cidade, e.uf].filter(Boolean).join("/") || "—"}</TableCell><TableCell>{e.segmento ?? "—"}</TableCell>
@@ -185,7 +206,13 @@ function Board({ columns, items, onMove, onOpen }: { columns: { id: string; titl
 function Funil({ data, refresh, setOp }: Ctx) {
   const [q, setQ] = useState("");
   const [reason, setReason] = useState<{ id: string; fase: Fase } | null>(null);
-  const ops = data.ops.filter((o) => matchesSearch(q, o.titulo, empresaName(data, o.empresa_id), userName(data, o.dono_id)));
+  const filters = useTableFilters(data.ops, [
+    { key: "title", label: "Título", value: o => o.titulo },
+    { key: "company", label: "Empresa", value: o => empresaName(data, o.empresa_id) },
+    { key: "phase", label: "Fase", value: o => data.fases.find(f => f.id === o.fase_id)?.nome },
+    { key: "owner", label: "Responsável", value: o => userName(data, o.dono_id) },
+  ]);
+  const ops = filters.filtered.filter((o) => matchesSearch(q, o.titulo, empresaName(data, o.empresa_id), userName(data, o.dono_id)));
   const summary = funnelSummary(data.fases, ops);
   async function move(id: string, faseId: string, motivo?: string) {
     const fase = data.fases.find((f) => f.id === faseId);
@@ -195,7 +222,8 @@ function Funil({ data, refresh, setOp }: Ctx) {
     await refresh();
   }
   return <div>
-    <SectionTitle title="Funil de oportunidades"><SearchBox value={q} onChange={setQ} placeholder="Buscar oportunidade" /><AddButton label="Nova oportunidade" onClick={() => setOp({ fase_id: data.fases.find((f) => f.ativa !== false)?.id })} /></SectionTitle>
+    <SectionTitle title="Funil de oportunidades"><SearchBox value={q} onChange={setQ} placeholder="Buscar oportunidade" />{filters.menu}<AddButton label="Nova oportunidade" onClick={() => setOp({ fase_id: data.fases.find((f) => f.ativa !== false)?.id })} /></SectionTitle>
+    {filters.summary}
     <Board columns={summary.map((s) => ({ id: s.fase.id, title: s.fase.nome, color: s.fase.cor, footer: `${brl(s.setup)} · MRR ${brl(s.mrr)}` }))} items={ops.map((o) => ({ id: o.id, column: o.fase_id, title: o.titulo, subtitle: empresaName(data, o.empresa_id), meta: `${brl(o.valor_setup)} · MRR ${brl(o.valor_mrr)}` }))} onOpen={(id) => setOp(data.ops.find((o) => o.id === id)!)} onMove={(id, col) => void move(id, col)} />
     <ReasonDialog value={reason} onClose={() => setReason(null)} onConfirm={async (m) => { if (reason) await move(reason.id, reason.fase.id, m); setReason(null); }} />
   </div>;
@@ -214,12 +242,23 @@ function Oportunidades({ data, setOp }: Ctx) {
   const [q, setQ] = useState("");
   const [fase, setFase] = useState("all");
   const byId = useMemo(() => new Map(data.fases.map((f) => [f.id, f])), [data.fases]);
-  const rows = data.ops.filter((o) => (fase === "all" || o.fase_id === fase) && matchesSearch(q, o.titulo, empresaName(data, o.empresa_id), userName(data, o.dono_id), o.produto_alvo));
+  const filters = useTableFilters(data.ops, [
+    { key: "title", label: "Título", value: o => o.titulo },
+    { key: "company", label: "Empresa", value: o => empresaName(data, o.empresa_id) },
+    { key: "phase", label: "Fase", value: o => byId.get(o.fase_id)?.nome },
+    { key: "setup", label: "Setup", kind: "number", value: o => o.valor_setup },
+    { key: "mrr", label: "MRR", kind: "number", value: o => o.valor_mrr },
+    { key: "close", label: "Fechamento previsto", kind: "date", value: o => o.data_prevista_fechamento },
+    { key: "action", label: "Próxima ação", value: o => o.proxima_acao_descricao },
+    { key: "owner", label: "Responsável", value: o => userName(data, o.dono_id) },
+  ]);
+  const rows = filters.filtered.filter((o) => (fase === "all" || o.fase_id === fase) && matchesSearch(q, o.titulo, empresaName(data, o.empresa_id), userName(data, o.dono_id), o.produto_alvo));
   return <div>
     <SectionTitle title={`Oportunidades (${rows.length})`}>
       <Select value={fase} onValueChange={setFase}><SelectTrigger aria-label="Fase" className="h-8 w-40 text-[length:var(--filter-fs)]"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">Todas as fases</SelectItem>{data.fases.map((f) => <SelectItem key={f.id} value={f.id}>{f.nome}</SelectItem>)}</SelectContent></Select>
-      <SearchBox value={q} onChange={setQ} placeholder="Buscar oportunidade" /><AddButton label="Nova oportunidade" onClick={() => setOp({ fase_id: data.fases.find((f) => f.ativa !== false)?.id })} />
+      <SearchBox value={q} onChange={setQ} placeholder="Buscar oportunidade" />{filters.menu}<AddButton label="Nova oportunidade" onClick={() => setOp({ fase_id: data.fases.find((f) => f.ativa !== false)?.id })} />
     </SectionTitle>
+    {filters.summary}
     <Table><TableHeader><TableRow><TableHead>Título</TableHead><TableHead>Empresa</TableHead><TableHead>Fase</TableHead><TableHead>Setup</TableHead><TableHead>MRR</TableHead><TableHead>Prob.</TableHead><TableHead>Fechamento previsto</TableHead><TableHead>Próxima ação</TableHead><TableHead>Responsável</TableHead></TableRow></TableHeader>
       <TableBody>{rows.map((o) => { const f = byId.get(o.fase_id); return <TableRow key={o.id} className="cursor-pointer" onClick={() => setOp(o)}><TableCell className="font-medium">{o.titulo}</TableCell><TableCell>{empresaName(data, o.empresa_id)}</TableCell><TableCell><span className="inline-flex items-center gap-2"><Dot color={f?.cor} />{f?.nome}</span></TableCell><TableCell>{brl(o.valor_setup)}</TableCell><TableCell>{brl(o.valor_mrr)}</TableCell><TableCell>{o.probabilidade ?? f?.probabilidade ?? 0}%</TableCell><TableCell>{br(o.data_prevista_fechamento)}</TableCell><TableCell className="text-xs">{o.proxima_acao_data ? `${br(o.proxima_acao_data)} · ${o.proxima_acao_descricao ?? ""}` : "—"}</TableCell><TableCell>{userName(data, o.dono_id)}</TableCell></TableRow>; })}
         {!rows.length && <TableRow><TableCell colSpan={9} className="text-muted-foreground">Nenhuma oportunidade.</TableCell></TableRow>}</TableBody></Table>

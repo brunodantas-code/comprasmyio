@@ -1,4 +1,5 @@
 import { useCusteio } from "./crm-custos";
+import { useTableFilters } from "@/components/use-table-filters";
 import { MemoriaCalculo } from "./crm-memoria";
 import { useEffect, useMemo, useState } from "react";
 import { queryOptions, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
@@ -46,14 +47,25 @@ export function PropostasSection({ data }: { data: CrmData }) {
   const [open, setOpen] = useState<string | null>(null);
   const opOf = (id: string) => data.ops.find((o) => o.id === id);
   const empresaOf = (id: string) => data.empresas.find((e) => e.id === opOf(id)?.empresa_id)?.nome_fantasia ?? "—";
-  const rows = pd.propostas.filter((p) => (status === "all" || p.status === status) && matchesSearch(q, p.numero, opOf(p.oportunidade_id)?.titulo, empresaOf(p.oportunidade_id)));
+  const filters = useTableFilters(pd.propostas, [
+    { key: "number", label: "Número", value: p => p.numero },
+    { key: "opportunity", label: "Oportunidade", value: p => opOf(p.oportunidade_id)?.titulo },
+    { key: "company", label: "Empresa", value: p => empresaOf(p.oportunidade_id) },
+    { key: "status", label: "Situação", value: p => statusLabel(p.status) },
+    { key: "date", label: "Data", kind: "date", value: p => p.data_proposta },
+    { key: "setup", label: "Setup", kind: "number", value: p => p.total_setup },
+    { key: "monthly", label: "Mensal", kind: "number", value: p => p.total_mensal },
+  ]);
+  const rows = filters.filtered.filter((p) => (status === "all" || p.status === status) && matchesSearch(q, p.numero, opOf(p.oportunidade_id)?.titulo, empresaOf(p.oportunidade_id)));
   return <div>
     <div className="mb-4 flex flex-wrap items-end justify-between gap-3"><h1 className="text-xl font-semibold">Propostas ({rows.length})</h1>
       <div className="flex flex-wrap items-end justify-end gap-2">
         <Select value={status} onValueChange={setStatus}><SelectTrigger aria-label="Situação" className="h-8 w-40 text-[length:var(--filter-fs)]"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">Todas as situações</SelectItem>{STATUS_PROPOSTA.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}</SelectContent></Select>
         <Input aria-label="Buscar proposta" placeholder="Buscar proposta" value={q} onChange={(e) => setQ(e.target.value)} className="h-8 w-56 max-w-full text-[length:var(--filter-fs)] md:text-[length:var(--filter-fs)]" />
         <Button variant="ghost" onClick={() => setNova(true)}><Plus className="h-4 w-4" />Nova proposta</Button>
+        {filters.menu}
       </div></div>
+    {filters.summary}
     <Table><TableHeader><TableRow><TableHead>Número</TableHead><TableHead>Oportunidade</TableHead><TableHead>Empresa</TableHead><TableHead>Modelo</TableHead><TableHead>Data</TableHead><TableHead>Situação</TableHead><TableHead>Setup</TableHead><TableHead>Mensal</TableHead></TableRow></TableHeader>
       <TableBody>{rows.map((p) => <TableRow key={p.id} className="cursor-pointer" onClick={() => setOpen(p.id)}>
         <TableCell className="font-medium">{p.numero}{p.versao > 1 ? ` v${p.versao}` : ""}</TableCell><TableCell>{opOf(p.oportunidade_id)?.titulo ?? "—"}</TableCell><TableCell>{empresaOf(p.oportunidade_id)}</TableCell>

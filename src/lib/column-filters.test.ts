@@ -24,4 +24,14 @@ describe("filtros de coluna estilo Excel", () => {
     expect(matchesColumnFilter("text", "Materiais", "Materiais", { selected: ["Serviços"] })).toBe(false);
     expect(matchesColumnFilter("text", "", "", { selected: ["(Vazias)"] })).toBe(true);
   });
+  it("combina vários filtros sem substituir a escolha anterior", () => {
+    const rows = [{ id: "1", status: "Em atendimento", app: "Supply" }, { id: "2", status: "Atendido", app: "Supply" }, { id: "3", status: "Em atendimento", app: "Legal" }];
+    const filtered = rows.filter(row => matchesColumnFilter("text", row.status, row.status, { selected: ["Em atendimento"] }) && matchesColumnFilter("text", row.app, row.app, { selected: ["Supply"] }));
+    expect(filtered.map(row => row.id)).toEqual(["1"]);
+  });
+  it("retira apenas o filtro escolhido e preserva os demais", () => {
+    const rows = [{ id: "1", status: "Em atendimento", app: "Supply" }, { id: "2", status: "Atendido", app: "Supply" }, { id: "3", status: "Em atendimento", app: "Legal" }];
+    const filtered = rows.filter(row => matchesColumnFilter("text", row.status, row.status, undefined) && matchesColumnFilter("text", row.app, row.app, { selected: ["Supply"] }));
+    expect(filtered.map(row => row.id)).toEqual(["1", "2"]);
+  });
 });

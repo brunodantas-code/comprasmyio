@@ -92,7 +92,7 @@
   {
     "id": "components/access-profiles-tab.tsx|d382d9af94cd203b|0",
     "file": "components/access-profiles-tab.tsx",
-    "line": 130,
+    "line": 131,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -482,7 +482,7 @@
   {
     "id": "components/approval-workflow.tsx|3e52c6502682e506|0",
     "file": "components/approval-workflow.tsx",
-    "line": 890,
+    "line": 891,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -497,7 +497,7 @@
   {
     "id": "components/approval-workflow.tsx|3a08ec2bd4f59c79|0",
     "file": "components/approval-workflow.tsx",
-    "line": 968,
+    "line": 969,
     "tag": "Button",
     "label": "Editar etapa",
     "dynamic": false,
@@ -512,7 +512,7 @@
   {
     "id": "components/approval-workflow.tsx|aaa6dc3d2bb41971|1",
     "file": "components/approval-workflow.tsx",
-    "line": 1011,
+    "line": 1012,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -527,7 +527,7 @@
   {
     "id": "components/approval-workflow.tsx|4a6a3d7e3923ee68|0",
     "file": "components/approval-workflow.tsx",
-    "line": 1012,
+    "line": 1013,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -542,7 +542,7 @@
   {
     "id": "components/approval-workflow.tsx|24c0c53d10fe3ad0|0",
     "file": "components/approval-workflow.tsx",
-    "line": 1159,
+    "line": 1160,
     "tag": "CdeButton",
     "label": "Adicionar etapa",
     "dynamic": false,
@@ -557,7 +557,7 @@
   {
     "id": "components/approval-workflow.tsx|b620ad47ce826234|0",
     "file": "components/approval-workflow.tsx",
-    "line": 1187,
+    "line": 1188,
     "tag": "Button",
     "label": "Mover para cima",
     "dynamic": false,
@@ -572,7 +572,7 @@
   {
     "id": "components/approval-workflow.tsx|e21248f7072a9ceb|0",
     "file": "components/approval-workflow.tsx",
-    "line": 1188,
+    "line": 1189,
     "tag": "Button",
     "label": "Mover para baixo",
     "dynamic": false,
@@ -587,7 +587,7 @@
   {
     "id": "components/approval-workflow.tsx|e38411150084cef8|0",
     "file": "components/approval-workflow.tsx",
-    "line": 1213,
+    "line": 1214,
     "tag": "Button",
     "label": "Trash2",
     "dynamic": false,
@@ -707,7 +707,7 @@
   {
     "id": "components/assembly-release.tsx|6fa0e431900bac33|0",
     "file": "components/assembly-release.tsx",
-    "line": 681,
+    "line": 682,
     "tag": "Button",
     "label": "Tirar foto",
     "dynamic": false,
@@ -722,7 +722,7 @@
   {
     "id": "components/assembly-release.tsx|930ce65d1e920464|0",
     "file": "components/assembly-release.tsx",
-    "line": 684,
+    "line": 685,
     "tag": "Button",
     "label": "Escolher da galeria",
     "dynamic": false,
@@ -737,7 +737,7 @@
   {
     "id": "components/assembly-release.tsx|0dfba07560b1553e|0",
     "file": "components/assembly-release.tsx",
-    "line": 696,
+    "line": 697,
     "tag": "Button",
     "label": "Remover",
     "dynamic": false,
@@ -752,7 +752,7 @@
   {
     "id": "components/assembly-release.tsx|bbecbad7b9ae40a5|0",
     "file": "components/assembly-release.tsx",
-    "line": 726,
+    "line": 727,
     "tag": "Button",
     "label": "Liberando... / Liberar",
     "dynamic": true,
@@ -767,7 +767,7 @@
   {
     "id": "components/assembly-release.tsx|4c5d2bc07f454ca4|0",
     "file": "components/assembly-release.tsx",
-    "line": 794,
+    "line": 795,
     "tag": "Button",
     "label": "Excluir liberação",
     "dynamic": false,
@@ -782,7 +782,7 @@
   {
     "id": "components/assembly-release.tsx|aaa6dc3d2bb41971|2",
     "file": "components/assembly-release.tsx",
-    "line": 807,
+    "line": 808,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -797,7 +797,7 @@
   {
     "id": "components/assembly-release.tsx|e90bc5d1551bcae9|0",
     "file": "components/assembly-release.tsx",
-    "line": 808,
+    "line": 809,
     "tag": "Button",
     "label": "Excluindo... / Excluir",
     "dynamic": true,
@@ -812,7 +812,7 @@
   {
     "id": "components/assembly-release.tsx|c86089c978cc4558|0",
     "file": "components/assembly-release.tsx",
-    "line": 919,
+    "line": 920,
     "tag": "button",
     "label": "Homologar dispositivo",
     "dynamic": true,
@@ -2117,7 +2117,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|4df33b65fce17228|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 122,
+    "line": 123,
     "tag": "button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -2132,7 +2132,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|231a7abf9009e9c1|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 123,
+    "line": 124,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -2147,7 +2147,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|f857b332789216e5|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 329,
+    "line": 330,
     "tag": "CdeButton",
     "label": "Criar modelo",
     "dynamic": false,
@@ -2162,7 +2162,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|5da02bf919be1fcb|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 330,
+    "line": 331,
     "tag": "button",
     "label": "modelos ·",
     "dynamic": true,
@@ -2177,7 +2177,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|fa8c7d49a4be2739|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 339,
+    "line": 340,
     "tag": "CdeButton",
     "label": "Criar modelo",
     "dynamic": false,
@@ -2192,7 +2192,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|f791d685d80483f8|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 340,
+    "line": 341,
     "tag": "CdeButton",
     "label": "Sem nome fixo",
     "dynamic": false,
@@ -2207,7 +2207,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|bf4bc59b3127d3cb|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 354,
+    "line": 356,
     "tag": "Button",
     "label": "Editar modelo",
     "dynamic": false,
@@ -2222,7 +2222,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|bc74324fa1e657bf|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 355,
+    "line": 357,
     "tag": "Button",
     "label": "Trash2",
     "dynamic": false,
@@ -2237,7 +2237,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|266e760c60109aa6|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 360,
+    "line": 362,
     "tag": "Button",
     "label": "Padrão (remover) / Padrão principal (remover) / Adicionar como padrão / Tornar principal / Escolher como padrão",
     "dynamic": true,
@@ -2252,7 +2252,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|388711b738ca490e|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 364,
+    "line": 366,
     "tag": "Button",
     "label": "s / Padrão secundário por tela",
     "dynamic": true,
@@ -2267,7 +2267,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|ad4583041c4a5fe6|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 375,
+    "line": 377,
     "tag": "CdeButton",
     "label": "Sem nome fixo",
     "dynamic": false,
@@ -2282,7 +2282,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|957651bdfdf19f94|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 392,
+    "line": 394,
     "tag": "CdeButton",
     "label": "Sem nome fixo",
     "dynamic": false,
@@ -2297,7 +2297,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|b621c28901e39486|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 404,
+    "line": 406,
     "tag": "CdeButton",
     "label": "Sem nome fixo",
     "dynamic": false,
@@ -2312,7 +2312,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|fca6be028ea11516|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 414,
+    "line": 416,
     "tag": "CdeButton",
     "label": "Sem nome fixo",
     "dynamic": false,
@@ -2327,7 +2327,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|df7a84e1a6a84f82|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 420,
+    "line": 422,
     "tag": "Button",
     "label": "Restaurar modelo",
     "dynamic": false,
@@ -2342,7 +2342,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|ca37ea1739cd7ac2|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 437,
+    "line": 439,
     "tag": "Button",
     "label": "Recolher tudo",
     "dynamic": false,
@@ -2357,7 +2357,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|d28478a4de1b6b68|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 523,
+    "line": 525,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -2372,7 +2372,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|fd8d2b22c3bed015|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 524,
+    "line": 526,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -2387,7 +2387,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|758d89a80b0968e2|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 543,
+    "line": 545,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -2402,7 +2402,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|5bfeb96807f40237|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 544,
+    "line": 546,
     "tag": "Button",
     "label": "Excluir",
     "dynamic": false,
@@ -2417,7 +2417,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|558b9c4f599890d9|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 566,
+    "line": 568,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -2432,7 +2432,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|3acf816df56366de|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 567,
+    "line": 569,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -3257,7 +3257,7 @@
   {
     "id": "components/crm/crm-custos.tsx|912570d6a3959372|0",
     "file": "components/crm/crm-custos.tsx",
-    "line": 71,
+    "line": 80,
     "tag": "Button",
     "label": "Novo item",
     "dynamic": false,
@@ -3272,7 +3272,7 @@
   {
     "id": "components/crm/crm-custos.tsx|2c7f764afe693f5b|0",
     "file": "components/crm/crm-custos.tsx",
-    "line": 88,
+    "line": 97,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -3287,7 +3287,7 @@
   {
     "id": "components/crm/crm-custos.tsx|4a57eb9f11f2244c|0",
     "file": "components/crm/crm-custos.tsx",
-    "line": 98,
+    "line": 107,
     "tag": "Button",
     "label": "Novo kit",
     "dynamic": false,
@@ -3302,7 +3302,7 @@
   {
     "id": "components/crm/crm-custos.tsx|98d388b972666815|0",
     "file": "components/crm/crm-custos.tsx",
-    "line": 108,
+    "line": 117,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -3317,7 +3317,7 @@
   {
     "id": "components/crm/crm-custos.tsx|f97e9b5a763a56c8|0",
     "file": "components/crm/crm-custos.tsx",
-    "line": 130,
+    "line": 139,
     "tag": "Button",
     "label": "Novo lote",
     "dynamic": false,
@@ -3332,7 +3332,7 @@
   {
     "id": "components/crm/crm-custos.tsx|85c5d81c426bec43|0",
     "file": "components/crm/crm-custos.tsx",
-    "line": 137,
+    "line": 146,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -3347,7 +3347,7 @@
   {
     "id": "components/crm/crm-custos.tsx|f33f63b7db4afe67|0",
     "file": "components/crm/crm-custos.tsx",
-    "line": 150,
+    "line": 159,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -3392,7 +3392,7 @@
   {
     "id": "components/crm/crm-propostas.tsx|ec35d9012c0a9d46|0",
     "file": "components/crm/crm-propostas.tsx",
-    "line": 55,
+    "line": 65,
     "tag": "Button",
     "label": "Nova proposta",
     "dynamic": false,
@@ -3407,7 +3407,7 @@
   {
     "id": "components/crm/crm-propostas.tsx|6a5f0982e68cddd8|0",
     "file": "components/crm/crm-propostas.tsx",
-    "line": 90,
+    "line": 102,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -3422,7 +3422,7 @@
   {
     "id": "components/crm/crm-propostas.tsx|3e965260fc40ffee|0",
     "file": "components/crm/crm-propostas.tsx",
-    "line": 216,
+    "line": 228,
     "tag": "Button",
     "label": "rascunho / Voltar a rascunho",
     "dynamic": true,
@@ -3437,7 +3437,7 @@
   {
     "id": "components/crm/crm-propostas.tsx|29e88087fc874a0f|0",
     "file": "components/crm/crm-propostas.tsx",
-    "line": 246,
+    "line": 258,
     "tag": "Button",
     "label": "Remover item",
     "dynamic": false,
@@ -3452,7 +3452,7 @@
   {
     "id": "components/crm/crm-propostas.tsx|73bdca7421414a9a|0",
     "file": "components/crm/crm-propostas.tsx",
-    "line": 249,
+    "line": 261,
     "tag": "Button",
     "label": "Adicionar item",
     "dynamic": false,
@@ -3467,7 +3467,7 @@
   {
     "id": "components/crm/crm-propostas.tsx|a7c0c57e604311c8|0",
     "file": "components/crm/crm-propostas.tsx",
-    "line": 262,
+    "line": 274,
     "tag": "Button",
     "label": "Resolvida",
     "dynamic": false,
@@ -3482,7 +3482,7 @@
   {
     "id": "components/crm/crm-propostas.tsx|73f20b113e7785d2|0",
     "file": "components/crm/crm-propostas.tsx",
-    "line": 262,
+    "line": 274,
     "tag": "Button",
     "label": "Não se aplica",
     "dynamic": false,
@@ -3497,7 +3497,7 @@
   {
     "id": "components/crm/crm-propostas.tsx|ece472d439ca5dc1|0",
     "file": "components/crm/crm-propostas.tsx",
-    "line": 263,
+    "line": 275,
     "tag": "Button",
     "label": "Reabrir",
     "dynamic": false,
@@ -3512,7 +3512,7 @@
   {
     "id": "components/crm/crm-propostas.tsx|5c3cfdf5132604f8|0",
     "file": "components/crm/crm-propostas.tsx",
-    "line": 266,
+    "line": 278,
     "tag": "Button",
     "label": "Adicionar",
     "dynamic": false,
@@ -3527,7 +3527,7 @@
   {
     "id": "components/crm/crm-propostas.tsx|85c5d81c426bec43|0",
     "file": "components/crm/crm-propostas.tsx",
-    "line": 272,
+    "line": 284,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -3542,7 +3542,7 @@
   {
     "id": "components/crm/crm-propostas.tsx|d522c2536abc581f|0",
     "file": "components/crm/crm-propostas.tsx",
-    "line": 273,
+    "line": 285,
     "tag": "Button",
     "label": "Gerar DOCX",
     "dynamic": false,
@@ -3557,7 +3557,7 @@
   {
     "id": "components/crm/crm-propostas.tsx|e0f5929df481d6ad|0",
     "file": "components/crm/crm-propostas.tsx",
-    "line": 274,
+    "line": 286,
     "tag": "Button",
     "label": "Nova versão",
     "dynamic": false,
@@ -3587,7 +3587,7 @@
   {
     "id": "components/crm/crm-workspace.tsx|eff1c540e2ea123b|0",
     "file": "components/crm/crm-workspace.tsx",
-    "line": 38,
+    "line": 39,
     "tag": "Button",
     "label": "Plus",
     "dynamic": true,
@@ -3602,7 +3602,7 @@
   {
     "id": "components/crm/crm-workspace.tsx|679e20ab81379a47|0",
     "file": "components/crm/crm-workspace.tsx",
-    "line": 80,
+    "line": 81,
     "tag": "Button",
     "label": "CRM anterior",
     "dynamic": false,
@@ -3617,7 +3617,7 @@
   {
     "id": "components/crm/crm-workspace.tsx|6702d10e35b00cf4|0",
     "file": "components/crm/crm-workspace.tsx",
-    "line": 110,
+    "line": 121,
     "tag": "Button",
     "label": "Importar CSV",
     "dynamic": false,
@@ -3632,7 +3632,7 @@
   {
     "id": "components/crm/crm-workspace.tsx|d5ac3e9830e8164e|0",
     "file": "components/crm/crm-workspace.tsx",
-    "line": 139,
+    "line": 151,
     "tag": "Button",
     "label": "Escolher arquivo",
     "dynamic": false,
@@ -3647,7 +3647,7 @@
   {
     "id": "components/crm/crm-workspace.tsx|37a7ed93258a8466|0",
     "file": "components/crm/crm-workspace.tsx",
-    "line": 141,
+    "line": 153,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -3662,7 +3662,7 @@
   {
     "id": "components/crm/crm-workspace.tsx|cbe4678d4a0444fd|0",
     "file": "components/crm/crm-workspace.tsx",
-    "line": 154,
+    "line": 175,
     "tag": "button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -3677,7 +3677,7 @@
   {
     "id": "components/crm/crm-workspace.tsx|d3e63a9cee029c4d|0",
     "file": "components/crm/crm-workspace.tsx",
-    "line": 155,
+    "line": 176,
     "tag": "button",
     "label": "▲ / ▼",
     "dynamic": true,
@@ -3692,7 +3692,7 @@
   {
     "id": "components/crm/crm-workspace.tsx|ea537393dc33b792|0",
     "file": "components/crm/crm-workspace.tsx",
-    "line": 157,
+    "line": 178,
     "tag": "button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -3707,7 +3707,7 @@
   {
     "id": "components/crm/crm-workspace.tsx|bd6c867f24700f65|0",
     "file": "components/crm/crm-workspace.tsx",
-    "line": 168,
+    "line": 189,
     "tag": "button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -3722,7 +3722,7 @@
   {
     "id": "components/crm/crm-workspace.tsx|ebc1a14c2ffcb1b0|0",
     "file": "components/crm/crm-workspace.tsx",
-    "line": 208,
+    "line": 236,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -3737,7 +3737,7 @@
   {
     "id": "components/crm/crm-workspace.tsx|ae85521702d6b455|0",
     "file": "components/crm/crm-workspace.tsx",
-    "line": 271,
+    "line": 310,
     "tag": "Button",
     "label": "Converter em oportunidade",
     "dynamic": false,
@@ -4187,7 +4187,7 @@
   {
     "id": "components/erp-app-access-admin.tsx|d8080386dc1bf053|0",
     "file": "components/erp-app-access-admin.tsx",
-    "line": 84,
+    "line": 85,
     "tag": "button",
     "label": "Sem nome",
     "dynamic": true,
@@ -4202,7 +4202,7 @@
   {
     "id": "components/erp-app-access-admin.tsx|a14e3248ff0e79ea|0",
     "file": "components/erp-app-access-admin.tsx",
-    "line": 93,
+    "line": 94,
     "tag": "Button",
     "label": "CdeDisclosureIcon",
     "dynamic": false,
@@ -4847,7 +4847,7 @@
   {
     "id": "components/legal/legal-workspace.tsx|cdcd182e484b0d2e|0",
     "file": "components/legal/legal-workspace.tsx",
-    "line": 127,
+    "line": 128,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -4862,7 +4862,7 @@
   {
     "id": "components/legal/legal-workspace.tsx|f2fb8220f55dd7e3|0",
     "file": "components/legal/legal-workspace.tsx",
-    "line": 127,
+    "line": 128,
     "tag": "Button",
     "label": "Assinar documento",
     "dynamic": false,
@@ -4877,7 +4877,7 @@
   {
     "id": "components/legal/legal-workspace.tsx|8682f9590657fa1d|0",
     "file": "components/legal/legal-workspace.tsx",
-    "line": 127,
+    "line": 128,
     "tag": "Button",
     "label": "Editar",
     "dynamic": false,
@@ -4892,7 +4892,7 @@
   {
     "id": "components/legal/legal-workspace.tsx|fe9be11cedd4296f|0",
     "file": "components/legal/legal-workspace.tsx",
-    "line": 127,
+    "line": 128,
     "tag": "Button",
     "label": "Excluir",
     "dynamic": false,
@@ -4907,7 +4907,7 @@
   {
     "id": "components/legal/legal-workspace.tsx|1a57952ce8ad3624|0",
     "file": "components/legal/legal-workspace.tsx",
-    "line": 127,
+    "line": 128,
     "tag": "Button",
     "label": "PDF",
     "dynamic": false,
@@ -4922,7 +4922,7 @@
   {
     "id": "components/legal/legal-workspace.tsx|a5ca5d2413c9e304|0",
     "file": "components/legal/legal-workspace.tsx",
-    "line": 127,
+    "line": 128,
     "tag": "Button",
     "label": "Files",
     "dynamic": false,
@@ -4937,7 +4937,7 @@
   {
     "id": "components/legal/legal-workspace.tsx|dea6ba774e8c8e1a|0",
     "file": "components/legal/legal-workspace.tsx",
-    "line": 130,
+    "line": 131,
     "tag": "Button",
     "label": "Icon",
     "dynamic": true,
@@ -4952,7 +4952,7 @@
   {
     "id": "components/legal/legal-workspace.tsx|666e85d4a67205e4|0",
     "file": "components/legal/legal-workspace.tsx",
-    "line": 133,
+    "line": 134,
     "tag": "CdeButton",
     "label": "Adicionar participante",
     "dynamic": false,
@@ -4967,7 +4967,7 @@
   {
     "id": "components/legal/legal-workspace.tsx|f27ef6b808a82fdb|0",
     "file": "components/legal/legal-workspace.tsx",
-    "line": 133,
+    "line": 134,
     "tag": "Button",
     "label": "Trash2",
     "dynamic": false,
@@ -4982,7 +4982,7 @@
   {
     "id": "components/legal/legal-workspace.tsx|59a467fb0f5eb249|0",
     "file": "components/legal/legal-workspace.tsx",
-    "line": 135,
+    "line": 136,
     "tag": "CdeButton",
     "label": "Sem nome fixo",
     "dynamic": false,
@@ -4997,7 +4997,7 @@
   {
     "id": "components/legal/legal-workspace.tsx|683cf1f2d52727ac|0",
     "file": "components/legal/legal-workspace.tsx",
-    "line": 135,
+    "line": 136,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -5012,7 +5012,7 @@
   {
     "id": "components/legal/legal-workspace.tsx|ced14f81bf90a577|0",
     "file": "components/legal/legal-workspace.tsx",
-    "line": 135,
+    "line": 136,
     "tag": "button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -5027,7 +5027,7 @@
   {
     "id": "components/legal/legal-workspace.tsx|355abed709d32cf3|0",
     "file": "components/legal/legal-workspace.tsx",
-    "line": 135,
+    "line": 136,
     "tag": "Button",
     "label": "Trash2",
     "dynamic": false,
@@ -5042,7 +5042,7 @@
   {
     "id": "components/legal/legal-workspace.tsx|86bafa826f74c4c7|0",
     "file": "components/legal/legal-workspace.tsx",
-    "line": 136,
+    "line": 137,
     "tag": "Button",
     "label": "Assinar ata",
     "dynamic": false,
@@ -5057,7 +5057,7 @@
   {
     "id": "components/legal/legal-workspace.tsx|c369924558850e42|0",
     "file": "components/legal/legal-workspace.tsx",
-    "line": 137,
+    "line": 138,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -5072,7 +5072,7 @@
   {
     "id": "components/legal/legal-workspace.tsx|6481e88a22b8235a|0",
     "file": "components/legal/legal-workspace.tsx",
-    "line": 137,
+    "line": 138,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -5087,7 +5087,7 @@
   {
     "id": "components/legal/legal-workspace.tsx|0ae7a4f2e9881471|0",
     "file": "components/legal/legal-workspace.tsx",
-    "line": 137,
+    "line": 138,
     "tag": "Button",
     "label": "Salvar PDF",
     "dynamic": false,
@@ -5102,7 +5102,7 @@
   {
     "id": "components/legal/legal-workspace.tsx|14c2d77e29a0a079|0",
     "file": "components/legal/legal-workspace.tsx",
-    "line": 140,
+    "line": 141,
     "tag": "Button",
     "label": "Voltar à ata",
     "dynamic": false,
@@ -5117,7 +5117,7 @@
   {
     "id": "components/legal/legal-workspace.tsx|ed2e1d9449665b35|0",
     "file": "components/legal/legal-workspace.tsx",
-    "line": 141,
+    "line": 142,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -5132,7 +5132,7 @@
   {
     "id": "components/legal/legal-workspace.tsx|e971bfe8a0a15a79|0",
     "file": "components/legal/legal-workspace.tsx",
-    "line": 141,
+    "line": 142,
     "tag": "Button",
     "label": "Excluir",
     "dynamic": false,
@@ -6977,7 +6977,7 @@
   {
     "id": "components/mytosis/kpis-tab.tsx|af3a5701deac0725|0",
     "file": "components/mytosis/kpis-tab.tsx",
-    "line": 123,
+    "line": 124,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -6992,7 +6992,7 @@
   {
     "id": "components/mytosis/kpis-tab.tsx|271e29d50ff9ddba|0",
     "file": "components/mytosis/kpis-tab.tsx",
-    "line": 151,
+    "line": 152,
     "tag": "Button",
     "label": "Editar lançamento",
     "dynamic": false,
@@ -7007,7 +7007,7 @@
   {
     "id": "components/mytosis/kpis-tab.tsx|a7ab4f7440d7e5b0|0",
     "file": "components/mytosis/kpis-tab.tsx",
-    "line": 152,
+    "line": 153,
     "tag": "Button",
     "label": "Excluir lançamento",
     "dynamic": false,
@@ -7022,7 +7022,7 @@
   {
     "id": "components/mytosis/kpis-tab.tsx|ec9b5a5136961a07|0",
     "file": "components/mytosis/kpis-tab.tsx",
-    "line": 157,
+    "line": 158,
     "tag": "CdeButton",
     "label": "Lançar resultado",
     "dynamic": false,
@@ -7037,7 +7037,7 @@
   {
     "id": "components/mytosis/kpis-tab.tsx|b0040b1b81010d50|0",
     "file": "components/mytosis/kpis-tab.tsx",
-    "line": 158,
+    "line": 159,
     "tag": "Button",
     "label": "Editar KPI",
     "dynamic": false,
@@ -7052,7 +7052,7 @@
   {
     "id": "components/mytosis/kpis-tab.tsx|349eff77d1f0af1f|0",
     "file": "components/mytosis/kpis-tab.tsx",
-    "line": 159,
+    "line": 160,
     "tag": "Button",
     "label": "Excluir",
     "dynamic": false,
@@ -7067,7 +7067,7 @@
   {
     "id": "components/mytosis/kpis-tab.tsx|fff24dcd715b500e|0",
     "file": "components/mytosis/kpis-tab.tsx",
-    "line": 181,
+    "line": 182,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -7082,7 +7082,7 @@
   {
     "id": "components/mytosis/kpis-tab.tsx|cff29000051f317b|0",
     "file": "components/mytosis/kpis-tab.tsx",
-    "line": 181,
+    "line": 182,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -7097,7 +7097,7 @@
   {
     "id": "components/mytosis/kpis-tab.tsx|879a4e5ee466518b|0",
     "file": "components/mytosis/kpis-tab.tsx",
-    "line": 194,
+    "line": 195,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -7112,7 +7112,7 @@
   {
     "id": "components/mytosis/kpis-tab.tsx|b07f67f2b14bc7cc|0",
     "file": "components/mytosis/kpis-tab.tsx",
-    "line": 194,
+    "line": 195,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -8147,7 +8147,7 @@
   {
     "id": "components/personal-todos/todo-section.tsx|0b6f8b131925dfac|0",
     "file": "components/personal-todos/todo-section.tsx",
-    "line": 60,
+    "line": 61,
     "tag": "Button",
     "label": "Tarefas pendentes",
     "dynamic": false,
@@ -8162,7 +8162,7 @@
   {
     "id": "components/personal-todos/todo-section.tsx|0ab47e2fcfbf8fff|0",
     "file": "components/personal-todos/todo-section.tsx",
-    "line": 65,
+    "line": 66,
     "tag": "Button",
     "label": "· / - / / / Sem conclusão prevista",
     "dynamic": true,
@@ -8177,7 +8177,7 @@
   {
     "id": "components/personal-todos/todo-section.tsx|3b6db2b3ec61401f|0",
     "file": "components/personal-todos/todo-section.tsx",
-    "line": 65,
+    "line": 66,
     "tag": "Button",
     "label": "Concluídas",
     "dynamic": true,
@@ -8192,7 +8192,7 @@
   {
     "id": "components/personal-todos/todo-section.tsx|1d63c8c335e9e679|0",
     "file": "components/personal-todos/todo-section.tsx",
-    "line": 65,
+    "line": 66,
     "tag": "Button",
     "label": "· Concluída / pt-BR",
     "dynamic": true,
@@ -8627,7 +8627,7 @@
   {
     "id": "components/site-survey-environment-manager.tsx|d9a761072e72787c|0",
     "file": "components/site-survey-environment-manager.tsx",
-    "line": 120,
+    "line": 121,
     "tag": "CdeButton",
     "label": "Adicionar ambiente",
     "dynamic": false,
@@ -8642,7 +8642,7 @@
   {
     "id": "components/site-survey-environment-manager.tsx|58d6c4ad412fd74c|0",
     "file": "components/site-survey-environment-manager.tsx",
-    "line": 122,
+    "line": 123,
     "tag": "button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -8657,7 +8657,7 @@
   {
     "id": "components/site-survey-environment-manager.tsx|c5b513be3f2f114c|0",
     "file": "components/site-survey-environment-manager.tsx",
-    "line": 122,
+    "line": 123,
     "tag": "Button",
     "label": "ChevronDown",
     "dynamic": false,
@@ -8672,7 +8672,7 @@
   {
     "id": "components/site-survey-environment-manager.tsx|c9c9200fcdb04f80|0",
     "file": "components/site-survey-environment-manager.tsx",
-    "line": 122,
+    "line": 123,
     "tag": "Button",
     "label": "Editar ambiente",
     "dynamic": false,
@@ -8687,7 +8687,7 @@
   {
     "id": "components/site-survey-environment-manager.tsx|273714851aff6a4a|0",
     "file": "components/site-survey-environment-manager.tsx",
-    "line": 128,
+    "line": 129,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -8702,7 +8702,7 @@
   {
     "id": "components/site-survey-environment-manager.tsx|2cd2aa4d68ea71da|0",
     "file": "components/site-survey-environment-manager.tsx",
-    "line": 128,
+    "line": 129,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -8792,7 +8792,7 @@
   {
     "id": "components/site-survey-general-filter.tsx|75610b28819642c2|0",
     "file": "components/site-survey-general-filter.tsx",
-    "line": 21,
+    "line": 22,
     "tag": "CdeButton",
     "label": "Filtro geral",
     "dynamic": true,
@@ -8807,7 +8807,7 @@
   {
     "id": "components/site-survey-general-filter.tsx|fbb5a446e827ef29|0",
     "file": "components/site-survey-general-filter.tsx",
-    "line": 26,
+    "line": 27,
     "tag": "button",
     "label": "ChevronDown",
     "dynamic": true,
@@ -8822,7 +8822,7 @@
   {
     "id": "components/site-survey-general-filter.tsx|9bd671ac64fa3a70|0",
     "file": "components/site-survey-general-filter.tsx",
-    "line": 29,
+    "line": 30,
     "tag": "Button",
     "label": "Limpar filtros",
     "dynamic": false,
@@ -8837,7 +8837,7 @@
   {
     "id": "components/site-survey-general-filter.tsx|b303b1b282a8a79b|0",
     "file": "components/site-survey-general-filter.tsx",
-    "line": 29,
+    "line": 30,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -8852,7 +8852,7 @@
   {
     "id": "components/site-survey-general-filter.tsx|e0d30de60cea146d|0",
     "file": "components/site-survey-general-filter.tsx",
-    "line": 29,
+    "line": 30,
     "tag": "Button",
     "label": "Aplicar filtros",
     "dynamic": false,
@@ -8897,7 +8897,7 @@
   {
     "id": "components/site-survey-luc-manager.tsx|d9a761072e72787c|0",
     "file": "components/site-survey-luc-manager.tsx",
-    "line": 484,
+    "line": 485,
     "tag": "CdeButton",
     "label": "Adicionar ambiente",
     "dynamic": false,
@@ -8912,7 +8912,7 @@
   {
     "id": "components/site-survey-luc-manager.tsx|5042265c2b79818c|0",
     "file": "components/site-survey-luc-manager.tsx",
-    "line": 486,
+    "line": 487,
     "tag": "Button",
     "label": "Importar Cadastro",
     "dynamic": false,
@@ -8927,7 +8927,7 @@
   {
     "id": "components/site-survey-luc-manager.tsx|aceb8f1d4fc20044|0",
     "file": "components/site-survey-luc-manager.tsx",
-    "line": 486,
+    "line": 487,
     "tag": "Button",
     "label": "Gerando... / Cadastro em PDF",
     "dynamic": true,
@@ -8942,7 +8942,7 @@
   {
     "id": "components/site-survey-luc-manager.tsx|8bdf7ec953e5ea11|0",
     "file": "components/site-survey-luc-manager.tsx",
-    "line": 486,
+    "line": 487,
     "tag": "Button",
     "label": "Exportando... / Cadastro em Excel",
     "dynamic": true,
@@ -8957,7 +8957,7 @@
   {
     "id": "components/site-survey-luc-manager.tsx|289c2e2cfafb5df7|0",
     "file": "components/site-survey-luc-manager.tsx",
-    "line": 486,
+    "line": 487,
     "tag": "Button",
     "label": "ChevronDown",
     "dynamic": false,
@@ -8972,7 +8972,7 @@
   {
     "id": "components/site-survey-luc-manager.tsx|58d6c4ad412fd74c|0",
     "file": "components/site-survey-luc-manager.tsx",
-    "line": 489,
+    "line": 490,
     "tag": "button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -8987,7 +8987,7 @@
   {
     "id": "components/site-survey-luc-manager.tsx|c5b513be3f2f114c|0",
     "file": "components/site-survey-luc-manager.tsx",
-    "line": 489,
+    "line": 490,
     "tag": "Button",
     "label": "ChevronDown",
     "dynamic": false,
@@ -9002,7 +9002,7 @@
   {
     "id": "components/site-survey-luc-manager.tsx|d93ef7dc6b935baa|0",
     "file": "components/site-survey-luc-manager.tsx",
-    "line": 489,
+    "line": 490,
     "tag": "Button",
     "label": "Editar ambiente",
     "dynamic": false,
@@ -9017,7 +9017,7 @@
   {
     "id": "components/site-survey-luc-manager.tsx|9c04296342489c55|0",
     "file": "components/site-survey-luc-manager.tsx",
-    "line": 495,
+    "line": 496,
     "tag": "Button",
     "label": "Colorido",
     "dynamic": false,
@@ -9032,7 +9032,7 @@
   {
     "id": "components/site-survey-luc-manager.tsx|3a9a35e239a29535|0",
     "file": "components/site-survey-luc-manager.tsx",
-    "line": 496,
+    "line": 497,
     "tag": "Button",
     "label": "Preto e branco",
     "dynamic": false,
@@ -9047,7 +9047,7 @@
   {
     "id": "components/site-survey-luc-manager.tsx|d9d23398d9014c37|0",
     "file": "components/site-survey-luc-manager.tsx",
-    "line": 509,
+    "line": 510,
     "tag": "Button",
     "label": "Digite ou selecione",
     "dynamic": true,
@@ -9062,7 +9062,7 @@
   {
     "id": "components/site-survey-luc-manager.tsx|e52ebf226858bf17|0",
     "file": "components/site-survey-luc-manager.tsx",
-    "line": 511,
+    "line": 512,
     "tag": "Button",
     "label": "Analisando fachada... / Identificar pela fachada",
     "dynamic": true,
@@ -9077,7 +9077,7 @@
   {
     "id": "components/site-survey-luc-manager.tsx|ef6c7eca62e8f970|0",
     "file": "components/site-survey-luc-manager.tsx",
-    "line": 515,
+    "line": 516,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -9092,7 +9092,7 @@
   {
     "id": "components/site-survey-luc-manager.tsx|891aaa11be57c820|0",
     "file": "components/site-survey-luc-manager.tsx",
-    "line": 515,
+    "line": 516,
     "tag": "Button",
     "label": "Salvando... / Salvar",
     "dynamic": true,
@@ -9107,7 +9107,7 @@
   {
     "id": "components/site-survey-luc-manager.tsx|44ddb90f890d7aea|0",
     "file": "components/site-survey-luc-manager.tsx",
-    "line": 518,
+    "line": 519,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -9122,7 +9122,7 @@
   {
     "id": "components/site-survey-luc-manager.tsx|12ee4b1f51a6a7cc|0",
     "file": "components/site-survey-luc-manager.tsx",
-    "line": 518,
+    "line": 519,
     "tag": "Button",
     "label": "Importando...",
     "dynamic": true,
@@ -9602,7 +9602,7 @@
   {
     "id": "components/site-survey-screen-summary.tsx|c992a2c961324ee0|0",
     "file": "components/site-survey-screen-summary.tsx",
-    "line": 210,
+    "line": 211,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -9617,7 +9617,7 @@
   {
     "id": "components/site-survey-screen-summary.tsx|00230d0b87f05c00|0",
     "file": "components/site-survey-screen-summary.tsx",
-    "line": 211,
+    "line": 212,
     "tag": "Button",
     "label": "Abrir checklist",
     "dynamic": false,
@@ -10547,7 +10547,7 @@
   {
     "id": "components/supply-consolidation.tsx|cbc53e3427e08bb9|0",
     "file": "components/supply-consolidation.tsx",
-    "line": 51,
+    "line": 52,
     "tag": "Button",
     "label": "Tentar novamente",
     "dynamic": false,
@@ -10562,7 +10562,7 @@
   {
     "id": "components/supply-consolidation.tsx|36d3da68e93b93d8|0",
     "file": "components/supply-consolidation.tsx",
-    "line": 51,
+    "line": 52,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -10577,7 +10577,7 @@
   {
     "id": "components/supply-consolidation.tsx|a01f26ec9c483031|0",
     "file": "components/supply-consolidation.tsx",
-    "line": 52,
+    "line": 53,
     "tag": "Button",
     "label": "Resumida",
     "dynamic": false,
@@ -10592,7 +10592,7 @@
   {
     "id": "components/supply-consolidation.tsx|7fcf1889e8445017|0",
     "file": "components/supply-consolidation.tsx",
-    "line": 52,
+    "line": 53,
     "tag": "Button",
     "label": "Detalhada",
     "dynamic": false,
@@ -11462,7 +11462,7 @@
   {
     "id": "components/use-table-filters.tsx|03c087fc3b076bd1|0",
     "file": "components/use-table-filters.tsx",
-    "line": 61,
+    "line": 66,
     "tag": "CdeButton",
     "label": "Filtros",
     "dynamic": true,
@@ -11475,24 +11475,24 @@
     "group": "filter"
   },
   {
-    "id": "components/use-table-filters.tsx|46ba228d750e08f2|0",
+    "id": "components/use-table-filters.tsx|afb52d5e8e8a77d4|0",
     "file": "components/use-table-filters.tsx",
-    "line": 68,
-    "tag": "button",
+    "line": 73,
+    "tag": "Button",
     "label": ":",
     "dynamic": true,
     "visualCustom": false,
     "autoCdeSafe": true,
     "icon": "",
-    "variant": "",
+    "variant": "ghost",
     "size": "",
-    "className": "min-w-0 flex-1 truncate text-left hover:underline",
+    "className": "!h-auto !min-w-0 !w-auto flex-1 whitespace-normal break-words text-left font-normal",
     "group": ""
   },
   {
     "id": "components/use-table-filters.tsx|c72c0b82547e9a5c|0",
     "file": "components/use-table-filters.tsx",
-    "line": 68,
+    "line": 73,
     "tag": "Button",
     "label": "X",
     "dynamic": false,
@@ -11507,7 +11507,7 @@
   {
     "id": "components/use-table-filters.tsx|ff0cd4e1453274fb|0",
     "file": "components/use-table-filters.tsx",
-    "line": 69,
+    "line": 74,
     "tag": "Button",
     "label": "Limpar todos os filtros ( / )",
     "dynamic": true,
@@ -11837,7 +11837,7 @@
   {
     "id": "components/wishlist/workspace.tsx|297b7ee894a38d2d|0",
     "file": "components/wishlist/workspace.tsx",
-    "line": 42,
+    "line": 43,
     "tag": "Button",
     "label": "pt-BR",
     "dynamic": true,
@@ -11847,6 +11847,21 @@
     "variant": "",
     "size": "",
     "className": "grid h-auto w-full min-w-0 grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1 rounded-none bg-transparent px-3 py-3 text-left whitespace-normal text-foreground cursor-pointer hover:bg-cde-number-soft focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring md:grid-cols-[12rem_6rem_minmax(0,1fr)_8rem_2rem] md:gap-4",
+    "group": ""
+  },
+  {
+    "id": "components/active-filter-tags.tsx|b92379d534749c7a|0",
+    "file": "components/active-filter-tags.tsx",
+    "line": 23,
+    "tag": "Button",
+    "label": "X",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "X",
+    "variant": "ghost",
+    "size": "compactIcon",
+    "className": "shrink-0",
     "group": ""
   },
   {
@@ -12390,24 +12405,9 @@
     "group": ""
   },
   {
-    "id": "routes/_authenticated/dashboard.tsx|72fbad8194e7cc64|0",
-    "file": "routes/_authenticated/dashboard.tsx",
-    "line": 2954,
-    "tag": "Button",
-    "label": "Limpar filtros",
-    "dynamic": false,
-    "visualCustom": false,
-    "autoCdeSafe": true,
-    "icon": "",
-    "variant": "outline",
-    "size": "sm",
-    "className": "h-7 text-xs",
-    "group": ""
-  },
-  {
     "id": "routes/_authenticated/dashboard.tsx|8bf4bb2937a4342e|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3244,
+    "line": 3242,
     "tag": "button",
     "label": "Ver relatório completo",
     "dynamic": true,
@@ -12422,7 +12422,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|0fbcbb029b4cde41|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3411,
+    "line": 3410,
     "tag": "button",
     "label": "Clique para editar",
     "dynamic": true,
@@ -12437,7 +12437,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|eaa2bbed90ba75c3|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3567,
+    "line": 3566,
     "tag": "Button",
     "label": "Editar solicitação pendente como solicitante",
     "dynamic": false,
@@ -12452,7 +12452,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|b303b1b282a8a79b|1",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3668,
+    "line": 3667,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -12467,7 +12467,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|891aaa11be57c820|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3669,
+    "line": 3668,
     "tag": "Button",
     "label": "Salvando... / Salvar",
     "dynamic": true,
@@ -12482,7 +12482,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|9ddcd7ddce1a378e|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3699,
+    "line": 3698,
     "tag": "Button",
     "label": "Excluir solicitação",
     "dynamic": false,
@@ -12497,7 +12497,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|439484d97dcb8080|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3897,
+    "line": 3896,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -12512,7 +12512,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|4df33b65fce17228|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3944,
+    "line": 3943,
     "tag": "button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -12527,7 +12527,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|dbe7afbb506329df|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3963,
+    "line": 3962,
     "tag": "Button",
     "label": "Marcar como implantado",
     "dynamic": false,
@@ -12542,7 +12542,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|2e3048fb239fe8e0|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3966,
+    "line": 3965,
     "tag": "Button",
     "label": "Cancelar projeto",
     "dynamic": false,
@@ -12557,7 +12557,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|2865b23725fc6c87|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3972,
+    "line": 3971,
     "tag": "Button",
     "label": "Reativar projeto",
     "dynamic": false,
@@ -12572,7 +12572,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|5ecf0ecc993a5786|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3990,
+    "line": 3989,
     "tag": "Button",
     "label": "Excluir projeto",
     "dynamic": false,
@@ -12587,7 +12587,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|47a894e7a4e2f49b|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 4114,
+    "line": 4113,
     "tag": "Button",
     "label": "Editar projeto",
     "dynamic": false,
@@ -12602,7 +12602,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|439484d97dcb8080|1",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 4174,
+    "line": 4173,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -12617,7 +12617,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|231a7abf9009e9c1|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 4195,
+    "line": 4194,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -12677,7 +12677,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|4df33b65fce17228|1",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 4618,
+    "line": 4619,
     "tag": "button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -12692,7 +12692,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|a60f755b5ed09042|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 4720,
+    "line": 4721,
     "tag": "Button",
     "label": "Gerar backup",
     "dynamic": false,
@@ -12707,7 +12707,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|aaa6dc3d2bb41971|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 4733,
+    "line": 4734,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -12722,7 +12722,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|4e0d335dec619872|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 4734,
+    "line": 4735,
     "tag": "Button",
     "label": "Confirmar e baixar",
     "dynamic": true,
@@ -12747,21 +12747,6 @@
     "variant": "ghost",
     "size": "compactIcon",
     "className": "absolute right-0 top-1/2 -translate-y-1/2",
-    "group": ""
-  },
-  {
-    "id": "routes/_authenticated/development.tsx|06c3a6f788d5e424|0",
-    "file": "routes/_authenticated/development.tsx",
-    "line": 265,
-    "tag": "Button",
-    "label": "X",
-    "dynamic": false,
-    "visualCustom": false,
-    "autoCdeSafe": true,
-    "icon": "X",
-    "variant": "ghost",
-    "size": "compactIcon",
-    "className": "",
     "group": ""
   },
   {
@@ -13187,7 +13172,7 @@
   {
     "id": "routes/_authenticated/rh.tsx|b77cb1c9eb5531f6|0",
     "file": "routes/_authenticated/rh.tsx",
-    "line": 89,
+    "line": 90,
     "tag": "Button",
     "label": "Celular não cadastrado",
     "dynamic": true,
@@ -13202,7 +13187,7 @@
   {
     "id": "routes/_authenticated/rh.tsx|891aaa11be57c820|0",
     "file": "routes/_authenticated/rh.tsx",
-    "line": 96,
+    "line": 97,
     "tag": "Button",
     "label": "Salvando... / Salvar",
     "dynamic": true,
@@ -13832,7 +13817,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|f579d3c586485846|1",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1468,
+    "line": 1469,
     "tag": "Button",
     "label": "Recolher visita",
     "dynamic": false,
@@ -13847,7 +13832,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|ebe2e887f7ebc777|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1468,
+    "line": 1469,
     "tag": "Button",
     "label": "Iniciar visita",
     "dynamic": false,
@@ -13862,7 +13847,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|378be691e293d2cc|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1468,
+    "line": 1469,
     "tag": "Button",
     "label": "Concluir",
     "dynamic": false,
@@ -13877,7 +13862,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|06d552b413eac24c|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1468,
+    "line": 1469,
     "tag": "Button",
     "label": "Solicitar ajustes",
     "dynamic": false,
@@ -13892,7 +13877,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|1cd36a073b3e717e|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1492,
+    "line": 1493,
     "tag": "CdeButton",
     "label": "Técnico",
     "dynamic": false,
@@ -13907,7 +13892,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|8bc3eee31c830b6d|2",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1496,
+    "line": 1497,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -13922,7 +13907,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|d7080aff7892e375|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1496,
+    "line": 1497,
     "tag": "Button",
     "label": "Selecione um modelo",
     "dynamic": false,
@@ -13937,7 +13922,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|5443eedbdbe51c70|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1503,
+    "line": 1504,
     "tag": "Button",
     "label": "Disponível sem modelo base",
     "dynamic": true,
@@ -13952,7 +13937,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|686366697b299307|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1624,
+    "line": 1625,
     "tag": "Button",
     "label": "new",
     "dynamic": true,
@@ -13967,7 +13952,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|20e22cc6beda2b60|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1624,
+    "line": 1625,
     "tag": "CdeButton",
     "label": "Criar modelo",
     "dynamic": false,
@@ -13982,7 +13967,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|5498a86b6f4701e2|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1624,
+    "line": 1625,
     "tag": "Button",
     "label": "edit",
     "dynamic": true,
@@ -13997,7 +13982,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|289c2e2cfafb5df7|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1624,
+    "line": 1625,
     "tag": "Button",
     "label": "ChevronDown",
     "dynamic": true,
@@ -14012,7 +13997,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|7d0a9d25ab7e8fda|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1624,
+    "line": 1625,
     "tag": "Button",
     "label": "Salvar modelo",
     "dynamic": false,
@@ -14027,7 +14012,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|f4e9ed1e0d392d4a|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1624,
+    "line": 1625,
     "tag": "Button",
     "label": "sections",
     "dynamic": true,
@@ -14042,7 +14027,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|4d4be3b720f9f28d|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1624,
+    "line": 1625,
     "tag": "CdeButton",
     "label": "Adicionar seção",
     "dynamic": false,
@@ -14057,7 +14042,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|b0e331627f4ba3a5|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1624,
+    "line": 1625,
     "tag": "Button",
     "label": "Editar seção",
     "dynamic": false,
@@ -14072,7 +14057,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|8c6f20b2bb48f18a|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1624,
+    "line": 1625,
     "tag": "Button",
     "label": "Salvar seção",
     "dynamic": false,
@@ -14087,7 +14072,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|58556371ae221833|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1624,
+    "line": 1625,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -14102,7 +14087,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|9b901d6be1ac92a2|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1624,
+    "line": 1625,
     "tag": "CdeButton",
     "label": "Adicionar pergunta",
     "dynamic": false,
@@ -14117,7 +14102,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|d9521549804d6823|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1624,
+    "line": 1625,
     "tag": "Button",
     "label": "Editar pergunta",
     "dynamic": false,
@@ -14132,7 +14117,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|59e987744915d1a4|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1624,
+    "line": 1625,
     "tag": "Button",
     "label": "Salvar pergunta",
     "dynamic": false,
@@ -14147,7 +14132,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|e325e236904d1ee7|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1624,
+    "line": 1625,
     "tag": "CdeButton",
     "label": "Adicionar pergunta",
     "dynamic": false,
@@ -14162,7 +14147,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|439484d97dcb8080|3",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1760,
+    "line": 1761,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -14177,7 +14162,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|db59ed42a6bf9277|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1762,
+    "line": 1763,
     "tag": "CdeButton",
     "label": "Criar novo cadastro",
     "dynamic": false,
@@ -14192,7 +14177,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|4fc6a91fd6777a16|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1767,
+    "line": 1768,
     "tag": "Button",
     "label": "Editar cadastro",
     "dynamic": false,
@@ -14207,7 +14192,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|57d3f889944ca8fd|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1767,
+    "line": 1768,
     "tag": "CdeButton",
     "label": "Adicionar item",
     "dynamic": false,
@@ -14222,7 +14207,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|231a7abf9009e9c1|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1767,
+    "line": 1768,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -14237,7 +14222,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|aa96a102ec9d5d01|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1768,
+    "line": 1769,
     "tag": "Button",
     "label": "Editar",
     "dynamic": false,
@@ -14252,7 +14237,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|439484d97dcb8080|4",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1769,
+    "line": 1770,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -14267,7 +14252,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|273714851aff6a4a|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1773,
+    "line": 1774,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -14282,7 +14267,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|891aaa11be57c820|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1773,
+    "line": 1774,
     "tag": "Button",
     "label": "Salvando... / Salvar",
     "dynamic": true,
@@ -14297,7 +14282,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|eaec305d10b6c1a1|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1774,
+    "line": 1775,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -14312,7 +14297,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|891aaa11be57c820|1",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1774,
+    "line": 1775,
     "tag": "Button",
     "label": "Salvando... / Salvar",
     "dynamic": true,
@@ -14327,7 +14312,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|632a5db14784c7ce|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1797,
+    "line": 1798,
     "tag": "Button",
     "label": "Remover acesso",
     "dynamic": false,
@@ -14342,7 +14327,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|640c09521c9ba752|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1880,
+    "line": 1881,
     "tag": "Button",
     "label": "Escolher anexos para excluir",
     "dynamic": false,
@@ -14357,7 +14342,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|3df0f39e6b06c033|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1900,
+    "line": 1901,
     "tag": "button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -14372,7 +14357,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|03802a8f57d2d9b0|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1911,
+    "line": 1912,
     "tag": "Button",
     "label": "FileText",
     "dynamic": true,
@@ -14387,7 +14372,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|5d8b32552a03bf1e|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1919,
+    "line": 1920,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -14402,7 +14387,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|cf05cb89eb9438a0|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1980,
+    "line": 1981,
     "tag": "Button",
     "label": "Escolher ou arrastar arquivo",
     "dynamic": true,
@@ -14417,7 +14402,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|37e77b77ac2e703f|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 2038,
+    "line": 2039,
     "tag": "Button",
     "label": "Abrir calendário",
     "dynamic": false,

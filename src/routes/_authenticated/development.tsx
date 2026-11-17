@@ -262,7 +262,7 @@ function DevelopmentPage() {
               </div>
               <span className="inline-flex shrink-0 items-center gap-1 text-[length:var(--filter-fs)] text-muted-foreground">Filtros{ticketFilters.menu}</span>
             </div>
-            {ticketFilters.active > 0 ? <div className="mb-3 flex flex-wrap justify-end gap-2">{ticketColumns.filter(column => isFilterActive(ticketFilters.filters[column.key])).map(column => { const value = ticketFilters.filters[column.key]; return <Badge key={column.key} variant="secondary" className="max-w-full gap-1 font-normal"><span className="min-w-0 break-words">{column.label}: {value?.selected?.join(", ") || `${OP_LABELS[column.kind ?? "text"].find(option => option.op === value?.op)?.label ?? ""} ${value?.value ?? ""}${value?.value2 ? ` — ${value.value2}` : ""}`}</span><Button type="button" variant="ghost" size="compactIcon" aria-label={`Remover filtro ${column.label}`} title={`Remover filtro ${column.label}`} onClick={() => ticketFilters.setFilter(column.key, undefined)}><X /></Button></Badge>; })}</div> : null}
+            {ticketFilters.summary}
             {isLoading ? <p className="py-8 text-center text-sm text-muted-foreground">Carregando tickets...</p> : (
               <Table className="table-auto text-xs md:min-w-[1100px]">
                  <TableHeader>

@@ -531,7 +531,7 @@ export function MyioOrdersTab({ userId, canManage = true }: { userId: string; ca
         </div>
       </CardHeader>
       <CardContent>
-        <Table>
+        <>{myioFilters.summary}<Table>
             <TableHeader>
               <TableRow>{["project", "client", "approval", "replacement", "date", "products", "status"].map(key => <TableHead key={key}>{myioFilters.header(key)}</TableHead>)} {canManage && <TableHead className="w-20" />}</TableRow>
             </TableHeader>
@@ -609,7 +609,7 @@ export function MyioOrdersTab({ userId, canManage = true }: { userId: string; ca
                 </TableRow>
               ))}
             </TableBody>
-          </Table>
+          </Table></>
       </CardContent>
     </Card>
   );

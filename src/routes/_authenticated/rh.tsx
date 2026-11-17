@@ -57,6 +57,7 @@ function RhPage() {
           <Badge variant="outline" className="shrink-0">{technicians.length} técnicos</Badge>
         </div>
         <div className="mb-4 flex flex-wrap gap-4 text-sm text-muted-foreground">{["name", "email", "phone"].map(key => <span key={key}>{technicianFilters.header(key)}</span>)}</div>
+        {technicianFilters.summary}
         <section className="overflow-hidden rounded-md border border-border bg-card shadow-sm" aria-label="Cadastro de técnicos">
           {isLoading ? <p className="p-6 text-sm text-muted-foreground">Carregando técnicos...</p> : filtered.map((technician) => <TechnicianRecord key={technician.id} technician={technician} expanded={expandedId === technician.id} onToggle={() => setExpandedId((current) => current === technician.id ? null : technician.id)} onSaved={() => void queryClient.invalidateQueries({ queryKey: ["rh-supply-technicians"] })} />)}
           {!isLoading && filtered.length === 0 ? <p className="p-8 text-center text-sm text-muted-foreground">Nenhum técnico encontrado.</p> : null}

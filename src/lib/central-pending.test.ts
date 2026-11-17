@@ -27,3 +27,35 @@ describe('aprovações no painel da Central',()=>{
  it('preserva uma pergunta separada de um pedido rejeitado, sem atribuir aprovação',()=>{const s=snapshot({...payment,approval_status:'rejeitado'});s.supplyMessages=[{id:'question',order_id:payment.id,author_id:'Leonardo',recipient_id:'Alexandre',message_type:'question',parent_message_id:null}];const all=centralItems(s);expect(all[0]?.reasons).toEqual({Alexandre:'Responder pergunta'});expect(centralPendingItems(all)).toHaveLength(1);});
  it('não altera o histórico ao calcular atribuições e contagens',()=>{const s=snapshot();const before=JSON.stringify(s);centralPendingItems(centralItems(s));expect(JSON.stringify(s)).toBe(before);});
 });
+
+describe('conferência de recebimento na Central Admin', () => {
+ const delivered = { ...payment, id: '202609170001', approval_number: '202609170001', item_name: 'Copos de Vidro', request_type: 'materiais', request_model: 'materiais', status: 'entregue', approval_status: 'aprovado', recipient_user_id: 'Bruno' };
+ it('inclui o pedido Entregue apenas para o Solicitante, mesmo sendo Comprador', () => {
+   const pending = centralPendingItems(centralItems(snapshot(delivered)));
+   expect(pending).toHaveLength(1);
+   expect(pending[0]?.sourceId).toBe('202609170001');
+   expect(pending[0]?.users).toEqual(['Leonardo']);
+   expect(Object.keys(pending[0]?.reasons ?? {})).toEqual(['Leonardo']);
+   expect(pending[0]?.receiptPending).toBe(true);
+ });
+ it.each(['recebido_ok', 'recebido_problema'])('retira a conferência após %s', status => {
+   const all = centralItems(snapshot({ ...delivered, status }));
+   expect(all[0]?.receiptPending).not.toBe(true);
+   expect(centralPendingItems(all).filter(i => i.receiptPending)).toEqual([]);
+   if (status === 'recebido_problema') {
+     expect(all[0]?.users).toEqual(['Leonardo']);
+     expect(all[0]?.reasons['Leonardo']).toBe('Execução de compra/serviço');
+   } else {
+     expect(all[0]?.users).toEqual([]);
+     expect(centralPendingItems(all)).toEqual([]);
+   }
+ });
+ it.each(['servicos', 'viagens', 'pagamento', 'reembolso', 'rh'])('não cria conferência física de %s', request_model => {
+   expect(centralPendingItems(centralItems(snapshot({ ...delivered, request_model })))).toEqual([]);
+ });
+ it('preserva os marcos existentes de entrega para dependências', () => {
+   const row = centralItems(snapshot(delivered))[0];
+   expect(row?.completed).toBe(true);
+   for (const milestone of ['completed', 'purchased', 'received']) expect(milestoneDone(row, milestone)).toBe(true);
+ });
+});

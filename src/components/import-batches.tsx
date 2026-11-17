@@ -618,7 +618,7 @@ export function ImportBatchesSection({ userId, children }: { userId: string; chi
         </div>
       </CardHeader>
       <CardContent>
-        <Table>
+        <>{batchFilters.summary}<Table>
             <TableHeader>
               <TableRow>{["name", "items", "attachments", "date", "status"].map(key => <TableHead key={key}>{batchFilters.header(key)}</TableHead>)}<TableHead className="w-32" /></TableRow>
             </TableHeader>
@@ -642,7 +642,7 @@ export function ImportBatchesSection({ userId, children }: { userId: string; chi
                 </TableRow>
               ))}
             </TableBody>
-          </Table>
+          </Table></>
         {children && <div className="mt-6 border-t pt-6">{children}</div>}
       </CardContent>
     </Card>

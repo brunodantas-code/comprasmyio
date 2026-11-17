@@ -168,6 +168,7 @@ export function SiteSurveyScreenSummary({ visitNumber, visitTemplateId, sections
           </div>
         </div> : null}
         <div>
+          {pointFilters.summary}
           {!embedded ? <div className="border-b bg-muted/30 px-4 py-3 sm:px-6">
             <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_12rem_12rem_auto] sm:items-center">
               <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">{pointFilters.header("search")}{pointFilters.header("type")}</div>

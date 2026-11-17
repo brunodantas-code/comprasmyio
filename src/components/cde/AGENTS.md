@@ -4,6 +4,7 @@
 - CDE numbering uses separate number_section/number_subsection standards through CdeNumber; main_menu stores ordered/hidden action IDs in cde_selected.variant_key and AppHeader reads them without changing action permissions or the standalone home button.
 - Use CdeCategoryHeader for every top-level CDE category so titles stay unframed and only subcategories use green bands.
 - Filter usage counts expand shared controls into logical consumer sites using filter-usage.json; exclude embedded editors and unused definitions, and validate this ledger against source when filter sites change.
+- useTableFilters consumers render the shared summary outside headers; ActiveFilterTags identifies/removes each condition without changing predicates or exports, and CDE previews the same control.
 - Shared SelectTrigger/SearchableSelect drop height utilities from the fields_select model (caller or h-9 default, like Input) so side-by-side green underlines share one base line; SelectTrigger resolves fields_select standards dynamically; chosen appearance follows caller layout classes so selections update existing droplists without changing values or actions.
 - Model edits update custom IDs in place; inventory edits become custom models while preserving selected references and replacement history; UPDATE policies remain ERP-admin-only.
 - Portal app order is stored in cde_selected group app_order (JSON array of app keys) and read by the portal; unknown/missing apps fall back to default order.

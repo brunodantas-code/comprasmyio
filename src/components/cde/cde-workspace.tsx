@@ -1,4 +1,5 @@
 import { CdeAppearance } from "./cde-appearance-item";
+import { CdeFilterStandard } from "./cde-filter-standard";
 import { NumericMarkerEditor } from "./numeric-marker-editor";
 import { CDE_APPEARANCE_DEFAULT, cdeAppearanceVars, useCdeAppearance } from "./cde-appearance";
 import { CdeCorporateMessages } from "./cde-corporate-messages";
@@ -55,7 +56,7 @@ const GROUPS: { key: GroupKey; title: string; hint: string; multi?: boolean }[] 
   { key: "fields_select", title: "1.2 Listas suspensas (droplists)", hint: "Seletores de opções · admite vários padrões", multi: true },
   { key: "fields_textarea", title: "1.3 Textos longos", hint: "Áreas de texto com várias linhas · admite vários padrões", multi: true },
   { key: "fields_password", title: "1.4 Senhas", hint: "Campos de senha com olho · admite vários padrões", multi: true },
-  { key: "filter", title: "2. Filtros", hint: "Botões de funil · padrão único" },
+  { key: "filter", title: "2. Filtros", hint: "Múltiplos filtros combinados · identificação e remoção individual · padrão único" },
   { key: "sort", title: "3.1 Ordenar colunas e listas", hint: "Setas de ordem crescente/decrescente · padrão único" },
   { key: "move", title: "3.2 Mover para cima/baixo", hint: "Setas que reposicionam uma linha · padrão único" },
   { key: "summary", title: "3.3 Voltar ao Sumário", hint: "Link de retorno ao sumário · padrão único" },
@@ -341,6 +342,7 @@ export function CdeWorkspace() {
             </div>}
             {isOpen ? (
               <>
+                {g.key === "filter" && <CdeFilterStandard />}
                 <div className="flex max-w-full gap-3 overflow-x-auto p-4">
                   {list.map((v, i) => ({ v, i })).sort((a, b) => { const rank = (k: string) => primaries.includes(k) ? 0 : secs.some((x) => x.variant_key === k) ? 1 : 2; return rank(a.v.key) - rank(b.v.key) || a.i - b.i; }).map(({ v, i }) => {
                     const selected = standards.includes(v.key);

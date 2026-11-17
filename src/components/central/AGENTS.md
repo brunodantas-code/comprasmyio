@@ -3,3 +3,4 @@
 - Cross-app edges are Admin-only, source-validated, audited and serialized by an advisory lock to reject concurrent cyclic inserts; canceled or missing sources never release successors.
 - React Flow is lazy-loaded for the administrative graph and Dagre lays out the dependency DAG; graph coordinates never alter source records or due dates.
 - Due-today highlights use the São Paulo calendar and RLS-authorized current-user records; shared To Dos appear only in the personal view, never Admin snapshots.
+- Physical receipt pendencies reuse Supply fulfillment helpers and requester identity; receiptPending keeps delivered orders visible without changing dependency milestones or purchase execution.

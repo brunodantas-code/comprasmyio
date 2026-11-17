@@ -129,7 +129,7 @@ export function StockSimulatorDialog({ userId }: { userId?: string }) {
         </DialogHeader>
 
         <div className="rounded-md border">
-          <Table>
+          <>{simulatorFilters.summary}<Table>
             <TableHeader>
               <TableRow>
                 <TableHead>{simulatorFilters.header("name")}</TableHead>
@@ -165,7 +165,7 @@ export function StockSimulatorDialog({ userId }: { userId?: string }) {
                 </TableRow>
               )}
             </TableBody>
-          </Table>
+          </Table></>
         </div>
 
         {needed.length > 0 && (
@@ -310,7 +310,7 @@ export function ProductionCapacityCard() {
         </div>
       </CardHeader>
       <CardContent>
-        <Table>
+        <>{productionFilters.summary}<Table>
           <TableHeader className="[&_tr]:border-b">
             <TableRow className="border-b">
               <TableHead>{productionFilters.header("name")}</TableHead>
@@ -363,7 +363,7 @@ export function ProductionCapacityCard() {
               </TableRow>
             )}
           </TableBody>
-        </Table>
+        </Table></>
       </CardContent>
 
       <Dialog open={limitDialog !== null} onOpenChange={(o) => !o && setLimitDialog(null)}>

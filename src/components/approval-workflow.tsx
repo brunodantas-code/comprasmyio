@@ -452,7 +452,7 @@ export function PendingForMe({ renderEditAction }: { renderEditAction?: EditActi
         </div>
       </CardHeader>
       <CardContent>
-        <Table>
+        <>{tableFilters.summary}<Table>
           <TableHeader className="[&_tr]:border-b">
               <TableRow className="border-b">
                 <TableHead>{sortControl("number")}</TableHead>
@@ -504,7 +504,7 @@ export function PendingForMe({ renderEditAction }: { renderEditAction?: EditActi
                 );
               })}
           </TableBody>
-        </Table>
+        </Table></>
       </CardContent>
     </Card>
   );
@@ -694,6 +694,7 @@ export function MyApprovalFlows({ renderEditAction }: { renderEditAction?: EditA
           {flowFilters.header("approval")}{flowFilters.header("type")}{flowFilters.header("value")}
           <ColumnSortButton label="Approval" direction={numberDirection} onClick={() => setNumberDirection(current => current === undefined ? "asc" : current === "asc" ? "desc" : undefined)} />
         </div>
+        {flowFilters.summary}
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Carregando...</p>
         ) : orders.length === 0 ? (

@@ -55,6 +55,7 @@ export function TodoSection({ initialTask }: { initialTask?: string } = {}) {
       <h2 className="flex min-w-0 items-center gap-2 text-xl font-bold"><ListTodo className="size-5 shrink-0" /><span className="min-w-0 whitespace-nowrap">To Dos</span></h2>
       <div className="flex shrink-0 items-center justify-end gap-2" aria-label="Ações dos To Dos">{tools}</div>
     </header>
+    {filters.summary}
     <div className="overflow-hidden rounded-md border border-border bg-card">
       <div className="transition-colors hover:bg-primary/10 focus-within:bg-primary/10">
         <Button type="button" variant="ghost" aria-label={open ? "Recolher lista de To Dos" : "Exibir lista de To Dos"} aria-expanded={open} title={open ? "Recolher To Dos" : "Exibir To Dos"} onClick={() => setOpen(!open)} className="!flex !h-auto !min-w-0 !w-full !max-w-none !justify-start items-center gap-3 !bg-transparent px-4 py-3 text-left">

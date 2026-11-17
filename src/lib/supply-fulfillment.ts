@@ -9,6 +9,11 @@ export function canConfirmPhysicalReceipt(order: Request): boolean {
   return order.status === "entregue" && hasPhysicalDelivery(order);
 }
 
+export function pendingPhysicalReceiptOrders<T extends Request & { id: string; requester_id: string }>(orders: readonly T[], userId: string): T[] {
+  if (!userId) return [];
+  return [...new Map(orders.filter(order => order.requester_id === userId && canConfirmPhysicalReceipt(order)).map(order => [order.id, order])).values()];
+}
+
 export function fulfillmentKind(order: Request): "delivered" | "attended" | "paid" {
   if (hasPhysicalDelivery(order)) return "delivered";
   return ["pagamento", "reembolso"].includes(order.request_model || order.request_type || "") ? "paid" : "attended";

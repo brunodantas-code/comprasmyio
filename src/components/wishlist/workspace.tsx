@@ -34,6 +34,7 @@ export function WishlistWorkspace({ userId }: { userId: string }) {
       <div className="flex shrink-0 items-center gap-2">{filters.menu}<Button variant="ghost" size="compactIcon" aria-label="Ordenar desejos" title={alphabetical ? "Ordenar por mais recentes" : "Ordenar por título"} onClick={() => setAlphabetical(!alphabetical)}>{alphabetical ? <ArrowUpAZ /> : <ArrowDownAZ />}</Button><CdeButton group="plus" screen="components/wishlist/workspace.tsx" aria-label="Novo desejo" title="Novo desejo" onClick={() => setSelected("new")} /></div>
     </div>
     <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2"><Search className="size-4 text-muted-foreground" /><Input aria-label="Buscar desejos" placeholder="Buscar desejo, idealizador ou situação" value={search} onChange={event => setSearch(event.target.value)} /><Button variant="ghost" size="compactIcon" aria-label="Limpar busca" title="Limpar busca" disabled={!search} onClick={() => setSearch("")}><X /></Button></div>
+    {filters.summary}
     <section aria-label="Desejos compartilhados">
       <div className="hidden grid-cols-[12rem_6rem_minmax(0,1fr)_8rem_2rem] gap-4 border-b border-border px-3 py-2 text-xs text-muted-foreground md:grid"><span>Idealizador</span><span>Data</span><span>Desejo · Resumo da descrição</span><span>Situação</span><span /></div>
       <div className="divide-y divide-border">{shown.map(idea => {

@@ -619,6 +619,7 @@ export function ReleaseAssembledDialog({ userId }: { userId: string }) {
         >
           <div className="space-y-2">
             <div className="text-sm">{deviceFilters.header("device")}</div>
+            {deviceFilters.summary}
             <div className="max-h-64 space-y-1 overflow-y-auto rounded border p-2">
               {!filtered.length ? (
                 <p className="p-2 text-sm text-muted-foreground">Nenhum dispositivo encontrado no estoque.</p>

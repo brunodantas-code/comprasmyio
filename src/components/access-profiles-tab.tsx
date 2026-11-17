@@ -121,6 +121,7 @@ export function AccessProfilesTab() {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">{["name", "email", "profile"].map(key => <span key={key}>{userFilters.header(key)}</span>)}</div>
+        {userFilters.summary}
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> : null}
         {!isLoading && data?.length === 0 ? <p className="text-sm text-muted-foreground">Nenhum usuário cadastrado.</p> : null}
         {!isLoading && data?.length !== 0 && filteredUsers?.length === 0 ? <p className="text-sm text-muted-foreground">Nenhum usuário encontrado.</p> : null}

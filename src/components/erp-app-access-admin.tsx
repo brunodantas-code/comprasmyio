@@ -73,6 +73,7 @@ export function ErpAppAccessAdmin() {
         <CardDescription>Libere os aplicativos do ERP sem alterar cargos ou perfis internos de cada app.</CardDescription>
       </CardHeader>
       <CardContent>
+        {userFilters.summary}
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando usuários...</p> : null}
         {!isLoading ? <p className="mb-2 text-xs text-muted-foreground">{filtered.length} de {users.length} usuários</p> : null}
         <div className="divide-y divide-border">

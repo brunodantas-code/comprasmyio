@@ -7,7 +7,7 @@ import { useState } from "react";
 import type React from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { MessageCircleQuestion, Bell, CheckCircle2, CodeXml, FileSignature, LayoutGrid, Phone, ShieldCheck, ShoppingCart } from "lucide-react";
+import { MessageCircleQuestion, Bell, CheckCircle2, CodeXml, FileSignature, LayoutGrid, Phone, ShieldCheck, ShoppingCart, PackageCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
@@ -197,6 +197,7 @@ function PortalPage() {
       ...((pendingActions?.userDeletions ?? 0) > 0 ? [{ key: "deletions", app: "Admin", requester: "Você", count: pendingActions?.userDeletions ?? 0, row: <PendingRow icon={ShieldCheck} label="Exclusões de usuários aguardando decisão" count={pendingActions?.userDeletions ?? 0} to="/dashboard" search={{ section: "admin", subsection: "usuarios" }} /> }] : []),
       ...(pendingActions?.legalItems ?? []).map(item => ({ key: `legal-${item.recordId}`, app: "Legal", requester: "Você", count: item.count, row: <PendingRow icon={FileSignature} label={legalPendingLabel(item)} count={item.count} to="/legal" search={{ record: item.recordId }} /> })),
       ...(pendingActions?.supplyQuestions ?? []).map(q => ({ key: `sq-${q.orderId}`, app: "Supply", requester: "Solicitante", count: q.count, row: <PendingRow icon={MessageCircleQuestion} label={`${q.approvalNumber ?? "—"} · Pergunta aguardando sua resposta · ${q.title}`} count={q.count} to="/dashboard" search={{ order: q.orderId }} /> })),
+      ...(pendingActions?.supplyReceipts ?? []).map(order => ({ key: `receipt-${order.id}`, app: "Supply", requester: "Você", count: 1, row: <PendingRow icon={PackageCheck} label={`${order.approval_number ?? "—"} · Conferir recebimento · ${order.item_name}`} count={1} to="/dashboard" search={{ order: order.id }} /> })),
       ...(pendingActions?.codeItems ?? []).map((ticket) => ({ key: `c-${ticket.ticketId}`, app: "Code", requester: ticket.reporterName ?? "Solicitante", count: 1, row: <PendingRow icon={ticket.reason === "responder" ? MessageCircleQuestion : ticket.reason === "notificado" ? Bell : CodeXml} number={ticket.ticketNumber} label={`${ticket.reason === "responder" ? "Pergunta aguardando sua resposta" : ticket.reason === "notificado" ? "Nova pergunta direcionada a outro usuário" : ticket.reason === "aceitar" ? "Confirmar atendimento" : "Ticket aguardando atendimento"} · ${new Date(ticket.createdAt).toLocaleDateString("pt-BR")} · ${ticket.title.length > 60 ? `${ticket.title.slice(0, 60)}…` : ticket.title}`} count={1} to="/development" search={{ ticket: ticket.ticketId }} /> })),
       ...(pendingActions?.supportCallItems ?? []).map((call) => ({ key: `s-${call.callId}`, app: "Chamados", requester: call.reason === "confirmar" ? "Você" : "Clientes", count: 1, row: <PendingRow icon={Phone} number={call.callNumber} label={`${call.reason === "confirmar" ? "Confirmar conclusão" : call.title}`} count={1} to="/chamados" search={{ chamado: call.callId }} /> })),
     ]} />

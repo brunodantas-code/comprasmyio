@@ -473,6 +473,7 @@ export function SiteSurveyLucManager({ checklistData, visitTemplateId: visitTemp
    const sortHeader = (column: typeof sortBy, label: string) => <Button type="button" variant="ghost" size="sm" className="h-8 w-auto shrink-0 items-center justify-start px-0 text-xs font-semibold !bg-transparent !text-foreground hover:!bg-transparent hover:!text-foreground" aria-label={`Ordenar por ${label}${sortBy === column ? sortAscending ? ", crescente" : ", decrescente" : ""}`} onClick={() => sortColumn(column)}>{label}{sortBy === column ? sortAscending ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" /> : <ArrowUpDown className="h-3 w-3" />}</Button>;
 
   return <Collapsible open={listOpen} onOpenChange={setListOpen} asChild><section className="space-y-3 pt-5">
+     {pointFilters.summary}
      {compactSearch || addOnly ? null : <div id="registration-pending" className="min-w-0"><PointTypeTotals totals={typeTotals} groupTotals={approvalGroupTotals} environmentTotals={environmentTotals} groupDivergence={proposalDivergence} proposal={<ContractedScopeFields scope={scope} canEdit={canApprove} onChanged={onChanged} approvedShopKiosk={approvedShopKiosk} />} /></div>}
 
        {compactSearch ? null : <div className="space-y-3">

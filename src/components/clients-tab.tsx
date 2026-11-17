@@ -273,7 +273,7 @@ export function ClientsTab({ userId }: { userId: string }) {
         <CardContent>
           {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
             !clients?.length ? <p className="text-sm text-muted-foreground">Sem clientes.</p> :
-            <Table>
+            <>{clientFilters.summary}<Table>
               <TableHeader>
                  <TableRow>{["name", "legal", "category", "city", "state", "cnpj"].map(key => <TableHead key={key}>{clientFilters.header(key)}</TableHead>)}<TableHead className="w-20" /></TableRow>
               </TableHeader>
@@ -345,7 +345,7 @@ export function ClientsTab({ userId }: { userId: string }) {
                   </Fragment>
                 );})}
               </TableBody>
-            </Table>
+            </Table></>
           }
         </CardContent>
       </Card>
