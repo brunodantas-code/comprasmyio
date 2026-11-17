@@ -23,6 +23,10 @@ export function assertCodeProgressDraftSent(message: string) {
   if (message.trim()) throw new Error("Há uma pergunta ou resposta ainda não enviada. Envie pelo avião de papel antes de salvar o andamento.");
 }
 
+export function reconcileCodeProgressField<T extends string>(draft: T, previousSaved: T, saved: T): T {
+  return draft === previousSaved ? saved : draft;
+}
+
 // A rejected or dismissed confirmation must never execute the conclusion.
 export async function confirmCodeTicketConclusion(
   status: string,

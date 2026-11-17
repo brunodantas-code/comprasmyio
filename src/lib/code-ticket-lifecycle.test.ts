@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { canReopenCodeTicket, codeReopenReasonSchema, codeTicketProgressOutcome, assertCodeProgressDraftSent, confirmCodeTicketConclusion } from "./code-ticket-lifecycle";
+import { canReopenCodeTicket, codeReopenReasonSchema, codeTicketProgressOutcome, assertCodeProgressDraftSent, confirmCodeTicketConclusion, reconcileCodeProgressField } from "./code-ticket-lifecycle";
 
 const ticket = { status: "concluido", reporter_id: "alexandre", assignee_id: "leonardo" };
 
@@ -64,5 +64,18 @@ describe("Confirmação do andamento salvo", () => {
   });
   it("não trata outro status divergente como uma atualização concluída", () => {
     expect(() => codeTicketProgressOutcome("atendido", { id: "chamado-38", status: "aberto" })).toThrow();
+  });
+});
+
+describe("Atualização dos campos do mesmo chamado", () => {
+  it("mostra Atendido ao receber o status salvo sem uma alteração local", () => {
+    expect(reconcileCodeProgressField("em_atendimento", "em_atendimento", "atendido")).toBe("atendido");
+  });
+  it("preserva a situação escolhida e ainda não salva durante uma atualização", () => {
+    expect(reconcileCodeProgressField("aberto", "em_atendimento", "atendido")).toBe("aberto");
+  });
+  it("atualiza o responsável salvo sem sobrescrever uma escolha local", () => {
+    expect(reconcileCodeProgressField("leonardo", "leonardo", "rodrigo")).toBe("rodrigo");
+    expect(reconcileCodeProgressField("none", "leonardo", "rodrigo")).toBe("none");
   });
 });

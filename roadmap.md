@@ -1,8 +1,14 @@
 # Roadmap
+- [x] CRM: acesso com histórico esclarecido — consulta confirmou zero leads, oportunidades, propostas e atividades no ERP; ZIP conferido não equivale a importação concluída e CRM original não foi alterado.
+- [ ] Avisar Leonardo quando o cadastro/importação do CRM estiver concluído e conferido; a conferência do ZIP não significa dados já cadastrados.
+- [x] Code 37: resposta salva às 23:23:37 UTC e Atendido às 23:23:43 UTC, sem perguntas pendentes; divergência do seletor reproduzida ao atualizar o mesmo chamado e corrigida sem apagar rascunhos/escolhas locais. Conta real no computador/celular e 50 testes conferidos; nenhum registro do chamado alterado durante a investigação, correção ainda não publicada.
+- [x] OpDesk: banco-painel-de-tarefas-myio.sql conferido por leitura — 33 clientes, quatro responsáveis e 120 tarefas; 58 referências de anexos sem bytes. SQL/permissões públicas não executados, contas e clientes atuais intactos.
+- [x] CRM: ZIP completo recebido e conferido — 139 documentos íntegros (41 gerados, 16 importados, 68 legados, 14 levantamentos), banco idêntico ao backup anterior e 19.045 registros com contagens preservadas após filtro; nenhuma importação no ERP.
+- [ ] CRM: resolver três caminhos de levantamento já ausentes no pacote/índice: duas versões de A1-Consumo_de_A_gua_Outubro_de_2026.xls e uma de Riviera_-_Relac_a_o_de_Pontos.xlsx; outras versões não substituem automaticamente. Flavia ainda sem correspondência de conta no ERP; preservar dados e mapear identidade verificada sem conceder acessos.
 - [x] CRM: conferidos 13 arquivos de marca, oito arquivos do gerador original, seis exemplos DOCX e Levantamento_MYIO.xlsx (Instruções, SHOPPING 1, SHOPPING 2); recebidos como referências, nenhum documento/visual do ERP substituído.
 - [ ] CRM: adaptar os modelos originais BAS/Shoppings/Expansão/Realocação e levantamento ao ERP após completar o mapeamento dos dados; gerador depende de tipos/condições/composição ausentes no modelo atual, preservando separação da memória interna.
 - [x] CRM: indice.csv conferido — 139 arquivos: 41 gerados, 16 importados, 68 legados e 14 levantamentos; nenhum destes arquivos corresponde aos anexos enviados até agora.
-- [ ] CRM: importar arquivos privados históricos — aguarda o ZIP/pastas dos 139 documentos relacionados em indice.csv; índice contém caminhos/tamanhos/hashes, não os arquivos.
+- [ ] CRM: importar arquivos privados históricos — os 139 documentos do índice já foram recebidos e validados; preservar caminhos/vínculos/arquivos internos, completar estrutura e resolver os três vínculos de levantamento ausentes antes de validar a migração.
 - [x] Avisar Leonardo ao concluir OpDesk para receber o banco de dados do CRM enviado pelo João.
 - [x] OpDesk: base isolada de clientes/tarefas/subtarefas, colaboração autenticada para usuários com acesso, regras de fluxo e histórico auditado; criação, bloqueio da principal e liberação após conclusão da sub-tarefa conferidos.
 - [x] OpDesk: painel global Quadro/Tabela, clientes próprios, responsáveis do ERP, filtros múltiplos CDE, ordenação/exportações e editor com observações/anexos; download original, CSV e exclusão auditada do anexo conferidos.
@@ -10,7 +16,7 @@
 - [x] CRM: recebido public.dump, manifest.txt e contagem-por-tabela.csv do João via Leonardo; analisar sem restaurar sobre o ERP ou alterar o CRM original.
 - [x] CRM: integridade SHA-256 e contagens do backup conferidas sem escrita no ERP: 47 tabelas e 19.045 registros; 1.627 leads, 136 oportunidades, 141 propostas, 7.567 atividades. Sem logins/senhas no backup. CRM original intacto.
 - [ ] CRM: mapear as 47 tabelas de origem para as 23 atuais do ERP, completar lacunas de insumos/composição/levantamentos/regras e mapear quatro perfis sem conceder acessos; importar com preservação de valores e vínculos após conferência.
-- [ ] OpDesk: importar dados do painel anterior — depende de exportação dos registros/anexos; o MD recebido contém apenas a especificação.
+- [ ] OpDesk: importar dados do painel anterior — aguarda CSV/JSON por lista/tabela (clientes, responsáveis e tarefas) para filtro de credenciais e ZIP dos 58 anexos; SQL recebido não é executável sobre o ERP e permissões anônimas não serão copiadas.
 - [x] Acessos: rótulos soltos Nome/E-mail/Cargo aprovador/Cargo/Perfil removidos por não corresponderem a colunas; funil CDE à direita de Usuários cadastrados, ordenação com largura própria e fonte CDE. Conferidos 17 usuários reais em 1280/390 px, filtros Nome Alexandre + Perfil Customizado, remoção individual e ordenação por perfil, sem erros/excesso lateral; 24 testes passaram, biblioteca regenerada, nenhum acesso alterado. Não publicado.
 - [x] Explicado: Perfis por app reuniu os controles existentes de Supply, Site Survey, Mytosis e Code; os demais apps são liberados em Usuários e aplicativos, sem editor próprio de perfis. Nenhum perfil ou permissão criado nesta pergunta.
 - [x] Acessos: usuários/app grants, cadastro/cargos e perfis específicos de Supply, Site Survey, Mytosis e responsáveis Code reunidos em /acessos; contas, vínculos e autorizações preservados, sem alterações de dados ou permissões.
@@ -383,7 +389,7 @@
 - [x] CDE: auditoria de 908 botões — 768 Button compartilhados + 75 CdeButton já vinculados ao CDE ao vivo; 65 nativos são interativos (miniaturas, arraste, expansão), não ações; 'Try again' da tela de erro convertido ao Button compartilhado; 8 com visual customizado são funções específicas preservadas. Biblioteca regenerada; telas do CRM nascerão vinculadas ao CDE.
 - [x] CRM Fase 1 (banco): migração 0222 criou crm_empresas, crm_contatos, crm_papeis_contato, crm_fases_funil, crm_leads, crm_lead_contatos, crm_lead_origens, crm_etapas_lead, crm_oportunidades, crm_atividades (timeline imutável + motivo obrigatório em fase terminal) e crm_municipios; RLS por acesso ao app CRM, configurações só Admin ERP; sementes de fases/etapas/papéis inseridas. CRM original intacto.
 - [x] CRM Fase 2: telas principais no ERP (Dashboard, Leads, Empresas/Contatos, Funil, Oportunidades) no padrão CDE.
-- [ ] CRM Fase 6: migração dos dados — aguarda export do banco atual do CRM (backup-db.sh com João Paulo).
+- [ ] CRM Fase 6: migração dos dados — exportação completa recebida/conferida; falta completar mapeamento/estrutura/importação e resolver referências de levantamento ausentes e identidade de Flavia.
 - [x] Espaçamento/alinhamento das bolinhas de cor no item 11 do CDE
 - [x] Ordenação de cabeçalhos no CDE (arraste)
 - [x] Preenchimento (fundo) dos ícones dos apps no item 11 do CDE

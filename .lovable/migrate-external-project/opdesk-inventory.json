@@ -1,0 +1,13 @@
+{
+  "source": "banco-painel-de-tarefas-myio.sql",
+  "inspection": {"executed_source_sql": false, "client_inserts": 33, "responsible_inserts": 4, "task_inserts": 120, "attachment_metadata_entries": 58, "attachment_file_bytes_received": false},
+  "capabilities": [
+    {"capability":"schema","source":"Três tabelas clients/users/tasks, enums e gatilhos SQL originais","outcome":"migrate_to_existing_opdesk_tables","status":"pending","next_action":"Mapear somente campos/registros para opdesk_*; não criar public.clients/users/tasks nem executar o SQL original sobre o ERP."},
+    {"capability":"records","source":"33 clientes, quatro responsáveis e 120 tarefas em INSERT SQL","outcome":"migrate","status":"blocked","next_action":"Receber exportações CSV/JSON por lista/tabela para passar pelo filtro de credenciais; preservar IDs, números, clientes, datas, status, subtarefas, observações e histórico."},
+    {"capability":"auth identities and authorization","source":"Identificação livre por e-mail e políticas públicas irrestritas na origem","outcome":"replace_with_erp_verified_identities","status":"pending","next_action":"Não importar permissões anônimas. Mapear responsáveis e autores às contas verificadas do ERP sem conceder acessos automaticamente; preservar colaboração de quem já tem OpDesk."},
+    {"capability":"uploaded file bytes","source":"58 referências de anexos em JSON embutido nas tarefas; SQL sem bytes","outcome":"migrate_private_files","status":"blocked","next_action":"Receber ZIP dos anexos com nomes/caminhos originais; metadados não equivalem aos arquivos."},
+    {"capability":"external providers and endpoints","source":"Links externos Freshdesk, Jira e visitas QR observados; nenhuma integração de escrita detectada nesta inspeção","outcome":"preserve_links","status":"pending","next_action":"Preservar links após filtrar os registros; não chamar nem modificar os serviços externos."},
+    {"capability":"schedules","source":"Concluída para Fechado após 48 horas; agendamento original comentado no SQL","outcome":"preserve_existing_opdesk_automation","status":"pending","next_action":"Manter a automação autenticada existente e conferir datas históricas após importar, sem reiniciar a contagem dos registros concluídos."},
+    {"capability":"verification","source":"Contagens de INSERT e estrutura conferidas por leitura","outcome":"verify_after_import","status":"pending","next_action":"Após arquivos filtrados/importação, validar contagens, relações, números, anexos, histórico e leitura/gravação autenticada; painel existente e chamados antigos permanecem intactos."}
+  ]
+}

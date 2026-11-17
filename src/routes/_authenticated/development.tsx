@@ -6,13 +6,13 @@ import { CdeButton } from "@/components/cde/cde-button";
 import { ColumnSortButton } from "@/components/column-sort-button";
 import { CodeStatusBadge } from "@/components/code-status-badge";
 import { matchesCodeTicketSearch } from "@/lib/code-ticket-search";
-import { assertCodeProgressDraftSent, codeTicketProgressOutcome } from "@/lib/code-ticket-lifecycle";
+import { assertCodeProgressDraftSent, codeTicketProgressOutcome, reconcileCodeProgressField } from "@/lib/code-ticket-lifecycle";
 import { isFilterActive, OP_LABELS, type FilterOp } from "@/lib/column-filters";
 import { compareColumnValues, type SortDirection } from "@/lib/column-sort";
 import { useTableFilters, type FilterColumn } from "@/components/use-table-filters";
 import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { CodeXml, Download, Eye, History, MessageCircleQuestion, MessageCircleMore, Paperclip, Send, Trash2, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -383,6 +383,7 @@ function CodeSaveButton({ label, ...props }: Omit<ButtonProps, "children"> & { l
 function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | null; onClose: () => void; data?: TicketPageData; onUpdated: () => void }) {
   const [status, setStatus] = useState<TicketStatus>("aberto");
   const [assignee, setAssignee] = useState("none");
+  const savedProgress = useRef<{ id: string; status: TicketStatus; assignee: string } | null>(null);
   const [notes, setNotes] = useState("");
   const [solution, setSolution] = useState("");
   const [observation, setObservation] = useState("");
@@ -397,6 +398,7 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
   const [preview, setPreview] = useState<{ url: string; downloadUrl: string; name: string; contentType: string } | null>(null);
   useEffect(() => {
     if (!ticket) return;
+    savedProgress.current = { id: ticket.id, status: ticket.status, assignee: ticket.assignee_id ?? "none" };
     setStatus(ticket.status);
     setAssignee(ticket.assignee_id ?? "none");
     setNotes(ticket.admin_notes ?? "");
@@ -410,6 +412,15 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
      setMessageFiles([]);
      setMessageFileInputKey((key) => key + 1);
    }, [ticket?.id]);
+  useEffect(() => {
+    if (!ticket) return;
+    const previous = savedProgress.current;
+    if (!previous || previous.id !== ticket.id) return;
+    const nextAssignee = ticket.assignee_id ?? "none";
+    setStatus((draft) => reconcileCodeProgressField(draft, previous.status, ticket.status));
+    setAssignee((draft) => reconcileCodeProgressField(draft, previous.assignee, nextAssignee));
+    savedProgress.current = { id: ticket.id, status: ticket.status, assignee: nextAssignee };
+  }, [ticket?.id, ticket?.status, ticket?.assignee_id]);
   const details = useQuery({
     queryKey: ["development-ticket-details", ticket?.id], enabled: Boolean(ticket),
     queryFn: async () => {
