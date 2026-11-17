@@ -343,7 +343,7 @@
 - [x] CDE: seção 'Fontes de cabeçalhos e filtros' (grupo table_fonts) com cabeçalho 10-14px e filtros 11-14px, prévia e salvamento ao vivo via --th-fs/--filter-fs; TableHead e barras de filtro do Supply, Tickets e Legal leem o padrão. Testado ao vivo: 13px aplicado e 11px restaurado na conta Leonardo; Legal 12px; celular mantém 16px no foco. 4 testes; não publicado.
 - [x] CDE: auditoria de 908 botões — 768 Button compartilhados + 75 CdeButton já vinculados ao CDE ao vivo; 65 nativos são interativos (miniaturas, arraste, expansão), não ações; 'Try again' da tela de erro convertido ao Button compartilhado; 8 com visual customizado são funções específicas preservadas. Biblioteca regenerada; telas do CRM nascerão vinculadas ao CDE.
 - [x] CRM Fase 1 (banco): migração 0222 criou crm_empresas, crm_contatos, crm_papeis_contato, crm_fases_funil, crm_leads, crm_lead_contatos, crm_lead_origens, crm_etapas_lead, crm_oportunidades, crm_atividades (timeline imutável + motivo obrigatório em fase terminal) e crm_municipios; RLS por acesso ao app CRM, configurações só Admin ERP; sementes de fases/etapas/papéis inseridas. CRM original intacto.
-- [ ] CRM Fase 2: telas principais no ERP (Dashboard, Leads, Empresas/Contatos, Funil, Oportunidades) no padrão CDE.
+- [x] CRM Fase 2: telas principais no ERP (Dashboard, Leads, Empresas/Contatos, Funil, Oportunidades) no padrão CDE.
 - [ ] CRM Fase 6: migração dos dados — aguarda export do banco atual do CRM (backup-db.sh com João Paulo).
 - [x] Espaçamento/alinhamento das bolinhas de cor no item 11 do CDE
 - [x] Ordenação de cabeçalhos no CDE (arraste)
@@ -355,3 +355,6 @@
 - [x] Seta exibir/recolher e busca no histórico de mensagens (CDE)
 
 - [x] Alinhar sempre pela base as linhas verdes dos campos (seletores e campos lado a lado)
+- [x] Links e botões das tabelas acompanham o alinhamento escolhido no CDE
+- [x] CRM Fase 2: telas dentro do ERP
+- [x] Cores de borda, fundo e texto dos cabeçalhos (CDE Cabeçalhos e Listas)

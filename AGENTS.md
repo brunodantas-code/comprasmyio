@@ -58,4 +58,4 @@
 - TableFilterMenu accepts an opt-in trigger label after its CDE icon so toolbar filters are explicit without widening icon-only table headers.
 - Only Supply execution enables consolidatedSort and compact=false reports; other screens retain column sorting/compact exports and all reports reuse sorted rows.
 - Reimbursement search normalizes authorized details; IDs and historical destinations remain unchanged.
-- AppAccessLink opens external CRM in a new tab without ERP credentials; portal visibility and /crm retain existing app grants, while CRM owns login.
+- CRM runs in-ERP at /crm (app grant "crm"); legacy external CRM only via panel link until migrated.

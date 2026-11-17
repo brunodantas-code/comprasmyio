@@ -5,7 +5,7 @@ import { APP_TILE_COLORS } from "@/components/cde/app-order-config";
 /** Corporate message look, saved in cde_selected group message_style; colours reuse the brand palette offered for app tiles. */
 export const MESSAGE_STYLE_GROUP = "message_style";
 export type MessageColorOption = { key: string; label: string; value: string };
-const BRAND: MessageColorOption[] = (() => {
+export const BRAND: MessageColorOption[] = (() => {
   const seen = new Map<string, MessageColorOption>();
   for (const list of Object.values(APP_TILE_COLORS)) for (const o of list) {
     if (o.value === "var(--background)" || o.value === "var(--muted-foreground)") continue;
@@ -14,7 +14,7 @@ const BRAND: MessageColorOption[] = (() => {
   }
   return [...seen.values()];
 })();
-const withDefault = (label: string, value: string) => [{ key: "padrao", label, value }, ...BRAND.filter((o) => o.value !== value)];
+export const withDefault = (label: string, value: string) => [{ key: "padrao", label, value }, ...BRAND.filter((o) => o.value !== value)];
 export const MESSAGE_COLORS = {
   fill: withDefault("Verde claro myio", "var(--myio-green-tint)"),
   border: withDefault("Verde myio suave", "color-mix(in srgb, var(--myio-green) 40%, transparent)"),

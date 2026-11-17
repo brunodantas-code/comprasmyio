@@ -859,7 +859,7 @@
       "className": "",
       "icon": "Trash2",
       "iconClass": "size-3",
-      "label": "void remove(file.id, file.storage_path)",
+      "label": "Trash2",
       "count": 2,
       "files": [
         "components/mytosis/node-attachments.tsx"
@@ -1385,7 +1385,7 @@
       "className": "",
       "icon": "ChevronDown",
       "iconClass": "h-5 w-5 shrink-0 text-primary",
-      "label": "toggle(name)} aria-expanded= className=\"",
+      "label": "ChevronDown",
       "count": 1,
       "files": [
         "components/pending-groups.tsx"
@@ -1513,7 +1513,7 @@
       "className": "",
       "icon": "ChevronDown",
       "iconClass": "h-4 w-4 text-primary",
-      "label": "toggle(root.id)} aria-expanded= classNam",
+      "label": "ChevronDown",
       "count": 1,
       "files": [
         "components/mytosis/export-dialog.tsx"

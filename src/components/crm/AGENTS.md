@@ -1,0 +1,2 @@
+- CRM opportunities are never deleted (their activity timeline is append-only); closing uses lost/disqualified phases with a reason.
+- CRM screens use shared CDE-bound components (Table, Input, Select, Button) and pure rules in crm-logic.ts.

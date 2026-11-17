@@ -720,6 +720,66 @@
     ]
   },
   {
+    "id": "components/crm/crm-workspace.tsx|0",
+    "file": "components/crm/crm-workspace.tsx",
+    "line": 81,
+    "context": "Próximas ações vencidas ou para hoje ( )",
+    "headers": [
+      "Data",
+      "Oportunidade",
+      "Empresa",
+      "Ação",
+      "Responsável"
+    ]
+  },
+  {
+    "id": "components/crm/crm-workspace.tsx|1",
+    "file": "components/crm/crm-workspace.tsx",
+    "line": 104,
+    "context": "Próximas ações vencidas ou para hoje ( )",
+    "headers": [
+      "Nome",
+      "Empresa",
+      "Cargo",
+      "Contato",
+      "Origem",
+      "Etapa",
+      "Responsável"
+    ]
+  },
+  {
+    "id": "components/crm/crm-workspace.tsx|2",
+    "file": "components/crm/crm-workspace.tsx",
+    "line": 143,
+    "context": "Importar leads (CSV)",
+    "headers": [
+      "Nome fantasia",
+      "Razão social",
+      "CNPJ",
+      "Cidade/UF",
+      "Segmento",
+      "Contatos",
+      "Oportunidades"
+    ]
+  },
+  {
+    "id": "components/crm/crm-workspace.tsx|3",
+    "file": "components/crm/crm-workspace.tsx",
+    "line": 214,
+    "context": "Motivo para “ ”",
+    "headers": [
+      "Título",
+      "Empresa",
+      "Fase",
+      "Setup",
+      "MRR",
+      "Prob.",
+      "Fechamento previsto",
+      "Próxima ação",
+      "Responsável"
+    ]
+  },
+  {
     "id": "routes/_authenticated/chamados.tsx|0",
     "file": "routes/_authenticated/chamados.tsx",
     "line": 98,

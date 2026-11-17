@@ -10,7 +10,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { CdeCategoryHeader } from "./cde-category-header";
 import { CdeTableOrder } from "./cde-table-order";
-import { ALIGN_H, ALIGN_V, tableAlignVars, type AlignH, type AlignV } from "./table-fonts-config";
+import { ALIGN_H, ALIGN_V, HEADER_COLORS, headerColor, tableAlignVars, type AlignH, type AlignV, type HeaderColorKind } from "./table-fonts-config";
+import { useCdeSwatchStyle } from "./cde-button";
 import { TABLE_FILTER_SIZES, TABLE_FONTS_DEFAULT, TABLE_HEADER_SIZES, useTableFonts, type TableFontsConfig } from "./table-fonts-config";
 
 export function CdeTableFonts({ number, handle }: { number: number; handle?: import("react").ReactNode }) {
@@ -75,6 +76,9 @@ export function CdeTableFonts({ number, handle }: { number: number; handle?: imp
               </div>
             ))}
           </div>
+          <div role="group" aria-label="Cores dos cabeçalhos" className="grid w-full max-w-5xl grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-3">
+            {([["headerBg", "Cabeçalhos — fundo"], ["headerText", "Cabeçalhos — texto"], ["headerBorder", "Cabeçalhos — borda"]] as [HeaderColorKind, string][]).map(([k, l]) => <ColorPick key={k} kind={k} label={l} value={fonts[k]} onChange={(v) => setDraft({ ...fonts, [k]: v })} />)}
+          </div>
           <div className="space-y-1">
             <Label>Prévia</Label>
             <div aria-label="Prévia das fontes" className="max-w-2xl rounded-md border border-border p-3">
@@ -111,4 +115,13 @@ export function CdeTableFonts({ number, handle }: { number: number; handle?: imp
       )}
     </section>
   );
+}
+
+function ColorPick({ kind, label, value, onChange }: { kind: HeaderColorKind; label: string; value: string; onChange: (v: string) => void }) {
+  const swatch = useCdeSwatchStyle();
+  const dot = (color: string) => <span aria-hidden="true" style={{ background: color, ...swatch.css }} className={`block h-4 w-4 shrink-0 rounded-full border border-border ${swatch.cls}`} />;
+  const current = headerColor(kind, value);
+  return <div className="min-w-0 space-y-1"><Label>{label}</Label>
+    <Select value={current.key} onValueChange={onChange}><SelectTrigger aria-label={label}><span style={{ display: "inline-flex", alignItems: "center", gap: 10, lineHeight: 1 }} className="min-w-0">{dot(current.value)}<span className="truncate" style={{ lineHeight: "16px" }}>{current.label}</span></span></SelectTrigger>
+      <SelectContent>{HEADER_COLORS[kind].map((o) => <SelectItem key={o.key} value={o.key}><span style={{ display: "inline-flex", alignItems: "center", gap: 10, lineHeight: "16px" }}>{dot(o.value)}<span>{o.label}</span></span></SelectItem>)}</SelectContent></Select></div>;
 }

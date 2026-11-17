@@ -35,3 +35,14 @@ describe("table alignment", () => {
     expect(parseTableFonts('{"headerH":"x"}')).toMatchObject({ headerH: "left", headerV: "middle", cellH: "left", cellV: "middle" });
   });
 });
+
+describe("header colours", () => {
+  it("default keeps today's grey text, no background and light border", async () => {
+    const { parseTableFonts, tableAlignVars } = await import("./table-fonts-config");
+    expect(tableAlignVars(parseTableFonts(null))).toMatchObject({ "--th-bg": "transparent", "--th-color": "var(--muted-foreground)", "--th-border": "var(--border)" });
+  });
+  it("offers brand colours (purple, lilac) for header background", async () => {
+    const { HEADER_COLORS } = await import("./table-fonts-config");
+    expect(HEADER_COLORS.headerBg.map((o) => o.value)).toEqual(expect.arrayContaining(["var(--myio-purple)", "var(--myio-lilac)", "var(--myio-green-tint)"]));
+  });
+});
