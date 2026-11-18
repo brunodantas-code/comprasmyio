@@ -1,4 +1,6 @@
 # Roadmap
+- [x] Explicar tarja preta do Gantt: destaque da semana atual com texto sem contraste; linha/bolinha marcam hoje. Consulta por código, sem alterar aparência sem pedido.
+- [x] Revisão da regra de datas: lidos cronograma/Gantt/EAP, portfólio, quadro/lista/calendário, carga/nivelamento, CSV, baseline/histórico, formulários/premissas e funções atuais de gravação; nenhum outro limite pelo período do projeto encontrado. Premissas usam período para capacidade, sem mover tarefas; sem rotina de reagendamento identificada. Feriados explicados ao usuário. Registros/permissões preservados; arraste e colaboração entre contas continuam não exercitados em tela.
 - [x] Projects: retirado limite automático do início/fim previsto do projeto no cálculo das tarefas/CPM, portfólio e comparação de baseline; calendário e dependências preservados. Cronograma/EAP reais conferidos de 12 a 19/11/2026 mesmo com projeto ainda em 25/01/2027, 38 testes passaram; nenhum registro alterado. Leonardo fará a alteração manual para 12/11/2026. Não publicado.
 - [x] Explicar Pacote de trabalho: Sim marca agrupamento da EAP; Não marca atividade comum; vínculo das subtarefas usa Tarefa superior.
 - [x] Informar localização da EAP: Projects → projeto → Escopo, com hierarquia dentro das fases; também aparece na lista do Cronograma.
