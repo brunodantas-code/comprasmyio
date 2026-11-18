@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Projects fase 3: conversa por tarefa, perguntas/respostas, menções, pendências Home/Central e anexos privados com download original; serviços externos apenas após conexão autorizada.
 - [x] Corrigir tarja preta: destaque verde-claro e texto contrastante; conferido no cronograma do Vila Velha.
 - [x] UF e cidade no editor de Projects com seletor Supply; salvamento/reabertura e celular conferidos, cadastros temporários removidos.
 - [x] Explicar possibilidade de feriados automáticos: nacionais pelo período; estaduais/municipais dependem da localidade e fonte oficial, pontos facultativos separados. Nenhuma configuração alterada.

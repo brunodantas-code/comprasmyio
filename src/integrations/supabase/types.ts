@@ -7642,6 +7642,139 @@ export type Database = {
           },
         ]
       }
+      pm_task_attachments: {
+        Row: {
+          content_type: string
+          created_at: string
+          file_name: string
+          file_size: number
+          id: string
+          project_id: string
+          storage_path: string
+          task_id: string
+          uploaded_by: string
+        }
+        Insert: {
+          content_type: string
+          created_at?: string
+          file_name: string
+          file_size: number
+          id?: string
+          project_id: string
+          storage_path: string
+          task_id: string
+          uploaded_by: string
+        }
+        Update: {
+          content_type?: string
+          created_at?: string
+          file_name?: string
+          file_size?: number
+          id?: string
+          project_id?: string
+          storage_path?: string
+          task_id?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pm_task_attachments_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "pm_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pm_task_attachments_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "pm_tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pm_task_attachments_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pm_task_messages: {
+        Row: {
+          author_id: string
+          created_at: string
+          id: string
+          kind: string
+          project_id: string
+          recipient_id: string | null
+          reply_to_id: string | null
+          seen_at: string | null
+          task_id: string
+          text: string
+        }
+        Insert: {
+          author_id: string
+          created_at?: string
+          id?: string
+          kind: string
+          project_id: string
+          recipient_id?: string | null
+          reply_to_id?: string | null
+          seen_at?: string | null
+          task_id: string
+          text: string
+        }
+        Update: {
+          author_id?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          project_id?: string
+          recipient_id?: string | null
+          reply_to_id?: string | null
+          seen_at?: string | null
+          task_id?: string
+          text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pm_task_messages_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pm_task_messages_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "pm_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pm_task_messages_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pm_task_messages_reply_to_id_fkey"
+            columns: ["reply_to_id"]
+            isOneToOne: false
+            referencedRelation: "pm_task_messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pm_task_messages_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "pm_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pm_tasks: {
         Row: {
           actual_end: string | null
@@ -12418,6 +12551,19 @@ export type Database = {
       pm_can_edit: { Args: { _project: string }; Returns: boolean }
       pm_can_manage: { Args: { _project: string }; Returns: boolean }
       pm_name_key: { Args: { n: string }; Returns: string }
+      pm_pending_messages: {
+        Args: never
+        Returns: {
+          created_at: string
+          kind: string
+          message_id: string
+          project_id: string
+          project_name: string
+          task_id: string
+          task_name: string
+          text: string
+        }[]
+      }
       pm_reorder_phase_tasks: {
         Args: { _ids: string[]; _phase: string }
         Returns: undefined

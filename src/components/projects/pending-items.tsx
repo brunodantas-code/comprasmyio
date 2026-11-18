@@ -1,0 +1,5 @@
+import {Link} from "@tanstack/react-router";
+import {Bell,MessageCircleQuestion} from "lucide-react";
+import type {Database} from "@/integrations/supabase/types";
+type Pending=Database["public"]["Functions"]["pm_pending_messages"]["Returns"][number];
+export function projectPendingItems(rows:Pending[]){return rows.map(q=>({key:`pm-${q.message_id}`,app:"Projects",requester:q.project_name,count:1,row:<Link to="/projects" search={{project:q.project_id,task:q.task_id}} className="flex min-w-0 items-center gap-3 px-4 py-3 transition-colors hover:bg-dropdown-highlight">{q.kind==="question"?<MessageCircleQuestion className="size-5 shrink-0 text-destructive"/>:<Bell className="size-5 shrink-0"/>}<span className="min-w-0 flex-1 break-words text-sm">{q.project_name} · {q.task_name} · {q.kind==="question"?"Pergunta aguardando sua resposta":"Nova menção"} · {q.text}</span></Link>}));}

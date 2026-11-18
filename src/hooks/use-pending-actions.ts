@@ -29,7 +29,7 @@ export function usePendingActions() {
       if (authError || !authData.user) throw authError ?? new Error("Sessão não encontrada");
       const userId = authData.user.id;
 
-      const [stepsResult, deletionsResult, codeResult, codeMessagesResult, supplyQueueResult, supportCallsResult, mytosisResult, codeAdminResult, codeAccessResult, legalResult, legalActionsResult, legalCompletionsResult, legalAllActionsResult, legalConfidentialResult] = await Promise.all([
+      const [stepsResult, deletionsResult, codeResult, codeMessagesResult, supplyQueueResult, supportCallsResult, mytosisResult, codeAdminResult, codeAccessResult, legalResult, legalActionsResult, legalCompletionsResult, legalAllActionsResult, legalConfidentialResult,projectsMessagesResult] = await Promise.all([
         supabase
           .from("approval_steps")
           .select("order_id, step_index, approver_id, status, purchase_orders(requester_id,approval_status,status)")
@@ -61,8 +61,10 @@ export function usePendingActions() {
         supabase.from("legal_subject_completions").select("record_id,subject_id"),
         supabase.from("legal_actions").select("record_id,subject_id,archived"),
         supabase.from("legal_confidential_subjects").select("record_id,subject_id,position,subject"),
+        supabase.rpc("pm_pending_messages"),
       ]);
 
+      if (projectsMessagesResult.error) throw projectsMessagesResult.error;
       if (stepsResult.error) throw stepsResult.error;
       if (deletionsResult.error) throw deletionsResult.error;
       if (codeResult.error) throw codeResult.error;
@@ -116,6 +118,8 @@ export function usePendingActions() {
       const supportCalls = supportCallItems.length;
 
       return {
+        projectsItems:projectsMessagesResult.data??[],
+        projectsCount:projectsMessagesResult.data?.length??0,
         todos,
         todoCount: todos.length,
         legalItems,
@@ -133,7 +137,7 @@ export function usePendingActions() {
         supportCallItems,
         isCustomerSupportAnalyst: currentUser?.isCustomerSupportAnalyst ?? false,
         supply: pendingApprovals + pendingUserDeletions + pendingSupplyQueue + supplyQuestionCount + supplyReceipts.length,
-        total: todos.length + legalCount + pendingApprovals + pendingUserDeletions + pendingCodeTickets + pendingSupplyQueue + supportCalls + supplyQuestionCount + supplyReceipts.length + (mytosisResult.data?.length ?? 0),
+        total: (projectsMessagesResult.data?.length??0) + todos.length + legalCount + pendingApprovals + pendingUserDeletions + pendingCodeTickets + pendingSupplyQueue + supportCalls + supplyQuestionCount + supplyReceipts.length + (mytosisResult.data?.length ?? 0),
       };
     },
     staleTime: 30_000,

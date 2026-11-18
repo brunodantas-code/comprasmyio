@@ -5,6 +5,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { Button } from "@/components/ui/button";
 import { CentralDashboard } from "@/components/central/dashboard";
 import { legalPendingLabel } from "@/lib/legal-pending";
+import {projectPendingItems} from "@/components/projects/pending-items";
 import { PendingGroups } from "@/components/pending-groups";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PendingForMe } from "@/components/approval-workflow";
@@ -50,6 +51,7 @@ function PendentesPage() {
           <div className="space-y-6">
             {(
               <PendingGroups leading={<CriticalGroup />} items={[
+      ...projectPendingItems(data?.projectsItems??[]),
       ...((data?.approvals ?? 0) > 0 ? [{ key: "approvals", app: "Supply", requester: "Você", count: data?.approvals ?? 0, row: <PendingLink icon={CheckCircle2} label="Aguardando minha aprovação" count={data?.approvals ?? 0} to="/pendentes" /> }] : []),
       ...((data?.supplyQueue ?? 0) > 0 ? [{ key: "queue", app: "Supply", requester: "Você", count: data?.supplyQueue ?? 0, row: <PendingLink icon={ShoppingCart} label="Compras e serviços a executar · Fila do Supply" count={data?.supplyQueue ?? 0} to="/dashboard" search={{ section: "queue", subsection: "supply" }} /> }] : []),
       ...((data?.userDeletions ?? 0) > 0 ? [{ key: "deletions", app: "Admin", requester: "Você", count: data?.userDeletions ?? 0, row: <PendingLink icon={ShieldCheck} label="Exclusões de usuários aguardando decisão" count={data?.userDeletions ?? 0} to="/dashboard" search={{ section: "admin", subsection: "usuarios" }} /> }] : []),
