@@ -32,8 +32,8 @@ describe('assinaturas pessoais pendentes', () => {
   it('retira assinaturas concluídas e não inclui contratos', () => {
     expect(legalSignaturePendingItems([record([{ name: user.full_name, signature: 'imagem', signedAt: '2026-11-09' }]), record([{ name: user.full_name }], 'contracts')], user)).toEqual([]);
   });
-  it('reconhece participantes antigos pelo nome e assinatura sem data continua pendente', () => {
-    expect(legalSignaturePendingItems([record([{ name: ' Leonardo Roedel ', signature: 'imagem' }])], user)).toHaveLength(1);
+  it('participante sem cadastro no ERP não gera pendência de assinatura, mesmo com nome igual', () => {
+    expect(legalSignaturePendingItems([record([{ name: ' Leonardo Roedel ', signature: 'imagem' }])], user)).toHaveLength(0);
   });
   it('soma as ações em aberto do usuário, ignorando concluídas, arquivadas e de outros', () => {
     const r = { id: 'ata', title: 'Ata', category: 'minutes', created_by: 'autor', content: { participants: [], subjects: [{ id: 's1', title: 'A' }] } };

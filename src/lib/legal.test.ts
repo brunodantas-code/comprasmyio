@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { allParticipantsSigned, clearLegalSignatures, emptyLegalContent, legalSearchText, legalPendingCount, parseLegalContent, legalSubjectResponsibles } from './legal';
+import { allParticipantsSigned, legalSigners, clearLegalSignatures, emptyLegalContent, legalSearchText, legalPendingCount, parseLegalContent, legalSubjectResponsibles } from './legal';
 describe('Atas do Legal', () => {
   it('preserva responsável antigo e permite vários sem duplicar a ação pendente', () => {
     const subject = {id:'1',title:'Ação',description:'',decisions:'',responsible:'Bruno'};
@@ -37,10 +37,15 @@ describe('Atas do Legal', () => {
   });
   it('exige assinatura de todos os participantes para PDF assinado', () => {
     const content = emptyLegalContent();
-    content.participants = [{ id: '1', name: 'Ana', signature: 'data:image/png;base64,AA', signedAt: '2026-11-05' }, { id: '2', name: 'Bia', signature: '', signedAt: '' }];
+    content.participants = [{ id: '1', name: 'Ana', userId: 'ana', signature: 'data:image/png;base64,AA', signedAt: '2026-11-05' }, { id: '2', name: 'Bia', userId: 'bia', signature: '', signedAt: '' }, { id: '3', name: 'Luiza - Shopping (externa)', signature: '', signedAt: '' }];
     expect(allParticipantsSigned(content)).toBe(false);
     content.participants[1].signature = 'data:image/png;base64,AA'; content.participants[1].signedAt = '2026-11-05';
     expect(allParticipantsSigned(content)).toBe(true);
+  });
+  it('convidado sem cadastro no ERP não entra na lista de assinaturas', () => {
+    const content = emptyLegalContent();
+    content.participants = [{ id: '1', name: 'Ana', userId: 'ana', signature: '', signedAt: '' }, { id: '2', name: 'Alexandre - Shopping Taboão', signature: '', signedAt: '' }];
+    expect(legalSigners(content).map(p => p.name)).toEqual(['Ana']);
   });
   it('busca pelo assunto mesmo sem correspondência no título da ata', () => {
     const content = emptyLegalContent(); content.subjects = [{ id: '1', title: 'Aquisição', description: 'Fornecedores', decisions: '' }];

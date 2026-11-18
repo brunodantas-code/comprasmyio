@@ -8,7 +8,9 @@ export function parseLegalContent(value: unknown): LegalContent {
   const v = value as Record<string, unknown>;
   return { location: typeof v.location === 'string' ? v.location : '', counterpart: typeof v.counterpart === 'string' ? v.counterpart : '', participants: Array.isArray(v.participants) ? v.participants as LegalParticipant[] : [], subjects: Array.isArray(v.subjects) ? v.subjects as LegalSubject[] : [], ...(typeof v.revision === 'number' ? { revision: v.revision } : {}), ...(typeof v.lastEditAt === 'string' ? { lastEditAt: v.lastEditAt } : {}) };
 }
-export function allParticipantsSigned(content: LegalContent) { return content.participants.length > 0 && content.participants.every(p => p.name.trim() && p.signature && p.signedAt); }
+/** Only ERP-registered participants (linked userId) sign; external guests stay listed as participants only. */
+export function legalSigners(content: LegalContent) { return content.participants.filter(p => Boolean(p.userId) && p.name.trim()); }
+export function allParticipantsSigned(content: LegalContent) { const signers = legalSigners(content); return signers.length > 0 && signers.every(p => p.signature && p.signedAt); }
 export function clearLegalSignatures(content: LegalContent): LegalContent { return { ...content, participants: content.participants.map(p => ({ ...p, signature: '', signedAt: '' })) }; }
 export function legalSubjectResponsibles(subject: LegalSubject): string[] {
   return [...new Set((subject.responsibles ?? [subject.responsible ?? '']).map(name => name.trim()).filter(Boolean))];

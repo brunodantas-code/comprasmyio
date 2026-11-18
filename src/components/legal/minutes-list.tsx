@@ -3,7 +3,7 @@ import { CdeLockIcon, CdeNumber, CdeDisclosureIcon } from "@/components/cde/cde-
 import { ChevronDown, ChevronRight, FileText, Pencil, Trash2, FileSignature, ChevronUp } from 'lucide-react';
 import { canSignParticipant, signatureDate } from '@/lib/signatures';
 import { Button } from '@/components/ui/button';
-import { legalDate, legalPendingCount, legalSubjectResponsibles, parseLegalContent } from '@/lib/legal';
+import { legalDate, legalSigners, legalPendingCount, legalSubjectResponsibles, parseLegalContent } from '@/lib/legal';
 import type { Database } from '@/integrations/supabase/types';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { legalActionDelayDays, legalActionDueSoonDays, legalTrackingOptions, pendingLegalActions } from '@/lib/legal-actions';
@@ -112,7 +112,7 @@ export function MinutesList({ rows, expanded, toggle, edit, remove, openPdf, use
               <SubjectActions recordId={row.id} subjectId={subject.id} userId={user?.id} />
             </div>}
           </section>)}
-          {!filteredView && <div className="space-y-2 border-t border-border px-4 py-4 text-sm sm:px-6"><h2 className="text-base font-semibold">Assinaturas dos participantes</h2>{content.revision && content.participants.some(p => !p.signature || !p.signedAt) ? <p className="text-xs text-destructive">Assinatura pendente referente à edição {content.revision} da ata anteriormente assinada. Confira as alterações no Histórico.</p> : null}{content.participants.map(p => <div key={p.id} className="flex items-center gap-2"><span className="min-w-0 break-words">{p.name} — {p.signature && p.signedAt ? `Assinado em ${signatureDate(p.signedAt)}` : 'Aguardando assinatura'}</span>{!p.signature || !p.signedAt ? <><PendingDot label={`Assinatura pendente de ${p.name}`} /><Button variant="outline" size="compactIcon" title={canSignParticipant(p,user) ? 'Assinar' : 'Somente este participante pode assinar'} disabled={!canSignParticipant(p,user)} aria-label={`Assinar como ${p.name}`} onClick={() => sign(row,p.id,p.name)}><FileSignature /></Button></> : null}</div>)}</div>}
+          {!filteredView && <div className="space-y-2 border-t border-border px-4 py-4 text-sm sm:px-6"><h2 className="text-base font-semibold">Assinaturas dos participantes</h2>{content.revision && legalSigners(content).some(p => !p.signature || !p.signedAt) ? <p className="text-xs text-destructive">Assinatura pendente referente à edição {content.revision} da ata anteriormente assinada. Confira as alterações no Histórico.</p> : null}{legalSigners(content).map(p => <div key={p.id} className="flex items-center gap-2"><span className="min-w-0 break-words">{p.name} — {p.signature && p.signedAt ? `Assinado em ${signatureDate(p.signedAt)}` : <span className="text-destructive">Aguardando assinatura</span>}</span>{!p.signature || !p.signedAt ? <><Button variant="outline" size="compactIcon" title={canSignParticipant(p,user) ? 'Assinar' : 'Somente este participante pode assinar'} disabled={!canSignParticipant(p,user)} aria-label={`Assinar como ${p.name}`} onClick={() => sign(row,p.id,p.name)}><FileSignature /></Button></> : null}</div>)}</div>}
         </div> : null}
       </article>;
     })}
