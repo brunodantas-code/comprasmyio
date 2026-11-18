@@ -7502,6 +7502,7 @@ export type Database = {
       }
       pm_projects: {
         Row: {
+          board_columns: Json
           budget: number
           budget_details: Json
           budget_mode: string
@@ -7509,6 +7510,7 @@ export type Database = {
           category: string
           created_at: string
           created_by: string
+          custom_fields: Json
           erp_project_id: string | null
           holidays: string[]
           hours_per_day: number
@@ -7522,6 +7524,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          board_columns?: Json
           budget?: number
           budget_details?: Json
           budget_mode?: string
@@ -7529,6 +7532,7 @@ export type Database = {
           category?: string
           created_at?: string
           created_by?: string
+          custom_fields?: Json
           erp_project_id?: string | null
           holidays?: string[]
           hours_per_day?: number
@@ -7542,6 +7546,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          board_columns?: Json
           budget?: number
           budget_details?: Json
           budget_mode?: string
@@ -7549,6 +7554,7 @@ export type Database = {
           category?: string
           created_at?: string
           created_by?: string
+          custom_fields?: Json
           erp_project_id?: string | null
           holidays?: string[]
           hours_per_day?: number
@@ -7637,6 +7643,8 @@ export type Database = {
         Row: {
           actual_end: string | null
           actual_start: string | null
+          board_column: string | null
+          custom_values: Json
           duration: number
           id: string
           milestone: boolean
@@ -7654,6 +7662,8 @@ export type Database = {
         Insert: {
           actual_end?: string | null
           actual_start?: string | null
+          board_column?: string | null
+          custom_values?: Json
           duration?: number
           id?: string
           milestone?: boolean
@@ -7671,6 +7681,8 @@ export type Database = {
         Update: {
           actual_end?: string | null
           actual_start?: string | null
+          board_column?: string | null
+          custom_values?: Json
           duration?: number
           id?: string
           milestone?: boolean
@@ -12394,6 +12406,10 @@ export type Database = {
           name: string
           selected: boolean
         }[]
+      }
+      pm_bulk_tasks: {
+        Args: { _changes: Json; _project: string }
+        Returns: number
       }
       pm_can_create: { Args: never; Returns: boolean }
       pm_can_edit: { Args: { _project: string }; Returns: boolean }

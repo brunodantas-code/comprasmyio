@@ -1765,6 +1765,13 @@
       "when": 1795012890811,
       "tag": "0251_projects_dependency_signed_lag",
       "breakpoints": true
+    },
+    {
+      "idx": 252,
+      "version": "7",
+      "when": 1795013446318,
+      "tag": "0252_projects_views_capacity",
+      "breakpoints": true
     }
   ]
 }

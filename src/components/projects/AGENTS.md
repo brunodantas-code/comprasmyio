@@ -10,3 +10,4 @@
 - Installation assumptions are project-keyed snapshots; import reads only RLS-visible Survey points, preserves per-discipline difficulty and manual productivity, and never writes Survey records. Effort is quantity/productivity; required headcount rounds up against the project calendar and target end.
 
 - WBS parents stay within their project/phase and are cycle-guarded; dependency offsets model TI/II/TT/IT with signed working-day lag, and CPM uses the same offsets in its backward pass.
+- View configuration is project-owned and manager-only; task batch edits use an invoker RPC for atomic RLS/audit-preserving writes. Workload sums identity-bound hours across authorized projects; leveling previews never move started tasks and require confirmation. Baseline effort remains grouped by captured resource unit.
