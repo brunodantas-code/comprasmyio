@@ -115,6 +115,11 @@
     "general": 0
   },
   {
+    "file": "components/projects/workspace.tsx",
+    "standard": 2,
+    "general": 0
+  },
+  {
     "file": "components/site-survey-environment-manager.tsx",
     "standard": 1,
     "general": 1

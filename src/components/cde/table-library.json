@@ -642,9 +642,21 @@
     ]
   },
   {
+    "id": "components/projects/assumptions.tsx|0",
+    "file": "components/projects/assumptions.tsx",
+    "line": 38,
+    "context": "Premissas de instalação",
+    "headers": [
+      "Disciplina",
+      "Dificuldade",
+      "Pontos",
+      "Pontos / hora / profissional"
+    ]
+  },
+  {
     "id": "components/projects/workspace.tsx|0",
     "file": "components/projects/workspace.tsx",
-    "line": 90,
+    "line": 104,
     "context": "",
     "headers": [
       "Projeto",
@@ -658,7 +670,7 @@
   {
     "id": "components/projects/workspace.tsx|1",
     "file": "components/projects/workspace.tsx",
-    "line": 93,
+    "line": 107,
     "context": "Atividades",
     "headers": [
       "Atividade",
@@ -673,7 +685,20 @@
   {
     "id": "components/projects/workspace.tsx|2",
     "file": "components/projects/workspace.tsx",
-    "line": 95,
+    "line": 111,
+    "context": "Atividades",
+    "headers": [
+      "Profissional",
+      "Dia",
+      "Carga / capacidade",
+      "Ocupação",
+      "Atividades"
+    ]
+  },
+  {
+    "id": "components/projects/workspace.tsx|3",
+    "file": "components/projects/workspace.tsx",
+    "line": 113,
     "context": "Recursos",
     "headers": [
       "Recurso",
@@ -684,9 +709,9 @@
     ]
   },
   {
-    "id": "components/projects/workspace.tsx|3",
+    "id": "components/projects/workspace.tsx|4",
     "file": "components/projects/workspace.tsx",
-    "line": 96,
+    "line": 114,
     "context": "Recursos",
     "headers": [
       "Atividade / recurso",
@@ -698,27 +723,15 @@
     ]
   },
   {
-    "id": "components/projects/workspace.tsx|4",
+    "id": "components/projects/workspace.tsx|5",
     "file": "components/projects/workspace.tsx",
-    "line": 97,
+    "line": 115,
     "context": "·",
     "headers": [
       "Atividade",
       "Fim da linha de base",
       "Fim atual",
       "Fim realizado"
-    ]
-  },
-  {
-    "id": "components/projects/assumptions.tsx|0",
-    "file": "components/projects/assumptions.tsx",
-    "line": 38,
-    "context": "Premissas de instalação",
-    "headers": [
-      "Disciplina",
-      "Dificuldade",
-      "Pontos",
-      "Pontos / hora / profissional"
     ]
   },
   {
