@@ -18,7 +18,7 @@ export function TableSortMenu({ columns, value, onChange }: {
   };
   return <Popover>
     <PopoverTrigger asChild>
-      <Button type="button" variant="ghost" size="sm" aria-label="Ordenar" title={selected ? `Ordenar: ${selected.label}, ${value?.direction === "desc" ? "decrescente" : "crescente"}` : "Ordenar"} className="gap-2 !w-auto !min-w-max shrink-0">
+      <Button type="button" variant="outline" size="sm" aria-label="Ordenar" title={selected ? `Ordenar: ${selected.label}, ${value?.direction === "desc" ? "decrescente" : "crescente"}` : "Ordenar"} className="!w-auto !min-w-max shrink-0">
         <ArrowUpDown className="size-4" /> Ordenar
       </Button>
     </PopoverTrigger>

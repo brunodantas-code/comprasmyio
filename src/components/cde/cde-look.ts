@@ -41,6 +41,8 @@ function iconName(node: React.ReactNode): string | undefined {
 
 /** Detects which CDE action group a button belongs to from its label or icon. */
 export function detectButtonGroup(children: React.ReactNode, label?: string): AutoGroup | undefined {
+  // Toolbar "Ordenar" (icon + text) follows the same organize standard as Agrupar/Consolidar.
+  if (/^ordenar$/i.test(text(children).trim())) return "organize";
   // A known icon wins (e.g. a chevron labelled "Recolher Salvar" is still a toggle).
   const icon = iconName(children);
   if (icon) return ICON_GROUP[icon];
