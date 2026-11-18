@@ -7414,6 +7414,8 @@ export type Database = {
           deliverables: string
           id: string
           name: string
+          planned_end: string | null
+          planned_start: string | null
           position: number
           project_id: string
         }
@@ -7423,6 +7425,8 @@ export type Database = {
           deliverables?: string
           id?: string
           name: string
+          planned_end?: string | null
+          planned_start?: string | null
           position?: number
           project_id: string
         }
@@ -7432,6 +7436,8 @@ export type Database = {
           deliverables?: string
           id?: string
           name?: string
+          planned_end?: string | null
+          planned_start?: string | null
           position?: number
           project_id?: string
         }
@@ -7467,6 +7473,7 @@ export type Database = {
           id: string
           manager_id: string
           name: string
+          planned_end: string | null
           scope: string
           start_date: string
           status: string
@@ -7486,6 +7493,7 @@ export type Database = {
           id?: string
           manager_id: string
           name: string
+          planned_end?: string | null
           scope?: string
           start_date: string
           status?: string
@@ -7505,6 +7513,7 @@ export type Database = {
           id?: string
           manager_id?: string
           name?: string
+          planned_end?: string | null
           scope?: string
           start_date?: string
           status?: string
@@ -12335,6 +12344,10 @@ export type Database = {
       pm_can_edit: { Args: { _project: string }; Returns: boolean }
       pm_can_manage: { Args: { _project: string }; Returns: boolean }
       pm_name_key: { Args: { n: string }; Returns: string }
+      pm_reorder_phase_tasks: {
+        Args: { _ids: string[]; _phase: string }
+        Returns: undefined
+      }
       pm_supply_catalog: {
         Args: never
         Returns: {

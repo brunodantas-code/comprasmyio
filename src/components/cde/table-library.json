@@ -644,12 +644,12 @@
   {
     "id": "components/projects/workspace.tsx|0",
     "file": "components/projects/workspace.tsx",
-    "line": 86,
+    "line": 89,
     "context": "",
     "headers": [
       "Projeto",
       "Situação",
-      "Fim previsto",
+      "Fim previsto / cronograma",
       "Avanço",
       "Orçamento",
       "Realizado"
@@ -658,7 +658,7 @@
   {
     "id": "components/projects/workspace.tsx|1",
     "file": "components/projects/workspace.tsx",
-    "line": 89,
+    "line": 92,
     "context": "Atividades",
     "headers": [
       "Atividade",
@@ -673,7 +673,7 @@
   {
     "id": "components/projects/workspace.tsx|2",
     "file": "components/projects/workspace.tsx",
-    "line": 91,
+    "line": 94,
     "context": "Recursos",
     "headers": [
       "Recurso",
@@ -686,7 +686,7 @@
   {
     "id": "components/projects/workspace.tsx|3",
     "file": "components/projects/workspace.tsx",
-    "line": 92,
+    "line": 95,
     "context": "Recursos",
     "headers": [
       "Atividade / recurso",
@@ -700,7 +700,7 @@
   {
     "id": "components/projects/workspace.tsx|4",
     "file": "components/projects/workspace.tsx",
-    "line": 93,
+    "line": 96,
     "context": "·",
     "headers": [
       "Atividade",

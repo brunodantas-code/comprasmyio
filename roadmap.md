@@ -1,5 +1,6 @@
 # Roadmap
-- [x] Projects: fases exibem início/fim derivados das tarefas e período total do projeto; ainda não há datas-alvo independentes para fases vazias. Testes de orçamento e fluxo autenticado passaram; arraste por fase implementado, não exercitado em tela. Não publicado.
+- [x] Projects: datas-alvo independentes do projeto/fases e comparação com cronograma; arraste real por fase renumera 1.1/1.2 e persiste após recarregar. Fase vazia preserva datas; período inválido rejeitado. 19 testes passaram, desktop/mobile sem excesso lateral, dados temporários removidos. Não publicado.
+- [x] Projects: fases exibem datas previstas independentes e cronograma das tarefas separadamente, comparados ao início/fim previsto do projeto.
 - [x] Projects: tarefas por fase com responsáveis/datas, arraste e renumeração automática no padrão CDE (interpretado “remuneração” como renumeração).
 - [x] Projects: botões de adicionar Participante/Recurso somente +, alinhados à direita e com tooltip.
 - [x] Projects: listar todos os usuários cadastrados em Acessos, mantendo autorização de entrada e equipe.

@@ -6,3 +6,4 @@
 - Supply matching uses a narrow authenticated catalog and normalized-name/link guards; planning links existing commercial projects instead of creating or renaming Supply records.
 - Team candidate lists include active ERP accounts; membership never grants app access, which remains managed in Acessos.
 - Projects appearance is saved in CDE and read as CSS variables; Gantt clips its SVG to the last row, and editor field slots use flex-column gaps so input/select baselines align.
+- Phase/project target dates are independent of scheduled task dates; comparisons warn without silently rescheduling tasks. Phase ordering uses an invoker RPC to validate the whole list and update atomically under existing RLS and audit triggers.
