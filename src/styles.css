@@ -665,6 +665,8 @@ input[data-search-field="true"] {
 
 .pm-weekday { display:block; font-size:0.7rem; line-height:1; color:var(--muted-foreground); margin-bottom:3px; }
 .pm-month-divider { position:absolute; top:8px; bottom:-3px; border-left:1px solid var(--muted-foreground); pointer-events:none; }
+.pm-gantt .upper-text { position:absolute; left:var(--pm-header-x,0px) !important; margin-left:17px; padding-left:0; }
+.pm-gantt [data-pm-mode="Month"] .lower-text { margin-left:17px; margin-right:17px; width:calc(var(--gv-column-width) - 34px); text-align:left; }
 .pm-activity-name { width:100%; justify-content:flex-start; }
 .pm-task-number-slot { display:inline-flex; flex:0 0 3.5rem; justify-content:flex-start; }
 .pm-task-name-text { padding-inline-start:calc(var(--pm-task-depth,0) * 1.25rem); }
