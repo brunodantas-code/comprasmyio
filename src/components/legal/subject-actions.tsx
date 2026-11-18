@@ -20,7 +20,7 @@ import { confirmAction } from '@/components/confirm-dialog';
 import { legalDate } from '@/lib/legal';
 import { signatureDate } from '@/lib/signatures';
 
-export function SubjectActions({ recordId, subjectId, userId, saved = true, drafts = [], onDraftsChange }: { recordId: string; subjectId: string; userId?: string; saved?: boolean; drafts?: DraftLegalAction[]; onDraftsChange?: (actions: DraftLegalAction[]) => void }) {
+export function SubjectActions({ recordId, subjectId, userId, saved = true, drafts = [], onDraftsChange, hideWhenEmpty = false }: { hideWhenEmpty?: boolean; recordId: string; subjectId: string; userId?: string; saved?: boolean; drafts?: DraftLegalAction[]; onDraftsChange?: (actions: DraftLegalAction[]) => void }) {
   const { data } = useSuspenseQuery(legalTrackingOptions); const qc = useQueryClient();
   const minutesAlerts = useMinutesAlerts();
   const actions = [...orderedLegalActions(data.actions.filter(a => a.record_id === recordId && a.subject_id === subjectId && !a.archived)), ...drafts.filter(a => a.subject_id === subjectId).map(a => ({...a,completed_at:null}))];
@@ -63,6 +63,8 @@ export function SubjectActions({ recordId, subjectId, userId, saved = true, draf
     const ok = await mutate(() => note.id ? supabase.from('legal_action_observations').update({ message: parsed.data }).eq('id',note.id).select('id').single() : supabase.from('legal_action_observations').insert({ action_id: note.actionId, message: parsed.data }).select('id').single());
     if(ok) { setNote(null); toast.success('Observação salva'); }
   }
+  // Read view hides an empty Ações block; adding actions stays in the minutes editor.
+  if (hideWhenEmpty && actions.length === 0 && !editor) return null;
   return <div className="space-y-4 border-t border-border pt-4">
     <div className="flex items-center justify-between gap-2"><h4 className="text-sm font-semibold">Ações</h4><CdeButton group="plus" screen="components/legal/subject-actions.tsx" disabled={(!saved && !onDraftsChange) || busy} title="Adicionar ação" aria-label="Adicionar ação" onClick={()=>setEditor({title:'',responsible_id:'',due_date:''})} /></div>
     <CdeSortableList ids={actions.map(a=>a.id)} labelOf={id=>actions.find(a=>a.id===id)?.title ?? 'ação'} onMove={reorderActions} className="space-y-4">{(id,index,handle)=>{const action=actions.find(a=>a.id===id);if(!action)return null;return <div key={action.id} className="space-y-3 pb-3">

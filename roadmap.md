@@ -516,3 +516,4 @@
 - [x] Gantt do Projects: trocar o verde-escuro do avanço das barras por verde claro
 - [x] Legal: só usuários do ERP aparecem para assinar a ata; convidados externos ficam só como participantes
 - [x] Legal: "Aguardando assinatura" em texto vermelho no lugar da bolinha
+- [x] Legal: esconder Deliberações e Ações vazias na leitura da ata
