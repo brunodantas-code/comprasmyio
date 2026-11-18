@@ -665,9 +665,11 @@ input[data-search-field="true"] {
 
 .pm-weekday { display:block; font-size:0.7rem; line-height:1; color:var(--muted-foreground); margin-bottom:3px; }
 .pm-month-divider { stroke:var(--muted-foreground); stroke-width:1; pointer-events:none; }
+.pm-activity-name { padding-inline-start:calc(var(--pm-task-depth,0) * 1.25rem); }
+.pm-workspace .pm-gantt .pm-gantt-number { font-size:var(--filter-fs); color:var(--pm-bar-text); }
 @media(max-width:767px){
  .pm-activity-cell .pm-activity-name { position:relative; padding-top:0.15rem; }
- .pm-activity-cell .pm-activity-name > [data-cde-number], .pm-activity-cell .pm-activity-name > [data-cde-number-sequence] { position:absolute; right:calc(100% + 0.5rem); top:0; }
+ .pm-activity-cell .pm-activity-name > [data-cde-number] { position:absolute; right:calc(100% + 0.5rem); top:0; }
  .pm-activity-cell .pm-activity-name > span:last-child { border-left:0; padding-left:0; }
 }
 
@@ -677,12 +679,3 @@ input[data-search-field="true"] {
 .home-header-desktop-preview { min-height:var(--home-header-desktop-height,80px); }
 .home-header-desktop-preview > div { width:100%; }
 @media(min-width:640px){ .home-page-header > .app-header-workspace { min-height:var(--home-header-desktop-height,0px); } }
-.mobile-favorites-dock { position:fixed; z-index:40; left:12px; right:12px; bottom:max(12px,env(safe-area-inset-bottom)); }
-.favorite-app-tile { width:min(var(--mobile-tile-size,80px),100%); aspect-ratio:1; justify-self:center; }
-@media(max-width:639px){
- .has-mobile-favorites body { padding-bottom:calc(120px + env(safe-area-inset-bottom)); }
- .has-mobile-favorites .mobile-favorites-dock { max-width:430px; margin-inline:auto; }
- .has-mobile-favorites main { padding-bottom:calc(120px + env(safe-area-inset-bottom)); }
- .has-mobile-favorites:has(.app-navigation) .mobile-favorites-dock { bottom:calc(90px + env(safe-area-inset-bottom)); }
- .has-mobile-favorites:has(.app-navigation) body, .has-mobile-favorites:has(.app-navigation) main { padding-bottom:calc(210px + env(safe-area-inset-bottom)); }
-}

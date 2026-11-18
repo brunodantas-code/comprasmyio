@@ -166,8 +166,9 @@ export function useCdeNumberStyle(screen?: string, subcategory = false) {
   return { css, className: cn("inline-flex h-7 min-w-7 shrink-0 items-center justify-center px-1 text-sm font-bold tabular-nums", subcategory && "text-xs", m.className, cls) };
 }
 
-export function CdeNumber({ children, subcategory = false, screen = "components/cde/cde-workspace.tsx", className, ...props }: React.ComponentProps<"span"> & { subcategory?: boolean; screen?: string }) {
+export function CdeNumber({ children, subcategory = false, unframed = false, screen = "components/cde/cde-workspace.tsx", className, ...props }: React.ComponentProps<"span"> & { subcategory?: boolean; unframed?: boolean; screen?: string }) {
   const look = useCdeNumberStyle(screen, subcategory);
+  if(unframed)return <span {...props} data-cde-number-plain="" className={cn("inline-flex shrink-0 items-center text-sm font-normal text-foreground tabular-nums",className)}>{children}</span>;
   const sequence=typeof children==="string"&&/^\d+(?:\.\d+)+$/.test(children)?children:null;
   if(sequence){const separator=sequence.indexOf(".");return <span {...props} data-cde-number-sequence="" className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap tabular-nums"><span data-cde-number="" style={look.css} className={cn(look.className,className)}>{sequence.slice(0,separator)}</span><span className="text-sm font-normal text-foreground">{sequence.slice(separator)}</span></span>;}
   return <span {...props} data-cde-number="" style={look.css} className={cn(look.className, className)}>{children}</span>;

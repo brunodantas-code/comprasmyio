@@ -15,6 +15,8 @@ import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { MyioPlatformLogo } from "@/components/myio-platform-logo";
 import { useAppOrder, useAppTile, APP_TILE_DEFAULT, appTileColorVars, homeHeaderVars, homeHeaderLogoTone, mobileTileVars } from "@/components/cde/app-order-config";
 import { AppTileFace } from "@/components/cde/app-tile";
+import { partitionMobileApps, useMobileFavorites } from "@/components/mobile-favorites-config";
+import { mobileDockVars, useMobileDockStyle } from "@/components/cde/mobile-dock-style";
 import { CorporateBanner } from "@/components/corporate/corporate-banner";
 import { DEFAULT_PORTAL_SECTIONS, usePortalSections } from "@/components/corporate/portal-sections";
 import { AppAccessLink } from "@/components/app-access-link";
@@ -53,6 +55,8 @@ function PortalPage() {
   const { data: criticalPending } = useCriticalPending();
   const { data: appOrder } = useAppOrder();
   const tile = useAppTile().data ?? APP_TILE_DEFAULT;
+  const favorites = useMobileFavorites().data;
+  const favoriteStyle = useMobileDockStyle().data;
   const portalSections = usePortalSections().data ?? DEFAULT_PORTAL_SECTIONS;
   const { data, isLoading } = useQuery({
     queryKey: ["my-erp-access"],
@@ -105,6 +109,7 @@ function PortalPage() {
   ].filter((app) => (app.key === "cde" ? (data.isErpAdmin || data.appKeys.has("cde")) : data.appKeys.has(app.key)) || (app.key === "chamados" && pendingActions?.isCustomerSupportAnalyst))
     .sort((a, b) => (appOrder ? appOrder.indexOf(a.key) - appOrder.indexOf(b.key) : 0));
 
+  const mobileApps = partitionMobileApps(apps, favorites?.keys ?? []);
   const renderApp = ({ key, name, description, to }: (typeof apps)[number]) => (
     <div key={key} className="flex min-w-0 flex-col items-center text-center">
       <AppAccessLink
@@ -159,9 +164,10 @@ function PortalPage() {
               const block = section === "messages" ? <CorporateBanner />
                 : section === "apps" ? (<>{apps.length ? (
                <>
-                  <div aria-label="Aplicativos disponíveis no mobile" style={mobileTileVars(tile) as React.CSSProperties} className="mobile-app-grid grid pb-2 sm:hidden">
-                    {apps.map(renderApp)}
-                 </div>
+                  <div aria-label="Aplicativos disponíveis no mobile" style={mobileTileVars(tile) as React.CSSProperties} className="sm:hidden">
+                    {mobileApps.favorites.length ? <div aria-label="Aplicativos favoritos" style={mobileDockVars(favoriteStyle)} className="mobile-favorites-band mobile-app-grid mb-6 grid px-1 pb-3 pt-4">{mobileApps.favorites.map(renderApp)}</div> : null}
+                    <div className="mobile-app-grid grid pb-2">{mobileApps.remaining.map(renderApp)}</div>
+                  </div>
                  <div aria-label="Aplicativos disponíveis" style={{ columnGap: tile.gapX, rowGap: tile.gapY }} className="hidden flex-wrap sm:flex">
                   {apps.map(({ key, name, description, to }) => (
                      <div key={key} className="relative min-w-0 snap-start justify-self-center sm:justify-self-start">

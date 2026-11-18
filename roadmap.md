@@ -1,4 +1,9 @@
 # Roadmap
+- [x] Barras Gantt: números sem fundo e mesma fonte de 12 px dos nomes, conferidos nas quatro atividades reais.
+- [x] Corrigir barra piscando: referência vazia estável evita reconstrução contínua do Gantt; conferida ausência de substituições repetidas na tela.
+- [x] Teste confirmado e removido: projeto Verificação colaboração Projects 20261118, tarefa, conversas e três anexos; Vila Velha preservado e conferido em tela.
+- [x] Tarefas endentadas em 20 px por nível; somente Levantamento Fotográfico e Q&A mantém marcador com fundo, demais exibem sequência completa sem fundo. Conferido no Vila Velha.
+- [x] Favoritos: primeira fileira somente na Home mobile, rolagem normal, sem duplicatas; demais apps na ordem CDE. Conferidos 12 apps únicos, primeira fileira pessoal, rolagem e Supply sem faixa; Desktop preservado, quatro testes passaram.
 - [x] Conferência dos 13 pedidos de ação: ajustes visuais, duração, exclusão e colaboração verificados; integrações externas aguardam autorização.
 - [x] Totalizadores Projects: orçamento/planejado/realizado no padrão visual das visitas Site Survey.
 - [x] Duração de atividades/fases: opções Horas, Dias, Semanas, Meses e Anos, preservar períodos existentes.

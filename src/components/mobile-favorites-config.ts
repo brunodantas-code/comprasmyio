@@ -10,6 +10,11 @@ export function normalizeFavorites(keys: string[], allowed: string[]): string[] 
 export function toggleFavorite(keys: string[], key: string): string[] {
   return keys.includes(key) ? keys.filter(k => k !== key) : keys.length < FAVORITE_LIMIT ? [...keys, key] : keys;
 }
+export function partitionMobileApps<T extends { key: string }>(apps: T[], keys: string[]) {
+  const selected = normalizeFavorites(keys, apps.map(app => app.key));
+  const favorites = selected.flatMap(key => apps.filter(app => app.key === key));
+  return { favorites, remaining: apps.filter(app => !selected.includes(app.key)) };
+}
 export function useMobileFavorites() {
   return useQuery({ queryKey: ["mobile-app-favorites"], queryFn: async () => {
     const { data: auth, error: authError } = await supabase.auth.getUser();

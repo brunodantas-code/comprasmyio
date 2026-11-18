@@ -9,10 +9,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { AppAccessLink } from "@/components/app-access-link";
-import { AppSymbol, AppTileFace } from "@/components/cde/app-tile";
-import { APP_TILE_DEFAULT, appTileColorVars, mobileTileVars, useAppTile } from "@/components/cde/app-order-config";
-import { mobileDockVars, useMobileDockStyle } from "@/components/cde/mobile-dock-style";
+import { AppSymbol } from "@/components/cde/app-tile";
 import { FAVORITE_APPS, FAVORITE_LIMIT, normalizeFavorites, toggleFavorite, useMobileFavorites } from "./mobile-favorites-config";
 
 function FavoriteRow({ id, selected, full, onToggle }: { id: string; selected: boolean; full: boolean; onToggle: () => void }) {
@@ -23,8 +20,6 @@ function FavoriteRow({ id, selected, full, onToggle }: { id: string; selected: b
 }
 function FavoritesExperience() {
   const { data, isError } = useMobileFavorites();
-  const tile = useAppTile().data ?? APP_TILE_DEFAULT;
-  const dock = useMobileDockStyle().data;
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<string[] | null>(null);
@@ -32,7 +27,6 @@ function FavoritesExperience() {
   const keys = draft ?? data?.keys ?? [];
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }), useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }));
   useEffect(() => { const show = () => { setDraft(null); setOpen(true); }; window.addEventListener("open-mobile-favorites", show); return () => window.removeEventListener("open-mobile-favorites", show); }, []);
-  useEffect(() => { document.documentElement.classList.toggle("has-mobile-favorites", Boolean(data?.keys.length)); return () => document.documentElement.classList.remove("has-mobile-favorites"); }, [data?.keys.length]);
   async function save() {
     if (!data) return;
     setSaving(true);
@@ -45,7 +39,7 @@ function FavoritesExperience() {
   }
   function move(e: DragEndEvent) { if (!e.over) return; const from = keys.indexOf(String(e.active.id)), to = keys.indexOf(String(e.over.id)); if (from >= 0 && to >= 0) setDraft(arrayMove(keys, from, to)); }
   const apps = data ? [...keys, ...data.allowed.filter(k => !keys.includes(k))].filter(k => FAVORITE_APPS.some(a => a.key === k)) : [];
-  return <><Dialog open={open} onOpenChange={setOpen}><DialogContent className="max-h-[85dvh] overflow-hidden"><DialogHeader><DialogTitle>Meus favoritos</DialogTitle></DialogHeader><div className="flex items-center justify-between"><span className="text-sm text-muted-foreground">{keys.length} / {FAVORITE_LIMIT}</span><Button variant="ghost" size="icon" title="Salvar meus favoritos" aria-label="Salvar meus favoritos" onClick={save} disabled={!data || saving || !draft}><Save /></Button></div>{isError ? <p>Não foi possível carregar seus aplicativos.</p> : !data ? <p>Carregando...</p> : <div className="max-h-[55dvh] overflow-y-auto"><DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={move}><SortableContext items={keys} strategy={verticalListSortingStrategy}>{apps.map(id => <FavoriteRow key={id} id={id} selected={keys.includes(id)} full={keys.length >= FAVORITE_LIMIT} onToggle={() => setDraft(toggleFavorite(keys, id))} />)}</SortableContext></DndContext></div>}</DialogContent></Dialog>{data?.keys.length ? <nav aria-label="Aplicativos favoritos" className="mobile-favorites-dock sm:hidden" style={{ ...mobileDockVars(dock), ...appTileColorVars(tile), ...mobileTileVars(tile) }}><div className="mobile-favorites-band grid grid-cols-4 items-center gap-2 p-3">{data.keys.map(key => { const app = FAVORITE_APPS.find(a => a.key === key); return app ? <AppAccessLink key={key} appKey={key} to={app.to} title={`Acessar ${app.name}`} aria-label={`Favorito ${app.name}`} className="favorite-app-tile relative flex min-w-0 flex-col items-center justify-between rounded-2xl border-2 border-[color:var(--tile-border)] bg-[var(--tile-fill)] px-1 pb-2 pt-1"><AppTileFace appKey={key} name={app.name} tile={tile} mobile /></AppAccessLink> : null; })}</div></nav> : null}</>;
+  return <Dialog open={open} onOpenChange={setOpen}><DialogContent className="max-h-[85dvh] overflow-hidden"><DialogHeader><DialogTitle>Meus favoritos</DialogTitle></DialogHeader><div className="flex items-center justify-between"><span className="text-sm text-muted-foreground">{keys.length} / {FAVORITE_LIMIT}</span><Button variant="ghost" size="icon" title="Salvar meus favoritos" aria-label="Salvar meus favoritos" onClick={save} disabled={!data || saving || !draft}><Save /></Button></div>{isError ? <p>Não foi possível carregar seus aplicativos.</p> : !data ? <p>Carregando...</p> : <div className="max-h-[55dvh] overflow-y-auto"><DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={move}><SortableContext items={keys} strategy={verticalListSortingStrategy}>{apps.map(id => <FavoriteRow key={id} id={id} selected={keys.includes(id)} full={keys.length >= FAVORITE_LIMIT} onToggle={() => setDraft(toggleFavorite(keys, id))} />)}</SortableContext></DndContext></div>}</DialogContent></Dialog>;
 }
 export function MobileFavorites() {
   const path = useRouterState({ select: state => state.location.pathname });
