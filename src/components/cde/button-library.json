@@ -332,7 +332,7 @@
   {
     "id": "components/app-header.tsx|7b00361987a980e8|0",
     "file": "components/app-header.tsx",
-    "line": 98,
+    "line": 105,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -347,7 +347,7 @@
   {
     "id": "components/app-header.tsx|39859e6ae6ec8d95|0",
     "file": "components/app-header.tsx",
-    "line": 102,
+    "line": 109,
     "tag": "Button",
     "label": "pendentes",
     "dynamic": true,
@@ -362,7 +362,7 @@
   {
     "id": "components/app-header.tsx|f29dcfdcaa93e9f9|0",
     "file": "components/app-header.tsx",
-    "line": 103,
+    "line": 110,
     "tag": "Button",
     "label": "Icon",
     "dynamic": true,
@@ -377,7 +377,7 @@
   {
     "id": "components/app-header.tsx|931b9c37b0113624|0",
     "file": "components/app-header.tsx",
-    "line": 104,
+    "line": 111,
     "tag": "Button",
     "label": "Icon",
     "dynamic": true,
@@ -392,7 +392,7 @@
   {
     "id": "components/app-header.tsx|6dca336c16185154|0",
     "file": "components/app-header.tsx",
-    "line": 105,
+    "line": 112,
     "tag": "Button",
     "label": "Icon",
     "dynamic": true,
@@ -407,7 +407,7 @@
   {
     "id": "components/app-header.tsx|eda3375c1408974d|0",
     "file": "components/app-header.tsx",
-    "line": 106,
+    "line": 113,
     "tag": "Button",
     "label": "Acessos",
     "dynamic": false,
@@ -422,7 +422,7 @@
   {
     "id": "components/app-header.tsx|f53375de42f526b7|0",
     "file": "components/app-header.tsx",
-    "line": 108,
+    "line": 115,
     "tag": "Button",
     "label": "Icon",
     "dynamic": true,
@@ -435,9 +435,24 @@
     "group": ""
   },
   {
+    "id": "components/app-header.tsx|70dc3242ea3d3ea2|0",
+    "file": "components/app-header.tsx",
+    "line": 116,
+    "tag": "Button",
+    "label": "Meus favoritos",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "Star",
+    "variant": "ghost",
+    "size": "",
+    "className": "",
+    "group": ""
+  },
+  {
     "id": "components/app-header.tsx|9f0601a999404d6d|0",
     "file": "components/app-header.tsx",
-    "line": 129,
+    "line": 136,
     "tag": "Button",
     "label": "Modo claro / Modo escuro",
     "dynamic": true,
@@ -452,7 +467,7 @@
   {
     "id": "components/app-header.tsx|ec8dd428ebba42fc|0",
     "file": "components/app-header.tsx",
-    "line": 144,
+    "line": 151,
     "tag": "Button",
     "label": "Abrir menu",
     "dynamic": false,
@@ -1442,7 +1457,7 @@
   {
     "id": "components/cde/cde-app-order.tsx|352137d3e1d9c3fb|0",
     "file": "components/cde/cde-app-order.tsx",
-    "line": 24,
+    "line": 25,
     "tag": "Button",
     "label": "GripVertical",
     "dynamic": false,
@@ -1457,7 +1472,7 @@
   {
     "id": "components/cde/cde-app-order.tsx|85c5d81c426bec43|0",
     "file": "components/cde/cde-app-order.tsx",
-    "line": 98,
+    "line": 99,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -1472,7 +1487,7 @@
   {
     "id": "components/cde/cde-app-order.tsx|177dc411735fb3ef|0",
     "file": "components/cde/cde-app-order.tsx",
-    "line": 105,
+    "line": 106,
     "tag": "Button",
     "label": "Diminuir ícone Desktop",
     "dynamic": false,
@@ -1487,7 +1502,7 @@
   {
     "id": "components/cde/cde-app-order.tsx|48bbec4c0ebed6cc|0",
     "file": "components/cde/cde-app-order.tsx",
-    "line": 107,
+    "line": 108,
     "tag": "Button",
     "label": "Aumentar ícone Desktop",
     "dynamic": false,
@@ -1502,7 +1517,7 @@
   {
     "id": "components/cde/cde-app-order.tsx|198dd12baded6ff7|0",
     "file": "components/cde/cde-app-order.tsx",
-    "line": 110,
+    "line": 111,
     "tag": "Button",
     "label": "Diminuir ícone Mobile",
     "dynamic": false,
@@ -1517,7 +1532,7 @@
   {
     "id": "components/cde/cde-app-order.tsx|6c3ef558f54ab4c2|0",
     "file": "components/cde/cde-app-order.tsx",
-    "line": 112,
+    "line": 113,
     "tag": "Button",
     "label": "Aumentar ícone Mobile",
     "dynamic": false,
@@ -1532,7 +1547,7 @@
   {
     "id": "components/cde/cde-app-order.tsx|82b769d9d7316d50|0",
     "file": "components/cde/cde-app-order.tsx",
-    "line": 116,
+    "line": 117,
     "tag": "Button",
     "label": "Diminuir símbolo Desktop",
     "dynamic": false,
@@ -1547,7 +1562,7 @@
   {
     "id": "components/cde/cde-app-order.tsx|c955970c05460064|0",
     "file": "components/cde/cde-app-order.tsx",
-    "line": 118,
+    "line": 119,
     "tag": "Button",
     "label": "Aumentar símbolo Desktop",
     "dynamic": false,
@@ -1562,7 +1577,7 @@
   {
     "id": "components/cde/cde-app-order.tsx|c67b92acad162c6b|0",
     "file": "components/cde/cde-app-order.tsx",
-    "line": 121,
+    "line": 122,
     "tag": "Button",
     "label": "Diminuir símbolo Mobile",
     "dynamic": false,
@@ -1577,7 +1592,7 @@
   {
     "id": "components/cde/cde-app-order.tsx|f73734ec02f49d94|0",
     "file": "components/cde/cde-app-order.tsx",
-    "line": 123,
+    "line": 124,
     "tag": "Button",
     "label": "Aumentar símbolo Mobile",
     "dynamic": false,
@@ -1592,7 +1607,7 @@
   {
     "id": "components/cde/cde-app-order.tsx|a65dc8fefea0dfa3|0",
     "file": "components/cde/cde-app-order.tsx",
-    "line": 126,
+    "line": 127,
     "tag": "Button",
     "label": "Diminuir",
     "dynamic": false,
@@ -1607,7 +1622,7 @@
   {
     "id": "components/cde/cde-app-order.tsx|ab3c91cf9c74634a|0",
     "file": "components/cde/cde-app-order.tsx",
-    "line": 128,
+    "line": 129,
     "tag": "Button",
     "label": "Aumentar",
     "dynamic": false,
@@ -1622,7 +1637,7 @@
   {
     "id": "components/cde/cde-app-order.tsx|d086902d80f9aa16|0",
     "file": "components/cde/cde-app-order.tsx",
-    "line": 154,
+    "line": 157,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -1637,7 +1652,7 @@
   {
     "id": "components/cde/cde-app-order.tsx|21af8c61dcce1a2b|0",
     "file": "components/cde/cde-app-order.tsx",
-    "line": 155,
+    "line": 158,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -1982,7 +1997,7 @@
   {
     "id": "components/cde/cde-project-appearance.tsx|992b86e2f704e179|0",
     "file": "components/cde/cde-project-appearance.tsx",
-    "line": 16,
+    "line": 17,
     "tag": "Button",
     "label": "Salvar cores do Projects",
     "dynamic": false,
@@ -2027,7 +2042,7 @@
   {
     "id": "components/cde/cde-table-fonts.tsx|85c5d81c426bec43|0",
     "file": "components/cde/cde-table-fonts.tsx",
-    "line": 112,
+    "line": 120,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -2042,7 +2057,7 @@
   {
     "id": "components/cde/cde-table-fonts.tsx|fff24dcd715b500e|0",
     "file": "components/cde/cde-table-fonts.tsx",
-    "line": 113,
+    "line": 121,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -2696,6 +2711,21 @@
     "icon": "",
     "variant": "outline",
     "size": "sm",
+    "className": "",
+    "group": ""
+  },
+  {
+    "id": "components/cde/mobile-dock-style.tsx|3a30a9a161a0e60b|0",
+    "file": "components/cde/mobile-dock-style.tsx",
+    "line": 44,
+    "tag": "Button",
+    "label": "Salvar faixa de favoritos",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "Save",
+    "variant": "ghost",
+    "size": "icon",
     "className": "",
     "group": ""
   },
@@ -8867,7 +8897,7 @@
   {
     "id": "components/projects/gantt.tsx|dda230ae883ecdcb|0",
     "file": "components/projects/gantt.tsx",
-    "line": 28,
+    "line": 42,
     "tag": "Button",
     "label": "Cancelar vínculo / Conectar atividades",
     "dynamic": true,
@@ -8882,7 +8912,7 @@
   {
     "id": "components/projects/gantt.tsx|36eac3769a942a3d|0",
     "file": "components/projects/gantt.tsx",
-    "line": 28,
+    "line": 42,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -8897,7 +8927,7 @@
   {
     "id": "components/projects/gantt.tsx|251087647c41c820|0",
     "file": "components/projects/gantt.tsx",
-    "line": 28,
+    "line": 42,
     "tag": "Button",
     "label": "CdeDisclosureIcon",
     "dynamic": false,
@@ -9015,9 +9045,24 @@
     "group": ""
   },
   {
+    "id": "components/projects/views.tsx|e9c58af3089e2981|0",
+    "file": "components/projects/views.tsx",
+    "line": 17,
+    "tag": "Button",
+    "label": "Arrastar atividade ou selecionar coluna",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "GripVertical",
+    "variant": "ghost",
+    "size": "compactIcon",
+    "className": "touch-none shrink-0 cursor-grab text-foreground active:cursor-grabbing",
+    "group": ""
+  },
+  {
     "id": "components/projects/views.tsx|699756ce04167d71|0",
     "file": "components/projects/views.tsx",
-    "line": 16,
+    "line": 17,
     "tag": "Button",
     "label": "Editar atividade",
     "dynamic": false,
@@ -9032,7 +9077,7 @@
   {
     "id": "components/projects/views.tsx|6995c816c65fba3c|0",
     "file": "components/projects/views.tsx",
-    "line": 25,
+    "line": 26,
     "tag": "Button",
     "label": "Configurar colunas",
     "dynamic": false,
@@ -9045,24 +9090,9 @@
     "group": ""
   },
   {
-    "id": "components/projects/views.tsx|057bf9c366e3eb25|0",
-    "file": "components/projects/views.tsx",
-    "line": 31,
-    "tag": "Button",
-    "label": "Mover ·",
-    "dynamic": true,
-    "visualCustom": false,
-    "autoCdeSafe": true,
-    "icon": "",
-    "variant": "ghost",
-    "size": "sm",
-    "className": "",
-    "group": ""
-  },
-  {
     "id": "components/projects/views.tsx|7a9a588240df32aa|0",
     "file": "components/projects/views.tsx",
-    "line": 36,
+    "line": 32,
     "tag": "Button",
     "label": "Período anterior",
     "dynamic": false,
@@ -9077,7 +9107,7 @@
   {
     "id": "components/projects/views.tsx|efe99a0ad9f14832|0",
     "file": "components/projects/views.tsx",
-    "line": 36,
+    "line": 32,
     "tag": "Button",
     "label": "Hoje",
     "dynamic": false,
@@ -9092,7 +9122,7 @@
   {
     "id": "components/projects/views.tsx|fdf2e3002227580c|0",
     "file": "components/projects/views.tsx",
-    "line": 36,
+    "line": 32,
     "tag": "Button",
     "label": "Próximo período",
     "dynamic": false,
@@ -9107,7 +9137,7 @@
   {
     "id": "components/projects/views.tsx|1263c1d469f42451|0",
     "file": "components/projects/views.tsx",
-    "line": 36,
+    "line": 32,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -9122,7 +9152,7 @@
   {
     "id": "components/projects/views.tsx|5ff27f7ca9f26a3b|0",
     "file": "components/projects/views.tsx",
-    "line": 37,
+    "line": 33,
     "tag": "Button",
     "label": "◆",
     "dynamic": true,
@@ -9137,7 +9167,7 @@
   {
     "id": "components/projects/views.tsx|f1bbed369e3352e5|0",
     "file": "components/projects/views.tsx",
-    "line": 42,
+    "line": 38,
     "tag": "Button",
     "label": "Configurar campos personalizados",
     "dynamic": false,
@@ -9152,7 +9182,7 @@
   {
     "id": "components/projects/views.tsx|34e8ab9c468c87d6|0",
     "file": "components/projects/views.tsx",
-    "line": 42,
+    "line": 38,
     "tag": "Button",
     "label": "Editar selecionadas",
     "dynamic": false,
@@ -9167,7 +9197,7 @@
   {
     "id": "components/projects/views.tsx|00b26569ba5c6660|0",
     "file": "components/projects/views.tsx",
-    "line": 43,
+    "line": 39,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -9176,13 +9206,13 @@
     "icon": "",
     "variant": "ghost",
     "size": "",
-    "className": "!h-auto !min-w-0 whitespace-normal break-words text-left",
+    "className": "!h-auto !min-w-0 !py-0 justify-start whitespace-normal break-words text-left max-md:col-start-2 max-md:row-start-1 max-md:!px-0",
     "group": ""
   },
   {
     "id": "components/projects/workspace.tsx|0c3121c77ef292f6|0",
     "file": "components/projects/workspace.tsx",
-    "line": 100,
+    "line": 103,
     "tag": "Button",
     "label": "Todos os projetos",
     "dynamic": false,
@@ -9197,7 +9227,7 @@
   {
     "id": "components/projects/workspace.tsx|3e4559f8cc45437e|0",
     "file": "components/projects/workspace.tsx",
-    "line": 100,
+    "line": 103,
     "tag": "Button",
     "label": "Editar projeto",
     "dynamic": false,
@@ -9212,7 +9242,7 @@
   {
     "id": "components/projects/workspace.tsx|743be97364da05ea|0",
     "file": "components/projects/workspace.tsx",
-    "line": 100,
+    "line": 103,
     "tag": "Button",
     "label": "Novo projeto",
     "dynamic": false,
@@ -9227,7 +9257,7 @@
   {
     "id": "components/projects/workspace.tsx|782b81987022040b|0",
     "file": "components/projects/workspace.tsx",
-    "line": 101,
+    "line": 104,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -9242,7 +9272,7 @@
   {
     "id": "components/projects/workspace.tsx|2d9b59408f06a45f|0",
     "file": "components/projects/workspace.tsx",
-    "line": 103,
+    "line": 106,
     "tag": "Button",
     "label": "Symbol",
     "dynamic": true,
@@ -9257,7 +9287,7 @@
   {
     "id": "components/projects/workspace.tsx|f76460e70e503af7|0",
     "file": "components/projects/workspace.tsx",
-    "line": 104,
+    "line": 107,
     "tag": "Button",
     "label": "Exportar cronograma",
     "dynamic": false,
@@ -9272,7 +9302,7 @@
   {
     "id": "components/projects/workspace.tsx|b5203519a1e48c82|0",
     "file": "components/projects/workspace.tsx",
-    "line": 104,
+    "line": 107,
     "tag": "Button",
     "label": "Atividade",
     "dynamic": false,
@@ -9287,7 +9317,7 @@
   {
     "id": "components/projects/workspace.tsx|ef5e3b9f421ba98c|0",
     "file": "components/projects/workspace.tsx",
-    "line": 104,
+    "line": 107,
     "tag": "Button",
     "label": "Dependência",
     "dynamic": false,
@@ -9300,9 +9330,24 @@
     "group": ""
   },
   {
+    "id": "components/projects/workspace.tsx|34a8ebba6c6c7f43|0",
+    "file": "components/projects/workspace.tsx",
+    "line": 107,
+    "tag": "Button",
+    "label": "CdeDisclosureIcon",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "CdeDisclosureIcon",
+    "variant": "ghost",
+    "size": "compactIcon",
+    "className": "ml-auto shrink-0 sm:hidden",
+    "group": ""
+  },
+  {
     "id": "components/projects/workspace.tsx|4e0754aa721e5b3b|0",
     "file": "components/projects/workspace.tsx",
-    "line": 104,
+    "line": 107,
     "tag": "Button",
     "label": "Editar atividade",
     "dynamic": false,
@@ -9315,9 +9360,24 @@
     "group": ""
   },
   {
+    "id": "components/projects/workspace.tsx|94306d761889705d|0",
+    "file": "components/projects/workspace.tsx",
+    "line": 107,
+    "tag": "Button",
+    "label": "Excluir atividade",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "Trash2",
+    "variant": "ghost",
+    "size": "compactIcon",
+    "className": "",
+    "group": ""
+  },
+  {
     "id": "components/projects/workspace.tsx|0c6252f2012d8262|0",
     "file": "components/projects/workspace.tsx",
-    "line": 108,
+    "line": 111,
     "tag": "Button",
     "label": "Nivelar carga",
     "dynamic": false,
@@ -9332,7 +9392,7 @@
   {
     "id": "components/projects/workspace.tsx|d5b09d4b44d536d7|0",
     "file": "components/projects/workspace.tsx",
-    "line": 109,
+    "line": 112,
     "tag": "Button",
     "label": "Fase",
     "dynamic": false,
@@ -9347,7 +9407,7 @@
   {
     "id": "components/projects/workspace.tsx|9f1e80d44ebc50b6|0",
     "file": "components/projects/workspace.tsx",
-    "line": 109,
+    "line": 112,
     "tag": "Button",
     "label": "Editar fase",
     "dynamic": false,
@@ -9362,7 +9422,7 @@
   {
     "id": "components/projects/workspace.tsx|b6d2b090da86e433|0",
     "file": "components/projects/workspace.tsx",
-    "line": 110,
+    "line": 113,
     "tag": "CdeButton",
     "label": "Adicionar participante",
     "dynamic": false,
@@ -9377,7 +9437,7 @@
   {
     "id": "components/projects/workspace.tsx|f302366a719976ac|0",
     "file": "components/projects/workspace.tsx",
-    "line": 110,
+    "line": 113,
     "tag": "CdeButton",
     "label": "Adicionar recurso",
     "dynamic": false,
@@ -9392,7 +9452,7 @@
   {
     "id": "components/projects/workspace.tsx|3a42c4b72bd7c359|0",
     "file": "components/projects/workspace.tsx",
-    "line": 110,
+    "line": 113,
     "tag": "Button",
     "label": "Editar recurso",
     "dynamic": false,
@@ -9407,7 +9467,7 @@
   {
     "id": "components/projects/workspace.tsx|5aa0cb83c5abc8ac|0",
     "file": "components/projects/workspace.tsx",
-    "line": 111,
+    "line": 114,
     "tag": "Button",
     "label": "Alocação",
     "dynamic": false,
@@ -9422,7 +9482,7 @@
   {
     "id": "components/projects/workspace.tsx|11701559f945bd50|0",
     "file": "components/projects/workspace.tsx",
-    "line": 111,
+    "line": 114,
     "tag": "Button",
     "label": "Editar alocação",
     "dynamic": false,
@@ -9437,7 +9497,7 @@
   {
     "id": "components/projects/workspace.tsx|e92f6540197b626b|0",
     "file": "components/projects/workspace.tsx",
-    "line": 112,
+    "line": 115,
     "tag": "Button",
     "label": "Linha de base",
     "dynamic": false,
@@ -13065,9 +13125,54 @@
     "group": ""
   },
   {
+    "id": "components/mobile-favorites.tsx|352137d3e1d9c3fb|0",
+    "file": "components/mobile-favorites.tsx",
+    "line": 19,
+    "tag": "Button",
+    "label": "GripVertical",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "GripVertical",
+    "variant": "ghost",
+    "size": "icon",
+    "className": "touch-none",
+    "group": ""
+  },
+  {
+    "id": "components/mobile-favorites.tsx|1c19d6deef352d9a|0",
+    "file": "components/mobile-favorites.tsx",
+    "line": 19,
+    "tag": "Button",
+    "label": "Star",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "Star",
+    "variant": "ghost",
+    "size": "icon",
+    "className": "",
+    "group": ""
+  },
+  {
+    "id": "components/mobile-favorites.tsx|6441fb506ce31a16|0",
+    "file": "components/mobile-favorites.tsx",
+    "line": 42,
+    "tag": "Button",
+    "label": "Salvar meus favoritos",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "Save",
+    "variant": "ghost",
+    "size": "icon",
+    "className": "",
+    "group": ""
+  },
+  {
     "id": "routes/__root.tsx|68898feacd882e4d|0",
     "file": "routes/__root.tsx",
-    "line": 61,
+    "line": 62,
     "tag": "Button",
     "label": "Try again",
     "dynamic": false,
@@ -14252,7 +14357,7 @@
   {
     "id": "routes/_authenticated/portal.tsx|d0125df1157dca00|0",
     "file": "routes/_authenticated/portal.tsx",
-    "line": 145,
+    "line": 151,
     "tag": "Button",
     "label": "Voltar aos aplicativos",
     "dynamic": false,

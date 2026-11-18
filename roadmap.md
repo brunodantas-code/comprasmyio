@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Kanban: ícones pretos de arraste em cada card, títulos no padrão de campos CDE; Configurar colunas/Nova coluna conferidos, arraste real movido e restaurado, celular conferido.
 - [x] Cronograma diário: destaque verde envolve letra e número com espaço interno, sem ultrapassar o cabeçalho.
 - [x] Cronograma: meses preenchem a largura disponível; anos e meses com distância uniforme da divisória, sem reativar expansão infinita.
 - [x] Mobile Lista: nome alinhado à coluna de valores de Início/fim e Responsável; checkbox entre rótulo Atividade e nome, mantendo seleção e Desktop.

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { addDays, addMonths, endOfMonth, endOfWeek, startOfMonth, startOfWeek, parseISO, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { DndContext, useDraggable, useDroppable, PointerSensor, TouchSensor, useSensor, useSensors } from "@dnd-kit/core";
-import { ChevronLeft, ChevronRight, Pencil, Settings2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, GripVertical, Pencil, Settings2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -10,25 +10,21 @@ import { ProjectsEditor, type EditorField } from "./editor";
 import { columnOf, type BoardColumn, type CustomField } from "./views-logic";
 import { dateKey, displayDate, type ScheduledTask } from "./logic";
 type ViewTask=ScheduledTask & {board_column?:string|null;custom_values?:unknown};
-function TaskCard({task,disabled,onEdit}:{task:ViewTask;disabled:boolean;onEdit:(id:string)=>void}) {
+function TaskCard({task,disabled,onEdit,columns,onMove}:{task:ViewTask;disabled:boolean;onEdit:(id:string)=>void;columns:BoardColumn[];onMove:(id:string,c:BoardColumn)=>Promise<void>}) {
+ const [open,setOpen]=useState(false);
  const drag=useDraggable({id:task.id,disabled});
- return <div ref={drag.setNodeRef} {...drag.listeners} {...drag.attributes} className={`min-w-0 rounded-md border border-border bg-background p-3 ${drag.isDragging?"opacity-40":""}`}>
- <div className="flex items-start justify-between gap-2"><span className="break-words">{task.milestone?"◆ ":""}{task.name}</span><Button variant="ghost" size="compactIcon" aria-label={`Editar ${task.name}`} title="Editar atividade" onPointerDown={e=>e.stopPropagation()} onClick={()=>onEdit(task.id)}><Pencil/></Button></div>
- <p className="mt-2 text-muted-foreground">{displayDate(task.end)} · {task.progress}%</p></div>;
+ return <><div ref={drag.setNodeRef} className={`min-w-0 rounded-md border border-border bg-background p-3 ${drag.isDragging?"opacity-40":""}`}>
+ <div className="flex items-start gap-2"><Button variant="ghost" size="compactIcon" disabled={disabled} className="touch-none shrink-0 cursor-grab text-foreground active:cursor-grabbing" {...drag.attributes} {...drag.listeners} aria-label={`Mover ${task.name}`} title="Arrastar atividade ou selecionar coluna" onClick={()=>setOpen(true)}><GripVertical/></Button><span className="min-w-0 flex-1 break-words">{task.milestone?"◆ ":""}{task.name}</span><Button variant="ghost" size="compactIcon" aria-label={`Editar ${task.name}`} title="Editar atividade" onClick={()=>onEdit(task.id)}><Pencil/></Button></div>
+ <p className="mt-2 text-muted-foreground">{displayDate(task.end)} · {task.progress}%</p></div>{open?<ProjectsEditor title={`Mover ${task.name}`} fields={[{key:"column",label:"Coluna",required:true,options:columns.map(c=>({value:c.id,label:c.name}))}]} initial={{column:columnOf(task,columns)??""}} onClose={()=>setOpen(false)} onSave={async v=>{const c=columns.find(c=>c.id===v.column);if(c)await onMove(task.id,c);}}/>:null}</>;
 }
-function BoardLane({column,tasks,closed,onEdit}:{column:BoardColumn;tasks:ViewTask[];closed:boolean;onEdit:(id:string)=>void}) {
+function BoardLane({column,tasks,closed,onEdit,columns,onMove}:{column:BoardColumn;tasks:ViewTask[];closed:boolean;onEdit:(id:string)=>void;columns:BoardColumn[];onMove:(id:string,c:BoardColumn)=>Promise<void>}) {
  const drop=useDroppable({id:column.id,disabled:closed});
- return <section ref={drop.setNodeRef} className={`min-w-0 space-y-3 border-t-2 border-border py-3 ${drop.isOver?"bg-accent":""}`}><h3 className="flex justify-between gap-2 font-medium"><span>{column.name}</span><span className="text-muted-foreground">{tasks.length}</span></h3>{tasks.map(t=><TaskCard key={t.id} task={t} disabled={closed} onEdit={onEdit}/>)}{!tasks.length?<p className="py-6 text-center text-muted-foreground">Nenhuma atividade</p>:null}</section>;
+ return <section ref={drop.setNodeRef} aria-label={column.name} className={`min-w-0 space-y-3 border-t-2 border-border py-3 ${drop.isOver?"bg-accent":""}`}><h3 className="flex items-center justify-between gap-2 text-sm font-medium"><span className="cde-field-title">{column.name}</span><span className="text-muted-foreground">{tasks.length}</span></h3>{tasks.map(t=><TaskCard key={t.id} task={t} disabled={closed} onEdit={onEdit} columns={columns} onMove={onMove}/>)}{!tasks.length?<p className="py-6 text-center text-muted-foreground">Nenhuma atividade</p>:null}</section>;
 }
 export function ProjectBoard({tasks,columns,closed,canManage,onMove,onConfigure,onEdit}:{tasks:ViewTask[];columns:BoardColumn[];closed:boolean;canManage:boolean;onMove:(id:string,column:BoardColumn)=>Promise<void>;onConfigure:()=>void;onEdit:(id:string)=>void}) {
  const sensors=useSensors(useSensor(PointerSensor,{activationConstraint:{distance:8}}),useSensor(TouchSensor,{activationConstraint:{delay:250,tolerance:8}}));
  return <section className="space-y-4 text-[length:var(--filter-fs)]"><div className="flex justify-end">{canManage&&!closed?<Button variant="ghost" size="icon" title="Configurar colunas" aria-label="Configurar colunas" onClick={onConfigure}><Settings2/></Button>:null}</div>
- <DndContext sensors={sensors} onDragEnd={e=>{const c=columns.find(c=>c.id===e.over?.id);if(c)void onMove(String(e.active.id),c);}}><div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{columns.map(c=><BoardLane key={c.id} column={c} tasks={tasks.filter(t=>columnOf(t,columns)===c.id)} closed={closed} onEdit={onEdit}/>)}</div></DndContext>
- <div className="flex flex-wrap gap-2">{!closed?tasks.map(t=><BoardMove key={t.id} task={t} columns={columns} onMove={onMove}/>):null}</div></section>;
-}
-function BoardMove({task,columns,onMove}:{task:ViewTask;columns:BoardColumn[];onMove:(id:string,c:BoardColumn)=>Promise<void>}) {
- const [open,setOpen]=useState(false);
- return <><Button variant="ghost" size="sm" onClick={()=>setOpen(true)} aria-label={`Mover ${task.name}`}>Mover · {task.name}</Button>{open?<ProjectsEditor title={`Mover ${task.name}`} fields={[{key:"column",label:"Coluna",required:true,options:columns.map(c=>({value:c.id,label:c.name}))}]} initial={{column:columnOf(task,columns)??""}} onClose={()=>setOpen(false)} onSave={async v=>{const c=columns.find(c=>c.id===v.column);if(c)await onMove(task.id,c);}}/>:null}</>;
+ <DndContext sensors={sensors} onDragEnd={e=>{const c=columns.find(c=>c.id===e.over?.id);if(c)void onMove(String(e.active.id),c);}}><div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{columns.map(c=><BoardLane key={c.id} column={c} tasks={tasks.filter(t=>columnOf(t,columns)===c.id)} closed={closed} onEdit={onEdit} columns={columns} onMove={onMove}/>)}</div></DndContext></section>;
 }
 export function ProjectCalendar({tasks,onEdit}:{tasks:ViewTask[];onEdit:(id:string)=>void}) {
  const [anchor,setAnchor]=useState(tasks[0]?.start??dateKey(new Date()));const [mode,setMode]=useState("month");
