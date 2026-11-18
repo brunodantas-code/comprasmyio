@@ -32,9 +32,10 @@ export function CdeTableFonts({ number, handle }: { number: number; handle?: imp
       if (existing.error) throw existing.error;
       const row = { variant_key: JSON.stringify(fonts), chosen_by: user.id };
       const result = existing.data
-        ? await supabase.from("cde_selected").update(row).eq("group_key", "table_fonts").eq("variant_key", existing.data.variant_key)
-        : await supabase.from("cde_selected").insert({ ...row, group_key: "table_fonts" });
+        ? await supabase.from("cde_selected").update(row).eq("group_key", "table_fonts").eq("is_primary", true).eq("variant_key", existing.data.variant_key).select("variant_key").single()
+        : await supabase.from("cde_selected").insert({ ...row, group_key: "table_fonts" }).select("variant_key").single();
       if (result.error) throw result.error;
+      if (result.data?.variant_key !== row.variant_key) throw new Error("Padrão não foi salvo");
       await qc.invalidateQueries({ queryKey: ["cde-table-fonts"] });
       setDraft(null);
       toast.success("Fontes de cabeçalhos e filtros atualizadas");
@@ -47,7 +48,7 @@ export function CdeTableFonts({ number, handle }: { number: number; handle?: imp
 
   return (
     <section className="space-y-4">
-      <CdeCategoryHeader handle={handle} number={number} title="Cabeçalhos e Listas" hint="Fontes, cores, títulos e subtítulos, alinhamento e ordem das colunas das listas de dados em todos os apps" open={open} onToggle={() => setOpen(!open)} />
+      <CdeCategoryHeader handle={handle} number={number} title="Cabeçalhos e Listas" hint="Fontes, cores, títulos dos campos, títulos e subtítulos, alinhamento e ordem das colunas" open={open} onToggle={() => setOpen(!open)} />
       {open && (
         <div className="w-full min-w-0 space-y-4 py-4">
           <div role="group" aria-label="Fontes de cabeçalhos e filtros" className="grid w-full max-w-3xl grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
@@ -79,6 +80,13 @@ export function CdeTableFonts({ number, handle }: { number: number; handle?: imp
           </div>
           <div role="group" aria-label="Cores dos cabeçalhos e listas" className="grid w-full max-w-5xl grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-3">
             {([["headerBg", "Cabeçalhos — fundo"], ["headerText", "Cabeçalhos — texto"], ["headerBorder", "Cabeçalhos — borda"], ["cellBg", "Listas — fundo"], ["cellText", "Listas — texto"], ["cellBorder", "Listas — borda"], ["titleBg", "Títulos — fundo"], ["titleText", "Títulos — texto"], ["titleBorder", "Títulos — borda"], ["subBg", "Subtítulos — fundo"], ["subText", "Subtítulos — texto"], ["subBorder", "Subtítulos — borda"]] as [HeaderColorKind, string][]).map(([k, l]) => <ColorPick key={k} kind={k} label={l} value={fonts[k]} onChange={(v) => setDraft({ ...fonts, [k]: v })} />)}
+          </div>
+          <div className="space-y-1">
+            <h3 className="text-sm font-medium">Títulos dos campos</h3>
+            <div role="group" aria-label="Formatação dos títulos dos campos" className="grid w-full max-w-5xl grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-3">
+              {([["fieldBg", "Títulos dos campos — fundo"], ["fieldText", "Títulos dos campos — texto"], ["fieldBorder", "Títulos dos campos — borda"]] as const).map(([k, l]) => <ColorPick key={k} kind={k} label={l} value={fonts[k]} onChange={(v) => setDraft({ ...fonts, [k]: v })} />)}
+            </div>
+            <div aria-label="Prévia dos títulos dos campos" style={tableAlignVars(fonts) as React.CSSProperties} className="flex flex-wrap gap-4 py-3"><Label>Nome</Label><Label>Responsável</Label><Label>Borda</Label></div>
           </div>
           <div className="space-y-1">
             <Label>Prévia</Label>

@@ -182,6 +182,8 @@ input[data-search-field="true"] {
   /* Fontes de cabeçalhos de tabela e barras de filtro — padrão CDE (grupo table_fonts); valores iniciais até o CDE carregar */
   --th-fs: 11px;
   --filter-fs: 12px;
+  --field-title-bg: transparent; --field-title-color: inherit; --field-title-border: transparent;
+  --field-title-border-width: 0px; --field-title-padding: 0px; --field-title-radius: 0px;
   /* Alinhamento de cabeçalhos e listas — padrão CDE (table_fonts) */
   --th-align: left; --th-valign: middle; --th-justify: flex-start;
   --td-align: left; --td-valign: middle; --td-justify: flex-start;
@@ -319,6 +321,16 @@ input[data-search-field="true"] {
 }
 
 @layer base {
+  .cde-field-title {
+    display: inline-block;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    background: var(--field-title-bg);
+    color: var(--field-title-color);
+    border: var(--field-title-border-width) solid var(--field-title-border);
+    border-radius: var(--field-title-radius);
+    padding: var(--field-title-padding);
+  }
   .cde-numeric-marker {
     display: inline-flex;
     flex-shrink: 0;
