@@ -47,6 +47,12 @@ input[data-search-field="true"] {
 .pm-gantt .pm-baseline .bar { fill: var(--muted); }
 .pm-gantt .gantt-container { min-height: 240px; }
 .pm-gantt svg.gantt { overflow: hidden; }
+.pm-gantt .pm-bar-number { pointer-events: none; overflow: hidden; }
+.pm-bar-number-inner { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; overflow: hidden; }
+.pm-gantt-names-hidden .bar-label { visibility: hidden; }
+@media (max-width: 767px) {
+  .pm-workspace div:has(> table[data-responsive="true"]) { border: 0; border-radius: 0; }
+}
 .pm-workspace { background: var(--pm-bg); color: var(--pm-text); }
 .pm-workspace .border-border { border-color: var(--pm-border); }
 .pm-workspace .cde-td,

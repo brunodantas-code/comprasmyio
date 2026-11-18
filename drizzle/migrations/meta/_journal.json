@@ -1786,6 +1786,13 @@
       "when": 1795015087171,
       "tag": "0254_projects_task_collaboration",
       "breakpoints": true
+    },
+    {
+      "idx": 255,
+      "version": "7",
+      "when": 1795030065087,
+      "tag": "0255_projects_attachment_path_scope",
+      "breakpoints": true
     }
   ]
 }

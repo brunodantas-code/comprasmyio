@@ -1,4 +1,13 @@
 # Roadmap
+- [ ] Mobile Cronograma: nome da atividade à esquerda, número entre rótulo Atividade e nome.
+- [ ] Calendário: iniciais S T Q Q S S D acima dos dias.
+- [ ] Divisórias verticais no início dos meses: apresentar opções e aguardar escolha antes de implementar.
+- [ ] Mobile Projects: atalhos alinhados à esquerda em 2 colunas/5 duplas, Lista na linha inferior de atalhos iniciais.
+- [ ] Projects Lista: checkbox ao lado do nome da atividade, sem linha separada no celular.
+- [ ] Numeração hierárquica: primeiro número com fundo CDE e níveis subsequentes sem fundo.
+- [ ] Retirar contorno duplo dos cards de tabelas no Projects (referência enviada).
+- [ ] Verificar arraste das barras de atividades e responder ao usuário.
+- [ ] Gantt: numeração dentro das barras e controle de exibir/recolher nomes.
 - [ ] Projects fase 3: conversa por tarefa, perguntas/respostas, menções, pendências Home/Central e anexos privados com download original; serviços externos apenas após conexão autorizada.
 - [x] Corrigir tarja preta: destaque verde-claro e texto contrastante; conferido no cronograma do Vila Velha.
 - [x] UF e cidade no editor de Projects com seletor Supply; salvamento/reabertura e celular conferidos, cadastros temporários removidos.

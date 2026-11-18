@@ -168,12 +168,15 @@ export function useCdeNumberStyle(screen?: string, subcategory = false) {
 
 export function CdeNumber({ children, subcategory = false, screen = "components/cde/cde-workspace.tsx", className, ...props }: React.ComponentProps<"span"> & { subcategory?: boolean; screen?: string }) {
   const look = useCdeNumberStyle(screen, subcategory);
+  const sequence=typeof children==="string"&&/^\d+(?:\.\d+)+$/.test(children)?children:null;
+  if(sequence){const separator=sequence.indexOf(".");return <span {...props} data-cde-number-sequence="" className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap tabular-nums"><span data-cde-number="" style={look.css} className={cn(look.className,className)}>{sequence.slice(0,separator)}</span><span className="text-sm font-normal text-foreground">{sequence.slice(separator)}</span></span>;}
   return <span {...props} data-cde-number="" style={look.css} className={cn(look.className, className)}>{children}</span>;
 }
 
 /** Numeric drag/edit controls keep their behavior but use the same look as passive numbers. */
 export function CdeNumberButton({ children, screen, subcategory = false, className, ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { screen: string; subcategory?: boolean }) {
   const look = useCdeNumberStyle(screen, subcategory);
+  if(typeof children==="string"&&/^\d+(?:\.\d+)+$/.test(children))return <Button {...props} type={props.type??"button"} variant="ghost" className="!h-auto !min-w-0 !bg-transparent !p-0"><CdeNumber screen={screen} subcategory={subcategory} className={className}>{children}</CdeNumber></Button>;
   return <Button {...props} type={props.type ?? "button"} variant="ghost" data-cde-number="" style={look.css} className={cn(look.className, "p-0", className)}>{children}</Button>;
 }
 
