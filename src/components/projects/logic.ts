@@ -43,7 +43,7 @@ export function schedule(tasks: PlanTask[], deps: Dependency[], calendar: Calend
   for (const id of order) {
     const task = byId.get(id);
     if (!task) continue;
-    let start = nextWorking(task.start_date > calendar.start_date ? task.start_date : calendar.start_date, calendar);
+    let start = nextWorking(task.start_date, calendar);
     for (const dep of deps.filter(dep => dep.successor_id === id)) {
       const previous = result.get(dep.predecessor_id);
       if (previous) {
@@ -53,7 +53,7 @@ export function schedule(tasks: PlanTask[], deps: Dependency[], calendar: Calend
     }
     result.set(id, { ...task, start, end: advance(start, Math.max(0, task.duration - 1), calendar), critical: false, float: 0 });
   }
-  const totalEnd = [...result.values()].reduce((end, task) => task.end > end ? task.end : end, calendar.start_date);
+  const totalEnd = [...result.values()].map(task => task.end).sort().at(-1) ?? calendar.start_date;
   const latest = new Map<string, string>();
   const retreat = (date: string, count: number) => { let current = date; for (let i = 0; i < count; i++) { do { current = dateKey(addDays(parseISO(current), -1)); } while (!isWorking(current, calendar)); } return current; };
   for (const id of [...order].reverse()) {

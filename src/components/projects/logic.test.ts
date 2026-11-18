@@ -3,6 +3,7 @@ import { schedule, totals, overloads, type PlanTask, type Calendar } from "./log
 const calendar: Calendar = { start_date: "2026-11-20", calendar_mode: "business", holidays: ["2026-11-23"], hours_per_day: 8 };
 const task = (id: string, duration = 1): PlanTask => ({ id, name:id, start_date:"2026-11-20", duration, milestone:false, progress:0, actual_start:null, actual_end:null, responsible_id:null, phase_id:null, position:0, notes:"", project_id:"p" });
 describe("planejamento de projetos", () => {
+ it("preserva novembro de 2026 mesmo com início do projeto em janeiro de 2027",()=>{const rows=schedule([{...task("a",2),start_date:"2026-11-12"},{...task("b",0),start_date:"2026-11-19",milestone:true}],[],{...calendar,start_date:"2027-01-25",calendar_mode:"calendar"});expect(rows[0].start).toBe("2026-11-12");expect(rows[0].end).toBe("2026-11-13");expect(rows[1].start).toBe("2026-11-19");expect(rows[1].end).toBe("2026-11-19");expect(rows[1].float).toBe(0);expect(rows[0].float).toBe(6);});
  it("dias úteis excluem fim de semana e feriado do projeto", () => { expect(schedule([task("a",2)],[],calendar)[0].end).toBe("2026-11-24"); });
  it("dias corridos incluem fim de semana", () => { expect(schedule([task("a",2)],[],{...calendar,calendar_mode:"calendar"})[0].end).toBe("2026-11-21"); });
  it("predecessora adia sucessora sem mudar datas cadastradas", () => { const tasks=[task("a",2),task("b")]; expect(schedule(tasks,[{predecessor_id:"a",successor_id:"b",lag:0}],calendar)[1].start).toBe("2026-11-25"); expect(tasks[1].start_date).toBe("2026-11-20"); });
