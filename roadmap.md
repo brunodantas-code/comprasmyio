@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Mobile Lista: checkbox e nome elevados ao topo do rótulo Atividade, ambos em y=791.39 px na célula y=785 px; seleção e cabeçalho CDE conferidos.
 - [x] Lápis de Lista alinhado aos ícones das duas colunas mobile (32/217 px), conferido em tela.
 - [x] Números da lista alinhados à esquerda com o primeiro 1; nomes mantêm recuo hierárquico; conferido no computador/celular.
 - [x] Divisórias dos meses somente no cabeçalho, avançando levemente abaixo dele sem cruzar a primeira tarefa; visualização mensal conferida.
