@@ -1,4 +1,5 @@
 - Shared SelectTrigger/SearchableSelect drop height utilities from the fields_select model (caller or h-9 default, like Input) so side-by-side green underlines share one base line; SelectTrigger resolves fields_select standards dynamically; chosen appearance follows caller layout classes so selections update existing droplists without changing values or actions.
+- Shared Input marks search fields from search type or search-labelled props; global CSS constrains their width and erp-search-row keeps adjacent icons together without changing CDE appearance or ordinary form inputs.
 - Dialog/Sheet X renders CdeCloseIcon (CDE group close); keep position in ui/, look in CDE.
 - Dialog/Sheet X is sticky at the top so it stays visible while long content scrolls.
 - Shared Button/Input/Textarea apply CDE standards live via cde-look.ts (action buttons detected by label/icon: save, cancel, confirm, trash, pencil, toggle, move, sort; fields_*); never hardcode those looks per screen.

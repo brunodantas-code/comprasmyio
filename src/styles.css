@@ -4,6 +4,18 @@
 @import "../node_modules/frappe-gantt/dist/frappe-gantt.css";
 @source "../src";
 
+:root { --search-field-width: 6cm; }
+input[data-search-field="true"] {
+  width: min(var(--search-field-width), 100%) !important;
+  max-width: 100%;
+  min-width: 0;
+  flex: 0 1 var(--search-field-width);
+}
+.erp-search-row {
+  width: min(calc(var(--search-field-width) + 4rem), 100%);
+}
+.erp-search-row input[data-search-field="true"] { width: 100% !important; }
+
 .pm-gantt {
   --g-arrow-color: var(--foreground);
   --g-bar-color: var(--myio-green-tint);
