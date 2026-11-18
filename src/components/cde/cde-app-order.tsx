@@ -105,12 +105,12 @@ export function CdeAppOrder({ number, handle }: { number: number; handle?: impor
               <Button variant="outline" size="compactIcon" aria-label="Diminuir ícone Desktop" title="Diminuir ícone Desktop" disabled={tile.tilePct <= 70} onClick={() => setTileDraft({ ...tile, tilePct: tile.tilePct - 5 })}><Minus /></Button>
               <span className="w-20 text-center text-sm tabular-nums">{tile.tilePct}%</span>
               <Button variant="outline" size="compactIcon" aria-label="Aumentar ícone Desktop" title="Aumentar ícone Desktop" disabled={tile.tilePct >= 140} onClick={() => setTileDraft({ ...tile, tilePct: tile.tilePct + 5 })}><Plus /></Button>
-            </div></div>
+            </div><p className="w-36 text-center text-xs tabular-nums text-muted-foreground">{Number((112 * tile.tilePct / 100).toFixed(1))} × {Number((112 * tile.tilePct / 100).toFixed(1))} px</p></div>
           <div className="min-w-0 space-y-1"><Label className="flex min-h-10 items-end pb-1">Ícone Mobile</Label><div className="grid h-9 w-36 grid-cols-[2rem_5rem_2rem] items-center justify-items-center">
             <Button variant="outline" size="compactIcon" aria-label="Diminuir ícone Mobile" title="Diminuir ícone Mobile" disabled={tile.mobileTilePct <= 70} onClick={() => setTileDraft({ ...tile, mobileTilePct: tile.mobileTilePct - 5 })}><Minus /></Button>
             <span className="w-20 text-center text-sm tabular-nums">{tile.mobileTilePct}%</span>
             <Button variant="outline" size="compactIcon" aria-label="Aumentar ícone Mobile" title="Aumentar ícone Mobile" disabled={tile.mobileTilePct >= 140} onClick={() => setTileDraft({ ...tile, mobileTilePct: tile.mobileTilePct + 5 })}><Plus /></Button>
-          </div></div>
+          </div><p className="w-36 text-center text-xs tabular-nums text-muted-foreground">{Number((80 * tile.mobileTilePct / 100).toFixed(1))} × {Number((80 * tile.mobileTilePct / 100).toFixed(1))} px</p></div>
           <div className="min-w-0 space-y-1"><Label className="flex min-h-10 items-end pb-1">Símbolo Desktop</Label>
             <div className="grid h-9 w-36 grid-cols-[2rem_5rem_2rem] items-center justify-items-center">
               <Button variant="outline" size="compactIcon" aria-label="Diminuir símbolo Desktop" title="Diminuir símbolo Desktop" disabled={tile.iconPct <= 60} onClick={() => setTileDraft({ ...tile, iconPct: tile.iconPct - 5 })}><Minus /></Button>
