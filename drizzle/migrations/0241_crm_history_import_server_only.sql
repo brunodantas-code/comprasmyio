@@ -1,0 +1,3 @@
+REVOKE EXECUTE ON FUNCTION public.crm_import_history_batch(text, text, jsonb, jsonb) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.crm_import_history_batch(text, text, jsonb, jsonb) TO service_role;
+COMMENT ON FUNCTION public.crm_import_history_batch(text, text, jsonb, jsonb) IS 'Restricted historical CRM import: no browser-role execution. Privileged execution retains the existing importer identity, ERP admin, CRM app access, active-run, table allowlist, identifier quoting and parameterized-value checks.';

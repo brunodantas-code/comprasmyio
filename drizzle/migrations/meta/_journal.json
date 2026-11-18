@@ -1688,6 +1688,13 @@
       "when": 1794960025160,
       "tag": "0240_crm_descontos_guard_null",
       "breakpoints": true
+    },
+    {
+      "idx": 241,
+      "version": "7",
+      "when": 1795007144407,
+      "tag": "0241_crm_history_import_server_only",
+      "breakpoints": true
     }
   ]
 }
