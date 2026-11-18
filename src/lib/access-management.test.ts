@@ -9,7 +9,7 @@ describe("centralized access preserves app-specific administration", () => {
   });
   it("does not turn global app grants into Supply profile permission", () => {
     expect(canOpenAccessManagement({ ...none, erpAdmin: true })).toBe(true);
-    expect(accessProfileApps({ ...none, erpAdmin: true })).toEqual([]);
+    expect(accessProfileApps({ ...none, erpAdmin: true })).toEqual(["projects"]);
   });
   it("keeps each app's manager scoped to the same app", () => {
     expect(accessProfileApps({ ...none, surveyProfiles: true })).toEqual(["site_survey"]);

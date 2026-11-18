@@ -23,6 +23,7 @@ const APPS = [
   { key: "development", label: "Code" },
   { key: "mytosis", label: "Mytosis" },
   { key: "wishlist", label: "Wishlist" },
+  { key: "projects", label: "Projects" },
   { key: "cde", label: "CDE" },
 ] as const;
 

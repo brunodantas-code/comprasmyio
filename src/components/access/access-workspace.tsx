@@ -13,8 +13,9 @@ import { AppSymbol } from "@/components/cde/app-tile";
 import { accessProfileApps, type AccessCapabilities } from "@/lib/access-management";
 import { UsersAdmin } from "./users-admin";
 import { SurveyUsersAdmin } from "./survey-users-admin";
+import { ProjectsAccess } from "@/components/projects/access";
 
-const APP_NAMES: Record<string, string> = { supply: "Supply", cash_flow: "Cash Flow", crm: "CRM", legal: "Legal", rh: "RH", site_survey: "Site Survey", chamados: "OpDesk", development: "Code", mytosis: "Mytosis", wishlist: "Wishlist", cde: "CDE" };
+const APP_NAMES: Record<string, string> = { supply: "Supply", cash_flow: "Cash Flow", crm: "CRM", legal: "Legal", rh: "RH", site_survey: "Site Survey", chamados: "OpDesk", development: "Code", mytosis: "Mytosis", wishlist: "Wishlist", cde: "CDE", projects: "Projects" };
 export type AccessSection = "usuarios" | "cadastro" | "perfis";
 
 function MytosisAccess() {
@@ -58,6 +59,7 @@ export function AccessWorkspace({ capabilities, section, app, onChange }: { capa
       {capabilities.surveyUsers || capabilities.surveyProfiles ? <TabsContent value="site_survey"><div className="space-y-6">{capabilities.surveyUsers ? <SurveyUsersAdmin /> : null}{capabilities.surveyProfiles ? <SiteSurveyProfilesAdmin /> : null}</div></TabsContent> : null}
       {capabilities.mytosisAdmin ? <TabsContent value="mytosis"><MytosisAccess /></TabsContent> : null}
       {capabilities.codeAdmin ? <TabsContent value="development"><CodeAccess /></TabsContent> : null}
+      {capabilities.erpAdmin ? <TabsContent value="projects"><ProjectsAccess /></TabsContent> : null}
     </Tabs> : null}
   </div>;
 }

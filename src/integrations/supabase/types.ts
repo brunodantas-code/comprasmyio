@@ -7140,6 +7140,492 @@ export type Database = {
         }
         Relationships: []
       }
+      pm_allocations: {
+        Row: {
+          actual_quantity: number
+          id: string
+          planned_quantity: number
+          project_id: string
+          resource_id: string
+          task_id: string
+          unit_rate: number
+        }
+        Insert: {
+          actual_quantity?: number
+          id?: string
+          planned_quantity?: number
+          project_id: string
+          resource_id: string
+          task_id: string
+          unit_rate?: number
+        }
+        Update: {
+          actual_quantity?: number
+          id?: string
+          planned_quantity?: number
+          project_id?: string
+          resource_id?: string
+          task_id?: string
+          unit_rate?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pm_allocations_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "pm_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pm_allocations_resource_id_fkey"
+            columns: ["resource_id"]
+            isOneToOne: false
+            referencedRelation: "pm_resources"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pm_allocations_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "pm_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pm_app_roles: {
+        Row: {
+          created_at: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pm_app_roles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pm_baselines: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          name: string
+          project_id: string
+          snapshot: Json
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          name: string
+          project_id: string
+          snapshot: Json
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          name?: string
+          project_id?: string
+          snapshot?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pm_baselines_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pm_baselines_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "pm_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pm_dependencies: {
+        Row: {
+          lag: number
+          predecessor_id: string
+          project_id: string
+          successor_id: string
+        }
+        Insert: {
+          lag?: number
+          predecessor_id: string
+          project_id: string
+          successor_id: string
+        }
+        Update: {
+          lag?: number
+          predecessor_id?: string
+          project_id?: string
+          successor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pm_dependencies_predecessor_id_fkey"
+            columns: ["predecessor_id"]
+            isOneToOne: false
+            referencedRelation: "pm_tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pm_dependencies_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "pm_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pm_dependencies_successor_id_fkey"
+            columns: ["successor_id"]
+            isOneToOne: false
+            referencedRelation: "pm_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pm_logs: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          entity: string
+          entity_id: string
+          id: string
+          new_data: Json | null
+          old_data: Json | null
+          project_id: string
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          entity: string
+          entity_id: string
+          id?: string
+          new_data?: Json | null
+          old_data?: Json | null
+          project_id: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          entity?: string
+          entity_id?: string
+          id?: string
+          new_data?: Json | null
+          old_data?: Json | null
+          project_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pm_logs_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pm_logs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "pm_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pm_members: {
+        Row: {
+          project_id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          project_id: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          project_id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pm_members_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "pm_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pm_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pm_phases: {
+        Row: {
+          accepted_at: string | null
+          accepted_by: string | null
+          deliverables: string
+          id: string
+          name: string
+          position: number
+          project_id: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          deliverables?: string
+          id?: string
+          name: string
+          position?: number
+          project_id: string
+        }
+        Update: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          deliverables?: string
+          id?: string
+          name?: string
+          position?: number
+          project_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pm_phases_accepted_by_fkey"
+            columns: ["accepted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pm_phases_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "pm_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pm_projects: {
+        Row: {
+          budget: number
+          calendar_mode: string
+          category: string
+          created_at: string
+          created_by: string
+          erp_project_id: string | null
+          holidays: string[]
+          hours_per_day: number
+          id: string
+          manager_id: string
+          name: string
+          scope: string
+          start_date: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          budget?: number
+          calendar_mode?: string
+          category?: string
+          created_at?: string
+          created_by?: string
+          erp_project_id?: string | null
+          holidays?: string[]
+          hours_per_day?: number
+          id?: string
+          manager_id: string
+          name: string
+          scope?: string
+          start_date: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          budget?: number
+          calendar_mode?: string
+          category?: string
+          created_at?: string
+          created_by?: string
+          erp_project_id?: string | null
+          holidays?: string[]
+          hours_per_day?: number
+          id?: string
+          manager_id?: string
+          name?: string
+          scope?: string
+          start_date?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pm_projects_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pm_projects_erp_project_id_fkey"
+            columns: ["erp_project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pm_projects_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pm_resources: {
+        Row: {
+          capacity_per_day: number
+          id: string
+          kind: string
+          name: string
+          project_id: string
+          rate: number
+          unit: string
+          user_id: string | null
+        }
+        Insert: {
+          capacity_per_day?: number
+          id?: string
+          kind?: string
+          name: string
+          project_id: string
+          rate?: number
+          unit?: string
+          user_id?: string | null
+        }
+        Update: {
+          capacity_per_day?: number
+          id?: string
+          kind?: string
+          name?: string
+          project_id?: string
+          rate?: number
+          unit?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pm_resources_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "pm_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pm_resources_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pm_tasks: {
+        Row: {
+          actual_end: string | null
+          actual_start: string | null
+          duration: number
+          id: string
+          milestone: boolean
+          name: string
+          notes: string
+          phase_id: string | null
+          position: number
+          progress: number
+          project_id: string
+          responsible_id: string | null
+          start_date: string
+        }
+        Insert: {
+          actual_end?: string | null
+          actual_start?: string | null
+          duration?: number
+          id?: string
+          milestone?: boolean
+          name: string
+          notes?: string
+          phase_id?: string | null
+          position?: number
+          progress?: number
+          project_id: string
+          responsible_id?: string | null
+          start_date: string
+        }
+        Update: {
+          actual_end?: string | null
+          actual_start?: string | null
+          duration?: number
+          id?: string
+          milestone?: boolean
+          name?: string
+          notes?: string
+          phase_id?: string | null
+          position?: number
+          progress?: number
+          project_id?: string
+          responsible_id?: string | null
+          start_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pm_tasks_phase_id_fkey"
+            columns: ["phase_id"]
+            isOneToOne: false
+            referencedRelation: "pm_phases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pm_tasks_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "pm_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pm_tasks_responsible_id_fkey"
+            columns: ["responsible_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_boms: {
         Row: {
           component_material_id: string
@@ -11804,6 +12290,16 @@ export type Database = {
         Returns: Json
       }
       personal_todo_users: {
+        Args: never
+        Returns: {
+          full_name: string
+          id: string
+        }[]
+      }
+      pm_can_create: { Args: never; Returns: boolean }
+      pm_can_edit: { Args: { _project: string }; Returns: boolean }
+      pm_can_manage: { Args: { _project: string }; Returns: boolean }
+      pm_team_candidates: {
         Args: never
         Returns: {
           full_name: string

@@ -1,0 +1,8 @@
+import { queryOptions } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+export function projectsOptions() { return queryOptions({ queryKey: ["pm-workspace"], queryFn: async () => {
+ const [projects,members,phases,tasks,dependencies,resources,allocations,baselines,logs,candidates,create,roles,legacy,admin] = await Promise.all([
+ supabase.from("pm_projects").select("*").order("created_at",{ascending:false}),supabase.from("pm_members").select("*"),supabase.from("pm_phases").select("*").order("position"),supabase.from("pm_tasks").select("*").order("position"),supabase.from("pm_dependencies").select("*"),supabase.from("pm_resources").select("*"),supabase.from("pm_allocations").select("*"),supabase.from("pm_baselines").select("*").order("created_at",{ascending:false}),supabase.from("pm_logs").select("*").order("created_at",{ascending:false}).limit(500),supabase.rpc("pm_team_candidates"),supabase.rpc("pm_can_create"),supabase.from("pm_app_roles").select("*"),supabase.from("projects").select("id,name").order("name"),supabase.auth.getUser().then(async ({data})=>supabase.from("erp_admins").select("user_id").eq("user_id",data.user?.id??"").maybeSingle())]);
+ for (const result of [projects,members,phases,tasks,dependencies,resources,allocations,baselines,logs,candidates,create,roles]) if(result.error) throw result.error;
+ return {projects:projects.data??[],members:members.data??[],phases:phases.data??[],tasks:tasks.data??[],dependencies:dependencies.data??[],resources:resources.data??[],allocations:allocations.data??[],baselines:baselines.data??[],logs:logs.data??[],candidates:candidates.data??[],canCreate:Boolean(create.data),roles:roles.data??[],isAdmin:Boolean(admin.data),legacy:legacy.data??[]};
+ }}); }

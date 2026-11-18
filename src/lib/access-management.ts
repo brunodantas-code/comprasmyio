@@ -17,6 +17,7 @@ export function accessProfileApps(c: AccessCapabilities) {
     ...(c.surveyUsers || c.surveyProfiles ? ["site_survey"] : []),
     ...(c.mytosisAdmin ? ["mytosis"] : []),
     ...(c.codeAdmin ? ["development"] : []),
+    ...(c.erpAdmin ? ["projects"] : []),
   ];
 }
 

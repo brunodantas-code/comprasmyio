@@ -1,0 +1,14 @@
+import { describe, expect, it } from "vitest";
+import { schedule, totals, overloads, type PlanTask, type Calendar } from "./logic";
+const calendar: Calendar = { start_date: "2026-11-20", calendar_mode: "business", holidays: ["2026-11-23"], hours_per_day: 8 };
+const task = (id: string, duration = 1): PlanTask => ({ id, name:id, start_date:"2026-11-20", duration, milestone:false, progress:0, actual_start:null, actual_end:null, responsible_id:null, phase_id:null, position:0, notes:"", project_id:"p" });
+describe("planejamento de projetos", () => {
+ it("dias úteis excluem fim de semana e feriado do projeto", () => { expect(schedule([task("a",2)],[],calendar)[0].end).toBe("2026-11-24"); });
+ it("dias corridos incluem fim de semana", () => { expect(schedule([task("a",2)],[],{...calendar,calendar_mode:"calendar"})[0].end).toBe("2026-11-21"); });
+ it("predecessora adia sucessora sem mudar datas cadastradas", () => { const tasks=[task("a",2),task("b")]; expect(schedule(tasks,[{predecessor_id:"a",successor_id:"b",lag:0}],calendar)[1].start).toBe("2026-11-25"); expect(tasks[1].start_date).toBe("2026-11-20"); });
+ it("rejeita dependência circular", () => { expect(()=>schedule([task("a"),task("b")],[{predecessor_id:"a",successor_id:"b",lag:0},{predecessor_id:"b",successor_id:"a",lag:0}],calendar)).toThrow("circular"); });
+ it("marco tem duração zero",()=>{expect(schedule([{...task("m",0),milestone:true}],[],calendar)[0].end).toBe("2026-11-20");});
+ it("custos usam quantidades planejadas/realizadas e taxa capturada",()=>{expect(totals([{task_id:"a",resource_id:"r",planned_quantity:10,actual_quantity:12,unit_rate:100}])).toEqual({planned:1000,actual:1200});});
+ it("caminho crítico distingue a atividade com folga",()=>{const rows=schedule([task("a",3),task("b",1)],[],calendar); expect(rows[0].critical).toBe(true); expect(rows[1].float).toBe(2);});
+ it("soma sobrecarga da mesma pessoa em projetos distintos",()=>{const rows=schedule([task("a"),{...task("b"),project_id:"q"}],[],calendar); const a=[{task_id:"a",resource_id:"r",planned_quantity:5,actual_quantity:0,unit_rate:1},{task_id:"b",resource_id:"s",planned_quantity:5,actual_quantity:0,unit_rate:1}]; expect(overloads(rows,a,[{id:"r",user_id:"u",kind:"person",name:"Pessoa",capacity_per_day:8},{id:"s",user_id:"u",kind:"person",name:"Pessoa",capacity_per_day:8}],new Map([["p",calendar],["q",calendar]]))[0].load).toBe(10);});
+});

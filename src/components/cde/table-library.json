@@ -260,7 +260,7 @@
   {
     "id": "components/crm/crm-propostas.tsx|0",
     "file": "components/crm/crm-propostas.tsx",
-    "line": 69,
+    "line": 70,
     "context": "Propostas ( )",
     "headers": [
       "Número",
@@ -276,7 +276,7 @@
   {
     "id": "components/crm/crm-propostas.tsx|1",
     "file": "components/crm/crm-propostas.tsx",
-    "line": 246,
+    "line": 248,
     "context": "Itens",
     "headers": [
       "Ambiente",
@@ -296,7 +296,7 @@
   {
     "id": "components/crm/crm-workspace.tsx|0",
     "file": "components/crm/crm-workspace.tsx",
-    "line": 91,
+    "line": 92,
     "context": "Próximas ações vencidas ou para hoje ( )",
     "headers": [
       "Data",
@@ -309,7 +309,7 @@
   {
     "id": "components/crm/crm-workspace.tsx|1",
     "file": "components/crm/crm-workspace.tsx",
-    "line": 125,
+    "line": 126,
     "context": "Próximas ações vencidas ou para hoje ( )",
     "headers": [
       "Nome",
@@ -324,7 +324,7 @@
   {
     "id": "components/crm/crm-workspace.tsx|2",
     "file": "components/crm/crm-workspace.tsx",
-    "line": 173,
+    "line": 174,
     "context": "Importar leads (CSV)",
     "headers": [
       "Nome fantasia",
@@ -339,7 +339,7 @@
   {
     "id": "components/crm/crm-workspace.tsx|3",
     "file": "components/crm/crm-workspace.tsx",
-    "line": 262,
+    "line": 263,
     "context": "Motivo para “ ”",
     "headers": [
       "Título",
@@ -604,6 +604,34 @@
     ]
   },
   {
+    "id": "components/opdesk/legacy-calls.tsx|0",
+    "file": "components/opdesk/legacy-calls.tsx",
+    "line": 77,
+    "context": "Acompanhamento",
+    "headers": [
+      "Nº",
+      "Visita",
+      "Solicitante",
+      "Categoria",
+      "Título",
+      "Prioridade",
+      "Situação",
+      "Data"
+    ]
+  },
+  {
+    "id": "components/opdesk/opdesk-workspace.tsx|0",
+    "file": "components/opdesk/opdesk-workspace.tsx",
+    "line": 35,
+    "context": "Responsáveis",
+    "headers": [
+      "Nome",
+      "E-mail",
+      "Cadastrado em",
+      "Ações"
+    ]
+  },
+  {
     "id": "components/request-types-tab.tsx|0",
     "file": "components/request-types-tab.tsx",
     "line": 127,
@@ -845,31 +873,81 @@
     ]
   },
   {
-    "id": "components/opdesk/legacy-calls.tsx|0",
-    "file": "components/opdesk/legacy-calls.tsx",
-    "line": 77,
-    "context": "Acompanhamento",
+    "id": "components/projects/workspace.tsx|0",
+    "file": "components/projects/workspace.tsx",
+    "line": 52,
+    "context": "",
     "headers": [
-      "Nº",
-      "Visita",
-      "Solicitante",
-      "Categoria",
-      "Título",
-      "Prioridade",
+      "Projeto",
       "Situação",
-      "Data"
+      "Fim previsto",
+      "Avanço",
+      "Orçamento",
+      "Realizado"
     ]
   },
   {
-    "id": "components/opdesk/opdesk-workspace.tsx|0",
-    "file": "components/opdesk/opdesk-workspace.tsx",
-    "line": 35,
-    "context": "Responsáveis",
+    "id": "components/projects/workspace.tsx|1",
+    "file": "components/projects/workspace.tsx",
+    "line": 55,
+    "context": "Atividades",
     "headers": [
-      "Nome",
-      "E-mail",
-      "Cadastrado em",
+      "Atividade",
+      "Responsável",
+      "Início / fim",
+      "Duração",
+      "Avanço",
+      "Predecessoras",
       "Ações"
+    ]
+  },
+  {
+    "id": "components/projects/workspace.tsx|2",
+    "file": "components/projects/workspace.tsx",
+    "line": 57,
+    "context": "Recursos",
+    "headers": [
+      "Recurso",
+      "Tipo",
+      "Taxa",
+      "Capacidade/dia",
+      "Ações"
+    ]
+  },
+  {
+    "id": "components/projects/workspace.tsx|3",
+    "file": "components/projects/workspace.tsx",
+    "line": 58,
+    "context": "Recursos",
+    "headers": [
+      "Atividade / recurso",
+      "Planejado",
+      "Realizado",
+      "Taxa registrada",
+      "Custo realizado",
+      "Ações"
+    ]
+  },
+  {
+    "id": "components/projects/workspace.tsx|4",
+    "file": "components/projects/workspace.tsx",
+    "line": 59,
+    "context": "·",
+    "headers": [
+      "Atividade",
+      "Fim da linha de base",
+      "Fim atual",
+      "Fim realizado"
+    ]
+  },
+  {
+    "id": "components/projects/access.tsx|0",
+    "file": "components/projects/access.tsx",
+    "line": 9,
+    "context": "Perfis do Projects",
+    "headers": [
+      "Usuário",
+      "Perfil"
     ]
   },
   {
@@ -935,7 +1013,7 @@
   {
     "id": "routes/_authenticated/development.tsx|0",
     "file": "routes/_authenticated/development.tsx",
-    "line": 264,
+    "line": 259,
     "context": "Acompanhamento",
     "headers": [
       "Nº",

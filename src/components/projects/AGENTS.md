@@ -1,0 +1,4 @@
+- Projects planning uses pm_* tables, with an optional legacy-project link; never rewrite Supply/QR project records.
+- Project membership and manager roles are database-authorized; Acessos owns app-wide manager grants.
+- Graphlib validates dependency DAGs; scheduling uses project-local dates/calendars and Frappe Gantt loads only in the browser.
+- Baselines and logs are immutable snapshots; allocation unit rates are captured values, not retroactively replaced by resource edits.

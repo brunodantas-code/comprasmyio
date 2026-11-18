@@ -24,6 +24,7 @@ import { Route as AuthenticatedLegalRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedMytosisRouteImport } from './routes/_authenticated/mytosis'
 import { Route as AuthenticatedPendentesRouteImport } from './routes/_authenticated/pendentes'
 import { Route as AuthenticatedPortalRouteImport } from './routes/_authenticated/portal'
+import { Route as AuthenticatedProjectsRouteImport } from './routes/_authenticated/projects'
 import { Route as AuthenticatedRhRouteImport } from './routes/_authenticated/rh'
 import { Route as AuthenticatedSiteSurveyRouteImport } from './routes/_authenticated/site-survey'
 import { Route as AuthenticatedSupplyManualRouteImport } from './routes/_authenticated/supply-manual'
@@ -105,6 +106,11 @@ const AuthenticatedPortalRoute = AuthenticatedPortalRouteImport.update({
   path: '/portal',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedProjectsRoute = AuthenticatedProjectsRouteImport.update({
+  id: '/projects',
+  path: '/projects',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedRhRoute = AuthenticatedRhRouteImport.update({
   id: '/rh',
   path: '/rh',
@@ -148,6 +154,7 @@ export interface FileRoutesByFullPath {
   '/mytosis': typeof AuthenticatedMytosisRoute
   '/pendentes': typeof AuthenticatedPendentesRoute
   '/portal': typeof AuthenticatedPortalRoute
+  '/projects': typeof AuthenticatedProjectsRoute
   '/rh': typeof AuthenticatedRhRoute
   '/site-survey': typeof AuthenticatedSiteSurveyRoute
   '/supply-manual': typeof AuthenticatedSupplyManualRoute
@@ -169,6 +176,7 @@ export interface FileRoutesByTo {
   '/mytosis': typeof AuthenticatedMytosisRoute
   '/pendentes': typeof AuthenticatedPendentesRoute
   '/portal': typeof AuthenticatedPortalRoute
+  '/projects': typeof AuthenticatedProjectsRoute
   '/rh': typeof AuthenticatedRhRoute
   '/site-survey': typeof AuthenticatedSiteSurveyRoute
   '/supply-manual': typeof AuthenticatedSupplyManualRoute
@@ -192,6 +200,7 @@ export interface FileRoutesById {
   '/_authenticated/mytosis': typeof AuthenticatedMytosisRoute
   '/_authenticated/pendentes': typeof AuthenticatedPendentesRoute
   '/_authenticated/portal': typeof AuthenticatedPortalRoute
+  '/_authenticated/projects': typeof AuthenticatedProjectsRoute
   '/_authenticated/rh': typeof AuthenticatedRhRoute
   '/_authenticated/site-survey': typeof AuthenticatedSiteSurveyRoute
   '/_authenticated/supply-manual': typeof AuthenticatedSupplyManualRoute
@@ -215,6 +224,7 @@ export interface FileRouteTypes {
     | '/mytosis'
     | '/pendentes'
     | '/portal'
+    | '/projects'
     | '/rh'
     | '/site-survey'
     | '/supply-manual'
@@ -236,6 +246,7 @@ export interface FileRouteTypes {
     | '/mytosis'
     | '/pendentes'
     | '/portal'
+    | '/projects'
     | '/rh'
     | '/site-survey'
     | '/supply-manual'
@@ -258,6 +269,7 @@ export interface FileRouteTypes {
     | '/_authenticated/mytosis'
     | '/_authenticated/pendentes'
     | '/_authenticated/portal'
+    | '/_authenticated/projects'
     | '/_authenticated/rh'
     | '/_authenticated/site-survey'
     | '/_authenticated/supply-manual'
@@ -380,6 +392,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPortalRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/projects': {
+      id: '/_authenticated/projects'
+      path: '/projects'
+      fullPath: '/projects'
+      preLoaderRoute: typeof AuthenticatedProjectsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/rh': {
       id: '/_authenticated/rh'
       path: '/rh'
@@ -430,6 +449,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedMytosisRoute: typeof AuthenticatedMytosisRoute
   AuthenticatedPendentesRoute: typeof AuthenticatedPendentesRoute
   AuthenticatedPortalRoute: typeof AuthenticatedPortalRoute
+  AuthenticatedProjectsRoute: typeof AuthenticatedProjectsRoute
   AuthenticatedRhRoute: typeof AuthenticatedRhRoute
   AuthenticatedSiteSurveyRoute: typeof AuthenticatedSiteSurveyRoute
   AuthenticatedSupplyManualRoute: typeof AuthenticatedSupplyManualRoute
@@ -448,6 +468,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMytosisRoute: AuthenticatedMytosisRoute,
   AuthenticatedPendentesRoute: AuthenticatedPendentesRoute,
   AuthenticatedPortalRoute: AuthenticatedPortalRoute,
+  AuthenticatedProjectsRoute: AuthenticatedProjectsRoute,
   AuthenticatedRhRoute: AuthenticatedRhRoute,
   AuthenticatedSiteSurveyRoute: AuthenticatedSiteSurveyRoute,
   AuthenticatedSupplyManualRoute: AuthenticatedSupplyManualRoute,

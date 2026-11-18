@@ -1,7 +1,32 @@
 @import "tailwindcss" source(none);
-@source "../src";
 @import "tw-animate-css";
 @import "@xyflow/react/dist/style.css";
+@import "../node_modules/frappe-gantt/dist/frappe-gantt.css";
+@source "../src";
+
+.pm-gantt {
+  --g-arrow-color: var(--foreground);
+  --g-bar-color: var(--myio-green-tint);
+  --g-bar-border: var(--primary);
+  --g-progress-color: var(--primary);
+  --g-tick-color: var(--border);
+  --g-tick-color-thick: var(--border);
+  --g-actions-background: var(--muted);
+  --g-border-color: var(--border);
+  --g-text-muted: var(--muted-foreground);
+  --g-text-light: var(--primary-foreground);
+  --g-text-dark: var(--foreground);
+  --g-handle-color: var(--foreground);
+  --g-header-background: var(--card);
+  --g-row-color: var(--background);
+  --g-row-border-color: var(--border);
+  --g-today-highlight: var(--foreground);
+  --g-weekend-highlight-color: var(--muted);
+}
+.pm-gantt .gantt .bar-label { font-family: inherit; }
+.pm-gantt .pm-critical .bar { stroke: var(--destructive); stroke-width: 2; }
+.pm-gantt .pm-baseline .bar { fill: var(--muted); }
+.pm-gantt .gantt-container { min-height: 240px; }
 
 @custom-variant dark (&:is(.dark *));
 
