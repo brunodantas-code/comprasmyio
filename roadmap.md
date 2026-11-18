@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Kanban: somente a atividade arrastada fica verde-claro; coluna transparente e demais cards neutros, conferidos no computador e celular sem alterar registros.
 - [x] Lista de projetos: título Portfólio retirado; funil junto ao cabeçalho Projeto, acesso mobile preservado; Projeto/Tipo combinados, identificação e limpeza conferidos.
 - [x] Kanban: ícones pretos de arraste em cada card, títulos no padrão de campos CDE; Configurar colunas/Nova coluna conferidos, arraste real movido e restaurado, celular conferido.
 - [x] Cronograma diário: destaque verde envolve letra e número com espaço interno, sem ultrapassar o cabeçalho.
