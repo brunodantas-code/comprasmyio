@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Kanban Projects: quantidade com fundo/texto coloridos e borda superior de 3 px; três opções no CDE com prévia. Salvamento/releitura da cor no quadro real conferidos e verde restaurado; celular sem excesso lateral e cinco testes passaram. Não publicado.
 - [x] Kanban: somente a atividade arrastada fica verde-claro; coluna transparente e demais cards neutros, conferidos no computador e celular sem alterar registros.
 - [x] Lista de projetos: título Portfólio retirado; funil junto ao cabeçalho Projeto, acesso mobile preservado; Projeto/Tipo combinados, identificação e limpeza conferidos.
 - [x] Kanban: ícones pretos de arraste em cada card, títulos no padrão de campos CDE; Configurar colunas/Nova coluna conferidos, arraste real movido e restaurado, celular conferido.

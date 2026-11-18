@@ -61,6 +61,8 @@ input[data-search-field="true"] {
 .pm-workspace .cde-td p { font-size: var(--filter-fs); }
 .pm-color-preview { background: var(--pm-bg); color: var(--pm-text); border-color: var(--pm-border); }
 .pm-color-preview-bar { background: var(--g-bar-color); color: var(--pm-bar-text); border-color: var(--g-bar-border); }
+.pm-kanban-lane { border-top: 3px solid var(--pm-kanban-border, var(--primary)); }
+.pm-kanban-count { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; min-width: 2rem; height: 2rem; padding-inline: 0.5rem; border-radius: 999px; background: var(--pm-kanban-count-bg, var(--myio-green-tint)); color: var(--pm-kanban-count-text, var(--foreground)); font-size: var(--filter-fs, 0.75rem); font-weight: 600; font-variant-numeric: tabular-nums; }
 .pm-workspace .pm-gantt .bar-label { fill: var(--pm-bar-text); font-size: var(--filter-fs); }
 .pm-workspace .pm-gantt .lower-text,
 .pm-workspace .pm-gantt .upper-text { color: var(--pm-header-text); }
