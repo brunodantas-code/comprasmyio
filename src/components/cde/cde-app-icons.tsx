@@ -2,7 +2,7 @@ import { useState } from "react";
 import {
   BookOpen, Boxes, Briefcase, Building2, Bell, CalendarDays, CheckCircle2, ChevronDown, ChevronUp, ClipboardCheck, ClipboardList, CodeXml,
   DatabaseBackup, DollarSign, FileSignature, FileText, Files, FolderKanban, Gauge, History, Landmark, Layers3, ListTree, Package, Phone,
-  Plus, ReceiptText, ScrollText, Search, Settings, ShieldCheck, ShoppingCart, Tag, Target, Users, UsersRound, WalletCards, Workflow,
+  Plus, ReceiptText, ScrollText, Search, Settings, ShieldCheck, ShoppingCart, Tag, Target, Users, UsersRound, WalletCards, Workflow, Flag, GitBranch, Wallet,
   LayoutGrid, Menu, ArrowLeft, KeyRound, LogOut, type LucideIcon,
 } from "lucide-react";
 import { CrmFunnelIcon } from "@/components/crm-funnel-icon";
@@ -47,6 +47,9 @@ const APPS: App[] = [
     { title: "Barra inferior", items: [i("OKRs", Target, "Target"), i("Fluxogramas", Workflow, "Workflow"), i("Processos", BookOpen, "BookOpen"), i("KPIs", Gauge, "Gauge")] },
   ] },
   { name: "CDE", icon: CdeIcon, iconName: "CdeIcon", groups: [{ title: STD, items: [i("Criar modelo", Plus, "Plus")] }] },
+  { name: "Projects", icon: FolderKanban, iconName: "FolderKanban", groups: [
+    { title: "Seções do projeto", items: [i("Cronograma", CalendarDays, "CalendarDays"), i("Escopo", Flag, "Flag"), i("Equipe e recursos", UsersRound, "UsersRound"), i("Custos", Wallet, "Wallet"), i("Linha de base", GitBranch, "GitBranch"), i("Histórico", History, "History")] },
+  ] },
 ];
 
 /** Submenu → main menu it belongs to, per app (used to draw the menu tree). */
@@ -94,7 +97,7 @@ export function CdeAppIcons({ number, handle }: { number: number; handle?: impor
           <CdeToggleIcon open={isOpen} />
         </button>
         {isOpen ? <div className="space-y-2 rounded-lg border border-border p-3">{a.groups.filter((g) => !(g.title === "Submenus" && SUB_PARENT[a.name])).map((g) => <div key={g.title}><div className="mb-1 text-xs text-muted-foreground">{g.title === "Barra inferior" ? "Menu principal do app" : g.title}</div>{g.title === "Barra inferior" ? <div className="mb-2"><CdeMenuType app={a.name} items={g.items} /></div> : null}
-          {g.items.length ? <CdeSortableIcons app={a.name} group={g.title} items={g.items} /> : <span className="text-xs text-muted-foreground">—</span>}</div>)}{SUB_PARENT[a.name] ? <div><div className="mb-1 text-xs text-muted-foreground">Menus e seus submenus</div><MenuTree app={a.name} groups={a.groups} /></div> : null}</div> : null}
+          {g.items.length ? g.title === "Seções do projeto" ? <div className="flex flex-wrap gap-3">{g.items.map(it => <Tile key={it.label} it={it} />)}</div> : <CdeSortableIcons app={a.name} group={g.title} items={g.items} /> : <span className="text-xs text-muted-foreground">—</span>}</div>)}{SUB_PARENT[a.name] ? <div><div className="mb-1 text-xs text-muted-foreground">Menus e seus submenus</div><MenuTree app={a.name} groups={a.groups} /></div> : null}</div> : null}
       </div>; })}
     </div> : null}
   </section>;
