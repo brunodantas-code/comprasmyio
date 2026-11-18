@@ -43,7 +43,6 @@ import { Calendar } from "@/components/ui/calendar";
 import { ptBR } from "date-fns/locale";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ColumnFilter } from "@/components/column-filter";
-import { ColumnSortButton } from "@/components/column-sort-button";
 import { TableSortMenu } from "@/components/table-sort-menu";
 import { compareColumnValues, type SortDirection } from "@/lib/column-sort";
 import { isFilterActive, matchesColumnFilter, type ColumnFilterValue, type FilterKind } from "@/lib/column-filters";
@@ -2906,15 +2905,7 @@ function OrdersTable({
     { key: "passe", label: "Código", kind: "text", raw: (o) => o.passphrase, list: (o) => o.passphrase ?? "" },
   ];
   const colByKey = Object.fromEntries(colDefs.map((c) => [c.key, c]));
-  const colFilter = (key: string, showLabel = false) => {
-    if (consolidatedSort) return null;
-    const c = colByKey[key];
-    if (!c) return null;
-    void showLabel;
-    return <span className="inline-flex shrink-0 items-center gap-0">
-      <ColumnSortButton compact label={c.label} direction={columnSort?.key === key ? columnSort.direction : undefined} onClick={() => setColumnSort((current) => current?.key !== key ? { key, direction: "asc" } : current.direction === "asc" ? { key, direction: "desc" } : undefined)} />
-    </span>;
-  };
+  const colFilter = (_key: string) => null;
   const activeColFilters = colDefs.filter((c) => isFilterActive(cf[c.key]));
   const columnFiltered = orders.filter((o) => activeColFilters.every((c) => matchesColumnFilter(c.kind, c.raw(o), c.list(o), cf[c.key])));
   const filteredOrders = columnFiltered;
@@ -2938,7 +2929,7 @@ function OrdersTable({
     <>
       <div className="mb-2 flex items-center gap-2 overflow-x-auto py-1 text-[length:var(--filter-fs)] [&>*]:shrink-0">
         <TableFilterMenu triggerLabel="Filtros" rows={orders} columns={colDefs.filter(c => showRequester || c.key !== "req").map(c => ({ key: c.key, label: c.label, kind: c.kind, value: c.raw as (o: typeof orders[number]) => string | number | null | undefined, display: c.list }))} filters={cf} onChange={(key, value) => setCf(prev => ({ ...prev, [key]: value }))} clear={() => setCf({})} />
-        {consolidatedSort && <TableSortMenu columns={colDefs} value={columnSort} onChange={setColumnSort} />}
+        {<TableSortMenu columns={colDefs} value={columnSort} onChange={setColumnSort} />}
         {toolbarActions}
         <SupplyDeadlineIndicators orders={visibleOrders} />
         <TableReportActions title={showRequester ? "Todos os approvals" : "Minhas Solicitações"} compact={reportCompact} />
@@ -2946,9 +2937,6 @@ function OrdersTable({
       <TableFilterSummary columns={colDefs.map(c => ({ key: c.key, label: c.label, kind: c.kind, value: c.raw as (o: typeof orders[number]) => string | number | null | undefined, display: c.list }))} filters={cf} onChange={(key, value) => setCf(prev => ({ ...prev, [key]: value }))} />
       {/* Mobile: cartões com rótulo à esquerda e informação à direita */}
       <div className="space-y-3 lg:hidden">
-        <div className="flex flex-wrap gap-1.5">
-          {colDefs.filter(c => !["end", "notes", "received"].includes(c.key)).map((c) => <span key={c.key}>{colFilter(c.key, true)}</span>)}
-        </div>
         {visibleOrders.map((o) => {
           const part = o.request_group_id ? stockParts?.get(o.request_group_id) : undefined;
           return (

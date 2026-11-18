@@ -57,7 +57,7 @@
 - Table headers constrain and wrap label/control groups; inline grid sort controls use content-sized widths to keep neighboring headings clear without changing CDE appearance.
 - Code uses shared status badges in list/details and a pure text matcher; search intersects existing column filters without changing sorting or ticket access.
 - TableFilterMenu accepts an opt-in trigger label after its CDE icon so toolbar filters are explicit without widening icon-only table headers.
-- Only Supply execution enables consolidatedSort and compact=false reports; other screens retain column sorting/compact exports and all reports reuse sorted rows.
+- Sortable lists use the consolidated TableSortMenu, not per-header arrows; only Supply execution has compact=false reports.
 - Reimbursement search normalizes authorized details; IDs and historical destinations remain unchanged.
 - CRM runs in-ERP at /crm (app grant "crm"); legacy external CRM only via panel link until migrated.
 - CRM config: admin RLS; custom lead stages preserve legacy status; lookups require app access.

@@ -3,7 +3,7 @@ import { DependencyEditor } from "@/components/central/dependency-editor";
 import { ImageAttachmentField } from "@/components/image-attachment-field";
 import { confirmAction } from "@/components/confirm-dialog";
 import { CdeButton } from "@/components/cde/cde-button";
-import { ColumnSortButton } from "@/components/column-sort-button";
+import { TableSortMenu } from "@/components/table-sort-menu";
 import { CodeStatusBadge } from "@/components/code-status-badge";
 import { matchesCodeTicketSearch } from "@/lib/code-ticket-search";
 import { assertCodeProgressDraftSent, codeTicketProgressOutcome, reconcileCodeProgressField, replaceSavedCodeTicket } from "@/lib/code-ticket-lifecycle";
@@ -222,7 +222,7 @@ function DevelopmentPage() {
   const sortHeader = (key: string) => {
     const column = ticketColumns.find((entry) => entry.key === key);
     if (!column) return null;
-    return <span className="inline-flex items-center gap-1 whitespace-nowrap">{column.label}<ColumnSortButton label={column.label} direction={sorting?.key === key ? sorting.direction : undefined} onClick={() => setSorting((current) => current?.key !== key ? { key, direction: "asc" } : current.direction === "asc" ? { key, direction: "desc" } : undefined)} /></span>;
+    return <span className="inline-flex items-center gap-1 whitespace-nowrap">{column.label}</span>;
   };
   const closeTicket = () => {
     setSelectedTicketId(null);
@@ -253,6 +253,7 @@ function DevelopmentPage() {
                 {searchOp !== "empty" && searchOp !== "not_empty" ? <div className="relative w-56 max-w-full"><Input aria-label="Buscar tickets" placeholder="Buscar ticket" value={searchText} onChange={event => setSearchText(event.target.value)} className="h-8 pr-8 text-[length:var(--filter-fs)] md:text-[length:var(--filter-fs)]" />{searchText ? <Button type="button" variant="ghost" size="compactIcon" className="absolute right-0 top-1/2 -translate-y-1/2" aria-label="Limpar busca" title="Limpar busca" onClick={() => setSearchText("")}><X /></Button> : null}</div> : null}
               </div>
               <span className="inline-flex shrink-0 items-center gap-1 text-[length:var(--filter-fs)] text-muted-foreground">Filtros{ticketFilters.menu}</span>
+              <TableSortMenu columns={ticketColumns.map(c => ({ key: c.key, label: c.label }))} value={sorting} onChange={setSorting} />
             </div>
             {ticketFilters.summary}
             {isLoading ? <p className="py-8 text-center text-sm text-muted-foreground">Carregando tickets...</p> : (

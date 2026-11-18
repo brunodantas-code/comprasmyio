@@ -511,3 +511,4 @@
 - [x] Comparar saudação dos prints: Home usa 20 px em negrito; tamanho do Nubank estimado pela imagem, não medição do aplicativo.
 - [x] CDE Home Page: altura da faixa superior ajustável separadamente no desktop, preservando a versão mobile; prévia em 120 px e testes conferidos.
 - [x] Home mobile: informação pessoal escolhida no CDE abaixo da saudação (Admin conferido para Leonardo); título Ordenação dos Apps na Home Page antes da lista, conferido na tela.
+- [x] Ordenação consolidada (padrão Fila do Supply) em todas as telas com setas de ordenação nos cabeçalhos

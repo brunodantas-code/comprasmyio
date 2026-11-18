@@ -33,6 +33,7 @@ import { requestTypeModel, requestTypeName, useRequestTypes, type RequestTypeRec
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 import { cn } from "@/lib/utils";
 import { ColumnSortButton } from "@/components/column-sort-button";
+import { TableSortMenu } from "@/components/table-sort-menu";
 import { compareColumnValues, type SortDirection, type SortValue } from "@/lib/column-sort";
 import type { FilterKind } from "@/lib/column-filters";
 import { pendingApprovalSteps } from "@/lib/approval-pending";
@@ -414,7 +415,7 @@ export function PendingForMe({ renderEditAction }: { renderEditAction?: EditActi
   const sortControl = (key: string) => {
     const c = sortDefs.find(c => c.key === key);
     if (!c) return null;
-    return <span className="inline-flex items-center gap-1 whitespace-nowrap">{c.label}{tableFilters.control(key)}<ColumnSortButton label={c.label} direction={sorting?.key === key ? sorting.direction : undefined} onClick={() => setSorting(current => current?.key !== key ? { key, direction: "asc" } : current.direction === "asc" ? { key, direction: "desc" } : undefined)} /></span>;
+    return <span className="inline-flex items-center gap-1 whitespace-nowrap">{c.label}{tableFilters.control(key)}</span>;
   };
 
   const refresh = () => {
@@ -452,7 +453,7 @@ export function PendingForMe({ renderEditAction }: { renderEditAction?: EditActi
         </div>
       </CardHeader>
       <CardContent>
-        <>{tableFilters.summary}<Table>
+        <>{tableFilters.summary}<div className="mb-2 flex justify-end"><TableSortMenu columns={sortDefs.map(c => ({ key: c.key, label: c.label }))} value={sorting} onChange={setSorting} /></div><Table>
           <TableHeader className="[&_tr]:border-b">
               <TableRow className="border-b">
                 <TableHead>{sortControl("number")}</TableHead>
