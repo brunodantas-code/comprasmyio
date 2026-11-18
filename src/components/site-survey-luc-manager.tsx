@@ -1,3 +1,4 @@
+import { TableSortMenu } from "@/components/table-sort-menu";
 import { addedAfterSurveyOriginalList } from "@/lib/site-survey-point-origin";
 import { matchesSurveyCompletion, surveyPendingFilterValue, type SurveyCompletionFilter } from "@/lib/site-survey-completion-filter";
 import { SiteSurveyPointChoice } from "@/components/site-survey-point-choice";
@@ -5,7 +6,7 @@ import { resolveSurveyPointChoice, surveyDepotType, surveyPointChoice } from "@/
 import { CdeDisclosureIcon, CdeButton } from "@/components/cde/cde-button";
 import { useTableFilters } from "@/components/use-table-filters";
 import { Fragment, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { ArrowDown, ArrowUp, ArrowUpDown, Camera, Check, ChevronDown, ChevronsUpDown, Download, FileSpreadsheet, FileText, Images, Pencil, Sparkles } from "lucide-react";
+import { Camera, Check, ChevronDown, ChevronsUpDown, Download, FileSpreadsheet, FileText, Images, Pencil, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
 
@@ -415,7 +416,6 @@ export function SiteSurveyLucManager({ checklistData, visitTemplateId: visitTemp
   const sortedRows = useMemo(() => baseSortedRows.filter((row) => !checklistData || matchesGeneralFilter(row, checklistData, filterFields, generalFilter)), [baseSortedRows, checklistData, filterFields, generalFilter]);
   const completionLabel = customerQuestionsOnly ? "Com perguntas para o cliente" : completionFilter === "pendente" ? "Não concluídas" : completionFilter === "concluida" ? "Concluídas" : completionFilter === "cancelada" ? "Canceladas" : "Todas";
   const generalFilterControl = checklistData ? <SiteSurveyGeneralFilter fields={filterFields} value={generalFilter} onChange={setGeneralFilter} countMatches={(filter) => baseSortedRows.filter((row) => matchesGeneralFilter(row, checklistData, filterFields, filter)).length} /> : null;
-  const sortColumn = (column: typeof sortBy) => { if (sortBy === column) setSortAscending((current) => !current); else { setSortBy(column); setSortAscending(true); } };
   const registrationRows = async () => {
     const { data: approvals, error } = await supabase.from("site_survey_installation_approvals").select("point_kind,point_id,hydraulic_approved,electrical_approved").eq("visit_id", visitId);
     if (error) throw error;
@@ -470,9 +470,11 @@ export function SiteSurveyLucManager({ checklistData, visitTemplateId: visitTemp
     } catch (error) { toast.error(error instanceof Error ? error.message : "Não foi possível gerar o PDF.", { id: toastId }); }
     finally { setExportingPdf(false); }
   };
-   const sortHeader = (column: typeof sortBy, label: string) => <Button type="button" variant="ghost" size="sm" className="h-8 w-auto shrink-0 items-center justify-start px-0 text-xs font-semibold !bg-transparent !text-foreground hover:!bg-transparent hover:!text-foreground" aria-label={`Ordenar por ${label}${sortBy === column ? sortAscending ? ", crescente" : ", decrescente" : ""}`} onClick={() => sortColumn(column)}>{label}{sortBy === column ? sortAscending ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" /> : <ArrowUpDown className="h-3 w-3" />}</Button>;
+   const sortHeader = (_column: typeof sortBy, label: string) => label ? <span className="text-xs font-semibold">{label}</span> : null;
+   const sortLabels: Record<typeof sortBy, string> = { luc_number: "LUC", shop_name: "Nome", location: "Localização", pending: "Pendências" };
 
   return <Collapsible open={listOpen} onOpenChange={setListOpen} asChild><section className="space-y-3 pt-5">
+     <div className="flex justify-end"><TableSortMenu columns={(Object.keys(sortLabels) as (typeof sortBy)[]).map(key => ({ key, label: sortLabels[key] }))} value={{ key: sortBy, direction: sortAscending ? "asc" : "desc" }} onChange={v => { setSortBy((v?.key ?? "luc_number") as typeof sortBy); setSortAscending(!v || v.direction === "asc"); }} /></div>
      {pointFilters.summary}
      {compactSearch || addOnly ? null : <div id="registration-pending" className="min-w-0"><PointTypeTotals totals={typeTotals} groupTotals={approvalGroupTotals} environmentTotals={environmentTotals} groupDivergence={proposalDivergence} proposal={<ContractedScopeFields scope={scope} canEdit={canApprove} onChanged={onChanged} approvedShopKiosk={approvedShopKiosk} />} /></div>}
 

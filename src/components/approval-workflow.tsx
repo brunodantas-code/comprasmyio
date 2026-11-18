@@ -32,7 +32,6 @@ import { useAdditionalStepTypes, type AdditionalStepType } from "@/components/ad
 import { requestTypeModel, requestTypeName, useRequestTypes, type RequestTypeRecord } from "@/components/request-types-tab";
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 import { cn } from "@/lib/utils";
-import { ColumnSortButton } from "@/components/column-sort-button";
 import { TableSortMenu } from "@/components/table-sort-menu";
 import { compareColumnValues, type SortDirection, type SortValue } from "@/lib/column-sort";
 import type { FilterKind } from "@/lib/column-filters";
@@ -693,7 +692,7 @@ export function MyApprovalFlows({ renderEditAction }: { renderEditAction?: EditA
       <CardContent className="space-y-4">
         <div className="flex items-center gap-2 border-t p-2">
           {flowFilters.header("approval")}{flowFilters.header("type")}{flowFilters.header("value")}
-          <ColumnSortButton label="Approval" direction={numberDirection} onClick={() => setNumberDirection(current => current === undefined ? "asc" : current === "asc" ? "desc" : undefined)} />
+          <TableSortMenu columns={[{ key: "approval", label: "Approval" }]} value={numberDirection ? { key: "approval", direction: numberDirection } : undefined} onChange={v => setNumberDirection(v?.direction)} />
         </div>
         {flowFilters.summary}
         {isLoading ? (
