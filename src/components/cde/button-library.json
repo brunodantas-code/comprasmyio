@@ -8837,7 +8837,7 @@
   {
     "id": "components/projects/workspace.tsx|0c3121c77ef292f6|0",
     "file": "components/projects/workspace.tsx",
-    "line": 88,
+    "line": 89,
     "tag": "Button",
     "label": "Todos os projetos",
     "dynamic": false,
@@ -8852,7 +8852,7 @@
   {
     "id": "components/projects/workspace.tsx|3e4559f8cc45437e|0",
     "file": "components/projects/workspace.tsx",
-    "line": 88,
+    "line": 89,
     "tag": "Button",
     "label": "Editar projeto",
     "dynamic": false,
@@ -8867,7 +8867,7 @@
   {
     "id": "components/projects/workspace.tsx|743be97364da05ea|0",
     "file": "components/projects/workspace.tsx",
-    "line": 88,
+    "line": 89,
     "tag": "Button",
     "label": "Novo projeto",
     "dynamic": false,
@@ -8882,7 +8882,7 @@
   {
     "id": "components/projects/workspace.tsx|782b81987022040b|0",
     "file": "components/projects/workspace.tsx",
-    "line": 89,
+    "line": 90,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -8897,7 +8897,7 @@
   {
     "id": "components/projects/workspace.tsx|2d9b59408f06a45f|0",
     "file": "components/projects/workspace.tsx",
-    "line": 91,
+    "line": 92,
     "tag": "Button",
     "label": "Symbol",
     "dynamic": true,
@@ -8912,7 +8912,7 @@
   {
     "id": "components/projects/workspace.tsx|f76460e70e503af7|0",
     "file": "components/projects/workspace.tsx",
-    "line": 92,
+    "line": 93,
     "tag": "Button",
     "label": "Exportar cronograma",
     "dynamic": false,
@@ -8927,7 +8927,7 @@
   {
     "id": "components/projects/workspace.tsx|b5203519a1e48c82|0",
     "file": "components/projects/workspace.tsx",
-    "line": 92,
+    "line": 93,
     "tag": "Button",
     "label": "Atividade",
     "dynamic": false,
@@ -8942,7 +8942,7 @@
   {
     "id": "components/projects/workspace.tsx|b65b8cc4f14ccc8d|0",
     "file": "components/projects/workspace.tsx",
-    "line": 92,
+    "line": 93,
     "tag": "Button",
     "label": "Dependência",
     "dynamic": false,
@@ -8957,7 +8957,7 @@
   {
     "id": "components/projects/workspace.tsx|4e0754aa721e5b3b|0",
     "file": "components/projects/workspace.tsx",
-    "line": 92,
+    "line": 93,
     "tag": "Button",
     "label": "Editar atividade",
     "dynamic": false,
@@ -8972,7 +8972,7 @@
   {
     "id": "components/projects/workspace.tsx|d5b09d4b44d536d7|0",
     "file": "components/projects/workspace.tsx",
-    "line": 93,
+    "line": 94,
     "tag": "Button",
     "label": "Fase",
     "dynamic": false,
@@ -8987,7 +8987,7 @@
   {
     "id": "components/projects/workspace.tsx|9f1e80d44ebc50b6|0",
     "file": "components/projects/workspace.tsx",
-    "line": 93,
+    "line": 94,
     "tag": "Button",
     "label": "Editar fase",
     "dynamic": false,
@@ -9002,7 +9002,7 @@
   {
     "id": "components/projects/workspace.tsx|b6d2b090da86e433|0",
     "file": "components/projects/workspace.tsx",
-    "line": 94,
+    "line": 95,
     "tag": "CdeButton",
     "label": "Adicionar participante",
     "dynamic": false,
@@ -9017,7 +9017,7 @@
   {
     "id": "components/projects/workspace.tsx|f302366a719976ac|0",
     "file": "components/projects/workspace.tsx",
-    "line": 94,
+    "line": 95,
     "tag": "CdeButton",
     "label": "Adicionar recurso",
     "dynamic": false,
@@ -9032,7 +9032,7 @@
   {
     "id": "components/projects/workspace.tsx|3a42c4b72bd7c359|0",
     "file": "components/projects/workspace.tsx",
-    "line": 94,
+    "line": 95,
     "tag": "Button",
     "label": "Editar recurso",
     "dynamic": false,
@@ -9047,7 +9047,7 @@
   {
     "id": "components/projects/workspace.tsx|5aa0cb83c5abc8ac|0",
     "file": "components/projects/workspace.tsx",
-    "line": 95,
+    "line": 96,
     "tag": "Button",
     "label": "Alocação",
     "dynamic": false,
@@ -9062,7 +9062,7 @@
   {
     "id": "components/projects/workspace.tsx|11701559f945bd50|0",
     "file": "components/projects/workspace.tsx",
-    "line": 95,
+    "line": 96,
     "tag": "Button",
     "label": "Editar alocação",
     "dynamic": false,
@@ -9077,7 +9077,7 @@
   {
     "id": "components/projects/workspace.tsx|e92f6540197b626b|0",
     "file": "components/projects/workspace.tsx",
-    "line": 96,
+    "line": 97,
     "tag": "Button",
     "label": "Linha de base",
     "dynamic": false,
@@ -9118,6 +9118,51 @@
     "size": "",
     "className": "",
     "group": "plus"
+  },
+  {
+    "id": "components/projects/assumptions.tsx|de278c48c4097ab1|0",
+    "file": "components/projects/assumptions.tsx",
+    "line": 17,
+    "tag": "Button",
+    "label": "Premissas",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "SlidersHorizontal",
+    "variant": "ghost",
+    "size": "",
+    "className": "",
+    "group": ""
+  },
+  {
+    "id": "components/projects/assumptions.tsx|4005eb4ec9ebc376|0",
+    "file": "components/projects/assumptions.tsx",
+    "line": 38,
+    "tag": "Button",
+    "label": "Importar Site Survey",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "Download",
+    "variant": "ghost",
+    "size": "icon",
+    "className": "",
+    "group": ""
+  },
+  {
+    "id": "components/projects/assumptions.tsx|6bff50fe0cfb3ecb|0",
+    "file": "components/projects/assumptions.tsx",
+    "line": 38,
+    "tag": "Button",
+    "label": "Salvar premissas",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "Save",
+    "variant": "ghost",
+    "size": "icon",
+    "className": "",
+    "group": ""
   },
   {
     "id": "components/qr-check.tsx|622e54d386a51c94|0",

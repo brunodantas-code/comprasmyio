@@ -7,3 +7,4 @@
 - Team candidate lists include active ERP accounts; membership never grants app access, which remains managed in Acessos.
 - Projects appearance is saved in CDE and read as CSS variables; Gantt clips its SVG to the last row, and editor field slots use flex-column gaps so input/select baselines align.
 - Phase/project target dates are independent of scheduled task dates; comparisons warn without silently rescheduling tasks. Phase ordering uses an invoker RPC to validate the whole list and update atomically under existing RLS and audit triggers.
+- Installation assumptions are project-keyed snapshots; import reads only RLS-visible Survey points, preserves per-discipline difficulty and manual productivity, and never writes Survey records. Effort is quantity/productivity; required headcount rounds up against the project calendar and target end.

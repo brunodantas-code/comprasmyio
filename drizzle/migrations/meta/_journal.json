@@ -1737,6 +1737,20 @@
       "when": 1795011709627,
       "tag": "0247_projects_phase_target_dates_atomic_order",
       "breakpoints": true
+    },
+    {
+      "idx": 248,
+      "version": "7",
+      "when": 1795011972330,
+      "tag": "0248_projects_installation_assumptions",
+      "breakpoints": true
+    },
+    {
+      "idx": 249,
+      "version": "7",
+      "when": 1795012305236,
+      "tag": "0249_projects_assumptions_validation_alias",
+      "breakpoints": true
     }
   ]
 }

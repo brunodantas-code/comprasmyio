@@ -1,0 +1,11 @@
+import {it,expect} from "vitest";
+import {emptyEntries,installationEstimate,surveyAssumptionEntries} from "./assumptions-logic";
+const calendar={start_date:"2026-11-18",calendar_mode:"business",holidays:[],hours_per_day:8};
+it("calcula homem-hora como pontos por produtividade e arredonda equipe para cima",()=>expect(installationEstimate([{discipline:"electrical",difficulty:"low",quantity:100,productivity:2}],calendar,"2026-11-20")).toEqual({hours:50,days:3,professionals:3}));
+it("não inventa produtividade faltante",()=>expect(installationEstimate([{discipline:"hydraulic",difficulty:"high",quantity:10,productivity:null}],calendar,"2026-11-20").hours).toBeNull());
+it("respeita feriados na capacidade",()=>expect(installationEstimate([{discipline:"electrical",difficulty:"low",quantity:100,productivity:2}],{...calendar,holidays:["2026-11-19"]},"2026-11-20").professionals).toBe(4));
+it("não calcula equipe sem fim previsto",()=>expect(installationEstimate(emptyEntries(),calendar,null).professionals).toBeNull());
+it("importa um ponto por disciplina com complexidades separadas",()=>{
+ const rows=surveyAssumptionEntries([{id:"p",kind:"luc",point_type:"shop",completion_status:"concluida",active:true,skipped_section_ids:[]}],[{visit_luc_id:"p",visit_environment_id:null,question_id:"water",answer:{value:"Sim"}},{visit_luc_id:"p",visit_environment_id:null,question_id:"energy",answer:{value:"Sim"}},{visit_luc_id:"p",visit_environment_id:null,question_id:"wc",answer:{value:"Alta"}},{visit_luc_id:"p",visit_environment_id:null,question_id:"ec",answer:{value:"Baixa"}}],[{id:"water",prompt:"Existe hidrômetro?",section_id:"w"},{id:"energy",prompt:"Existe ponto de elétrica próximo?",section_id:"e"},{id:"wc",prompt:"Qual a complexidade dessa instalação?",section_id:"w"},{id:"ec",prompt:"Qual a complexidade dessa instalação?",section_id:"e"}],[{id:"w",title:"Água e hidrômetros"},{id:"e",title:"Instalação elétrica"}],[],false);
+ expect(rows.find(r=>r.discipline==="electrical"&&r.difficulty==="low")?.quantity).toBe(1);expect(rows.find(r=>r.discipline==="hydraulic"&&r.difficulty==="high")?.quantity).toBe(1);
+});

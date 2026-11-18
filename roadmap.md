@@ -1,4 +1,6 @@
 # Roadmap
+- [ ] Projects evolução: avaliar EAP/subtarefas, TI/II/TT/IT e lead/lag, CPM, Gantt conectável, Kanban, planilha, calendário, capacidade, conversa/anexos, alertas e automações; organizar implementação em fases após Premissas.
+- [x] Projects: Premissas com pontos por disciplina/dificuldade, produtividade manual, homem-hora e equipe pelo calendário e fim previsto. Importação autorizada/paginada do Vila Velha conferida em projeto temporário (243 elétricos: 6 média/237 alta; hidráulicos não identificados no checklist desta visita). Salvar/reabrir conferidos, 24 testes passaram; dados de teste removidos. Não publicado.
 - [x] Projects: datas-alvo independentes do projeto/fases e comparação com cronograma; arraste real por fase renumera 1.1/1.2 e persiste após recarregar. Fase vazia preserva datas; período inválido rejeitado. 19 testes passaram, desktop/mobile sem excesso lateral, dados temporários removidos. Não publicado.
 - [x] Projects: fases exibem datas previstas independentes e cronograma das tarefas separadamente, comparados ao início/fim previsto do projeto.
 - [x] Projects: tarefas por fase com responsáveis/datas, arraste e renumeração automática no padrão CDE (interpretado “remuneração” como renumeração).

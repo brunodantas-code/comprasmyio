@@ -7218,6 +7218,45 @@ export type Database = {
           },
         ]
       }
+      pm_assumptions: {
+        Row: {
+          entries: Json
+          id: string
+          project_id: string
+          source_label: string
+          survey_id: string | null
+        }
+        Insert: {
+          entries?: Json
+          id?: string
+          project_id: string
+          source_label?: string
+          survey_id?: string | null
+        }
+        Update: {
+          entries?: Json
+          id?: string
+          project_id?: string
+          source_label?: string
+          survey_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pm_assumptions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: true
+            referencedRelation: "pm_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pm_assumptions_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_visits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pm_baselines: {
         Row: {
           created_at: string
