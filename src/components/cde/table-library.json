@@ -632,6 +632,84 @@
     ]
   },
   {
+    "id": "components/projects/access.tsx|0",
+    "file": "components/projects/access.tsx",
+    "line": 9,
+    "context": "Perfis do Projects",
+    "headers": [
+      "Usuário",
+      "Perfil"
+    ]
+  },
+  {
+    "id": "components/projects/workspace.tsx|0",
+    "file": "components/projects/workspace.tsx",
+    "line": 86,
+    "context": "",
+    "headers": [
+      "Projeto",
+      "Situação",
+      "Fim previsto",
+      "Avanço",
+      "Orçamento",
+      "Realizado"
+    ]
+  },
+  {
+    "id": "components/projects/workspace.tsx|1",
+    "file": "components/projects/workspace.tsx",
+    "line": 89,
+    "context": "Atividades",
+    "headers": [
+      "Atividade",
+      "Responsável",
+      "Início / fim",
+      "Duração",
+      "Avanço",
+      "Predecessoras",
+      "Ações"
+    ]
+  },
+  {
+    "id": "components/projects/workspace.tsx|2",
+    "file": "components/projects/workspace.tsx",
+    "line": 91,
+    "context": "Recursos",
+    "headers": [
+      "Recurso",
+      "Tipo",
+      "Taxa",
+      "Capacidade/dia",
+      "Ações"
+    ]
+  },
+  {
+    "id": "components/projects/workspace.tsx|3",
+    "file": "components/projects/workspace.tsx",
+    "line": 92,
+    "context": "Recursos",
+    "headers": [
+      "Atividade / recurso",
+      "Planejado",
+      "Realizado",
+      "Taxa registrada",
+      "Custo realizado",
+      "Ações"
+    ]
+  },
+  {
+    "id": "components/projects/workspace.tsx|4",
+    "file": "components/projects/workspace.tsx",
+    "line": 93,
+    "context": "·",
+    "headers": [
+      "Atividade",
+      "Fim da linha de base",
+      "Fim atual",
+      "Fim realizado"
+    ]
+  },
+  {
     "id": "components/request-types-tab.tsx|0",
     "file": "components/request-types-tab.tsx",
     "line": 127,
@@ -870,84 +948,6 @@
       "Situação",
       "Revisão",
       "PDF"
-    ]
-  },
-  {
-    "id": "components/projects/workspace.tsx|0",
-    "file": "components/projects/workspace.tsx",
-    "line": 52,
-    "context": "",
-    "headers": [
-      "Projeto",
-      "Situação",
-      "Fim previsto",
-      "Avanço",
-      "Orçamento",
-      "Realizado"
-    ]
-  },
-  {
-    "id": "components/projects/workspace.tsx|1",
-    "file": "components/projects/workspace.tsx",
-    "line": 55,
-    "context": "Atividades",
-    "headers": [
-      "Atividade",
-      "Responsável",
-      "Início / fim",
-      "Duração",
-      "Avanço",
-      "Predecessoras",
-      "Ações"
-    ]
-  },
-  {
-    "id": "components/projects/workspace.tsx|2",
-    "file": "components/projects/workspace.tsx",
-    "line": 57,
-    "context": "Recursos",
-    "headers": [
-      "Recurso",
-      "Tipo",
-      "Taxa",
-      "Capacidade/dia",
-      "Ações"
-    ]
-  },
-  {
-    "id": "components/projects/workspace.tsx|3",
-    "file": "components/projects/workspace.tsx",
-    "line": 58,
-    "context": "Recursos",
-    "headers": [
-      "Atividade / recurso",
-      "Planejado",
-      "Realizado",
-      "Taxa registrada",
-      "Custo realizado",
-      "Ações"
-    ]
-  },
-  {
-    "id": "components/projects/workspace.tsx|4",
-    "file": "components/projects/workspace.tsx",
-    "line": 59,
-    "context": "·",
-    "headers": [
-      "Atividade",
-      "Fim da linha de base",
-      "Fim atual",
-      "Fim realizado"
-    ]
-  },
-  {
-    "id": "components/projects/access.tsx|0",
-    "file": "components/projects/access.tsx",
-    "line": 9,
-    "context": "Perfis do Projects",
-    "headers": [
-      "Usuário",
-      "Perfil"
     ]
   },
   {

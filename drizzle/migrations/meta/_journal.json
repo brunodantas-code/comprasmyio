@@ -1716,6 +1716,20 @@
       "when": 1795008366468,
       "tag": "0244_projects_guard_scoped_record_fields",
       "breakpoints": true
+    },
+    {
+      "idx": 245,
+      "version": "7",
+      "when": 1795010501364,
+      "tag": "0245_projects_budget_modes_supply_matching",
+      "breakpoints": true
+    },
+    {
+      "idx": 246,
+      "version": "7",
+      "when": 1795011135802,
+      "tag": "0246_projects_all_erp_team_candidates",
+      "breakpoints": true
     }
   ]
 }

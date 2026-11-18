@@ -4,6 +4,13 @@
 @import "../node_modules/frappe-gantt/dist/frappe-gantt.css";
 @source "../src";
 
+.pm-editor-fields input,
+.pm-editor-fields button[role="combobox"] {
+  height: 2.25rem !important;
+  min-height: 2.25rem !important;
+  box-sizing: border-box;
+}
+
 :root { --search-field-width: 6cm; }
 input[data-search-field="true"] {
   width: min(var(--search-field-width), 100%) !important;
@@ -39,6 +46,20 @@ input[data-search-field="true"] {
 .pm-gantt .pm-critical .bar { stroke: var(--destructive); stroke-width: 2; }
 .pm-gantt .pm-baseline .bar { fill: var(--muted); }
 .pm-gantt .gantt-container { min-height: 240px; }
+.pm-gantt svg.gantt { overflow: hidden; }
+.pm-workspace { background: var(--pm-bg); color: var(--pm-text); }
+.pm-workspace .border-border { border-color: var(--pm-border); }
+.pm-workspace .cde-td,
+.pm-workspace .cde-td button,
+.pm-workspace .cde-td span,
+.pm-workspace .cde-td p { font-size: var(--filter-fs); }
+.pm-color-preview { background: var(--pm-bg); color: var(--pm-text); border-color: var(--pm-border); }
+.pm-color-preview-bar { background: var(--g-bar-color); color: var(--pm-bar-text); border-color: var(--g-bar-border); }
+.pm-workspace .pm-gantt .bar-label { fill: var(--pm-bar-text); font-size: var(--filter-fs); }
+.pm-workspace .pm-gantt .lower-text,
+.pm-workspace .pm-gantt .upper-text { color: var(--pm-header-text); }
+.pm-workspace .pm-gantt .pm-critical .bar { stroke: var(--pm-critical); }
+.pm-workspace .pm-gantt .pm-baseline .bar { fill: var(--pm-baseline); }
 
 @custom-variant dark (&:is(.dark *));
 

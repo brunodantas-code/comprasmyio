@@ -1,0 +1,3 @@
+CREATE OR REPLACE FUNCTION public.pm_team_candidates() RETURNS TABLE(id uuid,full_name text) LANGUAGE sql STABLE SECURITY DEFINER SET search_path=public AS $$ SELECT p.id,p.full_name FROM public.profiles p WHERE private.has_app_access(auth.uid(),'projects') AND p.is_active AND p.deleted_at IS NULL ORDER BY p.full_name $$;
+DROP POLICY pm_members_manage ON public.pm_members;
+CREATE POLICY pm_members_manage ON public.pm_members FOR ALL TO authenticated USING(public.pm_can_manage(project_id)) WITH CHECK(public.pm_can_manage(project_id) AND EXISTS(SELECT 1 FROM public.profiles p WHERE p.id=user_id AND p.is_active AND p.deleted_at IS NULL));

@@ -2,3 +2,7 @@
 - Project membership and manager roles are database-authorized; Acessos owns app-wide manager grants.
 - Graphlib validates dependency DAGs; scheduling uses project-local dates/calendars and Frappe Gantt loads only in the browser.
 - Baselines and logs are immutable snapshots; allocation unit rates are captured values, not retroactively replaced by resource edits.
+- Budget modes and itemized account snapshots live on the planning project; CDE selects eligible expense account IDs without writing Cash Flow entries, preserving historical budgets when the selection changes.
+- Supply matching uses a narrow authenticated catalog and normalized-name/link guards; planning links existing commercial projects instead of creating or renaming Supply records.
+- Team candidate lists include active ERP accounts; membership never grants app access, which remains managed in Acessos.
+- Projects appearance is saved in CDE and read as CSS variables; Gantt clips its SVG to the last row, and editor field slots use flex-column gaps so input/select baselines align.

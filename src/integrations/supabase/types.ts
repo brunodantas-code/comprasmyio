@@ -7260,6 +7260,26 @@ export type Database = {
           },
         ]
       }
+      pm_budget_accounts: {
+        Row: {
+          account_id: string
+        }
+        Insert: {
+          account_id: string
+        }
+        Update: {
+          account_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pm_budget_accounts_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: true
+            referencedRelation: "cash_flow_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pm_dependencies: {
         Row: {
           lag: number
@@ -7435,6 +7455,8 @@ export type Database = {
       pm_projects: {
         Row: {
           budget: number
+          budget_details: Json
+          budget_mode: string
           calendar_mode: string
           category: string
           created_at: string
@@ -7452,6 +7474,8 @@ export type Database = {
         }
         Insert: {
           budget?: number
+          budget_details?: Json
+          budget_mode?: string
           calendar_mode?: string
           category?: string
           created_at?: string
@@ -7469,6 +7493,8 @@ export type Database = {
         }
         Update: {
           budget?: number
+          budget_details?: Json
+          budget_mode?: string
           calendar_mode?: string
           category?: string
           created_at?: string
@@ -12296,9 +12322,27 @@ export type Database = {
           id: string
         }[]
       }
+      pm_budget_catalog: {
+        Args: never
+        Returns: {
+          code: string
+          id: string
+          name: string
+          selected: boolean
+        }[]
+      }
       pm_can_create: { Args: never; Returns: boolean }
       pm_can_edit: { Args: { _project: string }; Returns: boolean }
       pm_can_manage: { Args: { _project: string }; Returns: boolean }
+      pm_name_key: { Args: { n: string }; Returns: string }
+      pm_supply_catalog: {
+        Args: never
+        Returns: {
+          id: string
+          name: string
+          project_type: string
+        }[]
+      }
       pm_team_candidates: {
         Args: never
         Returns: {

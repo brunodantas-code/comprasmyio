@@ -41,7 +41,7 @@
   },
   {
     "file": "components/cde/cde-workspace.tsx",
-    "line": 333,
+    "line": 335,
     "group": "number_subsection"
   },
   {
@@ -112,6 +112,21 @@
   {
     "file": "components/personal-todos/todo-dialog.tsx",
     "line": 114,
+    "group": "number_subsection"
+  },
+  {
+    "file": "components/projects/workspace.tsx",
+    "line": 90,
+    "group": "number_section"
+  },
+  {
+    "file": "components/projects/workspace.tsx",
+    "line": 91,
+    "group": "number_section"
+  },
+  {
+    "file": "components/projects/phase-tasks.tsx",
+    "line": 8,
     "group": "number_subsection"
   },
   {

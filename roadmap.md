@@ -1,4 +1,11 @@
 # Roadmap
+- [x] Projects: fases exibem início/fim derivados das tarefas e período total do projeto; ainda não há datas-alvo independentes para fases vazias. Testes de orçamento e fluxo autenticado passaram; arraste por fase implementado, não exercitado em tela. Não publicado.
+- [x] Projects: tarefas por fase com responsáveis/datas, arraste e renumeração automática no padrão CDE (interpretado “remuneração” como renumeração).
+- [x] Projects: botões de adicionar Participante/Recurso somente +, alinhados à direita e com tooltip.
+- [x] Projects: listar todos os usuários cadastrados em Acessos, mantendo autorização de entrada e equipe.
+- [x] Projects: incluir edição de cores de bordas, fundos e textos no CDE com aplicação imediata, inclusive Gantt.
+- [x] Projects: investigar linhas e fundos ultrapassando a margem inferior na captura de 18/11 às 11:05.
+- [x] Projects: tipos selecionáveis, conferência/vínculo sem duplicidade com Supply, orçamento detalhado/estimativa/sem estimativa e plano sintético no CDE; alinhar linhas verdes pela base e respeitar fonte CDE nas listas (pedidos adicionais de 18/11).
 - [x] myio Projects: app /projects com escopo/fases/entregáveis, Gantt, dependências e marcos, equipe/recursos/custos, baseline e portfólio; calendário por projeto, caminho crítico e sobrecarga. Acessos inclui perfil Gestor/Participante, cadastro legado preservado. Fluxo autenticado de cadastro, dependência, recurso, custo e baseline conferido; computador/celular sem excesso lateral, 12 testes passaram; dados temporários removidos. Não publicado; arraste, colaboração entre contas e aceite formal de fase não exercitados em tela.
 - [x] CRM: Leonardo autorizou concluir sem as três planilhas ausentes em 18/11/2026 às 13:03 UTC; exceção registrada no plano e controle da migração, sem apagar referências ou substituir arquivos. A conferência do restante continua necessária.
 - [x] Code 40: Atendido salvo às 23:41:08 UTC; reproduzida confirmação seguida de janela reaberta/dado desatualizado. Seleção por ID e cache do registro confirmado corrigem a sequência; salvar/reabrir/fechar reais em computador/celular e 51 testes conferidos, sem mudar status/permissões; correção ainda não publicada.
