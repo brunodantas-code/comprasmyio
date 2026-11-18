@@ -1,0 +1,10 @@
+- Shared SelectTrigger/SearchableSelect drop height utilities from the fields_select model (caller or h-9 default, like Input) so side-by-side green underlines share one base line; SelectTrigger resolves fields_select standards dynamically; chosen appearance follows caller layout classes so selections update existing droplists without changing values or actions.
+- Dialog/Sheet X renders CdeCloseIcon (CDE group close); keep position in ui/, look in CDE.
+- Dialog/Sheet X is sticky at the top so it stays visible while long content scrolls.
+- Shared Button/Input/Textarea apply CDE standards live via cde-look.ts (action buttons detected by label/icon: save, cancel, confirm, trash, pencil, toggle, move, sort; fields_*); never hardcode those looks per screen.
+- Shared Button resolves CDE variants before screen defaults; model cards use fixed dimensions with technical details outside. All color pickers read color_swatch shape through useCdeSwatchStyle without overriding their palette values.
+- Shared Save/Delete buttons resolve icon and label through CDE; the library aggregates their source locations to avoid presenting call sites as distinct models.
+- Table header and list-cell alignment (independent H/V) live in table_fonts and reach every Table via --th-*/--td-* variables on .cde-th/.cde-td (base layer, so explicit screen classes win).
+- Tags: shared Badge resolves cde_selected tag_style ({looks, renames, removed→replacement label, custom}) by visible label via tag-style.ts — display only, stored values never change; CDE item Tags lists tag-inventory.json (scripts/scan-cde-tags.mjs) plus active Supply statuses and CDE-created tags.
+- Card titles/subtitles (CardTitle/CardDescription) read --title-*/--sub-* from table_fonts via .cde-title/.cde-subtitle in the base layer.
+- Card title/subtitle texts: CardTitle/CardDescription replace plain-text children from cde_selected title_text ("titulo|Original"→text) via title-text.ts; inventory title-inventory.json from scripts/scan-cde-titles.mjs.
