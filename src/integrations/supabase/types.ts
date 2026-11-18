@@ -7515,6 +7515,7 @@ export type Database = {
           holidays: string[]
           hours_per_day: number
           id: string
+          location_city: string | null
           manager_id: string
           name: string
           planned_end: string | null
@@ -7537,6 +7538,7 @@ export type Database = {
           holidays?: string[]
           hours_per_day?: number
           id?: string
+          location_city?: string | null
           manager_id: string
           name: string
           planned_end?: string | null
@@ -7559,6 +7561,7 @@ export type Database = {
           holidays?: string[]
           hours_per_day?: number
           id?: string
+          location_city?: string | null
           manager_id?: string
           name?: string
           planned_end?: string | null

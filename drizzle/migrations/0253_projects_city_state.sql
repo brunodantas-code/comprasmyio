@@ -1,0 +1,1 @@
+ALTER TABLE public.pm_projects ADD COLUMN location_city text; COMMENT ON COLUMN public.pm_projects.location_city IS 'Project locality selected from the shared Supply city picker, formatted Cidade - UF; independent from commercial project records.';

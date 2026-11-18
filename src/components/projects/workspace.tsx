@@ -56,7 +56,7 @@ export function ProjectsWorkspace({userId}:{userId:string}) {
  setEditor({title:creating?"Novo projeto":"Editar projeto",fields:[
  select("erp_project_id","Projeto existente no Supply",data.legacy.map(p=>({value:p.id,label:p.name}))),
  text("name","Nome do projeto",true),select("category","Tipo de projeto",categories.map(value=>({value,label:value})),true),
- {key:"scope",label:"Escopo",type:"textarea"},date("start_date","Início",true),date("planned_end","Fim previsto"),
+ {key:"location_city",label:"UF e Cidade",type:"city"},{key:"scope",label:"Escopo",type:"textarea"},date("start_date","Início",true),date("planned_end","Fim previsto"),
  select("budget_mode","Situação do orçamento",BUDGET_MODES,true),
  {...number("budget","Total estimado (R$)"),required:true,showWhen:{key:"budget_mode",value:"estimated"}},
  ...accounts.map(a=>({...number(`account_${a.id}`,`${a.name} (R$)`),showWhen:{key:"budget_mode",value:"detailed"}})),
@@ -77,7 +77,7 @@ export function ProjectsWorkspace({userId}:{userId:string}) {
  const erpId=match?.id||v.erp_project_id||null;
  if(data.projects.some(p=>p.id!==project?.id&&(projectNameKey(p.name)===projectNameKey(v.name)||(erpId&&p.erp_project_id===erpId))))throw new Error("Este projeto já possui planejamento no Projects. Abra o cadastro existente.");
  if(match&&!v.erp_project_id&&!await confirmAction(`Este projeto já existe no Supply: ${match.name}. Vincular o planejamento ao cadastro existente?`))return;
- const payload={name:v.name.trim(),category:v.category,scope:v.scope,start_date:v.start_date,planned_end:v.planned_end||null,budget:total,budget_mode:v.budget_mode,budget_details:v.budget_mode==="detailed"?details:oldDetails,calendar_mode:v.calendar_mode,hours_per_day:Number(v.hours_per_day),holidays,erp_project_id:erpId};
+ const payload={name:v.name.trim(),category:v.category,location_city:v.location_city||null,scope:v.scope,start_date:v.start_date,planned_end:v.planned_end||null,budget:total,budget_mode:v.budget_mode,budget_details:v.budget_mode==="detailed"?details:oldDetails,calendar_mode:v.calendar_mode,hours_per_day:Number(v.hours_per_day),holidays,erp_project_id:erpId};
  if(creating){const result=await supabase.from("pm_projects").insert({...payload,manager_id:userId,created_by:userId}).select("id").single();await persist(result);if(result.data)setSelected(result.data.id);}
  else if(project){if(["concluido","cancelado"].includes(v.status)&&!await confirmAction("Encerrar este projeto? Os registros da execução serão preservados."))return;await persist(await supabase.from("pm_projects").update({...payload,status:v.status||project.status}).eq("id",project.id));}
  }});

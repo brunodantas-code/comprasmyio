@@ -1772,6 +1772,13 @@
       "when": 1795013446318,
       "tag": "0252_projects_views_capacity",
       "breakpoints": true
+    },
+    {
+      "idx": 253,
+      "version": "7",
+      "when": 1795014408378,
+      "tag": "0253_projects_city_state",
+      "breakpoints": true
     }
   ]
 }

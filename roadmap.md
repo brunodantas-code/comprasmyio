@@ -1,4 +1,6 @@
 # Roadmap
+- [x] Corrigir tarja preta: destaque verde-claro e texto contrastante; conferido no cronograma do Vila Velha.
+- [x] UF e cidade no editor de Projects com seletor Supply; salvamento/reabertura e celular conferidos, cadastros temporários removidos.
 - [x] Explicar possibilidade de feriados automáticos: nacionais pelo período; estaduais/municipais dependem da localidade e fonte oficial, pontos facultativos separados. Nenhuma configuração alterada.
 - [x] Explicar tarja preta do Gantt: destaque da semana atual com texto sem contraste; linha/bolinha marcam hoje. Consulta por código, sem alterar aparência sem pedido.
 - [x] Revisão da regra de datas: lidos cronograma/Gantt/EAP, portfólio, quadro/lista/calendário, carga/nivelamento, CSV, baseline/histórico, formulários/premissas e funções atuais de gravação; nenhum outro limite pelo período do projeto encontrado. Premissas usam período para capacidade, sem mover tarefas; sem rotina de reagendamento identificada. Feriados explicados ao usuário. Registros/permissões preservados; arraste e colaboração entre contas continuam não exercitados em tela.
