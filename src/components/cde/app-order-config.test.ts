@@ -3,6 +3,11 @@ vi.mock("@/integrations/supabase/client", () => ({ supabase: {} }));
 import { appTileColorVars, appTileLowContrast, homeHeaderVars, homeHeaderLogoTone, mobileTileVars, parseAppTile } from "./app-order-config";
 
 describe("app spacing configuration", () => {
+  it("stores desktop header height without changing mobile icon dimensions", () => {
+    const c = parseAppTile('{"desktopHeaderPx":120,"mobileTilePct":100}');
+    expect(homeHeaderVars(c)["--home-header-desktop-height"]).toBe("120px");
+    expect(mobileTileVars(c)["--mobile-tile-size"]).toBe("80px");
+  });
   it("adds spacing to legacy choices without changing their selected tile appearance", () => {
     expect(parseAppTile('{"labelPx":13,"iconPct":100,"tilePct":100}')).toEqual({ labelPx: 13, iconPct: 100, tilePct: 100, mobileTilePct: 100, mobileIconPct: 100, gapX: 32, gapY: 40, headerBg: "padrao", bg: "padrao", fill: "padrao", border: "padrao", symbol: "padrao", inside: "padrao", below: "padrao" });
   });

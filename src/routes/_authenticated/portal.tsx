@@ -18,7 +18,7 @@ import { AppTileFace } from "@/components/cde/app-tile";
 import { CorporateBanner } from "@/components/corporate/corporate-banner";
 import { DEFAULT_PORTAL_SECTIONS, usePortalSections } from "@/components/corporate/portal-sections";
 import { AppAccessLink } from "@/components/app-access-link";
-import { HeaderMenu, UserNameBlock } from "@/components/app-header";
+import { HeaderMenu, UserNameBlock, UserGreetingInfo } from "@/components/app-header";
 import { usePendingActions } from "@/hooks/use-pending-actions";
 import { ChangePasswordDialog } from "@/components/change-password-dialog";
 import { PersonalSignature } from "@/components/personal-signature";
@@ -138,6 +138,7 @@ function PortalPage() {
           </div>
           <div className="mt-8 sm:hidden">
             <p className="text-xl font-bold">Olá, {firstName}</p>
+            <UserGreetingInfo />
           </div>
           <div className="hidden min-w-0 items-center gap-2 sm:flex">
             <UserNameBlock userName={data.name} />

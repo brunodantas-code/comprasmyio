@@ -8,7 +8,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { TopIconStyleVars } from "@/components/cde/top-icon-style";
-import { ArrowLeft, BookOpen, LayoutGrid, KeyRound, LogOut, Menu } from "lucide-react";
+import { ArrowLeft, BookOpen, LayoutGrid, KeyRound, LogOut, Menu, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -86,6 +86,13 @@ export function UserNameBlock({ userName }: { userName: string }) {
   return <div className="min-w-0 text-right"><p className="truncate text-sm font-semibold">{userName}</p>{line ? <p className="truncate text-xs text-muted-foreground">{line}</p> : null}</div>;
 }
 
+export function UserGreetingInfo() {
+  const mode = useMainMenuConfig().data?.userInfo;
+  const { data: me } = useCurrentUser();
+  const line = userInfoLine(mode, me?.jobTitle?.name, me?.accessProfileName);
+  return line ? <p className="mt-2 text-sm text-muted-foreground">{line}</p> : null;
+}
+
 type MenuAction = { label: string; icon: ReactNode; onClick: () => void };
 type MenuExtras = { manualApp?: string; onOpenManual?: () => void; onOpenSignature?: () => void; menuActions?: MenuAction[] };
 type HeaderMenuProps = MenuExtras & { userName: string; onSignOut: () => void; onChangePassword: () => void; buttonClass: string; supplyManual?: boolean; homePage?: boolean };
@@ -106,7 +113,7 @@ function MainMenuEntries({ onSignOut, onChangePassword, supplyManual, homePage, 
     if (id === "access") return <Button key={id} asChild variant="ghost" className={itemClass}><Link to="/acessos"><Icon className="h-5 w-5" />Acessos</Link></Button>;
     if (id === "theme") return <ThemeEntry key={id} className={itemClass} />;
     return <Button key={id} variant="ghost" className={`${itemClass}`} onClick={id === "logout" ? onSignOut : id === "password" ? onChangePassword : () => window.history.back()}><Icon className="h-5 w-5" />{item.label}</Button>;
-  })}</>;
+  })}<Button variant="ghost" className={itemClass} onClick={() => window.dispatchEvent(new Event("open-mobile-favorites"))}><Star className="h-5 w-5" />Meus favoritos</Button></>;
 }
 
 function CountBadge({ count, className = "" }: { count: number; className?: string }) {

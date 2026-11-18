@@ -1807,6 +1807,13 @@
       "when": 1795030979034,
       "tag": "0257_projects_reply_lock",
       "breakpoints": true
+    },
+    {
+      "idx": 258,
+      "version": "7",
+      "when": 1795031973475,
+      "tag": "0258_personal_mobile_app_favorites",
+      "breakpoints": true
     }
   ]
 }

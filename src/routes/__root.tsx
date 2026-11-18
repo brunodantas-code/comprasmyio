@@ -18,6 +18,7 @@ import { ConfirmDialogHost } from "@/components/confirm-dialog";
 import { CdeHighlight } from "@/components/cde/cde-highlight";
 import { useApplyTableFonts } from "@/components/cde/table-fonts-config";
 import { supabase } from "@/integrations/supabase/client";
+import { MobileFavorites } from "@/components/mobile-favorites";
 
 function NotFoundComponent() {
   return (
@@ -160,6 +161,7 @@ function RootComponent() {
       <ConfirmDialogHost />
       <CdeHighlight />
       <CdeTableFontsApplier />
+      <MobileFavorites />
     </QueryClientProvider>
   );
 }

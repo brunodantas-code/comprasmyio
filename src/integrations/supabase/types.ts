@@ -5588,6 +5588,32 @@ export type Database = {
           },
         ]
       }
+      mobile_app_favorites: {
+        Row: {
+          app_keys: string[]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          app_keys?: string[]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          app_keys?: string[]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mobile_app_favorites_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       myio_delivery_qrs: {
         Row: {
           box_qr: string | null

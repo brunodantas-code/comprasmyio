@@ -16,6 +16,7 @@ import { APP_TILE_COLORS, APP_TILE_DEFAULT, PORTAL_APPS, appTileColor, appTileCo
 import { useCdeSwatchStyle } from "./cde-button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { CdeMobileDockStyle } from "./mobile-dock-style";
 
 function Row({ id, index }: { id: string; index: number }) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
@@ -32,7 +33,7 @@ const COLOR_FIELDS: [AppTileColorKind, string][] = [["headerBg", "Fundo da faixa
 
 function HeaderPreview({ tile, mobile = false }: { tile: AppTileConfig; mobile?: boolean }) {
   const background = tile.headerBg === "padrao" ? (mobile ? "var(--accent)" : "var(--card)") : appTileColor("headerBg", tile.headerBg).value;
-  return <div aria-label={mobile ? "Prévia da faixa superior mobile" : "Prévia da faixa superior desktop"} style={{ ...homeHeaderVars(tile), "--home-header-bg": background } as React.CSSProperties} className="home-page-header px-4 py-5">
+  return <div aria-label={mobile ? "Prévia da faixa superior mobile" : "Prévia da faixa superior desktop"} style={{ ...homeHeaderVars(tile), "--home-header-bg": background } as React.CSSProperties} className={`home-page-header px-4 py-5 ${mobile ? "" : "home-header-desktop-preview flex items-center"}`}>
     <div className="flex items-center justify-between gap-3"><MyioPlatformLogo tone={homeHeaderLogoTone(tile, mobile)} className="h-10" /><div className="flex min-w-0 items-center gap-3">{!mobile && <span className="text-sm">Usuário</span>}<Menu aria-hidden className="h-6 w-6 shrink-0" /></div></div>
     {mobile && <p className="mt-8 text-xl font-bold">Olá, Usuário</p>}
   </div>;
@@ -94,7 +95,7 @@ export function CdeAppOrder({ number, handle }: { number: number; handle?: impor
   }
   return <section className="space-y-4">
     <CdeCategoryHeader handle={handle} number={number} title="Home Page" hint="Faixa superior, apps, espaçamento e cores" open={open} onToggle={() => setOpen(!open)} />
-    {open && <div className="w-full min-w-0 py-4"><DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={move}><SortableContext items={order} strategy={verticalListSortingStrategy}>{order.map((id, i) => <Row key={id} id={id} index={i} />)}</SortableContext></DndContext>
+    {open && <div className="w-full min-w-0 py-4"><p className="mb-3 text-sm font-medium">Ordenação dos Apps na Home Page</p><DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={move}><SortableContext items={order} strategy={verticalListSortingStrategy}>{order.map((id, i) => <Row key={id} id={id} index={i} />)}</SortableContext></DndContext>
       <Button variant="action" className="mt-3" onClick={save} disabled={saving || !draft}><Save className="h-4 w-4" />Salvar</Button>
       <div className="mt-6 space-y-3 border-t border-border pt-4">
         <p className="text-sm font-medium">Ícones da página principal</p>
@@ -128,6 +129,7 @@ export function CdeAppOrder({ number, handle }: { number: number; handle?: impor
             <Button variant="outline" size="compactIcon" aria-label={`Aumentar ${label.toLowerCase()}`} title="Aumentar" disabled={tile[key] >= 80} onClick={() => setTileDraft({ ...tile, [key]: Math.min(80, tile[key] + 4) })}><Plus /></Button>
           </div></div>)}
         </div>
+        <div className="max-w-xs space-y-2"><Label>Altura da faixa superior — Desktop</Label><Select value={String(tile.desktopHeaderPx ?? 0)} onValueChange={v => setTileDraft({ ...tile, desktopHeaderPx: Number(v) || undefined })}><SelectTrigger aria-label="Altura da faixa superior Desktop"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="0">Atual (padrão)</SelectItem>{[80, 90, 100, 110, 120, 140, 160, 180, 200, 240].map(px => <SelectItem key={px} value={String(px)}>{px} px</SelectItem>)}</SelectContent></Select></div>
         <p className="pt-2 text-sm font-medium">Cores da página principal (Manual da Marca myio)</p>
         <div role="group" aria-label="Cores da página principal" className="grid w-full max-w-5xl grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-5">
           {COLOR_FIELDS.map(([kind, label]) => <ColorChoice key={kind} kind={kind} label={label} value={tile[kind]} onChange={(v) => setTileDraft({ ...tile, [kind]: v })} />)}
@@ -150,6 +152,7 @@ export function CdeAppOrder({ number, handle }: { number: number; handle?: impor
             </div> : null; })}
           </div>
         </div>
+        <CdeMobileDockStyle />
         <p className="text-xs text-muted-foreground">No celular, a fonte fica 2 px menor. Os símbolos mais finos recebem correção automática para parecerem do mesmo tamanho.</p>
         <div className="flex items-center gap-2"><Button variant="action" aria-label="Salvar Home Page" title="Salvar Home Page" onClick={saveTile} disabled={saving || !tileDraft}><Save className="h-4 w-4" />Salvar</Button>
           {tileDraft && <Button variant="action" disabled={saving} onClick={() => setTileDraft(null)}>Cancelar</Button>}

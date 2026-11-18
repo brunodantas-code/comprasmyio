@@ -104,7 +104,7 @@ export const APP_TILE_COLORS = {
   ],
 } as const;
 export type AppTileColorKind = keyof typeof APP_TILE_COLORS;
-export type AppTileConfig = { labelPx: number; iconPct: number; tilePct: number; mobileTilePct: number; mobileIconPct: number; gapX: number; gapY: number; headerBg: string; bg: string; fill: string; border: string; symbol: string; inside: string; below: string };
+export type AppTileConfig = { desktopHeaderPx?: number; labelPx: number; iconPct: number; tilePct: number; mobileTilePct: number; mobileIconPct: number; gapX: number; gapY: number; headerBg: string; bg: string; fill: string; border: string; symbol: string; inside: string; below: string };
 export const APP_TILE_DEFAULT: AppTileConfig = { labelPx: 14, iconPct: 100, tilePct: 100, mobileTilePct: 100, mobileIconPct: 100, gapX: 32, gapY: 40, headerBg: "padrao", bg: "padrao", fill: "padrao", border: "padrao", symbol: "padrao", inside: "padrao", below: "padrao" };
 export function appTileColor(kind: AppTileColorKind, key: string) {
   const list = APP_TILE_COLORS[kind] as readonly { key: string; label: string; value: string; dark: boolean }[];
@@ -116,9 +116,10 @@ export function appTileColorVars(tile: AppTileConfig): Record<string, string> {
 }
 export function homeHeaderVars(tile: AppTileConfig): Record<string, string> {
   const selected = appTileColor("headerBg", tile.headerBg);
-  if (selected.key === "padrao") return {};
+  const height: Record<string, string> = tile.desktopHeaderPx ? { "--home-header-desktop-height": `${tile.desktopHeaderPx}px` } : {};
+  if (selected.key === "padrao") return height;
   const foreground = selected.dark ? "var(--myio-white)" : "var(--myio-dark)";
-  return { "--home-header-bg": selected.value, "--home-header-text": foreground, "--home-header-muted": selected.dark ? "var(--myio-white)" : "var(--muted-foreground)", "--foreground": foreground, "--ti-fg": foreground };
+  return { ...height, "--home-header-bg": selected.value, "--home-header-text": foreground, "--home-header-muted": selected.dark ? "var(--myio-white)" : "var(--muted-foreground)", "--foreground": foreground, "--ti-fg": foreground };
 }
 export function homeHeaderLogoTone(tile: AppTileConfig, mobile = false): "auto" | "light" | "dark" {
   const selected = appTileColor("headerBg", tile.headerBg);
@@ -144,6 +145,7 @@ export function parseAppTile(raw?: string): AppTileConfig {
       mobileIconPct: mobileIconPct >= 60 && mobileIconPct <= 140 ? mobileIconPct : (iconPct >= 60 && iconPct <= 140 ? iconPct : APP_TILE_DEFAULT.mobileIconPct),
       gapX: Number.isFinite(gapX) && gapX >= 8 && gapX <= 80 ? gapX : APP_TILE_DEFAULT.gapX,
       gapY: Number.isFinite(gapY) && gapY >= 8 && gapY <= 80 ? gapY : APP_TILE_DEFAULT.gapY,
+      ...(Number(p.desktopHeaderPx) >= 80 && Number(p.desktopHeaderPx) <= 240 ? { desktopHeaderPx: Number(p.desktopHeaderPx) } : {}),
       headerBg: appTileColor("headerBg", String(p.headerBg ?? "")).key,
       bg: appTileColor("bg", String(p.bg ?? "")).key, fill: appTileColor("fill", String(p.fill ?? "")).key, border: appTileColor("border", String(p.border ?? "")).key,
       symbol: appTileColor("symbol", String(p.symbol ?? "")).key, inside: appTileColor("inside", String(p.inside ?? "")).key, below: appTileColor("below", String(p.below ?? "")).key };
