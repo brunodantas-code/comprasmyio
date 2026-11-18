@@ -12606,6 +12606,10 @@ export type Database = {
         Args: { _ids: string[]; _phase: string }
         Returns: undefined
       }
+      pm_reorder_project_phases: {
+        Args: { _ids: string[]; _project: string }
+        Returns: undefined
+      }
       pm_supply_catalog: {
         Args: never
         Returns: {
