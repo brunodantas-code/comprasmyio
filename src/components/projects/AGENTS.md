@@ -13,3 +13,5 @@
 - View configuration is project-owned and manager-only; task batch edits use an invoker RPC for atomic RLS/audit-preserving writes. Workload sums identity-bound hours across authorized projects; leveling previews never move started tasks and require confirmation. Baseline effort remains grouped by captured resource unit.
 
 - Task collaboration is task/project-keyed and append-only; database guards bind authors, validate team recipients and serialize single answers. Mentions use recipient-only read acknowledgments; private owner/task files never grant project access. Shared pending rows and the authenticated pending RPC feed Home/Central with deep links.
+
+- Duration entry stores original value/unit separately from whole working-day scheduling; hours use project hours/day, weeks/months/years count calendar intervals against holidays. Gantt date resizing resets entry to days to avoid stale units.

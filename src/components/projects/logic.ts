@@ -2,7 +2,7 @@ import { Graph, alg } from "@dagrejs/graphlib";
 import { addDays, format, parseISO } from "date-fns";
 
 export type Calendar = { calendar_mode: string; holidays: string[]; hours_per_day: number; start_date: string };
-export type PlanTask = { id: string; name: string; start_date: string; duration: number; milestone: boolean; progress: number; actual_start: string | null; actual_end: string | null; responsible_id: string | null; phase_id: string | null; position: number; notes: string; project_id: string; parent_id?: string | null; work_package?: boolean };
+export type PlanTask = { id: string; name: string; start_date: string; duration: number; duration_value?:number|null; duration_unit?:string; milestone: boolean; progress: number; actual_start: string | null; actual_end: string | null; responsible_id: string | null; phase_id: string | null; position: number; notes: string; project_id: string; parent_id?: string | null; work_package?: boolean };
 export type Dependency = { predecessor_id: string; successor_id: string; lag: number; link_type?: string };
 export type ScheduledTask = PlanTask & { start: string; end: string; critical: boolean; float: number };
 export const dateKey = (date: Date) => format(date, "yyyy-MM-dd");

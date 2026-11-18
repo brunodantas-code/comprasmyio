@@ -650,3 +650,13 @@ input[data-search-field="true"] {
   .opdesk-status-review, .opdesk-status-completed { color: var(--foreground); background: var(--accent); border-color: var(--primary); }
   .opdesk-priority-urgent { color: var(--opdesk-red); background: color-mix(in oklab, var(--opdesk-red) 10%, var(--card)); border-color: color-mix(in oklab, var(--opdesk-red) 35%, var(--border)); }
 }
+
+.pm-weekday { display:block; font-size:0.7rem; line-height:1; color:var(--muted-foreground); margin-bottom:3px; }
+.pm-month-divider { stroke:var(--muted-foreground); stroke-width:1; pointer-events:none; }
+@media(max-width:767px){
+ .pm-activity-cell .pm-activity-name { position:relative; padding-top:0.15rem; }
+ .pm-activity-cell .pm-activity-name > [data-cde-number], .pm-activity-cell .pm-activity-name > [data-cde-number-sequence] { position:absolute; right:calc(100% + 0.5rem); top:0; }
+ .pm-activity-cell .pm-activity-name > span:last-child { border-left:0; padding-left:0; }
+}
+
+@media(max-width:767px){.pm-task-card-collapsed > td:not(:first-child), .pm-task-card-collapsed .pm-activity-cell > span { display:none; }}

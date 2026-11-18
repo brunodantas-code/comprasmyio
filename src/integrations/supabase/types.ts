@@ -7454,6 +7454,8 @@ export type Database = {
           accepted_at: string | null
           accepted_by: string | null
           deliverables: string
+          duration_unit: string
+          duration_value: number | null
           id: string
           name: string
           planned_end: string | null
@@ -7465,6 +7467,8 @@ export type Database = {
           accepted_at?: string | null
           accepted_by?: string | null
           deliverables?: string
+          duration_unit?: string
+          duration_value?: number | null
           id?: string
           name: string
           planned_end?: string | null
@@ -7476,6 +7480,8 @@ export type Database = {
           accepted_at?: string | null
           accepted_by?: string | null
           deliverables?: string
+          duration_unit?: string
+          duration_value?: number | null
           id?: string
           name?: string
           planned_end?: string | null
@@ -7782,6 +7788,8 @@ export type Database = {
           board_column: string | null
           custom_values: Json
           duration: number
+          duration_unit: string
+          duration_value: number | null
           id: string
           milestone: boolean
           name: string
@@ -7801,6 +7809,8 @@ export type Database = {
           board_column?: string | null
           custom_values?: Json
           duration?: number
+          duration_unit?: string
+          duration_value?: number | null
           id?: string
           milestone?: boolean
           name: string
@@ -7820,6 +7830,8 @@ export type Database = {
           board_column?: string | null
           custom_values?: Json
           duration?: number
+          duration_unit?: string
+          duration_value?: number | null
           id?: string
           milestone?: boolean
           name?: string

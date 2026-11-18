@@ -1,14 +1,21 @@
 # Roadmap
-- [ ] Mobile Cronograma: nome da atividade à esquerda, número entre rótulo Atividade e nome.
-- [ ] Calendário: iniciais S T Q Q S S D acima dos dias.
-- [ ] Divisórias verticais no início dos meses: apresentar opções e aguardar escolha antes de implementar.
-- [ ] Mobile Projects: atalhos alinhados à esquerda em 2 colunas/5 duplas, Lista na linha inferior de atalhos iniciais.
-- [ ] Projects Lista: checkbox ao lado do nome da atividade, sem linha separada no celular.
-- [ ] Numeração hierárquica: primeiro número com fundo CDE e níveis subsequentes sem fundo.
-- [ ] Retirar contorno duplo dos cards de tabelas no Projects (referência enviada).
-- [ ] Verificar arraste das barras de atividades e responder ao usuário.
-- [ ] Gantt: numeração dentro das barras e controle de exibir/recolher nomes.
-- [ ] Projects fase 3: conversa por tarefa, perguntas/respostas, menções, pendências Home/Central e anexos privados com download original; serviços externos apenas após conexão autorizada.
+- [x] Conferência dos 13 pedidos de ação: ajustes visuais, duração, exclusão e colaboração verificados; integrações externas aguardam autorização.
+- [x] Totalizadores Projects: orçamento/planejado/realizado no padrão visual das visitas Site Survey.
+- [x] Duração de atividades/fases: opções Horas, Dias, Semanas, Meses e Anos, preservar períodos existentes.
+- [x] Mobile cards: seta CDE à direita, recolhido mostra somente Atividade.
+- [x] Projects: exclusão junto à edição conforme imagem, com confirmação e histórico preservado.
+- [x] Conferir predecessoras não exibidas no Vila Velha e explicar a causa.
+- [x] Hierarquia Projects: melhorar indicação dos níveis, sem setas que pareçam ações.
+- [x] Mobile Cronograma: nome da atividade à esquerda, número entre rótulo Atividade e nome.
+- [x] Calendário: iniciais S T Q Q S S D acima dos dias.
+- [x] Divisórias verticais no início dos meses: apresentar opções e aguardar escolha antes de implementar.
+- [x] Mobile Projects: atalhos alinhados à esquerda em 2 colunas/5 duplas, Lista na linha inferior de atalhos iniciais.
+- [x] Projects Lista: checkbox ao lado do nome da atividade, sem linha separada no celular.
+- [x] Numeração hierárquica: primeiro número com fundo CDE e níveis subsequentes sem fundo.
+- [x] Retirar contorno duplo dos cards de tabelas no Projects (referência enviada).
+- [x] Verificar arraste das barras de atividades e responder ao usuário.
+- [x] Gantt: numeração dentro das barras e controle de exibir/recolher nomes.
+- [x] Projects fase 3: conversa por tarefa, perguntas/respostas, menções, pendências Home/Central e anexos privados com download original; serviços externos apenas após conexão autorizada.
 - [x] Corrigir tarja preta: destaque verde-claro e texto contrastante; conferido no cronograma do Vila Velha.
 - [x] UF e cidade no editor de Projects com seletor Supply; salvamento/reabertura e celular conferidos, cadastros temporários removidos.
 - [x] Explicar possibilidade de feriados automáticos: nacionais pelo período; estaduais/municipais dependem da localidade e fonte oficial, pontos facultativos separados. Nenhuma configuração alterada.
