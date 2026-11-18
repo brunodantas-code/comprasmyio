@@ -664,12 +664,14 @@ input[data-search-field="true"] {
 }
 
 .pm-weekday { display:block; font-size:0.7rem; line-height:1; color:var(--muted-foreground); margin-bottom:3px; }
-.pm-month-divider { stroke:var(--muted-foreground); stroke-width:1; pointer-events:none; }
-.pm-activity-name { padding-inline-start:calc(var(--pm-task-depth,0) * 1.25rem); }
-.pm-workspace .pm-gantt .pm-gantt-number { font-size:var(--filter-fs); color:var(--pm-bar-text); }
+.pm-month-divider { position:absolute; top:8px; bottom:-3px; border-left:1px solid var(--muted-foreground); pointer-events:none; }
+.pm-activity-name { width:100%; justify-content:flex-start; }
+.pm-task-number-slot { display:inline-flex; flex:0 0 3.5rem; justify-content:flex-start; }
+.pm-task-name-text { padding-inline-start:calc(var(--pm-task-depth,0) * 1.25rem); }
+.pm-gantt-number { font-size:var(--pm-number-fs,10px); color:var(--pm-number-text,var(--muted-foreground)); }
+.pm-gantt .current-highlight, .pm-gantt .current-ball-highlight { display:none; }
 @media(max-width:767px){
  .pm-activity-cell .pm-activity-name { position:relative; padding-top:0.15rem; }
- .pm-activity-cell .pm-activity-name > [data-cde-number] { position:absolute; right:calc(100% + 0.5rem); top:0; }
  .pm-activity-cell .pm-activity-name > span:last-child { border-left:0; padding-left:0; }
 }
 

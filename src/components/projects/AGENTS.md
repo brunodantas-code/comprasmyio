@@ -15,4 +15,4 @@
 - Task collaboration is task/project-keyed and append-only; database guards bind authors, validate team recipients and serialize single answers. Mentions use recipient-only read acknowledgments; private owner/task files never grant project access. Shared pending rows and the authenticated pending RPC feed Home/Central with deep links.
 
 - Duration entry stores original value/unit separately from whole working-day scheduling; hours use project hours/day, weeks/months/years count calendar intervals against holidays. Gantt date resizing resets entry to days to avoid stale units.
-- Gantt optional dependency arrays use a stable default to avoid effect/rebuild loops; task hierarchy lists opt into unframed CDE numbers for descendants and depth-based right indentation.
+- Gantt rebuilds depend on serialized task/dependency content and editable mode, not caller array/callback identity; disable infinite padding to keep wheel scrolling from rebuilding the chart and destroying numbering portals; task hierarchy lists opt into unframed CDE numbers for descendants and depth-based right indentation.

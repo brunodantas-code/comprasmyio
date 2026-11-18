@@ -1,4 +1,8 @@
 # Roadmap
+- [x] Lápis de Lista alinhado aos ícones das duas colunas mobile (32/217 px), conferido em tela.
+- [x] Números da lista alinhados à esquerda com o primeiro 1; nomes mantêm recuo hierárquico; conferido no computador/celular.
+- [x] Divisórias dos meses somente no cabeçalho, avançando levemente abaixo dele sem cruzar a primeira tarefa; visualização mensal conferida.
+- [x] Oscilação reproduzida com 971 mutações na rolagem e eliminada (zero); conteúdo estável e expansão infinita desativada. Numeração 10 px cinza escuro, tamanho/cor no CDE, salvar/reler 9 px e restaurar 10 px conferidos. Linha/bolinha de hoje retiradas; 14 testes passaram.
 - [x] Barras Gantt: números sem fundo e mesma fonte de 12 px dos nomes, conferidos nas quatro atividades reais.
 - [x] Corrigir barra piscando: referência vazia estável evita reconstrução contínua do Gantt; conferida ausência de substituições repetidas na tela.
 - [x] Teste confirmado e removido: projeto Verificação colaboração Projects 20261118, tarefa, conversas e três anexos; Vila Velha preservado e conferido em tela.
