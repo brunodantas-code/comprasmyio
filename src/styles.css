@@ -58,6 +58,7 @@ input[data-search-field="true"] {
 .pm-workspace .pm-gantt .bar-label { fill: var(--pm-bar-text); font-size: var(--filter-fs); }
 .pm-workspace .pm-gantt .lower-text,
 .pm-workspace .pm-gantt .upper-text { color: var(--pm-header-text); }
+.pm-workspace .pm-gantt .date-range-highlight,
 .pm-workspace .pm-gantt .current-date-highlight {
   background: var(--myio-green-tint);
   color: var(--foreground);
