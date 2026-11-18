@@ -1,4 +1,5 @@
 import { CrmMessageModels } from "./crm-message-models";
+import { CrmHistoricalRecords } from "./crm-historical-records";
 import { useTableFilters } from "@/components/use-table-filters";
 import { CrmConfig, crmConfigOptions } from "./crm-config";
 import { CnpjField, CidadeField, UfField } from "./company-lookups";
@@ -307,7 +308,7 @@ function LeadDialog({ value, data, onClose, refresh }: { value: Partial<FullLead
   return <CrmRecordDialog open={!!value} title={value?.id ? "Editar lead" : "Novo lead"} fields={fields} initial={Object.fromEntries(fields.map((f) => [f.key, f.key === "etapa_codigo" ? (value ? leadStage(value as FullLead) : "novo") : s(value?.[f.key as keyof FullLead])]))} onClose={onClose}
     onSave={async (v) => { const me = await uid(); check(value?.id ? await supabase.from("crm_leads").update(rowOf(v)).eq("id", value.id).select("id") : await supabase.from("crm_leads").insert({ ...rowOf(v), dono_id: nn(v.dono_id) ?? me, created_by: me }).select("id")); await refresh(); toast.success("Lead salvo"); }}
     onDelete={value?.id ? async () => { check(await supabase.from("crm_leads").delete().eq("id", value.id!).select("id")); await refresh(); } : undefined} deleteTitle="Excluir lead?"
-    footer={(v) => <div className="space-y-3"><CrmMessageModels etapa={v.etapa_codigo} vars={{ nome: v.nome, empresa: v.empresa_texto, shopping: v.empresa_texto }} />{value?.oportunidade_id ? <span className="text-xs text-muted-foreground">Já convertido em oportunidade</span> : <Button variant="ghost" disabled={!v.nome?.trim()} onClick={() => convert(v).catch((e) => toast.error(e instanceof Error ? e.message : "Não foi possível converter."))}><ArrowRightLeft className="h-4 w-4" />Converter em oportunidade</Button>}</div>} />;
+    footer={(v) => <div className="space-y-3"><CrmMessageModels etapa={v.etapa_codigo} vars={{ nome: v.nome, empresa: v.empresa_texto, shopping: v.empresa_texto }} />{value?.oportunidade_id ? <span className="text-xs text-muted-foreground">Já convertido em oportunidade</span> : <Button variant="ghost" disabled={!v.nome?.trim()} onClick={() => convert(v).catch((e) => toast.error(e instanceof Error ? e.message : "Não foi possível converter."))}><ArrowRightLeft className="h-4 w-4" />Converter em oportunidade</Button>}{value?.id ? <CrmHistoricalRecords leadId={value.id} /> : null}</div>} />;
 }
 function OpDialog({ value, data, onClose, refresh }: { value: Partial<FullOp> | null; data: CrmData; onClose: () => void; refresh: () => Promise<void> }) {
   const empresaId = value?.empresa_id;
@@ -324,5 +325,5 @@ function OpDialog({ value, data, onClose, refresh }: { value: Partial<FullOp> | 
       const row = { titulo: v.titulo.trim(), empresa_id: v.empresa_id, contato_id: nn(v.contato_id), fase_id: v.fase_id, dono_id: nn(v.dono_id), valor_setup: num(v.valor_setup), valor_mrr: num(v.valor_mrr), probabilidade: prob, data_prevista_fechamento: nn(v.data_prevista_fechamento), produto_alvo: nn(v.produto_alvo), proxima_acao_data: nn(v.proxima_acao_data), proxima_acao_descricao: nn(v.proxima_acao_descricao), motivo_encerramento: nn(v.motivo_encerramento), observacoes: nn(v.observacoes) };
       const me = await uid();
       check(value?.id ? await supabase.from("crm_oportunidades").update(row).eq("id", value.id).select("id") : await supabase.from("crm_oportunidades").insert({ ...row, dono_id: row.dono_id ?? me, created_by: me }).select("id")); await refresh(); toast.success("Oportunidade salva"); }}
-    footer={(v) => <div className="space-y-3"><CrmMessageModels fase={v.fase_id} vars={{ nome: data.contatos.find((c) => c.id === v.contato_id)?.nome ?? "", empresa: empresaName(data, v.empresa_id), shopping: empresaName(data, v.empresa_id) }} />{value?.id && <span className="text-xs text-muted-foreground">Oportunidades não são excluídas: para encerrar, mova para Perdido ou Desqualificado.</span>}</div>} />;
+    footer={(v) => <div className="space-y-3"><CrmMessageModels fase={v.fase_id} vars={{ nome: data.contatos.find((c) => c.id === v.contato_id)?.nome ?? "", empresa: empresaName(data, v.empresa_id), shopping: empresaName(data, v.empresa_id) }} />{value?.id && <><span className="text-xs text-muted-foreground">Oportunidades não são excluídas: para encerrar, mova para Perdido ou Desqualificado.</span><CrmHistoricalRecords oportunidadeId={value.id} /></>}</div>} />;
 }

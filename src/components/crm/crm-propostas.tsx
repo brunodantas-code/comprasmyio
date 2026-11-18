@@ -1,4 +1,5 @@
 import { useCusteio } from "./crm-custos";
+import { CrmHistoricalRecords } from "./crm-historical-records";
 import { useTableFilters } from "@/components/use-table-filters";
 import { MemoriaCalculo } from "./crm-memoria";
 import { useEffect, useMemo, useState } from "react";
@@ -21,7 +22,7 @@ import { brl, matchesSearch } from "./crm-logic";
 import { CATEGORIAS_ITEM, STATUS_PROPOSTA, bloqueioEnvio, parseCondicoes, proximaVersao, statusLabel, totaisDe, type Condicoes, type ItemProposta, type Pendencia, type PropostaStatus } from "./proposta-logic";
 
 export type Template = { id: string; codigo: string; nome: string; introducao: string | null; escopo: string | null; condicoes_padrao: unknown; ativo: boolean };
-export type Proposta = { id: string; numero: string; versao: number; oportunidade_id: string; template_id: string | null; status: PropostaStatus; data_proposta: string; condicoes: unknown; total_setup: number; total_mensal: number; incompleta: boolean; observacoes: string | null; created_by: string | null; created_at: string };
+export type Proposta = { id: string; numero: string; versao: number; oportunidade_id: string; template_id: string | null; status: PropostaStatus; data_proposta: string; condicoes: unknown; total_setup: number; total_mensal: number; incompleta: boolean; observacoes: string | null; created_by: string | null; created_at: string; arquivo_path?: string | null; arquivo_origem_path?: string | null };
 
 export const propostasOptions = () => queryOptions({
   queryKey: ["crm-propostas"],
@@ -111,10 +112,11 @@ function PropostaEditor({ id, data, templates, onClose, onOpen }: { id: string |
   const detail = useQuery({
     queryKey: ["crm-proposta", id], enabled: !!id,
     queryFn: async (): Promise<Detail> => {
+      if (!id) throw new Error("Proposta não encontrada.");
       const [p, i, pe] = await Promise.all([
-        supabase.from("crm_propostas").select("*").eq("id", id!).single(),
-        supabase.from("crm_proposta_itens").select("*").eq("proposta_id", id!).order("ordem"),
-        supabase.from("crm_proposta_pendencias").select("id, texto, status, resolucao").eq("proposta_id", id!).order("created_at"),
+        supabase.from("crm_propostas").select("*").eq("id", id).single(),
+        supabase.from("crm_proposta_itens").select("*").eq("proposta_id", id).order("ordem"),
+        supabase.from("crm_proposta_pendencias").select("id, texto, status, resolucao").eq("proposta_id", id).order("created_at"),
       ]);
       if (p.error) throw p.error; if (i.error) throw i.error; if (pe.error) throw pe.error;
       return { proposta: p.data as unknown as Proposta, itens: (i.data ?? []).map((x) => ({ ...x, quantidade: Number(x.quantidade), preco_setup_unit: Number(x.preco_setup_unit), preco_mensal_unit: Number(x.preco_mensal_unit) })) as ItemProposta[], pendencias: (pe.data ?? []) as Pendencia[] };
@@ -278,6 +280,7 @@ function PropostaEditor({ id, data, templates, onClose, onOpen }: { id: string |
           <div className="flex items-end gap-2"><Input aria-label="Nova pendência" placeholder="Nova pendência (ex.: confirmar quantidade de quiosques)" value={novaPend} onChange={(e) => setNovaPend(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") void pend("add"); }} /><Button variant="ghost" onClick={() => pend("add")}><Plus className="h-4 w-4" />Adicionar</Button></div>
         </section>
 
+        <CrmHistoricalRecords propostaId={d.proposta.id} numero={d.proposta.numero} paths={[d.proposta.arquivo_path, d.proposta.arquivo_origem_path]} />
         <div className="space-y-1"><Label htmlFor="pr-obs">Observações internas (não saem no documento)</Label><Textarea id="pr-obs" rows={2} value={obs} onChange={(e) => setObs(e.target.value)} /></div>
 
         <div className="flex flex-wrap items-center gap-2 border-t border-border pt-3">

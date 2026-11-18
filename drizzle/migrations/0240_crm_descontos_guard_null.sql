@@ -1,0 +1,2 @@
+ALTER TABLE public.crm_proposta_itens DROP CONSTRAINT crm_item_setup_valid, DROP CONSTRAINT crm_item_mensal_valid;
+ALTER TABLE public.crm_proposta_itens ADD CONSTRAINT crm_item_setup_valid CHECK(preco_setup_unit>=0 OR COALESCE(preco_setup_unit=(precos_historicos->>'preco_setup_unit')::numeric,false)), ADD CONSTRAINT crm_item_mensal_valid CHECK(preco_mensal_unit>=0 OR COALESCE(preco_mensal_unit=(precos_historicos->>'preco_mensal_unit')::numeric,false));

@@ -5,3 +5,5 @@
 - CRM configuration writes use existing admin-only RLS; stage synchronization preserves historical status, while UI filtering/boards use etapa_codigo. Foreign keys prevent deleting referenced configuration.
 - CNPJ/IBGE lookups use authenticated server functions with CRM access checks and bounded public-provider requests; unavailable lookups never block manual registration.
 - Message models are local copyable text, not approved Meta templates or delivery evidence; no automatic messaging occurs.
+- Historical migration retains sanitized originals, server-verified identity mapping, private document manifests and calculation snapshots; import-only side effects end with the audited run, and legacy roles never grant ERP access.
+- CRM lead/history reads paginate deterministically to preserve full imported lists beyond the Data API row cap.

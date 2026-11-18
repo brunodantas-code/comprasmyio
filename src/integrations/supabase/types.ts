@@ -1434,6 +1434,7 @@ export type Database = {
           email: string | null
           empresa_id: string
           id: string
+          legado: Json | null
           nome: string
           observacoes: string | null
           papel: string | null
@@ -1447,6 +1448,7 @@ export type Database = {
           email?: string | null
           empresa_id: string
           id?: string
+          legado?: Json | null
           nome: string
           observacoes?: string | null
           papel?: string | null
@@ -1460,6 +1462,7 @@ export type Database = {
           email?: string | null
           empresa_id?: string
           id?: string
+          legado?: Json | null
           nome?: string
           observacoes?: string | null
           papel?: string | null
@@ -1487,29 +1490,50 @@ export type Database = {
         Row: {
           cif: number
           componentes_myio: number
+          created_at: string | null
+          custo_base: number | null
+          custo_mensal: number | null
           id: string
           lote_id: string
           mod_assembling: number
+          observacoes: string | null
+          origem_custo: string | null
           pre_setup_fabrica: number
           produto: string
+          updated_at: string | null
+          valores_originais: Json | null
         }
         Insert: {
           cif?: number
           componentes_myio?: number
+          created_at?: string | null
+          custo_base?: number | null
+          custo_mensal?: number | null
           id?: string
           lote_id: string
           mod_assembling?: number
+          observacoes?: string | null
+          origem_custo?: string | null
           pre_setup_fabrica?: number
           produto: string
+          updated_at?: string | null
+          valores_originais?: Json | null
         }
         Update: {
           cif?: number
           componentes_myio?: number
+          created_at?: string | null
+          custo_base?: number | null
+          custo_mensal?: number | null
           id?: string
           lote_id?: string
           mod_assembling?: number
+          observacoes?: string | null
+          origem_custo?: string | null
           pre_setup_fabrica?: number
           produto?: string
+          updated_at?: string | null
+          valores_originais?: Json | null
         }
         Relationships: [
           {
@@ -1521,49 +1545,234 @@ export type Database = {
           },
         ]
       }
+      crm_documentos_migrados: {
+        Row: {
+          file_name: string
+          file_size: number
+          grupo: string
+          internal_only: boolean
+          path: string
+          sha256: string
+          storage_path: string
+        }
+        Insert: {
+          file_name: string
+          file_size: number
+          grupo: string
+          internal_only?: boolean
+          path: string
+          sha256: string
+          storage_path: string
+        }
+        Update: {
+          file_name?: string
+          file_size?: number
+          grupo?: string
+          internal_only?: boolean
+          path?: string
+          sha256?: string
+          storage_path?: string
+        }
+        Relationships: []
+      }
+      crm_emails_envios: {
+        Row: {
+          assunto: string
+          atividade_id: string | null
+          corpo: string
+          created_at: string
+          destino: string
+          enviado_em: string | null
+          erro: string | null
+          id: string
+          lead_id: string | null
+          lote_id: string | null
+          nao_antes_de: string | null
+          oportunidade_id: string | null
+          remetente_id: string
+          status: string
+          template_id: string | null
+          template_nome: string | null
+          tentativas: number
+          updated_at: string
+        }
+        Insert: {
+          assunto: string
+          atividade_id?: string | null
+          corpo: string
+          created_at?: string
+          destino: string
+          enviado_em?: string | null
+          erro?: string | null
+          id?: string
+          lead_id?: string | null
+          lote_id?: string | null
+          nao_antes_de?: string | null
+          oportunidade_id?: string | null
+          remetente_id: string
+          status?: string
+          template_id?: string | null
+          template_nome?: string | null
+          tentativas?: number
+          updated_at?: string
+        }
+        Update: {
+          assunto?: string
+          atividade_id?: string | null
+          corpo?: string
+          created_at?: string
+          destino?: string
+          enviado_em?: string | null
+          erro?: string | null
+          id?: string
+          lead_id?: string | null
+          lote_id?: string | null
+          nao_antes_de?: string | null
+          oportunidade_id?: string | null
+          remetente_id?: string
+          status?: string
+          template_id?: string | null
+          template_nome?: string | null
+          tentativas?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_emails_envios_atividade_id_fkey"
+            columns: ["atividade_id"]
+            isOneToOne: false
+            referencedRelation: "crm_atividades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_emails_envios_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "crm_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_emails_envios_lote_id_fkey"
+            columns: ["lote_id"]
+            isOneToOne: false
+            referencedRelation: "crm_emails_lotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_emails_envios_oportunidade_id_fkey"
+            columns: ["oportunidade_id"]
+            isOneToOne: false
+            referencedRelation: "crm_oportunidades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_emails_envios_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "crm_templates_mensagem"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_emails_lotes: {
+        Row: {
+          created_at: string
+          id: string
+          remetente_id: string
+          template_id: string | null
+          template_nome: string
+          total: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          remetente_id: string
+          template_id?: string | null
+          template_nome: string
+          total?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          remetente_id?: string
+          template_id?: string | null
+          template_nome?: string
+          total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_emails_lotes_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "crm_templates_mensagem"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_empresas: {
         Row: {
+          apelido: string | null
+          cep: string | null
           cidade: string | null
           cnpj: string | null
           created_at: string
           created_by: string | null
           dominio: string | null
+          email: string | null
+          endereco: string | null
           grupo_economico: string | null
           id: string
+          legado: Json | null
+          municipio_ibge: number | null
           nome_fantasia: string
           observacoes: string | null
           razao_social: string | null
           segmento: string | null
+          telefone: string | null
           uf: string | null
           updated_at: string
         }
         Insert: {
+          apelido?: string | null
+          cep?: string | null
           cidade?: string | null
           cnpj?: string | null
           created_at?: string
           created_by?: string | null
           dominio?: string | null
+          email?: string | null
+          endereco?: string | null
           grupo_economico?: string | null
           id?: string
+          legado?: Json | null
+          municipio_ibge?: number | null
           nome_fantasia: string
           observacoes?: string | null
           razao_social?: string | null
           segmento?: string | null
+          telefone?: string | null
           uf?: string | null
           updated_at?: string
         }
         Update: {
+          apelido?: string | null
+          cep?: string | null
           cidade?: string | null
           cnpj?: string | null
           created_at?: string
           created_by?: string | null
           dominio?: string | null
+          email?: string | null
+          endereco?: string | null
           grupo_economico?: string | null
           id?: string
+          legado?: Json | null
+          municipio_ibge?: number | null
           nome_fantasia?: string
           observacoes?: string | null
           razao_social?: string | null
           segmento?: string | null
+          telefone?: string | null
           uf?: string | null
           updated_at?: string
         }
@@ -1647,6 +1856,294 @@ export type Database = {
         }
         Relationships: []
       }
+      crm_import_batches: {
+        Row: {
+          batch_key: string
+          created_at: string
+          payload_hash: string
+          row_count: number
+          run_id: string
+          table_name: string
+        }
+        Insert: {
+          batch_key: string
+          created_at?: string
+          payload_hash: string
+          row_count: number
+          run_id: string
+          table_name: string
+        }
+        Update: {
+          batch_key?: string
+          created_at?: string
+          payload_hash?: string
+          row_count?: number
+          run_id?: string
+          table_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_import_batches_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "crm_import_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_import_originals: {
+        Row: {
+          payload: Json
+          record_key: string
+          run_id: string
+          table_name: string
+        }
+        Insert: {
+          payload: Json
+          record_key: string
+          run_id: string
+          table_name: string
+        }
+        Update: {
+          payload?: Json
+          record_key?: string
+          run_id?: string
+          table_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_import_originals_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "crm_import_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_import_runs: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          requested_by: string
+          status: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id: string
+          requested_by: string
+          status?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          requested_by?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_import_runs_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_insumos: {
+        Row: {
+          ativo: boolean
+          categoria: string
+          codigo: string | null
+          conta_device: boolean
+          created_at: string
+          custo_mensal: number | null
+          fornecedor: string | null
+          id: string
+          margem_propria: number | null
+          nome: string
+          observacoes: string | null
+          origem_preco: string
+          parametro_tipo: string
+          parametro_valor: number | null
+          pct_mensal: number | null
+          preco_compra: number | null
+          unidade: string
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          categoria?: string
+          codigo?: string | null
+          conta_device?: boolean
+          created_at?: string
+          custo_mensal?: number | null
+          fornecedor?: string | null
+          id?: string
+          margem_propria?: number | null
+          nome: string
+          observacoes?: string | null
+          origem_preco?: string
+          parametro_tipo?: string
+          parametro_valor?: number | null
+          pct_mensal?: number | null
+          preco_compra?: number | null
+          unidade?: string
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          categoria?: string
+          codigo?: string | null
+          conta_device?: boolean
+          created_at?: string
+          custo_mensal?: number | null
+          fornecedor?: string | null
+          id?: string
+          margem_propria?: number | null
+          nome?: string
+          observacoes?: string | null
+          origem_preco?: string
+          parametro_tipo?: string
+          parametro_valor?: number | null
+          pct_mensal?: number | null
+          preco_compra?: number | null
+          unidade?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      crm_insumos_compatibilidade: {
+        Row: {
+          insumo_id: string
+          produto_codigo: string
+        }
+        Insert: {
+          insumo_id: string
+          produto_codigo: string
+        }
+        Update: {
+          insumo_id?: string
+          produto_codigo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_insumos_compatibilidade_insumo_id_fkey"
+            columns: ["insumo_id"]
+            isOneToOne: false
+            referencedRelation: "crm_insumos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_insumos_compatibilidade_produto_codigo_fkey"
+            columns: ["produto_codigo"]
+            isOneToOne: false
+            referencedRelation: "crm_produtos_myio"
+            referencedColumns: ["codigo"]
+          },
+        ]
+      }
+      crm_itens_proposta_composicao: {
+        Row: {
+          created_at: string
+          custo_setup_unit: number | null
+          id: string
+          item_lista_id: string | null
+          item_proposta_id: string
+          nome: string
+          ordem: number
+          preco_mensal_unit: number
+          preco_setup_unit: number
+          quantidade_por_linha: number
+          ref: string
+          tipo: string
+        }
+        Insert: {
+          created_at?: string
+          custo_setup_unit?: number | null
+          id?: string
+          item_lista_id?: string | null
+          item_proposta_id: string
+          nome: string
+          ordem?: number
+          preco_mensal_unit?: number
+          preco_setup_unit?: number
+          quantidade_por_linha: number
+          ref: string
+          tipo: string
+        }
+        Update: {
+          created_at?: string
+          custo_setup_unit?: number | null
+          id?: string
+          item_lista_id?: string | null
+          item_proposta_id?: string
+          nome?: string
+          ordem?: number
+          preco_mensal_unit?: number
+          preco_setup_unit?: number
+          quantidade_por_linha?: number
+          ref?: string
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_itens_proposta_composicao_item_lista_id_fkey"
+            columns: ["item_lista_id"]
+            isOneToOne: false
+            referencedRelation: "crm_tabela_precos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_itens_proposta_composicao_item_proposta_id_fkey"
+            columns: ["item_proposta_id"]
+            isOneToOne: false
+            referencedRelation: "crm_proposta_itens"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_itens_proposta_custo: {
+        Row: {
+          composicao: Json | null
+          custo_capitalizavel_unit: number | null
+          custo_unit: number | null
+          item_id: string
+          kit_id: string | null
+        }
+        Insert: {
+          composicao?: Json | null
+          custo_capitalizavel_unit?: number | null
+          custo_unit?: number | null
+          item_id: string
+          kit_id?: string | null
+        }
+        Update: {
+          composicao?: Json | null
+          custo_capitalizavel_unit?: number | null
+          custo_unit?: number | null
+          item_id?: string
+          kit_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_itens_proposta_custo_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: true
+            referencedRelation: "crm_proposta_itens"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_itens_proposta_custo_kit_id_fkey"
+            columns: ["kit_id"]
+            isOneToOne: false
+            referencedRelation: "crm_kits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_kits: {
         Row: {
           ativo: boolean
@@ -1688,6 +2185,39 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      crm_kits_insumos: {
+        Row: {
+          insumo_id: string
+          kit_id: string
+          quantidade: number
+        }
+        Insert: {
+          insumo_id: string
+          kit_id: string
+          quantidade?: number
+        }
+        Update: {
+          insumo_id?: string
+          kit_id?: string
+          quantidade?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_kits_insumos_insumo_id_fkey"
+            columns: ["insumo_id"]
+            isOneToOne: false
+            referencedRelation: "crm_insumos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_kits_insumos_kit_id_fkey"
+            columns: ["kit_id"]
+            isOneToOne: false
+            referencedRelation: "crm_kits"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       crm_lead_contatos: {
         Row: {
@@ -1776,6 +2306,7 @@ export type Database = {
       crm_leads: {
         Row: {
           cargo: string | null
+          cidade: string | null
           cnpj: string | null
           created_at: string
           created_by: string | null
@@ -1784,21 +2315,33 @@ export type Database = {
           empresa_id: string | null
           empresa_texto: string | null
           etapa_codigo: string | null
+          etapa_desde: string | null
+          etapa_legado: string | null
           id: string
           interesses: string | null
+          municipio_ibge: number | null
           nome: string
           observacoes: string | null
           oportunidade_id: string | null
           origem: string
           origem_detalhe: string | null
           papel: string | null
+          proximo_followup: string | null
+          revisar_cidade: boolean | null
           status: string
           telefone: string | null
+          telefone_e164: string | null
+          tipo: string | null
           toques: number
+          uf: string | null
+          ultima_atividade: string | null
+          ultimo_contato: string | null
           updated_at: string
+          whatsapp_status: string | null
         }
         Insert: {
           cargo?: string | null
+          cidade?: string | null
           cnpj?: string | null
           created_at?: string
           created_by?: string | null
@@ -1807,21 +2350,33 @@ export type Database = {
           empresa_id?: string | null
           empresa_texto?: string | null
           etapa_codigo?: string | null
+          etapa_desde?: string | null
+          etapa_legado?: string | null
           id?: string
           interesses?: string | null
+          municipio_ibge?: number | null
           nome: string
           observacoes?: string | null
           oportunidade_id?: string | null
           origem?: string
           origem_detalhe?: string | null
           papel?: string | null
+          proximo_followup?: string | null
+          revisar_cidade?: boolean | null
           status?: string
           telefone?: string | null
+          telefone_e164?: string | null
+          tipo?: string | null
           toques?: number
+          uf?: string | null
+          ultima_atividade?: string | null
+          ultimo_contato?: string | null
           updated_at?: string
+          whatsapp_status?: string | null
         }
         Update: {
           cargo?: string | null
+          cidade?: string | null
           cnpj?: string | null
           created_at?: string
           created_by?: string | null
@@ -1830,18 +2385,29 @@ export type Database = {
           empresa_id?: string | null
           empresa_texto?: string | null
           etapa_codigo?: string | null
+          etapa_desde?: string | null
+          etapa_legado?: string | null
           id?: string
           interesses?: string | null
+          municipio_ibge?: number | null
           nome?: string
           observacoes?: string | null
           oportunidade_id?: string | null
           origem?: string
           origem_detalhe?: string | null
           papel?: string | null
+          proximo_followup?: string | null
+          revisar_cidade?: boolean | null
           status?: string
           telefone?: string | null
+          telefone_e164?: string | null
+          tipo?: string | null
           toques?: number
+          uf?: string | null
+          ultima_atividade?: string | null
+          ultimo_contato?: string | null
           updated_at?: string
+          whatsapp_status?: string | null
         }
         Relationships: [
           {
@@ -1874,12 +2440,178 @@ export type Database = {
           },
         ]
       }
+      crm_levantamento_convites: {
+        Row: {
+          created_at: string
+          criado_por: string
+          emitido_em: string
+          enviado_em: string | null
+          expira_em: string
+          gravacoes: number
+          id: string
+          levantamento_id: string | null
+          oportunidade_id: string
+          respostas: Json | null
+          status: string
+          token_hash: string
+          ultima_gravacao: string | null
+          updated_at: string
+          visto_em: string | null
+        }
+        Insert: {
+          created_at?: string
+          criado_por: string
+          emitido_em?: string
+          enviado_em?: string | null
+          expira_em?: string
+          gravacoes?: number
+          id?: string
+          levantamento_id?: string | null
+          oportunidade_id: string
+          respostas?: Json | null
+          status?: string
+          token_hash: string
+          ultima_gravacao?: string | null
+          updated_at?: string
+          visto_em?: string | null
+        }
+        Update: {
+          created_at?: string
+          criado_por?: string
+          emitido_em?: string
+          enviado_em?: string | null
+          expira_em?: string
+          gravacoes?: number
+          id?: string
+          levantamento_id?: string | null
+          oportunidade_id?: string
+          respostas?: Json | null
+          status?: string
+          token_hash?: string
+          ultima_gravacao?: string | null
+          updated_at?: string
+          visto_em?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_levantamento_convites_levantamento_id_fkey"
+            columns: ["levantamento_id"]
+            isOneToOne: false
+            referencedRelation: "crm_levantamentos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_levantamento_convites_oportunidade_id_fkey"
+            columns: ["oportunidade_id"]
+            isOneToOne: false
+            referencedRelation: "crm_oportunidades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_levantamentos: {
+        Row: {
+          arquivo_nome: string | null
+          arquivo_path: string | null
+          created_at: string
+          criado_por: string | null
+          custo_estimado_usd: number
+          extracao: Json
+          id: string
+          modelo: string | null
+          oportunidade_id: string | null
+          origem: string
+          proposta_id: string | null
+          texto_fonte: string
+          tokens_in: number
+          tokens_out: number
+        }
+        Insert: {
+          arquivo_nome?: string | null
+          arquivo_path?: string | null
+          created_at?: string
+          criado_por?: string | null
+          custo_estimado_usd?: number
+          extracao: Json
+          id?: string
+          modelo?: string | null
+          oportunidade_id?: string | null
+          origem: string
+          proposta_id?: string | null
+          texto_fonte: string
+          tokens_in?: number
+          tokens_out?: number
+        }
+        Update: {
+          arquivo_nome?: string | null
+          arquivo_path?: string | null
+          created_at?: string
+          criado_por?: string | null
+          custo_estimado_usd?: number
+          extracao?: Json
+          id?: string
+          modelo?: string | null
+          oportunidade_id?: string | null
+          origem?: string
+          proposta_id?: string | null
+          texto_fonte?: string
+          tokens_in?: number
+          tokens_out?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_levantamentos_oportunidade_id_fkey"
+            columns: ["oportunidade_id"]
+            isOneToOne: false
+            referencedRelation: "crm_oportunidades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_levantamentos_proposta_id_fkey"
+            columns: ["proposta_id"]
+            isOneToOne: false
+            referencedRelation: "crm_propostas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_listas_preco: {
+        Row: {
+          created_at: string
+          data_fim: string | null
+          data_inicio: string
+          id: string
+          nome: string
+          observacoes: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          data_fim?: string | null
+          data_inicio: string
+          id?: string
+          nome: string
+          observacoes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          data_fim?: string | null
+          data_inicio?: string
+          id?: string
+          nome?: string
+          observacoes?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       crm_lotes_custo: {
         Row: {
           codigo: string
           created_at: string
           descricao: string | null
           id: string
+          observacoes: string | null
           status: string
           updated_at: string
           vigencia_fim: string | null
@@ -1890,6 +2622,7 @@ export type Database = {
           created_at?: string
           descricao?: string | null
           id?: string
+          observacoes?: string | null
           status?: string
           updated_at?: string
           vigencia_fim?: string | null
@@ -1900,6 +2633,7 @@ export type Database = {
           created_at?: string
           descricao?: string | null
           id?: string
+          observacoes?: string | null
           status?: string
           updated_at?: string
           vigencia_fim?: string | null
@@ -1925,6 +2659,27 @@ export type Database = {
         }
         Relationships: []
       }
+      crm_nomes_proposta: {
+        Row: {
+          modelo: string
+          ordem: number
+          origem: string
+          updated_at: string
+        }
+        Insert: {
+          modelo: string
+          ordem?: number
+          origem: string
+          updated_at?: string
+        }
+        Update: {
+          modelo?: string
+          ordem?: number
+          origem?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       crm_oportunidades: {
         Row: {
           contato_id: string | null
@@ -1937,12 +2692,14 @@ export type Database = {
           fase_id: string
           id: string
           lead_id: string | null
+          legado: Json | null
           motivo_encerramento: string | null
           observacoes: string | null
           probabilidade: number | null
           produto_alvo: string | null
           proxima_acao_data: string | null
           proxima_acao_descricao: string | null
+          tipo_venda: string | null
           titulo: string
           updated_at: string
           valor_mrr: number | null
@@ -1959,12 +2716,14 @@ export type Database = {
           fase_id: string
           id?: string
           lead_id?: string | null
+          legado?: Json | null
           motivo_encerramento?: string | null
           observacoes?: string | null
           probabilidade?: number | null
           produto_alvo?: string | null
           proxima_acao_data?: string | null
           proxima_acao_descricao?: string | null
+          tipo_venda?: string | null
           titulo: string
           updated_at?: string
           valor_mrr?: number | null
@@ -1981,12 +2740,14 @@ export type Database = {
           fase_id?: string
           id?: string
           lead_id?: string | null
+          legado?: Json | null
           motivo_encerramento?: string | null
           observacoes?: string | null
           probabilidade?: number | null
           produto_alvo?: string | null
           proxima_acao_data?: string | null
           proxima_acao_descricao?: string | null
+          tipo_venda?: string | null
           titulo?: string
           updated_at?: string
           valor_mrr?: number | null
@@ -2086,61 +2847,339 @@ export type Database = {
         }
         Relationships: []
       }
+      crm_parametros_preco: {
+        Row: {
+          custo_hora_instalacao: number
+          id: number
+          margem_alvo: number
+          updated_at: string
+        }
+        Insert: {
+          custo_hora_instalacao?: number
+          id?: number
+          margem_alvo?: number
+          updated_at?: string
+        }
+        Update: {
+          custo_hora_instalacao?: number
+          id?: number
+          margem_alvo?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      crm_perfis_legado: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          email: string
+          erp_user_id: string | null
+          id: string
+          nome: string
+          papel: string
+          updated_at: string
+          visao_geral: boolean
+        }
+        Insert: {
+          ativo: boolean
+          created_at: string
+          email: string
+          erp_user_id?: string | null
+          id: string
+          nome: string
+          papel: string
+          updated_at: string
+          visao_geral: boolean
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          email?: string
+          erp_user_id?: string | null
+          id?: string
+          nome?: string
+          papel?: string
+          updated_at?: string
+          visao_geral?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_perfis_legado_erp_user_id_fkey"
+            columns: ["erp_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_precos_ponto: {
+        Row: {
+          ativo: boolean
+          atualizado_por: string | null
+          composicao: string
+          created_at: string
+          descricao: string
+          grandeza: string
+          id: string
+          nome_produto: string | null
+          ordem: number
+          preco_mensal: number | null
+          preco_setup: number | null
+          texto_tecnico: string | null
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          atualizado_por?: string | null
+          composicao: string
+          created_at?: string
+          descricao: string
+          grandeza: string
+          id?: string
+          nome_produto?: string | null
+          ordem?: number
+          preco_mensal?: number | null
+          preco_setup?: number | null
+          texto_tecnico?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          atualizado_por?: string | null
+          composicao?: string
+          created_at?: string
+          descricao?: string
+          grandeza?: string
+          id?: string
+          nome_produto?: string | null
+          ordem?: number
+          preco_mensal?: number | null
+          preco_setup?: number | null
+          texto_tecnico?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      crm_precos_ponto_historico: {
+        Row: {
+          alterado_em: string
+          alterado_por: string | null
+          id: string
+          mensal_antes: number | null
+          mensal_depois: number | null
+          origem: string
+          preco_ponto_id: string
+          setup_antes: number | null
+          setup_depois: number | null
+        }
+        Insert: {
+          alterado_em?: string
+          alterado_por?: string | null
+          id?: string
+          mensal_antes?: number | null
+          mensal_depois?: number | null
+          origem?: string
+          preco_ponto_id: string
+          setup_antes?: number | null
+          setup_depois?: number | null
+        }
+        Update: {
+          alterado_em?: string
+          alterado_por?: string | null
+          id?: string
+          mensal_antes?: number | null
+          mensal_depois?: number | null
+          origem?: string
+          preco_ponto_id?: string
+          setup_antes?: number | null
+          setup_depois?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_precos_ponto_historico_preco_ponto_id_fkey"
+            columns: ["preco_ponto_id"]
+            isOneToOne: false
+            referencedRelation: "crm_precos_ponto"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_produtos_myio: {
+        Row: {
+          ativo: boolean
+          codigo: string
+          conta_device: boolean
+          created_at: string
+          margem_propria: number | null
+          nome: string
+          observacoes: string | null
+          ordem: number
+          pct_mensal: number | null
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          codigo: string
+          conta_device?: boolean
+          created_at?: string
+          margem_propria?: number | null
+          nome: string
+          observacoes?: string | null
+          ordem?: number
+          pct_mensal?: number | null
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          codigo?: string
+          conta_device?: boolean
+          created_at?: string
+          margem_propria?: number | null
+          nome?: string
+          observacoes?: string | null
+          ordem?: number
+          pct_mensal?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      crm_produtos_myio_preco: {
+        Row: {
+          margem_propria: number | null
+          produto_codigo: string
+          updated_at: string
+        }
+        Insert: {
+          margem_propria?: number | null
+          produto_codigo: string
+          updated_at?: string
+        }
+        Update: {
+          margem_propria?: number | null
+          produto_codigo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_produtos_myio_preco_produto_codigo_fkey"
+            columns: ["produto_codigo"]
+            isOneToOne: true
+            referencedRelation: "crm_produtos_myio"
+            referencedColumns: ["codigo"]
+          },
+        ]
+      }
       crm_proposta_itens: {
         Row: {
           ambiente: string | null
           categoria: string
+          categoria_ponto: string | null
+          composicao: boolean
           created_at: string
           id: string
           modelo: string | null
+          modo: string
           nome: string
+          nome_proposta: string | null
+          nota_interna: string | null
           observacao: string | null
           ordem: number
+          origem_faixa: string | null
           preco_mensal_unit: number
+          preco_ponto_id: string | null
           preco_setup_unit: number
+          preco_tabela_mensal: number | null
+          preco_tabela_setup: number | null
+          precos_historicos: Json | null
+          produto_nome: string | null
+          produto_texto_tecnico: string | null
           proposta_id: string
           quantidade: number
+          regra_medicao_desc: string | null
+          regra_medicao_id: string | null
           tabela_item_id: string | null
           unidade: string
         }
         Insert: {
           ambiente?: string | null
           categoria?: string
+          categoria_ponto?: string | null
+          composicao?: boolean
           created_at?: string
           id?: string
           modelo?: string | null
+          modo?: string
           nome: string
+          nome_proposta?: string | null
+          nota_interna?: string | null
           observacao?: string | null
           ordem?: number
+          origem_faixa?: string | null
           preco_mensal_unit?: number
+          preco_ponto_id?: string | null
           preco_setup_unit?: number
+          preco_tabela_mensal?: number | null
+          preco_tabela_setup?: number | null
+          precos_historicos?: Json | null
+          produto_nome?: string | null
+          produto_texto_tecnico?: string | null
           proposta_id: string
           quantidade?: number
+          regra_medicao_desc?: string | null
+          regra_medicao_id?: string | null
           tabela_item_id?: string | null
           unidade?: string
         }
         Update: {
           ambiente?: string | null
           categoria?: string
+          categoria_ponto?: string | null
+          composicao?: boolean
           created_at?: string
           id?: string
           modelo?: string | null
+          modo?: string
           nome?: string
+          nome_proposta?: string | null
+          nota_interna?: string | null
           observacao?: string | null
           ordem?: number
+          origem_faixa?: string | null
           preco_mensal_unit?: number
+          preco_ponto_id?: string | null
           preco_setup_unit?: number
+          preco_tabela_mensal?: number | null
+          preco_tabela_setup?: number | null
+          precos_historicos?: Json | null
+          produto_nome?: string | null
+          produto_texto_tecnico?: string | null
           proposta_id?: string
           quantidade?: number
+          regra_medicao_desc?: string | null
+          regra_medicao_id?: string | null
           tabela_item_id?: string | null
           unidade?: string
         }
         Relationships: [
           {
+            foreignKeyName: "crm_proposta_itens_preco_ponto_id_fkey"
+            columns: ["preco_ponto_id"]
+            isOneToOne: false
+            referencedRelation: "crm_precos_ponto"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "crm_proposta_itens_proposta_id_fkey"
             columns: ["proposta_id"]
             isOneToOne: false
             referencedRelation: "crm_propostas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_proposta_itens_regra_medicao_id_fkey"
+            columns: ["regra_medicao_id"]
+            isOneToOne: false
+            referencedRelation: "crm_regras_medicao"
             referencedColumns: ["id"]
           },
           {
@@ -2159,6 +3198,7 @@ export type Database = {
           custo_hora: number
           custo_mensal_servir: number
           frete_site: number
+          historico_original: Json | null
           horas_implantacao: number
           lote_codigo: string | null
           mobilizacao: number
@@ -2171,6 +3211,7 @@ export type Database = {
           custo_hora?: number
           custo_mensal_servir?: number
           frete_site?: number
+          historico_original?: Json | null
           horas_implantacao?: number
           lote_codigo?: string | null
           mobilizacao?: number
@@ -2183,6 +3224,7 @@ export type Database = {
           custo_hora?: number
           custo_mensal_servir?: number
           frete_site?: number
+          historico_original?: Json | null
           horas_implantacao?: number
           lote_codigo?: string | null
           mobilizacao?: number
@@ -2204,36 +3246,64 @@ export type Database = {
           created_at: string
           created_by: string | null
           id: string
+          item_id: string | null
+          linha: number | null
+          linha_original: Json | null
+          origem: string | null
           proposta_id: string
           resolucao: string | null
           resolvido_em: string | null
           resolvido_por: string | null
           status: string
           texto: string
+          tipo: string | null
+          valor_parcial: number | null
+          valor_parcial_original: string | null
         }
         Insert: {
           created_at?: string
           created_by?: string | null
           id?: string
+          item_id?: string | null
+          linha?: number | null
+          linha_original?: Json | null
+          origem?: string | null
           proposta_id: string
           resolucao?: string | null
           resolvido_em?: string | null
           resolvido_por?: string | null
           status?: string
           texto: string
+          tipo?: string | null
+          valor_parcial?: number | null
+          valor_parcial_original?: string | null
         }
         Update: {
           created_at?: string
           created_by?: string | null
           id?: string
+          item_id?: string | null
+          linha?: number | null
+          linha_original?: Json | null
+          origem?: string | null
           proposta_id?: string
           resolucao?: string | null
           resolvido_em?: string | null
           resolvido_por?: string | null
           status?: string
           texto?: string
+          tipo?: string | null
+          valor_parcial?: number | null
+          valor_parcial_original?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "crm_proposta_pendencias_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "crm_proposta_itens"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "crm_proposta_pendencias_proposta_id_fkey"
             columns: ["proposta_id"]
@@ -2245,57 +3315,85 @@ export type Database = {
       }
       crm_propostas: {
         Row: {
+          arquivo_origem_path: string | null
+          arquivo_path: string | null
           condicoes: Json
           created_at: string
           created_by: string | null
           data_proposta: string
           id: string
+          importada: boolean
           incompleta: boolean
+          legado: Json | null
+          lista_preco_id: string | null
           numero: string
           observacoes: string | null
           oportunidade_id: string
           status: string
+          template_codigo: string | null
           template_id: string | null
+          tipo_venda: string | null
           total_mensal: number
           total_setup: number
           updated_at: string
           versao: number
         }
         Insert: {
+          arquivo_origem_path?: string | null
+          arquivo_path?: string | null
           condicoes?: Json
           created_at?: string
           created_by?: string | null
           data_proposta?: string
           id?: string
+          importada?: boolean
           incompleta?: boolean
+          legado?: Json | null
+          lista_preco_id?: string | null
           numero?: string
           observacoes?: string | null
           oportunidade_id: string
           status?: string
+          template_codigo?: string | null
           template_id?: string | null
+          tipo_venda?: string | null
           total_mensal?: number
           total_setup?: number
           updated_at?: string
           versao?: number
         }
         Update: {
+          arquivo_origem_path?: string | null
+          arquivo_path?: string | null
           condicoes?: Json
           created_at?: string
           created_by?: string | null
           data_proposta?: string
           id?: string
+          importada?: boolean
           incompleta?: boolean
+          legado?: Json | null
+          lista_preco_id?: string | null
           numero?: string
           observacoes?: string | null
           oportunidade_id?: string
           status?: string
+          template_codigo?: string | null
           template_id?: string | null
+          tipo_venda?: string | null
           total_mensal?: number
           total_setup?: number
           updated_at?: string
           versao?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "crm_propostas_lista_preco_id_fkey"
+            columns: ["lista_preco_id"]
+            isOneToOne: false
+            referencedRelation: "crm_listas_preco"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "crm_propostas_oportunidade_id_fkey"
             columns: ["oportunidade_id"]
@@ -2312,51 +3410,537 @@ export type Database = {
           },
         ]
       }
+      crm_propostas_custo: {
+        Row: {
+          lote_codigo: string | null
+          proposta_id: string
+          total_custo: number
+          updated_at: string
+        }
+        Insert: {
+          lote_codigo?: string | null
+          proposta_id: string
+          total_custo?: number
+          updated_at?: string
+        }
+        Update: {
+          lote_codigo?: string | null
+          proposta_id?: string
+          total_custo?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_propostas_custo_proposta_id_fkey"
+            columns: ["proposta_id"]
+            isOneToOne: true
+            referencedRelation: "crm_propostas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_propostas_rateio: {
+        Row: {
+          calculado_em: string
+          contrato_meses: number
+          economia_iss_mensal: number
+          iss_estimado_mensal: number
+          mensalidade: number
+          parcela_locacao: number
+          parcela_servicos: number
+          proposta_id: string
+          rateio_locacao_pct: number
+          rateio_servicos_pct: number
+        }
+        Insert: {
+          calculado_em?: string
+          contrato_meses: number
+          economia_iss_mensal: number
+          iss_estimado_mensal: number
+          mensalidade: number
+          parcela_locacao: number
+          parcela_servicos: number
+          proposta_id: string
+          rateio_locacao_pct: number
+          rateio_servicos_pct: number
+        }
+        Update: {
+          calculado_em?: string
+          contrato_meses?: number
+          economia_iss_mensal?: number
+          iss_estimado_mensal?: number
+          mensalidade?: number
+          parcela_locacao?: number
+          parcela_servicos?: number
+          proposta_id?: string
+          rateio_locacao_pct?: number
+          rateio_servicos_pct?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_propostas_rateio_proposta_id_fkey"
+            columns: ["proposta_id"]
+            isOneToOne: true
+            referencedRelation: "crm_propostas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_regras_composicao: {
+        Row: {
+          ativo: boolean
+          codigo: string
+          como_escolher: string | null
+          created_at: string
+          faixa_fixa_a: number | null
+          insumo1_categoria: string | null
+          insumo1_id: string | null
+          insumo1_qtd: number
+          insumo2_categoria: string | null
+          insumo2_qtd: number
+          ordem: number
+          produto_codigo: string
+          rotulo: string
+          se_faltar: string
+          servico_alto_a_partir_de_a: number | null
+          servico_alto_codigo: string | null
+          servico_codigo: string | null
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          codigo: string
+          como_escolher?: string | null
+          created_at?: string
+          faixa_fixa_a?: number | null
+          insumo1_categoria?: string | null
+          insumo1_id?: string | null
+          insumo1_qtd?: number
+          insumo2_categoria?: string | null
+          insumo2_qtd?: number
+          ordem?: number
+          produto_codigo: string
+          rotulo: string
+          se_faltar?: string
+          servico_alto_a_partir_de_a?: number | null
+          servico_alto_codigo?: string | null
+          servico_codigo?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          codigo?: string
+          como_escolher?: string | null
+          created_at?: string
+          faixa_fixa_a?: number | null
+          insumo1_categoria?: string | null
+          insumo1_id?: string | null
+          insumo1_qtd?: number
+          insumo2_categoria?: string | null
+          insumo2_qtd?: number
+          ordem?: number
+          produto_codigo?: string
+          rotulo?: string
+          se_faltar?: string
+          servico_alto_a_partir_de_a?: number | null
+          servico_alto_codigo?: string | null
+          servico_codigo?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_regras_composicao_insumo1_id_fkey"
+            columns: ["insumo1_id"]
+            isOneToOne: false
+            referencedRelation: "crm_insumos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_regras_composicao_produto_codigo_fkey"
+            columns: ["produto_codigo"]
+            isOneToOne: false
+            referencedRelation: "crm_produtos_myio"
+            referencedColumns: ["codigo"]
+          },
+          {
+            foreignKeyName: "crm_regras_composicao_servico_alto_codigo_fkey"
+            columns: ["servico_alto_codigo"]
+            isOneToOne: false
+            referencedRelation: "crm_servicos_instalacao"
+            referencedColumns: ["codigo"]
+          },
+          {
+            foreignKeyName: "crm_regras_composicao_servico_codigo_fkey"
+            columns: ["servico_codigo"]
+            isOneToOne: false
+            referencedRelation: "crm_servicos_instalacao"
+            referencedColumns: ["codigo"]
+          },
+        ]
+      }
+      crm_regras_geracao: {
+        Row: {
+          devices_por_dupla: number
+          id: number
+          proporcao: Json
+          updated_at: string
+        }
+        Insert: {
+          devices_por_dupla: number
+          id: number
+          proporcao: Json
+          updated_at?: string
+        }
+        Update: {
+          devices_por_dupla?: number
+          id?: number
+          proporcao?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      crm_regras_medicao: {
+        Row: {
+          ativa: boolean
+          composicao: string
+          condicao: string
+          condicao_max: number | null
+          condicao_min: number | null
+          created_at: string
+          created_by: string | null
+          data_origem: string
+          grandeza: string
+          id: string
+          insumo1_id: string | null
+          insumo1_qtd: number
+          insumo2_id: string | null
+          insumo2_qtd: number
+          nome_item: string | null
+          observacao: string | null
+          ordem: number
+          origem: string
+          origem_ref: string | null
+          preco_ponto_id: string | null
+          produto_codigo: string
+          servico_alto_a_partir_de_a: number | null
+          servico_alto_codigo: string | null
+          servico_codigo: string | null
+          termos: string[]
+          tipo: string
+          tipo_rotulo: string
+          updated_at: string
+        }
+        Insert: {
+          ativa?: boolean
+          composicao: string
+          condicao?: string
+          condicao_max?: number | null
+          condicao_min?: number | null
+          created_at?: string
+          created_by?: string | null
+          data_origem?: string
+          grandeza: string
+          id?: string
+          insumo1_id?: string | null
+          insumo1_qtd?: number
+          insumo2_id?: string | null
+          insumo2_qtd?: number
+          nome_item?: string | null
+          observacao?: string | null
+          ordem?: number
+          origem: string
+          origem_ref?: string | null
+          preco_ponto_id?: string | null
+          produto_codigo: string
+          servico_alto_a_partir_de_a?: number | null
+          servico_alto_codigo?: string | null
+          servico_codigo?: string | null
+          termos?: string[]
+          tipo: string
+          tipo_rotulo: string
+          updated_at?: string
+        }
+        Update: {
+          ativa?: boolean
+          composicao?: string
+          condicao?: string
+          condicao_max?: number | null
+          condicao_min?: number | null
+          created_at?: string
+          created_by?: string | null
+          data_origem?: string
+          grandeza?: string
+          id?: string
+          insumo1_id?: string | null
+          insumo1_qtd?: number
+          insumo2_id?: string | null
+          insumo2_qtd?: number
+          nome_item?: string | null
+          observacao?: string | null
+          ordem?: number
+          origem?: string
+          origem_ref?: string | null
+          preco_ponto_id?: string | null
+          produto_codigo?: string
+          servico_alto_a_partir_de_a?: number | null
+          servico_alto_codigo?: string | null
+          servico_codigo?: string | null
+          termos?: string[]
+          tipo?: string
+          tipo_rotulo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_regras_medicao_insumo1_id_fkey"
+            columns: ["insumo1_id"]
+            isOneToOne: false
+            referencedRelation: "crm_insumos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_regras_medicao_insumo2_id_fkey"
+            columns: ["insumo2_id"]
+            isOneToOne: false
+            referencedRelation: "crm_insumos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_regras_medicao_preco_ponto_id_fkey"
+            columns: ["preco_ponto_id"]
+            isOneToOne: false
+            referencedRelation: "crm_precos_ponto"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_regras_medicao_produto_codigo_fkey"
+            columns: ["produto_codigo"]
+            isOneToOne: false
+            referencedRelation: "crm_produtos_myio"
+            referencedColumns: ["codigo"]
+          },
+          {
+            foreignKeyName: "crm_regras_medicao_servico_alto_codigo_fkey"
+            columns: ["servico_alto_codigo"]
+            isOneToOne: false
+            referencedRelation: "crm_servicos_instalacao"
+            referencedColumns: ["codigo"]
+          },
+          {
+            foreignKeyName: "crm_regras_medicao_servico_codigo_fkey"
+            columns: ["servico_codigo"]
+            isOneToOne: false
+            referencedRelation: "crm_servicos_instalacao"
+            referencedColumns: ["codigo"]
+          },
+        ]
+      }
+      crm_servicos_instalacao: {
+        Row: {
+          ativo: boolean
+          codigo: string
+          created_at: string
+          horas: number | null
+          margem_propria: number | null
+          nome: string
+          observacoes: string | null
+          ordem: number
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          codigo: string
+          created_at?: string
+          horas?: number | null
+          margem_propria?: number | null
+          nome: string
+          observacoes?: string | null
+          ordem?: number
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          codigo?: string
+          created_at?: string
+          horas?: number | null
+          margem_propria?: number | null
+          nome?: string
+          observacoes?: string | null
+          ordem?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      crm_sugestoes_regra_medicao: {
+        Row: {
+          composicao: Json
+          created_at: string
+          decidido_em: string | null
+          decidido_por: string | null
+          descricao: string
+          id: string
+          item_proposta_id: string | null
+          motivo: string
+          proposta_id: string
+          regra_criada_id: string | null
+          regra_id: string | null
+          status: string
+          tipo: string | null
+        }
+        Insert: {
+          composicao: Json
+          created_at?: string
+          decidido_em?: string | null
+          decidido_por?: string | null
+          descricao: string
+          id?: string
+          item_proposta_id?: string | null
+          motivo: string
+          proposta_id: string
+          regra_criada_id?: string | null
+          regra_id?: string | null
+          status?: string
+          tipo?: string | null
+        }
+        Update: {
+          composicao?: Json
+          created_at?: string
+          decidido_em?: string | null
+          decidido_por?: string | null
+          descricao?: string
+          id?: string
+          item_proposta_id?: string | null
+          motivo?: string
+          proposta_id?: string
+          regra_criada_id?: string | null
+          regra_id?: string | null
+          status?: string
+          tipo?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_sugestoes_regra_medicao_item_proposta_id_fkey"
+            columns: ["item_proposta_id"]
+            isOneToOne: false
+            referencedRelation: "crm_proposta_itens"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_sugestoes_regra_medicao_proposta_id_fkey"
+            columns: ["proposta_id"]
+            isOneToOne: false
+            referencedRelation: "crm_propostas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_sugestoes_regra_medicao_regra_criada_id_fkey"
+            columns: ["regra_criada_id"]
+            isOneToOne: false
+            referencedRelation: "crm_regras_medicao"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_sugestoes_regra_medicao_regra_id_fkey"
+            columns: ["regra_id"]
+            isOneToOne: false
+            referencedRelation: "crm_regras_medicao"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_tabela_precos: {
         Row: {
           ativo: boolean
           categoria: string
           created_at: string
           id: string
+          insumo_id: string | null
+          lista_id: string | null
           modelo: string | null
           nome: string
+          notas_internas: string | null
           ordem: number
           preco_mensal: number
           preco_setup: number
+          produto_codigo: string | null
+          servico_codigo: string | null
           unidade: string
           updated_at: string
+          valores_originais: Json | null
         }
         Insert: {
           ativo?: boolean
           categoria?: string
           created_at?: string
           id?: string
+          insumo_id?: string | null
+          lista_id?: string | null
           modelo?: string | null
           nome: string
+          notas_internas?: string | null
           ordem?: number
           preco_mensal?: number
           preco_setup?: number
+          produto_codigo?: string | null
+          servico_codigo?: string | null
           unidade?: string
           updated_at?: string
+          valores_originais?: Json | null
         }
         Update: {
           ativo?: boolean
           categoria?: string
           created_at?: string
           id?: string
+          insumo_id?: string | null
+          lista_id?: string | null
           modelo?: string | null
           nome?: string
+          notas_internas?: string | null
           ordem?: number
           preco_mensal?: number
           preco_setup?: number
+          produto_codigo?: string | null
+          servico_codigo?: string | null
           unidade?: string
           updated_at?: string
+          valores_originais?: Json | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "crm_tabela_precos_insumo_id_fkey"
+            columns: ["insumo_id"]
+            isOneToOne: false
+            referencedRelation: "crm_insumos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_tabela_precos_lista_id_fkey"
+            columns: ["lista_id"]
+            isOneToOne: false
+            referencedRelation: "crm_listas_preco"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_tabela_precos_produto_codigo_fkey"
+            columns: ["produto_codigo"]
+            isOneToOne: false
+            referencedRelation: "crm_produtos_myio"
+            referencedColumns: ["codigo"]
+          },
+          {
+            foreignKeyName: "crm_tabela_precos_servico_codigo_fkey"
+            columns: ["servico_codigo"]
+            isOneToOne: false
+            referencedRelation: "crm_servicos_instalacao"
+            referencedColumns: ["codigo"]
+          },
+        ]
       }
       crm_tabela_precos_custo: {
         Row: {
           custo_manual: number | null
+          custo_origem: string | null
           item_id: string
           kit_id: string | null
           markup_percentual: number
@@ -2364,6 +3948,7 @@ export type Database = {
         }
         Insert: {
           custo_manual?: number | null
+          custo_origem?: string | null
           item_id: string
           kit_id?: string | null
           markup_percentual?: number
@@ -2371,6 +3956,7 @@ export type Database = {
         }
         Update: {
           custo_manual?: number | null
+          custo_origem?: string | null
           item_id?: string
           kit_id?: string | null
           markup_percentual?: number
@@ -9984,6 +11570,17 @@ export type Database = {
           purchase_order_id: string
         }[]
       }
+      crm_history_import_active: { Args: never; Returns: boolean }
+      crm_import_history_batch: {
+        Args: {
+          _batch_key: string
+          _originals?: Json
+          _rows: Json
+          _table: string
+        }
+        Returns: Json
+      }
+      crm_import_restore_lead_links: { Args: never; Returns: number }
       decide_approval_step: {
         Args: { _comment?: string; _decision: string; _step_id: string }
         Returns: undefined

@@ -1,0 +1,5 @@
+ALTER TABLE public.crm_proposta_itens ADD COLUMN precos_historicos jsonb;
+ALTER TABLE public.crm_proposta_itens DROP CONSTRAINT crm_proposta_itens_preco_setup_unit_check, DROP CONSTRAINT crm_proposta_itens_preco_mensal_unit_check;
+ALTER TABLE public.crm_proposta_itens ADD CONSTRAINT crm_item_setup_valid CHECK(preco_setup_unit>=0 OR preco_setup_unit=(precos_historicos->>'preco_setup_unit')::numeric), ADD CONSTRAINT crm_item_mensal_valid CHECK(preco_mensal_unit>=0 OR preco_mensal_unit=(precos_historicos->>'preco_mensal_unit')::numeric);
+CREATE OR REPLACE FUNCTION public.crm_guard_historical_item_prices() RETURNS trigger LANGUAGE plpgsql SET search_path=public AS $$ BEGIN IF NOT public.crm_history_import_active() AND ((TG_OP='INSERT' AND NEW.precos_historicos IS NOT NULL) OR (TG_OP='UPDATE' AND NEW.precos_historicos IS DISTINCT FROM OLD.precos_historicos)) THEN RAISE EXCEPTION 'Os valores originais da migração não podem ser alterados'; END IF; RETURN NEW; END $$;
+CREATE TRIGGER crm_item_historical_prices BEFORE INSERT OR UPDATE ON public.crm_proposta_itens FOR EACH ROW EXECUTE FUNCTION public.crm_guard_historical_item_prices();

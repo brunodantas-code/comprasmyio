@@ -1639,6 +1639,55 @@
       "when": 1794955507790,
       "tag": "0233_opdesk_historico_integridade",
       "breakpoints": true
+    },
+    {
+      "idx": 234,
+      "version": "7",
+      "when": 1794959656993,
+      "tag": "0234_crm_historico_estrutura_completa",
+      "breakpoints": true
+    },
+    {
+      "idx": 235,
+      "version": "7",
+      "when": 1794959721426,
+      "tag": "0235_crm_importacao_historica_restrita",
+      "breakpoints": true
+    },
+    {
+      "idx": 236,
+      "version": "7",
+      "when": 1794959760047,
+      "tag": "0236_crm_importacao_validacao_lotes",
+      "breakpoints": true
+    },
+    {
+      "idx": 237,
+      "version": "7",
+      "when": 1794959812191,
+      "tag": "0237_crm_importacao_vinculos_ciclicos",
+      "breakpoints": true
+    },
+    {
+      "idx": 238,
+      "version": "7",
+      "when": 1794959904705,
+      "tag": "0238_crm_documentos_historicos_privados",
+      "breakpoints": true
+    },
+    {
+      "idx": 239,
+      "version": "7",
+      "when": 1794959941136,
+      "tag": "0239_crm_descontos_historicos_preservados",
+      "breakpoints": true
+    },
+    {
+      "idx": 240,
+      "version": "7",
+      "when": 1794960025160,
+      "tag": "0240_crm_descontos_guard_null",
+      "breakpoints": true
     }
   ]
 }
