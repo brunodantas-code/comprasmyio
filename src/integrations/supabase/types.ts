@@ -7322,18 +7322,21 @@ export type Database = {
       pm_dependencies: {
         Row: {
           lag: number
+          link_type: string
           predecessor_id: string
           project_id: string
           successor_id: string
         }
         Insert: {
           lag?: number
+          link_type?: string
           predecessor_id: string
           project_id: string
           successor_id: string
         }
         Update: {
           lag?: number
+          link_type?: string
           predecessor_id?: string
           project_id?: string
           successor_id?: string
@@ -7639,12 +7642,14 @@ export type Database = {
           milestone: boolean
           name: string
           notes: string
+          parent_id: string | null
           phase_id: string | null
           position: number
           progress: number
           project_id: string
           responsible_id: string | null
           start_date: string
+          work_package: boolean
         }
         Insert: {
           actual_end?: string | null
@@ -7654,12 +7659,14 @@ export type Database = {
           milestone?: boolean
           name: string
           notes?: string
+          parent_id?: string | null
           phase_id?: string | null
           position?: number
           progress?: number
           project_id: string
           responsible_id?: string | null
           start_date: string
+          work_package?: boolean
         }
         Update: {
           actual_end?: string | null
@@ -7669,14 +7676,23 @@ export type Database = {
           milestone?: boolean
           name?: string
           notes?: string
+          parent_id?: string | null
           phase_id?: string | null
           position?: number
           progress?: number
           project_id?: string
           responsible_id?: string | null
           start_date?: string
+          work_package?: boolean
         }
         Relationships: [
+          {
+            foreignKeyName: "pm_tasks_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "pm_tasks"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "pm_tasks_phase_id_fkey"
             columns: ["phase_id"]

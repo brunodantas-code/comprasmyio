@@ -1751,6 +1751,20 @@
       "when": 1795012305236,
       "tag": "0249_projects_assumptions_validation_alias",
       "breakpoints": true
+    },
+    {
+      "idx": 250,
+      "version": "7",
+      "when": 1795012658878,
+      "tag": "0250_projects_wbs_dependency_types",
+      "breakpoints": true
+    },
+    {
+      "idx": 251,
+      "version": "7",
+      "when": 1795012890811,
+      "tag": "0251_projects_dependency_signed_lag",
+      "breakpoints": true
     }
   ]
 }

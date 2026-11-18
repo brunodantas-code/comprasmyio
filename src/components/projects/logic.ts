@@ -2,8 +2,8 @@ import { Graph, alg } from "@dagrejs/graphlib";
 import { addDays, format, parseISO } from "date-fns";
 
 export type Calendar = { calendar_mode: string; holidays: string[]; hours_per_day: number; start_date: string };
-export type PlanTask = { id: string; name: string; start_date: string; duration: number; milestone: boolean; progress: number; actual_start: string | null; actual_end: string | null; responsible_id: string | null; phase_id: string | null; position: number; notes: string; project_id: string };
-export type Dependency = { predecessor_id: string; successor_id: string; lag: number };
+export type PlanTask = { id: string; name: string; start_date: string; duration: number; milestone: boolean; progress: number; actual_start: string | null; actual_end: string | null; responsible_id: string | null; phase_id: string | null; position: number; notes: string; project_id: string; parent_id?: string | null; work_package?: boolean };
+export type Dependency = { predecessor_id: string; successor_id: string; lag: number; link_type?: string };
 export type ScheduledTask = PlanTask & { start: string; end: string; critical: boolean; float: number };
 export const dateKey = (date: Date) => format(date, "yyyy-MM-dd");
 export function isWorking(date: string, calendar: Calendar) {
@@ -18,8 +18,19 @@ export function nextWorking(date: string, calendar: Calendar) {
 }
 export function advance(date: string, count: number, calendar: Calendar) {
   let current = nextWorking(date, calendar);
-  for (let i = 0; i < count; i++) current = nextWorking(dateKey(addDays(parseISO(current), 1)), calendar);
+  for (let i = 0; i < Math.abs(count); i++) {
+    do { current = dateKey(addDays(parseISO(current), count < 0 ? -1 : 1)); } while (!isWorking(current,calendar));
+  }
   return current;
+}
+export function dependencyOffset(previous: PlanTask, next: PlanTask, dep: Dependency) {
+  const p = Math.max(0,previous.duration-1), n = Math.max(0,next.duration-1);
+  switch(dep.link_type??"TI") {
+    case "II": return dep.lag;
+    case "TT": return p-n+dep.lag;
+    case "IT": return -n+dep.lag;
+    default: return p+(previous.milestone?0:1)+dep.lag;
+  }
 }
 export function schedule(tasks: PlanTask[], deps: Dependency[], calendar: Calendar): ScheduledTask[] {
   const graph = new Graph({ directed: true });
@@ -36,7 +47,7 @@ export function schedule(tasks: PlanTask[], deps: Dependency[], calendar: Calend
     for (const dep of deps.filter(dep => dep.successor_id === id)) {
       const previous = result.get(dep.predecessor_id);
       if (previous) {
-        const candidate = advance(previous.end, (previous.milestone ? 0 : 1) + dep.lag, calendar);
+        const candidate = advance(previous.start, dependencyOffset(previous,task,dep), calendar);
         if (candidate > start) start = candidate;
       }
     }
@@ -51,7 +62,7 @@ export function schedule(tasks: PlanTask[], deps: Dependency[], calendar: Calend
     let end = totalEnd;
     for (const dep of deps.filter(dep => dep.predecessor_id === id)) {
       const following = latest.get(dep.successor_id);
-      if (following) { const candidate = retreat(following, (task.milestone ? 0 : 1) + dep.lag); if (candidate < end) end = candidate; }
+      if (following) { const nextTask = result.get(dep.successor_id); if (!nextTask) continue; const candidate = advance(following, -dependencyOffset(task,nextTask,dep) + Math.max(0,task.duration-1), calendar); if (candidate < end) end = candidate; }
     }
     const lastStart = retreat(end, Math.max(0, task.duration - 1));
     latest.set(id, lastStart);

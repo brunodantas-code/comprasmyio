@@ -1,0 +1,1 @@
+ALTER TABLE public.pm_dependencies DROP CONSTRAINT pm_dependencies_lag_check; ALTER TABLE public.pm_dependencies ADD CONSTRAINT pm_dependencies_lag_check CHECK(lag BETWEEN -10000 AND 10000);
