@@ -664,6 +664,8 @@ input[data-search-field="true"] {
 }
 
 .pm-weekday { display:block; font-size:0.7rem; line-height:1; color:var(--muted-foreground); margin-bottom:3px; }
+.pm-gantt [data-pm-mode="Day"] .lower-text { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; height:calc(var(--gv-lower-header-height) - 6px); padding-block:3px; box-sizing:border-box; }
+.pm-gantt [data-pm-mode="Day"] .pm-weekday { margin-bottom:0; flex-shrink:0; }
 .pm-month-divider { position:absolute; top:8px; bottom:-3px; border-left:1px solid var(--muted-foreground); pointer-events:none; }
 .pm-gantt .upper-text { position:absolute; left:var(--pm-header-x,0px) !important; margin-left:17px; padding-left:0; }
 .pm-gantt [data-pm-mode="Month"] .lower-text { margin-left:17px; margin-right:17px; width:calc(var(--gv-column-width) - 34px); text-align:left; }

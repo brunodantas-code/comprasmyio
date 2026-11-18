@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Cronograma diário: destaque verde envolve letra e número com espaço interno, sem ultrapassar o cabeçalho.
 - [x] Cronograma: meses preenchem a largura disponível; anos e meses com distância uniforme da divisória, sem reativar expansão infinita.
 - [x] Mobile Lista: nome alinhado à coluna de valores de Início/fim e Responsável; checkbox entre rótulo Atividade e nome, mantendo seleção e Desktop.
 - [x] Mobile Lista: checkbox e nome elevados ao topo do rótulo Atividade, ambos em y=791.39 px na célula y=785 px; seleção e cabeçalho CDE conferidos.
