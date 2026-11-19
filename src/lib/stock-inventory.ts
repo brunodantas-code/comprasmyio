@@ -1,7 +1,7 @@
 import { addMonths, format, parseISO } from 'date-fns';
 
 export const INVENTORY_INTERVALS = [0, 1, 3, 6, 12] as const;
-export const INVENTORY_COUNT_DEFAULT = 1;
+export const INVENTORY_COUNT_DEFAULT = 0;
 export const INVENTORY_COUNT_STEP = 1;
 export function isInventoryCount(counted: number | null): counted is number {
   return counted !== null && Number.isSafeInteger(counted) && counted >= 0;

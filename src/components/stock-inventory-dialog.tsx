@@ -10,6 +10,7 @@ import { CdeButton } from '@/components/cde/cde-button';
 import { useTableFilters } from '@/components/use-table-filters';
 import { TableSortMenu, type TableSorting } from '@/components/table-sort-menu';
 import { compareColumnValues } from '@/lib/column-sort';
+import { StockPhotoCell, useStockMeta } from '@/components/stock-meta';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { InventorySignatureDialog } from '@/components/inventory-signature-dialog';
 import { signatureDate } from '@/lib/signatures';
@@ -29,6 +30,7 @@ type Item = Row & { counted: number | null; difference?: number | null; confirme
 const intervals = [{ value: 0, label: 'Sem recorrência' }, { value: 1, label: 'Mensal' }, { value: 3, label: 'Trimestral' }, { value: 6, label: 'Semestral' }, { value: 12, label: 'Anual' }];
 
 export function StockInventoryDialog({ area, rows }: { area: string; rows: Row[] }) {
+  const { data: stockMeta } = useStockMeta(area === 'terceiros' ? 'terceiros_materials' : 'materials');
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(false);
   const [id, setId] = useState<string | null>(null);
@@ -156,14 +158,14 @@ export function StockInventoryDialog({ area, rows }: { area: string; rows: Row[]
         {comparison.error && <p className="text-destructive">{comparison.error.message}</p>}
         <div className="flex justify-end"><TableSortMenu columns={itemColumns} value={sorting} onChange={setSorting} /></div>
         {itemFilters.summary}
-        <Table><TableHeader><TableRow><TableHead>{itemFilters.header('name')}</TableHead><TableHead>Inventário N</TableHead><TableHead>Entradas por compras</TableHead><TableHead>Saídas da Fábrica</TableHead><TableHead>Saldo</TableHead><TableHead>Inventário N+1</TableHead><TableHead>Divergências ou confirmação</TableHead></TableRow></TableHeader><TableBody>{visibleItems.map(item => {
+        <Table><TableHeader><TableRow><TableHead>{itemFilters.header('name')}</TableHead><TableHead>Imagem</TableHead><TableHead>Inventário N</TableHead><TableHead>Entradas por compras</TableHead><TableHead>Saídas da Fábrica</TableHead><TableHead>Saldo</TableHead><TableHead>Inventário N+1</TableHead><TableHead>Divergências ou confirmação</TableHead></TableRow></TableHeader><TableBody>{visibleItems.map(item => {
           const index = items.findIndex(row => row.material_id === item.material_id);
           const old = previousItems.find(row => row.material_id === item.material_id);
           const movements = comparison.data?.find(row => row.material_id === item.material_id);
           const difference = item.counted !== null && item.counted < 0 ? null : inventoryCountDifference(item.counted, item.balance, !!previousInventory);
           const field = <Input type="number" min={0} step={INVENTORY_COUNT_STEP} aria-invalid={item.counted !== null && !isInventoryCount(item.counted)} aria-label={`Contagem ${item.name}`} value={item.counted ?? ''} disabled={readOnly || save.isPending} onChange={e => setItems(current => current.map((row, position) => position === index ? { ...row, counted: e.target.value === '' ? null : Number(e.target.value), confirmed: false } : row))} />;
           const divergent = difference !== null && difference !== 0;
-          return <TableRow key={item.material_id}><TableCell>{item.name}</TableCell><TableCell>{previousInventory ? old?.counted ?? '—' : field}</TableCell><TableCell>{previousInventory ? comparison.isLoading ? '…' : movements?.purchases ?? 0 : '—'}</TableCell><TableCell>{previousInventory ? comparison.isLoading ? '…' : movements?.factory_exits ?? 0 : '—'}</TableCell><TableCell title="Inclui todas as movimentações registradas">{item.balance}</TableCell><TableCell>{previousInventory ? field : '—'}</TableCell><TableCell><div className="flex items-center justify-center gap-2">{divergent ? <span>{difference > 0 ? `+${difference}` : difference}</span> : item.confirmed || readOnly ? <span>Confirmado</span> : null}{!readOnly && <Button variant="ghost" size="icon" aria-label={`${divergent ? 'Salvar divergência' : 'Confirmar contagem'} ${item.name}`} title={item.confirmed ? 'Contagem confirmada' : divergent ? 'Salvar divergência' : 'Confirmar contagem'} disabled={save.isPending || !isInventoryCount(item.counted) || item.confirmed} onClick={() => save.mutate({ complete: false, confirmIndex: index })}>{divergent && !item.confirmed ? <Save className="size-4" /> : <Check className="size-4" />}</Button>}</div></TableCell></TableRow>;
+          return <TableRow key={item.material_id}><TableCell>{item.name}</TableCell><TableCell><StockPhotoCell url={stockMeta?.[item.material_id]?.photo} name={item.name} /></TableCell><TableCell>{previousInventory ? old?.counted ?? '—' : field}</TableCell><TableCell>{previousInventory ? comparison.isLoading ? '…' : movements?.purchases ?? 0 : '—'}</TableCell><TableCell>{previousInventory ? comparison.isLoading ? '…' : movements?.factory_exits ?? 0 : '—'}</TableCell><TableCell title="Inclui todas as movimentações registradas">{item.balance}</TableCell><TableCell>{previousInventory ? field : '—'}</TableCell><TableCell><div className="flex items-center justify-center gap-2">{divergent ? <span>{difference > 0 ? `+${difference}` : difference}</span> : item.confirmed || readOnly ? <span>Confirmado</span> : null}{!readOnly && <Button variant="ghost" size="icon" aria-label={`${divergent ? 'Salvar divergência' : 'Confirmar contagem'} ${item.name}`} title={item.confirmed ? 'Contagem confirmada' : divergent ? 'Salvar divergência' : 'Confirmar contagem'} disabled={save.isPending || !isInventoryCount(item.counted) || item.confirmed} onClick={() => save.mutate({ complete: false, confirmIndex: index })}>{divergent && !item.confirmed ? <Save className="size-4" /> : <Check className="size-4" />}</Button>}</div></TableCell></TableRow>;
         })}</TableBody></Table>
         {readOnly && <section className="space-y-2"><h2 className="text-sm">Assinaturas dos inventariantes</h2>{counters.map(counter => {
           const signer = signatures.data?.find(s => s.signer_name === counter);

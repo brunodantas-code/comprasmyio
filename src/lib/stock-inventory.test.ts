@@ -3,7 +3,7 @@ import { addInventoryCounter, INVENTORY_COUNT_DEFAULT, INVENTORY_COUNT_STEP, inv
 describe('confirmação do inventário', () => {
   it('primeiro inventário não tem divergência mesmo com saldo zero', () => expect(inventoryCountDifference(100, 0, false)).toBeNull());
   it('inventário seguinte mostra a divergência encontrada', () => expect(inventoryCountDifference(100, 90, true)).toBe(10));
-  it('quantidade começa em 1', () => expect(INVENTORY_COUNT_DEFAULT).toBe(1));
+  it('quantidade inicial fica zerada', () => expect(INVENTORY_COUNT_DEFAULT).toBe(0));
   it('quantidade avança de unidade em unidade', () => expect(INVENTORY_COUNT_STEP).toBe(1));
   it('não aceita a contagem fracionária 0.001', () => expect(() => inventoryDifference(0.001, 0)).toThrow());
   it('não confirma uma quantidade fracionária digitada', () => expect(isInventoryCount(1.5)).toBe(false));
