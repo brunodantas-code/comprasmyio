@@ -9,6 +9,7 @@ import { mergeConfidentialSubjects } from "@/lib/legal";
 import { todoPendingItems } from "@/lib/personal-todos";
 import { pendingApprovalSteps, type ApprovalStepOrder } from "@/lib/approval-pending";
 import { pendingPhysicalReceiptOrders } from "@/lib/supply-fulfillment";
+import { pendingInventorySignatures } from '@/lib/inventory-signatures';
 
 type ApprovalStep = {
   order_id: string;
@@ -28,6 +29,9 @@ export function usePendingActions() {
       const { data: authData, error: authError } = await supabase.auth.getUser();
       if (authError || !authData.user) throw authError ?? new Error("Sessão não encontrada");
       const userId = authData.user.id;
+      const inventoryResult = await supabase.from('stock_inventory_signatures').select('inventory_id,user_id,signed_at,stock_inventories(name)').eq('user_id', userId).is('signed_at', null);
+      if (inventoryResult.error) throw inventoryResult.error;
+      const inventorySignatures = pendingInventorySignatures(inventoryResult.data ?? [], userId).map(s => inventoryResult.data?.find(row => row.inventory_id === s.inventory_id)).filter((row): row is NonNullable<typeof row> => !!row);
 
       const [stepsResult, deletionsResult, codeResult, codeMessagesResult, supplyQueueResult, supportCallsResult, mytosisResult, codeAdminResult, codeAccessResult, legalResult, legalActionsResult, legalCompletionsResult, legalAllActionsResult, legalConfidentialResult,projectsMessagesResult] = await Promise.all([
         supabase
@@ -118,6 +122,7 @@ export function usePendingActions() {
       const supportCalls = supportCallItems.length;
 
       return {
+        inventorySignatures,
         projectsItems:projectsMessagesResult.data??[],
         projectsCount:projectsMessagesResult.data?.length??0,
         todos,
@@ -136,8 +141,8 @@ export function usePendingActions() {
         supportCalls,
         supportCallItems,
         isCustomerSupportAnalyst: currentUser?.isCustomerSupportAnalyst ?? false,
-        supply: pendingApprovals + pendingUserDeletions + pendingSupplyQueue + supplyQuestionCount + supplyReceipts.length,
-        total: (projectsMessagesResult.data?.length??0) + todos.length + legalCount + pendingApprovals + pendingUserDeletions + pendingCodeTickets + pendingSupplyQueue + supportCalls + supplyQuestionCount + supplyReceipts.length + (mytosisResult.data?.length ?? 0),
+        supply: inventorySignatures.length + pendingApprovals + pendingUserDeletions + pendingSupplyQueue + supplyQuestionCount + supplyReceipts.length,
+        total: inventorySignatures.length + (projectsMessagesResult.data?.length??0) + todos.length + legalCount + pendingApprovals + pendingUserDeletions + pendingCodeTickets + pendingSupplyQueue + supportCalls + supplyQuestionCount + supplyReceipts.length + (mytosisResult.data?.length ?? 0),
       };
     },
     staleTime: 30_000,

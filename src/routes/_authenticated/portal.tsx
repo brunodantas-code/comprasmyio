@@ -3,6 +3,7 @@ import { legalPendingLabel } from "@/lib/legal-pending";
 import { ListItemStyleVars } from "@/components/cde/list-item-style";
 import { TopIconStyleVars } from "@/components/cde/top-icon-style";
 import {projectPendingItems} from "@/components/projects/pending-items";
+import { inventoryPendingItems } from '@/components/inventory-pending-items';
 import { PendingGroups, PendingRowContent } from "@/components/pending-groups";
 import { useState } from "react";
 import type React from "react";
@@ -204,6 +205,7 @@ function PortalPage() {
               <section aria-labelledby="pending-title">
                 <PendingGroups leading={<CriticalGroup />} items={[
       ...projectPendingItems(pendingActions?.projectsItems??[]),
+      ...inventoryPendingItems(pendingActions?.inventorySignatures ?? []),
       ...((pendingActions?.approvals ?? 0) > 0 ? [{ key: "approvals", app: "Supply", requester: "Você", count: pendingActions?.approvals ?? 0, row: <PendingRow icon={CheckCircle2} label="Aguardando minha aprovação" count={pendingActions?.approvals ?? 0} to="/pendentes" /> }] : []),
       ...((pendingActions?.supplyQueue ?? 0) > 0 ? [{ key: "queue", app: "Supply", requester: "Você", count: pendingActions?.supplyQueue ?? 0, row: <PendingRow icon={ShoppingCart} label="Compras e serviços a executar · Fila do Supply" count={pendingActions?.supplyQueue ?? 0} to="/dashboard" search={{ section: "queue", subsection: "supply" }} /> }] : []),
       ...((pendingActions?.userDeletions ?? 0) > 0 ? [{ key: "deletions", app: "Admin", requester: "Você", count: pendingActions?.userDeletions ?? 0, row: <PendingRow icon={ShieldCheck} label="Exclusões de usuários aguardando decisão" count={pendingActions?.userDeletions ?? 0} to="/dashboard" search={{ section: "admin", subsection: "usuarios" }} /> }] : []),

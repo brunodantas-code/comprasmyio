@@ -1,4 +1,12 @@
 # Roadmap
+- [x] Publicação solicitada para liberar os ajustes conferidos e iniciar a contagem; implantação precisa terminar antes de atualizar o site.
+- [x] Inventário: Excel e PDF baixados e conferidos; duas páginas do PDF legíveis, planilha com Inventário/Assinaturas.
+- [x] Estoque de componentes: totalizadores junto ao título conferidos: 72 cadastrados, 0 positivos, 72 zerados.
+- [x] Botão Inventário vinculado ao padrão de ação CDE.
+- [x] Inventário concluído: assinatura com confirmação por senha e pendência na Home/Central; conclusão sem alterar saldos e senha incorreta rejeitada na tela. Assinatura positiva não executada em nome de Leonardo; 23 testes passaram, registros temporários removidos.
+- [x] Inventariantes externos registrados sem assinatura ou pendência; somente conta ERP ativa e unívoca gera assinatura.
+- [x] Inventário: + único conferido; usuários ERP e nomes adicionais selecionados, salvos e relidos.
+- [x] Primeiro inventário sem divergência; check por item persiste após reabrir; quantidade começa em 1 com passo 1 e permite zero.
 - [x] Estoque: data efetiva nas entradas manuais; inventário por área com inventariantes, data, contagem física, divergências e recorrência mensal/trimestral/semestral/anual. Contagem temporária salva/reaberta e concluída sem movimentações, removida após teste; nove testes passaram. Não publicado.
 - [x] Inventário: seis colunas de comparação, compras vinculadas e saídas da área Fábrica; saldo inclui todas as movimentações. Computador/celular conferidos; comparação entre dois inventários reais ainda não exercitada.
 - [x] Primeiro inventário em 19/11/2026: contagem inicial no Inventário N, sem inventário anterior fictício; preserva histórico e exige confirmação antes de ajustar saldos.

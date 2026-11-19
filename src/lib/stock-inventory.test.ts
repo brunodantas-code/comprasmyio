@@ -1,5 +1,17 @@
 import { describe, expect, it } from 'vitest';
-import { inventoryDifference, nextInventoryDate } from './stock-inventory';
+import { addInventoryCounter, INVENTORY_COUNT_DEFAULT, INVENTORY_COUNT_STEP, inventoryCountDifference, inventoryDifference, nextInventoryDate } from './stock-inventory';
+describe('confirmação do inventário', () => {
+  it('primeiro inventário não tem divergência mesmo com saldo zero', () => expect(inventoryCountDifference(100, 0, false)).toBeNull());
+  it('inventário seguinte mostra a divergência encontrada', () => expect(inventoryCountDifference(100, 90, true)).toBe(10));
+  it('quantidade começa em 1', () => expect(INVENTORY_COUNT_DEFAULT).toBe(1));
+  it('quantidade avança de unidade em unidade', () => expect(INVENTORY_COUNT_STEP).toBe(1));
+});
+describe('inventariantes', () => {
+  it('permite adicionar um usuário cadastrado', () => expect(addInventoryCounter([], 'Leonardo Roedel')).toEqual(['Leonardo Roedel']));
+  it('permite adicionar outro nome sem substituir os selecionados', () => expect(addInventoryCounter(['Leonardo Roedel'], ' Maria Silva ')).toEqual(['Leonardo Roedel', 'Maria Silva']));
+  it('não duplica a mesma pessoa ao adicionar novamente', () => expect(addInventoryCounter(['Leonardo Roedel'], ' leonardo roedel ')).toEqual(['Leonardo Roedel']));
+  it('não adiciona nome vazio', () => expect(addInventoryCounter([], ' ')).toEqual([]));
+});
 describe('recorrência do inventário', () => {
   it('mensal', () => expect(nextInventoryDate('2026-11-19', 1)).toBe('2026-12-19'));
   it('trimestral', () => expect(nextInventoryDate('2026-11-19', 3)).toBe('2027-02-19'));

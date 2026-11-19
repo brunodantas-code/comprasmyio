@@ -11072,6 +11072,48 @@ export type Database = {
         }
         Relationships: []
       }
+      stock_inventory_signatures: {
+        Row: {
+          content_hash: string | null
+          image: string | null
+          inventory_id: string
+          signed_at: string | null
+          signer_name: string
+          user_id: string
+        }
+        Insert: {
+          content_hash?: string | null
+          image?: string | null
+          inventory_id: string
+          signed_at?: string | null
+          signer_name: string
+          user_id: string
+        }
+        Update: {
+          content_hash?: string | null
+          image?: string | null
+          inventory_id?: string
+          signed_at?: string | null
+          signer_name?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_inventory_signatures_inventory_id_fkey"
+            columns: ["inventory_id"]
+            isOneToOne: false
+            referencedRelation: "stock_inventories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_inventory_signatures_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stock_movement_qrs: {
         Row: {
           box_qr: string | null
@@ -12490,6 +12532,14 @@ export type Database = {
         Args: { _changes: Json; _items: Json; _order_id: string }
         Returns: undefined
       }
+      apply_verified_inventory_signature: {
+        Args: {
+          _expected_completed_at: string
+          _inventory_id: string
+          _user_id: string
+        }
+        Returns: string
+      }
       apply_verified_legal_signature: {
         Args: {
           _expected_updated_at: string
@@ -12678,6 +12728,7 @@ export type Database = {
         Returns: boolean
       }
       is_erp_admin: { Args: { _user_id: string }; Returns: boolean }
+      is_inventory_signer: { Args: { _id: string }; Returns: boolean }
       is_supply_member: { Args: { _user_id: string }; Returns: boolean }
       is_supply_technician: { Args: { _user_id: string }; Returns: boolean }
       legal_participant_users: {

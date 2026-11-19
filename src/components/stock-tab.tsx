@@ -46,6 +46,7 @@ import { pushQrsToExternal } from "@/lib/push-external";
 import { StockPhotoCell, useStockMeta, CopyCodeCell } from "@/components/stock-meta";
 import { StockDatePicker } from "./stock-date-picker";
 import { StockInventoryDialog } from "./stock-inventory-dialog";
+import { stockComponentTotals } from '@/lib/stock-totals';
 import { format } from "date-fns";
 
 
@@ -1117,6 +1118,7 @@ function StockTableCard({
   damageSource,
   simple,
   columnFilters,
+  totals,
 }: {
   title: string;
   description: string;
@@ -1130,6 +1132,7 @@ function StockTableCard({
   /** Estoque Myio: só saldo em estoque e baixa por avaria. */
   simple?: boolean;
   columnFilters?: boolean;
+  totals?: ReturnType<typeof stockComponentTotals>;
 }) {
   const { data: metaMap } = useStockMeta("materials");
   const stockFilters = useTableFilters(rows, [
@@ -1144,7 +1147,7 @@ function StockTableCard({
     <Card>
       <CardHeader className="gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <CardTitle>{title}</CardTitle>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2"><CardTitle>{title}</CardTitle>{totals && <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground"><span>Cadastrados: <strong className="font-normal text-foreground">{totals.registered}</strong></span><span>Saldo positivo: <strong className="font-normal text-foreground">{totals.positive}</strong></span><span>Saldo zerado: <strong className="font-normal text-foreground">{totals.zero}</strong></span></div>}</div>
           <CardDescription>{description}</CardDescription>
         </div>
         {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
@@ -1361,6 +1364,7 @@ function FabricaSection({
         <ProductionCapacityCard />
         <StockTableCard
           title="Estoque de Componentes"
+          totals={stockComponentTotals(rows)}
           description="Componentes exclusivos da operação da fábrica, separados dos dispositivos comprados de terceiros."
           rows={rows}
           isLoading={isLoading}
