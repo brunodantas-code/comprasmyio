@@ -1,5 +1,5 @@
-import { AlertMarker } from "@/components/cde/numeric-markers";
-import { useMemo, useState, type ReactNode } from "react";
+import { AlertMarker, NumericMarker } from "@/components/cde/numeric-markers";
+import { useMemo, useState, type ComponentType, type ReactNode } from "react";
 import { CdeDisclosureIcon } from "@/components/cde/cde-button";
 import { cn } from "@/lib/utils";
 import { AppSymbol } from "@/components/cde/app-tile";
@@ -9,6 +9,25 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuRad
 
 export type PendingGroupItem = { key: string; app: string; requester: string; count: number; row: ReactNode };
 type GroupBy = "app" | "requester";
+
+/**
+ * Row content shared by every pending list: the numeric identifier sits above the
+ * app symbol in a fixed-width column, so the text always starts at the same left edge.
+ */
+export function PendingRowContent({ icon: Icon, label, number, destructive }: {
+  icon: ComponentType<{ className?: string }>;
+  label: ReactNode;
+  number?: string | number;
+  destructive?: boolean;
+}) {
+  return <>
+    <span className="flex w-5 shrink-0 flex-col items-center gap-1">
+      {number !== undefined ? <NumericMarker>{number}</NumericMarker> : null}
+      <Icon className={cn("h-5 w-5 shrink-0", destructive && "text-destructive")} />
+    </span>
+    <span className="min-w-0 flex-1 text-left text-sm font-medium">{label}</span>
+  </>;
+}
 
 /** Groups pending rows by app or requester, with a red total and collapsible content. */
 export function PendingGroups({ items, leading }: { items: PendingGroupItem[]; leading?: ReactNode }) {
@@ -43,7 +62,7 @@ export function PendingGroups({ items, leading }: { items: PendingGroupItem[]; l
             <span className="min-w-0 flex-1 break-words text-sm font-semibold">{name}</span>
             <span className="ml-auto flex shrink-0 items-center gap-3"><AlertMarker count={total} /><CdeDisclosureIcon open={isOpen} screen="components/pending-groups.tsx" /></span>
           </Button></div>
-          {isOpen ? <div className="divide-y divide-border border-t border-border bg-muted/30">{rows.map((r) => <div key={r.key} className="pl-8 transition-colors hover:bg-primary/10 focus-within:bg-primary/10 [&>a]:!bg-transparent">{r.row}</div>)}</div> : null}
+          {isOpen ? <div className="divide-y divide-border border-t border-border bg-muted/30">{rows.map((r) => <div key={r.key} className="transition-colors hover:bg-primary/10 focus-within:bg-primary/10 [&>a]:!bg-transparent">{r.row}</div>)}</div> : null}
         </div>;
       })}
     </div>

@@ -22,7 +22,7 @@ export function WishlistWorkspace({ userId }: { userId: string }) {
     { key: "description", label: "Descrição", value: idea => `${idea.title} ${idea.description}` },
     { key: "status", label: "Situação", value: idea => status(idea.status) },
     { key: "date", label: "Data", kind: "date", value: idea => idea.created_at.slice(0, 10), display: idea => new Date(idea.created_at).toLocaleDateString("pt-BR") },
-    { key: "question", label: "Perguntas", value: idea => pending.some(q => q.idea_id === idea.id && q.recipient_id === userId) ? "Aguardando minha resposta" : pending.some(q => q.idea_id === idea.id && q.author_id === userId) ? "Aguardando resposta" : "Sem perguntas para mim" },
+    { key: "question", label: "Mensagens", value: idea => pending.some(q => q.idea_id === idea.id && q.recipient_id === userId) ? "Aguardando minha resposta" : pending.some(q => q.idea_id === idea.id && q.author_id === userId) ? "Aguardando resposta" : "Sem mensagens para mim" },
   ]);
   const normalize = (text: string) => text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   const terms = normalize(search).trim().split(/\s+/).filter(Boolean);
@@ -44,7 +44,7 @@ export function WishlistWorkspace({ userId }: { userId: string }) {
           <span className="min-w-0 truncate text-xs text-muted-foreground md:text-sm md:text-foreground">{name(idea.idealizer_id)}</span>
           <time className="text-right text-xs text-muted-foreground md:text-left">{new Date(idea.created_at).toLocaleDateString("pt-BR")}</time>
           <span className="col-span-2 min-w-0 md:col-span-1"><span className="block truncate text-sm font-medium">{idea.title}</span><span className="block truncate text-xs font-normal text-muted-foreground">{wishlistSummary(idea.description)}</span></span>
-          <span className="text-xs font-normal text-muted-foreground">{status(idea.status)}</span><span className="flex justify-end">{questionForMe ? <MessageCircleQuestion className="size-5 text-destructive" aria-label="Pergunta aguardando sua resposta" /> : waiting ? <MessageCircleMore className="size-5 text-muted-foreground" aria-label="Aguardando resposta" /> : null}</span>
+          <span className="text-xs font-normal text-muted-foreground">{status(idea.status)}</span><span className="flex justify-end">{questionForMe ? <MessageCircleQuestion className="size-5 text-destructive" aria-label="Mensagem aguardando sua resposta" /> : waiting ? <MessageCircleMore className="size-5 text-muted-foreground" aria-label="Aguardando resposta" /> : null}</span>
         </Button>;
       })}</div>
       {!shown.length && <p className="py-10 text-center text-sm text-muted-foreground">{search || filters.active ? "Nenhum desejo nesta seleção." : "Nenhum desejo registrado."}</p>}

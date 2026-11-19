@@ -3320,7 +3320,7 @@ function OrderReportDialog({
             <h3 className="text-sm font-semibold">Histórico</h3>
             {loadingLogs ? <p className="text-sm text-muted-foreground">Carregando...</p> : <MilestoneTimeline entries={(displayedLogs ?? []).map(l => {
               const detail = l.details && typeof l.details === 'object' && !Array.isArray(l.details) ? l.details : {};
-              const text = l.action === 'conversa_question' ? 'Pergunta enviada' : l.action === 'conversa_answer' ? 'Resposta enviada' : LOG_ACTION_LABELS[l.action] ?? l.action;
+              const text = l.action === 'conversa_question' ? 'Mensagem enviada' : l.action === 'conversa_answer' ? 'Resposta enviada' : LOG_ACTION_LABELS[l.action] ?? l.action;
               const modeText = l.action === 'modalidade_alterada' ? `${detail.modalidade_de !== detail.modalidade_para ? `\nDe ${MODE_NAME(detail.modalidade_de)} para ${MODE_NAME(detail.modalidade_para)}` : ''}\nEndereço anterior: ${detail.endereco_de || '—'}\nNovo endereço: ${detail.endereco_para || '—'}` : '';
               return { id: l.id, created_at: l.created_at, text: `${text}${typeof detail.message === 'string' ? `: ${detail.message}` : ''}${modeText}\npor ${nameFor(l.actor_id)}` };
             })} />}

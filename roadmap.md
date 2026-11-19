@@ -1,4 +1,6 @@
 # Roadmap
+- [x] Home/Central: números acima do símbolo do app e textos alinhados à esquerda; conferido no celular e computador (12/59/28/19 acima do </>, textos todos em x=61).
+- [x] Mensagens (ex-Perguntas e Respostas): clipe CDE com miniaturas em Supply, Mytosis (etapas e tarefas), Projects, Wishlist, Chamados e Code; renomeado para "Mensagens" nos cards, compositores, pendências e Central. Migration 0260, 3 testes novos passaram e 37 relacionados conferidos; envio real de anexo na tela ainda não exercitado.
 - [x] Kanban Projects: quantidade com fundo/texto coloridos e borda superior de 3 px; três opções no CDE com prévia. Salvamento/releitura da cor no quadro real conferidos e verde restaurado; celular sem excesso lateral e cinco testes passaram. Não publicado.
 - [x] Kanban: somente a atividade arrastada fica verde-claro; coluna transparente e demais cards neutros, conferidos no computador e celular sem alterar registros.
 - [x] Lista de projetos: título Portfólio retirado; funil junto ao cabeçalho Projeto, acesso mobile preservado; Projeto/Tipo combinados, identificação e limpeza conferidos.

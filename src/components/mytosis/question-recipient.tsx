@@ -12,5 +12,5 @@ export function QuestionRecipient({ nodeId, taskId, value, onChange }: { nodeId:
       return data;
     },
   });
-  return <div className="grid gap-1.5"><Label>Destinatário</Label><SearchableSelect aria-label="Destinatário da pergunta" value={value} onChange={onChange} placeholder="Selecione o destinatário" options={(recipients.data ?? []).map((user) => ({ value: user.id, label: user.full_name }))} />{recipients.error ? <p role="alert" className="text-xs text-destructive">Não foi possível carregar os destinatários.</p> : null}</div>;
+  return <div className="grid gap-1.5"><Label>Destinatário</Label><SearchableSelect aria-label="Destinatário da mensagem" value={value} onChange={onChange} placeholder="Selecione o destinatário" options={(recipients.data ?? []).map((user) => ({ value: user.id, label: user.full_name }))} />{recipients.error ? <p role="alert" className="text-xs text-destructive">Não foi possível carregar os destinatários.</p> : null}</div>;
 }

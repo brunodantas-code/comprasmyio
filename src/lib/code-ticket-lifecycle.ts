@@ -20,7 +20,7 @@ export function codeTicketProgressOutcome(requestedStatus: string, saved: { id: 
 }
 
 export function assertCodeProgressDraftSent(message: string) {
-  if (message.trim()) throw new Error("Há uma pergunta ou resposta ainda não enviada. Envie pelo avião de papel antes de salvar o andamento.");
+  if (message.trim()) throw new Error("Há uma mensagem ou resposta ainda não enviada. Envie pelo avião de papel antes de salvar o andamento.");
 }
 
 export function reconcileCodeProgressField<T extends string>(draft: T, previousSaved: T, saved: T): T {

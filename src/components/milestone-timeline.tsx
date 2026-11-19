@@ -9,7 +9,7 @@ export interface MilestoneEntry {
 
 function iconFor(text: string) {
   if (text.includes("→")) return ArrowRightLeft;
-  if (text.startsWith("Pergunta")) return MessageCircleQuestion;
+  if (text.startsWith("Pergunta") || text.startsWith("Mensagem")) return MessageCircleQuestion;
   if (text.startsWith("Resposta")) return MessageCircleReply;
   if (text.startsWith("Mensagem")) return MessageCircle;
   if (text.startsWith("Observação")) return FilePenLine;
@@ -40,7 +40,7 @@ export function MilestoneTimeline({ entries }: { entries: MilestoneEntry[] }) {
 }
 
 function collapsedParts(text: string) {
-  if (!/^(Observação|Pergunta|Resposta|Título|Solução)/.test(text)) return null;
+  if (!/^(Observação|Pergunta|Mensagem|Resposta|Título|Solução)/.test(text)) return null;
   const lines = text.split("\n");
   const first = lines[0];
   const colon = first.indexOf(":");

@@ -13,8 +13,8 @@ describe('assinaturas pessoais', () => {
     expect(canSignParticipant({ userId: 'bia', name: 'Ana' }, user)).toBe(false);
     expect(canSignParticipant({ name: 'Bia' }, user)).toBe(false);
   });
-  it('preserva reconhecimento de participantes antigos pelo nome', () => {
-    expect(canSignParticipant({ name: 'Ana' }, { id: 'ana', full_name: 'Ana' })).toBe(true);
+  it('não permite assinar a quem não é usuário do ERP', () => {
+    expect(canSignParticipant({ name: 'Ana' }, { id: 'ana', full_name: 'Ana' })).toBe(false);
   });
   it('exibe data e hora da assinatura no horário brasileiro', () => {
     expect(signatureDate('2026-11-09T03:28:00Z')).toContain('09/11/2026');

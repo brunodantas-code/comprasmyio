@@ -1821,6 +1821,13 @@
       "when": 1795040780306,
       "tag": "0259_projects_phase_reorder",
       "breakpoints": true
+    },
+    {
+      "idx": 260,
+      "version": "7",
+      "when": 1795101512625,
+      "tag": "0260_message_attachments_everywhere",
+      "breakpoints": true
     }
   ]
 }

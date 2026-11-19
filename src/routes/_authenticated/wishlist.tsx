@@ -19,7 +19,7 @@ export const Route = createFileRoute("/_authenticated/wishlist")({
     { title: "Wishlist | Ideias de inovação myio" },
     { name: "description", content: "Desejos e ideias de inovação compartilhados entre usuários myio, com idealizadores, conversas e roadmap para futuros projetos." },
     { property: "og:title", content: "Wishlist | Ideias de inovação myio" },
-    { property: "og:description", content: "Registre ideias de inovação, contribua com perguntas e respostas e planeje futuros projetos da myio." },
+    { property: "og:description", content: "Registre ideias de inovação, troque mensagens e planeje futuros projetos da myio." },
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary" },
   ] }),

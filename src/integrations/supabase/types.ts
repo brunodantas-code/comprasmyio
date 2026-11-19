@@ -4870,6 +4870,7 @@ export type Database = {
           file_name: string
           file_size: number
           id: string
+          message_id: string | null
           storage_path: string
           uploaded_by: string
         }
@@ -4880,6 +4881,7 @@ export type Database = {
           file_name: string
           file_size: number
           id?: string
+          message_id?: string | null
           storage_path: string
           uploaded_by: string
         }
@@ -4890,6 +4892,7 @@ export type Database = {
           file_name?: string
           file_size?: number
           id?: string
+          message_id?: string | null
           storage_path?: string
           uploaded_by?: string
         }
@@ -4899,6 +4902,13 @@ export type Database = {
             columns: ["call_id"]
             isOneToOne: false
             referencedRelation: "internal_calls"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "internal_call_attachments_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "internal_call_messages"
             referencedColumns: ["id"]
           },
           {
@@ -6113,6 +6123,7 @@ export type Database = {
           file_name: string
           file_size: number
           id: string
+          message_id: string | null
           node_id: string
           storage_path: string
           uploaded_by: string
@@ -6123,6 +6134,7 @@ export type Database = {
           file_name: string
           file_size: number
           id?: string
+          message_id?: string | null
           node_id: string
           storage_path: string
           uploaded_by?: string
@@ -6133,11 +6145,19 @@ export type Database = {
           file_name?: string
           file_size?: number
           id?: string
+          message_id?: string | null
           node_id?: string
           storage_path?: string
           uploaded_by?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "mytosis_node_attachments_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "mytosis_node_messages"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "mytosis_node_attachments_node_id_fkey"
             columns: ["node_id"]
@@ -6408,6 +6428,57 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      mytosis_task_attachments: {
+        Row: {
+          content_type: string
+          created_at: string
+          file_name: string
+          file_size: number
+          id: string
+          message_id: string | null
+          storage_path: string
+          task_id: string
+          uploaded_by: string
+        }
+        Insert: {
+          content_type?: string
+          created_at?: string
+          file_name: string
+          file_size?: number
+          id?: string
+          message_id?: string | null
+          storage_path: string
+          task_id: string
+          uploaded_by: string
+        }
+        Update: {
+          content_type?: string
+          created_at?: string
+          file_name?: string
+          file_size?: number
+          id?: string
+          message_id?: string | null
+          storage_path?: string
+          task_id?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mytosis_task_attachments_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "mytosis_task_messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mytosis_task_attachments_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "mytosis_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       mytosis_task_logs: {
         Row: {
@@ -7681,6 +7752,7 @@ export type Database = {
           file_name: string
           file_size: number
           id: string
+          message_id: string | null
           project_id: string
           storage_path: string
           task_id: string
@@ -7692,6 +7764,7 @@ export type Database = {
           file_name: string
           file_size: number
           id?: string
+          message_id?: string | null
           project_id: string
           storage_path: string
           task_id: string
@@ -7703,12 +7776,20 @@ export type Database = {
           file_name?: string
           file_size?: number
           id?: string
+          message_id?: string | null
           project_id?: string
           storage_path?: string
           task_id?: string
           uploaded_by?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "pm_task_attachments_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "pm_task_messages"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "pm_task_attachments_project_id_fkey"
             columns: ["project_id"]
@@ -11103,6 +11184,57 @@ export type Database = {
           },
         ]
       }
+      supply_order_attachments: {
+        Row: {
+          content_type: string
+          created_at: string
+          file_name: string
+          file_size: number
+          id: string
+          message_id: string | null
+          order_id: string
+          storage_path: string
+          uploaded_by: string
+        }
+        Insert: {
+          content_type?: string
+          created_at?: string
+          file_name: string
+          file_size?: number
+          id?: string
+          message_id?: string | null
+          order_id: string
+          storage_path: string
+          uploaded_by: string
+        }
+        Update: {
+          content_type?: string
+          created_at?: string
+          file_name?: string
+          file_size?: number
+          id?: string
+          message_id?: string | null
+          order_id?: string
+          storage_path?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supply_order_attachments_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "supply_order_messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supply_order_attachments_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       supply_order_messages: {
         Row: {
           author_id: string
@@ -11996,6 +12128,57 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      wishlist_attachments: {
+        Row: {
+          content_type: string
+          created_at: string
+          file_name: string
+          file_size: number
+          id: string
+          idea_id: string
+          message_id: string | null
+          storage_path: string
+          uploaded_by: string
+        }
+        Insert: {
+          content_type?: string
+          created_at?: string
+          file_name: string
+          file_size?: number
+          id?: string
+          idea_id: string
+          message_id?: string | null
+          storage_path: string
+          uploaded_by: string
+        }
+        Update: {
+          content_type?: string
+          created_at?: string
+          file_name?: string
+          file_size?: number
+          id?: string
+          idea_id?: string
+          message_id?: string | null
+          storage_path?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wishlist_attachments_idea_id_fkey"
+            columns: ["idea_id"]
+            isOneToOne: false
+            referencedRelation: "wishlist_ideas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wishlist_attachments_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "wishlist_messages"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       wishlist_ideas: {
         Row: {
