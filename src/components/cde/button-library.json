@@ -212,7 +212,7 @@
   {
     "id": "components/active-filter-tags.tsx|b92379d534749c7a|0",
     "file": "components/active-filter-tags.tsx",
-    "line": 23,
+    "line": 25,
     "tag": "Button",
     "label": "X",
     "dynamic": false,
@@ -13121,7 +13121,7 @@
     "icon": "",
     "variant": "ghost",
     "size": "",
-    "className": "!h-auto !min-w-0 !w-auto flex-1 whitespace-normal break-words text-left font-normal",
+    "className": "!h-auto !min-w-0 !w-auto flex-1 justify-start text-left font-normal",
     "group": ""
   },
   {
