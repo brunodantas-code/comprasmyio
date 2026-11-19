@@ -1856,6 +1856,13 @@
       "when": 1795117243256,
       "tag": "0264_inventory_external_counters_without_signing",
       "breakpoints": true
+    },
+    {
+      "idx": 265,
+      "version": "7",
+      "when": 1795117762015,
+      "tag": "0265_inventory_integer_counts",
+      "breakpoints": true
     }
   ]
 }

@@ -1,4 +1,6 @@
 # Roadmap
+- [x] Prints do + duplicado e campo Inventariantes antigo: prévia atual conferida com um único SVG no + e opção Leonardo Roedel na lista; usuário orientado a atualizar a tela após implantação, sem descartar contagem não salva.
+- [x] Revisados quatro pontos de entrada, editor/histórico/recorrência, comparação, Excel/PDF, assinatura e Home/Central: todos compartilham regras; corrigidas frações na confirmação, salvamento e exportação de rascunhos, com trigger apenas para inventários novos/em edição. 27 testes passaram; tela rejeitou 0.001 e aceitou zero sem salvar dados de teste. Assinatura positiva e comparação entre inventários reais permanecem não exercitadas.
 - [x] Publicação solicitada para liberar os ajustes conferidos e iniciar a contagem; implantação precisa terminar antes de atualizar o site.
 - [x] Inventário: Excel e PDF baixados e conferidos; duas páginas do PDF legíveis, planilha com Inventário/Assinaturas.
 - [x] Estoque de componentes: totalizadores junto ao título conferidos: 72 cadastrados, 0 positivos, 72 zerados.

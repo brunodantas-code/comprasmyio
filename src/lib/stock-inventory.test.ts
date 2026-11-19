@@ -1,10 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { addInventoryCounter, INVENTORY_COUNT_DEFAULT, INVENTORY_COUNT_STEP, inventoryCountDifference, inventoryDifference, nextInventoryDate } from './stock-inventory';
+import { addInventoryCounter, INVENTORY_COUNT_DEFAULT, INVENTORY_COUNT_STEP, inventoryCountDifference, inventoryDifference, isInventoryCount, nextInventoryDate } from './stock-inventory';
 describe('confirmação do inventário', () => {
   it('primeiro inventário não tem divergência mesmo com saldo zero', () => expect(inventoryCountDifference(100, 0, false)).toBeNull());
   it('inventário seguinte mostra a divergência encontrada', () => expect(inventoryCountDifference(100, 90, true)).toBe(10));
   it('quantidade começa em 1', () => expect(INVENTORY_COUNT_DEFAULT).toBe(1));
   it('quantidade avança de unidade em unidade', () => expect(INVENTORY_COUNT_STEP).toBe(1));
+  it('não aceita a contagem fracionária 0.001', () => expect(() => inventoryDifference(0.001, 0)).toThrow());
+  it('não confirma uma quantidade fracionária digitada', () => expect(isInventoryCount(1.5)).toBe(false));
+  it('permite confirmar zero unidades', () => expect(isInventoryCount(0)).toBe(true));
+  it('não calcula divergência para uma fração ainda não salva', () => expect(inventoryCountDifference(0.001, 0, true)).toBeNull());
 });
 describe('inventariantes', () => {
   it('permite adicionar um usuário cadastrado', () => expect(addInventoryCounter([], 'Leonardo Roedel')).toEqual(['Leonardo Roedel']));

@@ -11297,7 +11297,7 @@
   {
     "id": "components/stock-inventory-dialog.tsx|211da405b7e82540|0",
     "file": "components/stock-inventory-dialog.tsx",
-    "line": 128,
+    "line": 129,
     "tag": "Button",
     "label": "Inventário",
     "dynamic": false,
@@ -11312,7 +11312,7 @@
   {
     "id": "components/stock-inventory-dialog.tsx|de68b25131a6aac4|0",
     "file": "components/stock-inventory-dialog.tsx",
-    "line": 131,
+    "line": 132,
     "tag": "CdeButton",
     "label": "Novo inventário",
     "dynamic": false,
@@ -11327,7 +11327,7 @@
   {
     "id": "components/stock-inventory-dialog.tsx|286a9ba474fad055|0",
     "file": "components/stock-inventory-dialog.tsx",
-    "line": 134,
+    "line": 135,
     "tag": "Button",
     "label": "Editar inventário",
     "dynamic": false,
@@ -11342,7 +11342,7 @@
   {
     "id": "components/stock-inventory-dialog.tsx|269bb3a32a3102d2|0",
     "file": "components/stock-inventory-dialog.tsx",
-    "line": 134,
+    "line": 135,
     "tag": "Button",
     "label": "Ver contagem",
     "dynamic": false,
@@ -11357,7 +11357,7 @@
   {
     "id": "components/stock-inventory-dialog.tsx|11ef2fc73755e25c|0",
     "file": "components/stock-inventory-dialog.tsx",
-    "line": 138,
+    "line": 139,
     "tag": "Button",
     "label": "Excel",
     "dynamic": false,
@@ -11372,7 +11372,7 @@
   {
     "id": "components/stock-inventory-dialog.tsx|3f5f46810fb5f734|0",
     "file": "components/stock-inventory-dialog.tsx",
-    "line": 138,
+    "line": 139,
     "tag": "Button",
     "label": "PDF",
     "dynamic": false,
@@ -11387,7 +11387,7 @@
   {
     "id": "components/stock-inventory-dialog.tsx|69e2bc56459fb5b0|0",
     "file": "components/stock-inventory-dialog.tsx",
-    "line": 139,
+    "line": 140,
     "tag": "CdeButton",
     "label": "Adicionar inventariante",
     "dynamic": false,
@@ -11402,7 +11402,7 @@
   {
     "id": "components/stock-inventory-dialog.tsx|34af260e4c004341|0",
     "file": "components/stock-inventory-dialog.tsx",
-    "line": 139,
+    "line": 140,
     "tag": "Button",
     "label": "Confirmar inventariante",
     "dynamic": false,
@@ -11417,7 +11417,7 @@
   {
     "id": "components/stock-inventory-dialog.tsx|7c3014cf8b1f0f5d|0",
     "file": "components/stock-inventory-dialog.tsx",
-    "line": 139,
+    "line": 140,
     "tag": "Button",
     "label": "X",
     "dynamic": false,
@@ -11432,7 +11432,7 @@
   {
     "id": "components/stock-inventory-dialog.tsx|ec1367545e8a6f4e|0",
     "file": "components/stock-inventory-dialog.tsx",
-    "line": 148,
+    "line": 149,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -11447,7 +11447,7 @@
   {
     "id": "components/stock-inventory-dialog.tsx|ca02125f397f9f38|0",
     "file": "components/stock-inventory-dialog.tsx",
-    "line": 152,
+    "line": 153,
     "tag": "Button",
     "label": "FileSignature",
     "dynamic": false,
@@ -11462,7 +11462,7 @@
   {
     "id": "components/stock-inventory-dialog.tsx|09ddca822fff16a8|0",
     "file": "components/stock-inventory-dialog.tsx",
-    "line": 154,
+    "line": 155,
     "tag": "Button",
     "label": "Salvar contagem",
     "dynamic": false,
@@ -11477,7 +11477,7 @@
   {
     "id": "components/stock-inventory-dialog.tsx|ca7d8f781576ef05|0",
     "file": "components/stock-inventory-dialog.tsx",
-    "line": 154,
+    "line": 155,
     "tag": "Button",
     "label": "Concluir inventário",
     "dynamic": false,
