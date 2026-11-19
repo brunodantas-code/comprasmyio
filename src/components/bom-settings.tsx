@@ -248,7 +248,7 @@ export function BomSettingsDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="outline" title="Regras de componentes por dispositivo">
+        <Button size="icon" variant="ghost" title="Regras de componentes por dispositivo" aria-label="Regras de componentes por dispositivo">
           <Settings className="h-4 w-4" />
         </Button>
       </DialogTrigger>
