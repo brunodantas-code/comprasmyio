@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
-import { ClipboardList, Save, Pencil, Check, X, FileSignature, FileSpreadsheet, FileDown } from 'lucide-react';
+import { ClipboardList, Save, Pencil, Check, X, FileSignature, FileSpreadsheet, FileDown, Maximize2, Minimize2 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -32,6 +32,7 @@ const intervals = [{ value: 0, label: 'Sem recorrência' }, { value: 1, label: '
 export function StockInventoryDialog({ area, rows }: { area: string; rows: Row[] }) {
   const { data: stockMeta } = useStockMeta(area === 'terceiros' ? 'terceiros_materials' : 'materials');
   const [open, setOpen] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   const [editing, setEditing] = useState(false);
   const [id, setId] = useState<string | null>(null);
   const [name, setName] = useState('');
@@ -141,9 +142,15 @@ export function StockInventoryDialog({ area, rows }: { area: string; rows: Row[]
     } catch (e) { toast.error(e instanceof Error ? e.message : 'Não foi possível exportar'); }
     finally { setExporting(false); }
   }
-  return <Dialog open={open} onOpenChange={value => { setOpen(value); if (!value) setEditing(false); }}>
+  return <Dialog open={open} onOpenChange={value => { setOpen(value); if (!value) { setEditing(false); setExpanded(false); } }}>
     <DialogTrigger asChild><Button variant="action" title="Inventário"><ClipboardList className="size-4" />Inventário</Button></DialogTrigger>
-    <DialogContent className="stock-inventory max-h-[85vh] overflow-y-auto sm:max-w-4xl"><DialogHeader><DialogTitle>Inventário</DialogTitle></DialogHeader>
+    <DialogContent className={`stock-inventory auto-rows-min overflow-y-auto ${expanded ? 'h-dvh max-h-dvh w-screen max-w-none rounded-none sm:max-w-none' : 'max-h-[85vh] sm:max-w-4xl'}`}>
+      <DialogHeader className="sticky top-0 z-20 flex-row items-center justify-between space-y-0 gap-3 bg-background pr-9">
+        <DialogTitle>Inventário</DialogTitle>
+        <Button variant="ghost" size="icon" className="shrink-0" aria-label={expanded ? 'Restaurar tamanho do inventário' : 'Ampliar inventário'} title={expanded ? 'Restaurar tamanho do inventário' : 'Ampliar inventário'} aria-pressed={expanded} onClick={() => setExpanded(value => !value)}>
+          {expanded ? <Minimize2 className="size-4" /> : <Maximize2 className="size-4" />}
+        </Button>
+      </DialogHeader>
       {!editing ? <div className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3"><div>{upcoming?.next_date && <span className={upcoming.next_date < format(new Date(), 'yyyy-MM-dd') ? 'text-destructive' : 'text-muted-foreground'}>Próxima contagem: {format(new Date(`${upcoming.next_date}T12:00:00`), 'dd/MM/yyyy')}</span>}</div><CdeButton group="plus" title="Novo inventário" aria-label="Novo inventário" disabled={!rows.length || catalog.isLoading || history.isLoading || !!catalog.error} onClick={() => start(upcoming)} /></div>
         {history.isLoading && <p>Carregando inventários…</p>}{history.error && <p className="text-destructive">{history.error.message}</p>}
