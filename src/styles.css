@@ -634,6 +634,12 @@ input[data-search-field="true"] {
 .central-flow .central-flow-node { background: var(--card); color: var(--foreground); border: 1px solid var(--border); border-radius: 6px; padding: 12px; }
 
 /* CDE: alinhamento padrão de cabeçalhos (.cde-th) e listas (.cde-td); classes explícitas das telas (utilities) prevalecem. */
+.stock-inventory { font-size: var(--filter-fs); }
+.stock-inventory .cde-td,
+.stock-inventory .cde-td span,
+.stock-inventory .cde-td input,
+.stock-inventory p,
+.stock-inventory fieldset > div > div > div > span { font-size: var(--filter-fs); }
 @layer base {
   .cde-th { text-align: var(--th-align); vertical-align: var(--th-valign); background: var(--th-bg); color: var(--th-color); }
   :where(thead) > tr { border-color: var(--th-border); }

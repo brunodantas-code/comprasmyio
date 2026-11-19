@@ -7,6 +7,9 @@ import { supabase } from '@/integrations/supabase/client';
 import type { Json } from '@/integrations/supabase/types';
 import { Button } from '@/components/ui/button';
 import { CdeButton } from '@/components/cde/cde-button';
+import { useTableFilters } from '@/components/use-table-filters';
+import { TableSortMenu, type TableSorting } from '@/components/table-sort-menu';
+import { compareColumnValues } from '@/lib/column-sort';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { InventorySignatureDialog } from '@/components/inventory-signature-dialog';
 import { signatureDate } from '@/lib/signatures';
@@ -112,11 +115,22 @@ export function StockInventoryDialog({ area, rows }: { area: string; rows: Row[]
     return data ?? [];
   }});
   const upcoming = completed[0];
+  const [sorting, setSorting] = useState<TableSorting | undefined>({ key: 'name', direction: 'asc' });
+  const itemColumns = [
+    { key: 'name', label: 'Item', value: (item: Item) => item.name },
+    { key: 'balance', label: 'Saldo', kind: 'number' as const, value: (item: Item) => item.balance },
+    { key: 'counted', label: 'Contagem', kind: 'number' as const, value: (item: Item) => item.counted },
+    { key: 'confirmation', label: 'Confirmação', value: (item: Item) => item.confirmed || readOnly ? 'Confirmado' : 'A confirmar' },
+    { key: 'difference', label: 'Divergência', kind: 'number' as const, value: (item: Item) => inventoryCountDifference(item.counted, item.balance, !!previousInventory) },
+  ];
+  const itemFilters = useTableFilters(items, itemColumns);
+  const sortedColumn = itemColumns.find(column => column.key === sorting?.key);
+  const visibleItems = sortedColumn && sorting ? [...itemFilters.filtered].sort((a, b) => compareColumnValues(sortedColumn.kind ?? 'text', sortedColumn.value(a), sortedColumn.value(b), sorting.direction)) : itemFilters.filtered;
   async function exportCount(format: 'pdf' | 'xlsx') {
     setExporting(true);
     try {
       if (!readOnly) for (const item of items) if (item.counted !== null) inventoryDifference(item.counted, item.balance);
-      await exportInventory({ name, date, area: ({ fabrica: 'Estoque de Componentes', terceiros: 'Insumos de Instalação', almoxarifado: 'Estoque myio', almoxarifado_geral: 'Almoxarifado' } as Record<string,string>)[area] ?? area, counters, status: readOnly ? 'completed' : 'draft', signatures: signatures.data ?? [], columns: ['Item', 'Inventário N', 'Entradas por compras', 'Saídas da Fábrica', 'Saldo', 'Inventário N+1', 'Divergências ou confirmação'], rows: items.map(item => {
+      await exportInventory({ name, date, area: ({ fabrica: 'Estoque de Componentes', terceiros: 'Insumos de Instalação', almoxarifado: 'Estoque myio', almoxarifado_geral: 'Almoxarifado' } as Record<string,string>)[area] ?? area, counters, status: readOnly ? 'completed' : 'draft', signatures: signatures.data ?? [], columns: ['Item', 'Inventário N', 'Entradas por compras', 'Saídas da Fábrica', 'Saldo', 'Inventário N+1', 'Divergências ou confirmação'], rows: visibleItems.map(item => {
         const old = previousItems.find(row => row.material_id === item.material_id);
         const movement = comparison.data?.find(row => row.material_id === item.material_id);
         const difference = item.counted !== null && item.counted >= 0 ? inventoryCountDifference(item.counted, item.balance, !!previousInventory) : null;
@@ -127,7 +141,7 @@ export function StockInventoryDialog({ area, rows }: { area: string; rows: Row[]
   }
   return <Dialog open={open} onOpenChange={value => { setOpen(value); if (!value) setEditing(false); }}>
     <DialogTrigger asChild><Button variant="action" title="Inventário"><ClipboardList className="size-4" />Inventário</Button></DialogTrigger>
-    <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-4xl"><DialogHeader><DialogTitle>Inventário</DialogTitle></DialogHeader>
+    <DialogContent className="stock-inventory max-h-[85vh] overflow-y-auto sm:max-w-4xl"><DialogHeader><DialogTitle>Inventário</DialogTitle></DialogHeader>
       {!editing ? <div className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3"><div>{upcoming?.next_date && <span className={upcoming.next_date < format(new Date(), 'yyyy-MM-dd') ? 'text-destructive' : 'text-muted-foreground'}>Próxima contagem: {format(new Date(`${upcoming.next_date}T12:00:00`), 'dd/MM/yyyy')}</span>}</div><CdeButton group="plus" title="Novo inventário" aria-label="Novo inventário" disabled={!rows.length || catalog.isLoading || history.isLoading || !!catalog.error} onClick={() => start(upcoming)} /></div>
         {history.isLoading && <p>Carregando inventários…</p>}{history.error && <p className="text-destructive">{history.error.message}</p>}
@@ -140,7 +154,10 @@ export function StockInventoryDialog({ area, rows }: { area: string; rows: Row[]
         <fieldset disabled={readOnly} className="grid gap-4 sm:grid-cols-2"><div><Label htmlFor="inventory-name">Nome do inventário</Label><Input id="inventory-name" value={name} onChange={e => setName(e.target.value)} disabled={readOnly} /></div><div><Label>Data do inventário</Label><StockDatePicker label="Data do inventário" value={date} onChange={setDate} /></div><div className="min-w-0"><Label>Inventariantes</Label>{!readOnly && <div className="flex items-center gap-2"><SearchableSelect aria-label="Selecionar inventariante" value="" onChange={value => { const user = users.data?.find(row => row.id === value); if (user?.full_name) addCounter(user.full_name); }} options={(users.data ?? []).filter(user => user.full_name).map(user => ({ value: user.id, label: user.full_name ?? '' }))} placeholder={users.isLoading ? 'Carregando usuários…' : 'Selecionar usuário'} disabled={users.isLoading} className="min-w-0 flex-1" /><CdeButton group="plus" aria-label="Adicionar inventariante" title="Adicionar inventariante" onClick={() => setAddingCounter(value => !value)} /></div>}{users.error && !readOnly && <p role="alert" className="text-sm text-destructive">Não foi possível carregar os usuários.</p>}{addingCounter && !readOnly && <div className="mt-2 flex items-center gap-2"><Input aria-label="Nome do inventariante" value={counterName} onChange={e => setCounterName(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addCounter(counterName); } }} /><Button variant="ghost" size="icon" aria-label="Confirmar inventariante" title="Confirmar inventariante" disabled={!counterName.trim()} onClick={() => addCounter(counterName)}><Check className="size-4" /></Button></div>}<div className="mt-2 space-y-1">{counters.map(counter => <div key={counter} className="flex min-w-0 items-center gap-2"><span className="min-w-0 flex-1 break-words">{counter}</span>{!readOnly && <Button variant="ghost" size="icon" aria-label={`Remover inventariante ${counter}`} title={`Remover ${counter}`} onClick={() => setCounters(current => current.filter(name => name !== counter))}><X className="size-4" /></Button>}</div>)}</div></div><div><Label>Recorrência</Label><Select value={String(months)} onValueChange={v => setMonths(Number(v))}><SelectTrigger aria-label="Recorrência"><SelectValue /></SelectTrigger><SelectContent>{intervals.map(i => <SelectItem key={i.value} value={String(i.value)}>{i.label}</SelectItem>)}</SelectContent></Select></div></fieldset>
         {months > 0 && <p className="text-sm text-muted-foreground">Próximo inventário: {nextInventoryDate(date, months)?.split('-').reverse().join('/')}</p>}
         {comparison.error && <p className="text-destructive">{comparison.error.message}</p>}
-        <Table><TableHeader><TableRow><TableHead>Item</TableHead><TableHead>Inventário N</TableHead><TableHead>Entradas por compras</TableHead><TableHead>Saídas da Fábrica</TableHead><TableHead>Saldo</TableHead><TableHead>Inventário N+1</TableHead><TableHead>Divergências ou confirmação</TableHead></TableRow></TableHeader><TableBody>{items.map((item, index) => {
+        <div className="flex justify-end"><TableSortMenu columns={itemColumns} value={sorting} onChange={setSorting} /></div>
+        {itemFilters.summary}
+        <Table><TableHeader><TableRow><TableHead>{itemFilters.header('name')}</TableHead><TableHead>Inventário N</TableHead><TableHead>Entradas por compras</TableHead><TableHead>Saídas da Fábrica</TableHead><TableHead>Saldo</TableHead><TableHead>Inventário N+1</TableHead><TableHead>Divergências ou confirmação</TableHead></TableRow></TableHeader><TableBody>{visibleItems.map(item => {
+          const index = items.findIndex(row => row.material_id === item.material_id);
           const old = previousItems.find(row => row.material_id === item.material_id);
           const movements = comparison.data?.find(row => row.material_id === item.material_id);
           const difference = item.counted !== null && item.counted < 0 ? null : inventoryCountDifference(item.counted, item.balance, !!previousInventory);
