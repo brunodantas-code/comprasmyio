@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
-import { ClipboardList, Save, Pencil, Check, X, FileSignature, FileSpreadsheet, FileDown, Maximize2, Minimize2 } from 'lucide-react';
+import { ClipboardList, Save, Pencil, Check, X, FileSignature, FileSpreadsheet, FileDown, Maximize2, Minimize2, MessageSquare } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -18,6 +18,9 @@ import { exportInventory } from '@/lib/inventory-export';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -26,8 +29,23 @@ import { confirmAction } from './confirm-dialog';
 import { addInventoryCounter, INVENTORY_COUNT_DEFAULT, INVENTORY_COUNT_STEP, inventoryCountDifference, inventoryDifference, isInventoryCount, nextInventoryDate } from '@/lib/stock-inventory';
 
 type Row = { material_id: string; name: string; balance: number };
-type Item = Row & { counted: number | null; difference?: number | null; confirmed?: boolean };
+type Item = Row & { counted: number | null; difference?: number | null; confirmed?: boolean; observation?: string };
 const intervals = [{ value: 0, label: 'Sem recorrência' }, { value: 1, label: 'Mensal' }, { value: 3, label: 'Trimestral' }, { value: 6, label: 'Semestral' }, { value: 12, label: 'Anual' }];
+
+
+function InventoryObservation({ item, readOnly, saving, onSave }: { item: Item; readOnly: boolean; saving: boolean; onSave: (observation: string) => Promise<unknown> }) {
+  const [open, setOpen] = useState(false);
+  const [draft, setDraft] = useState('');
+  return <Popover open={open} onOpenChange={value => { setOpen(value); if (value) setDraft(item.observation ?? ''); }}>
+    <TooltipProvider delayDuration={200}><Tooltip><TooltipTrigger asChild><PopoverTrigger asChild>
+      <Button variant="ghost" size="compactIcon" aria-label={`Observação ${item.name}`}><MessageSquare className={item.observation ? 'size-4 text-primary' : 'size-4'} /></Button>
+    </PopoverTrigger></TooltipTrigger><TooltipContent className="max-w-80 whitespace-pre-wrap break-words">{item.observation || 'Adicionar observação'}</TooltipContent></Tooltip></TooltipProvider>
+    <PopoverContent className="w-[min(22rem,calc(100vw-2rem))] space-y-3">
+      <Label>Observação — {item.name}</Label>
+      {readOnly ? <p className="whitespace-pre-wrap break-words text-sm">{item.observation || 'Sem observação'}</p> : <><Textarea aria-label={`Texto da observação ${item.name}`} value={draft} onChange={e => setDraft(e.target.value)} disabled={saving} /><div className="flex justify-end"><Button variant="ghost" size="icon" aria-label={`Salvar observação ${item.name}`} title="Salvar observação" disabled={saving} onClick={async () => { try { await onSave(draft.trim()); setOpen(false); } catch { /* Keep the draft open; mutation presents the error. */ } }}><Save className="size-4" /></Button></div></>}
+    </PopoverContent>
+  </Popover>;
+}
 
 export function StockInventoryDialog({ area, rows }: { area: string; rows: Row[] }) {
   const { data: stockMeta } = useStockMeta(area === 'terceiros' ? 'terceiros_materials' : 'materials');
@@ -75,8 +93,8 @@ export function StockInventoryDialog({ area, rows }: { area: string; rows: Row[]
     if (error) throw error;
     return data ?? [];
   }});
-  const save = useMutation({ mutationFn: async ({ complete, confirmIndex }: { complete: boolean; confirmIndex?: number }) => {
-    const savedItems = items.map((item, index) => index === confirmIndex ? { ...item, confirmed: true } : item);
+  const save = useMutation({ mutationFn: async ({ complete, confirmIndex, observation }: { complete: boolean; confirmIndex?: number; observation?: { materialId: string; text: string } }) => {
+    const savedItems = items.map((item, index) => observation?.materialId === item.material_id ? { ...item, observation: observation.text } : index === confirmIndex ? { ...item, confirmed: true } : item);
     const names = counters;
     if (!name.trim() || !date || !names.length) throw new Error('Informe nome, data e inventariantes');
     if (!items.length) throw new Error('Nenhum item para contar');
@@ -88,7 +106,8 @@ export function StockInventoryDialog({ area, rows }: { area: string; rows: Row[]
     return data;
   }, onSuccess: (_, variables) => {
     toast.success('Inventário registrado');
-    if (variables.confirmIndex !== undefined) setItems(current => current.map((item, index) => index === variables.confirmIndex ? { ...item, confirmed: true } : item));
+    if (variables.observation) setItems(current => current.map(item => item.material_id === variables.observation?.materialId ? { ...item, observation: variables.observation.text } : item));
+    else if (variables.confirmIndex !== undefined) setItems(current => current.map((item, index) => index === variables.confirmIndex ? { ...item, confirmed: true } : item));
     else setEditing(false);
     for (const key of ['stock-inventories', 'material-stock', 'stock-movements', 'terceiros-stock', 'terceiros-movements', 'inventory-signatures', 'pending-actions']) qc.invalidateQueries({ queryKey: [key] });
   }, onError: (e: Error) => toast.error(e.message) });
@@ -103,7 +122,7 @@ export function StockInventoryDialog({ area, rows }: { area: string; rows: Row[]
     const previous = source?.status === 'draft' && Array.isArray(source.items) ? source.items as unknown as Item[] : [];
     setItems(rows.filter(row => catalog.data?.includes(row.material_id)).map(row => {
       const saved = previous.find(item => item.material_id === row.material_id);
-      return { ...row, counted: saved ? saved.counted : INVENTORY_COUNT_DEFAULT, confirmed: saved?.confirmed ?? false };
+      return { ...row, counted: saved ? saved.counted : INVENTORY_COUNT_DEFAULT, confirmed: saved?.confirmed ?? false, observation: saved?.observation ?? '' };
     }));
     setEditing(true);
   }
@@ -133,11 +152,11 @@ export function StockInventoryDialog({ area, rows }: { area: string; rows: Row[]
     setExporting(true);
     try {
       if (!readOnly) for (const item of items) if (item.counted !== null) inventoryDifference(item.counted, item.balance);
-      await exportInventory({ name, date, area: ({ fabrica: 'Estoque de Componentes', terceiros: 'Insumos de Instalação', almoxarifado: 'Estoque myio', almoxarifado_geral: 'Almoxarifado' } as Record<string,string>)[area] ?? area, counters, status: readOnly ? 'completed' : 'draft', signatures: signatures.data ?? [], columns: ['Item', 'Inventário N', 'Entradas por compras', 'Saídas da Fábrica', 'Saldo', 'Inventário N+1', 'Divergências ou confirmação'], rows: visibleItems.map(item => {
+      await exportInventory({ name, date, area: ({ fabrica: 'Estoque de Componentes', terceiros: 'Insumos de Instalação', almoxarifado: 'Estoque myio', almoxarifado_geral: 'Almoxarifado' } as Record<string,string>)[area] ?? area, counters, status: readOnly ? 'completed' : 'draft', signatures: signatures.data ?? [], columns: ['Item', 'Inventário N', 'Entradas por compras', 'Saídas da Fábrica', 'Saldo', 'Inventário N+1', 'Divergências ou confirmação', 'Observações'], rows: visibleItems.map(item => {
         const old = previousItems.find(row => row.material_id === item.material_id);
         const movement = comparison.data?.find(row => row.material_id === item.material_id);
         const difference = item.counted !== null && item.counted >= 0 ? inventoryCountDifference(item.counted, item.balance, !!previousInventory) : null;
-        return [item.name, previousInventory ? old?.counted ?? null : item.counted, previousInventory ? movement?.purchases ?? 0 : null, previousInventory ? movement?.factory_exits ?? 0 : null, item.balance, previousInventory ? item.counted : null, difference !== null && difference !== 0 ? difference : item.confirmed || readOnly ? 'Confirmado' : null];
+        return [item.name, previousInventory ? old?.counted ?? null : item.counted, previousInventory ? movement?.purchases ?? 0 : null, previousInventory ? movement?.factory_exits ?? 0 : null, item.balance, previousInventory ? item.counted : null, difference !== null && difference !== 0 ? difference : item.confirmed || readOnly ? 'Confirmado' : null, item.observation ?? null];
       }) }, format);
     } catch (e) { toast.error(e instanceof Error ? e.message : 'Não foi possível exportar'); }
     finally { setExporting(false); }
@@ -172,7 +191,7 @@ export function StockInventoryDialog({ area, rows }: { area: string; rows: Row[]
           const difference = item.counted !== null && item.counted < 0 ? null : inventoryCountDifference(item.counted, item.balance, !!previousInventory);
           const field = <Input type="number" min={0} step={INVENTORY_COUNT_STEP} aria-invalid={item.counted !== null && !isInventoryCount(item.counted)} aria-label={`Contagem ${item.name}`} value={item.counted ?? ''} disabled={readOnly || save.isPending} onChange={e => setItems(current => current.map((row, position) => position === index ? { ...row, counted: e.target.value === '' ? null : Number(e.target.value), confirmed: false } : row))} />;
           const divergent = difference !== null && difference !== 0;
-          return <TableRow key={item.material_id}><TableCell>{item.name}</TableCell><TableCell><StockPhotoCell url={stockMeta?.[item.material_id]?.photo} name={item.name} /></TableCell><TableCell>{previousInventory ? old?.counted ?? '—' : field}</TableCell><TableCell>{previousInventory ? comparison.isLoading ? '…' : movements?.purchases ?? 0 : '—'}</TableCell><TableCell>{previousInventory ? comparison.isLoading ? '…' : movements?.factory_exits ?? 0 : '—'}</TableCell><TableCell title="Inclui todas as movimentações registradas">{item.balance}</TableCell><TableCell>{previousInventory ? field : '—'}</TableCell><TableCell><div className="flex items-center justify-center gap-2">{divergent ? <span>{difference > 0 ? `+${difference}` : difference}</span> : item.confirmed || readOnly ? <span>Confirmado</span> : null}{!readOnly && <Button variant="ghost" size="icon" aria-label={`${divergent ? 'Salvar divergência' : 'Confirmar contagem'} ${item.name}`} title={item.confirmed ? 'Contagem confirmada' : divergent ? 'Salvar divergência' : 'Confirmar contagem'} disabled={save.isPending || !isInventoryCount(item.counted) || item.confirmed} onClick={() => save.mutate({ complete: false, confirmIndex: index })}>{divergent && !item.confirmed ? <Save className="size-4" /> : <Check className="size-4" />}</Button>}</div></TableCell></TableRow>;
+          return <TableRow key={item.material_id}><TableCell><div className="flex items-center gap-2"><span className="min-w-0 flex-1">{item.name}</span><InventoryObservation item={item} readOnly={readOnly} saving={save.isPending} onSave={text => save.mutateAsync({ complete: false, observation: { materialId: item.material_id, text } })} /></div></TableCell><TableCell><StockPhotoCell url={stockMeta?.[item.material_id]?.photo} name={item.name} /></TableCell><TableCell>{previousInventory ? old?.counted ?? '—' : field}</TableCell><TableCell>{previousInventory ? comparison.isLoading ? '…' : movements?.purchases ?? 0 : '—'}</TableCell><TableCell>{previousInventory ? comparison.isLoading ? '…' : movements?.factory_exits ?? 0 : '—'}</TableCell><TableCell title="Inclui todas as movimentações registradas">{item.balance}</TableCell><TableCell>{previousInventory ? field : '—'}</TableCell><TableCell><div className="flex items-center justify-center gap-2">{divergent ? <span>{difference > 0 ? `+${difference}` : difference}</span> : item.confirmed || readOnly ? <span>Confirmado</span> : null}{!readOnly && <Button variant="ghost" size="icon" aria-label={`${divergent ? 'Salvar divergência' : 'Confirmar contagem'} ${item.name}`} title={item.confirmed ? 'Contagem confirmada' : divergent ? 'Salvar divergência' : 'Confirmar contagem'} disabled={save.isPending || !isInventoryCount(item.counted) || item.confirmed} onClick={() => save.mutate({ complete: false, confirmIndex: index })}>{divergent && !item.confirmed ? <Save className="size-4" /> : <Check className="size-4" />}</Button>}</div></TableCell></TableRow>;
         })}</TableBody></Table>
         {readOnly && <section className="space-y-2"><h2 className="text-sm">Assinaturas dos inventariantes</h2>{counters.map(counter => {
           const signer = signatures.data?.find(s => s.signer_name === counter);
