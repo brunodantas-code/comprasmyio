@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Check, FactoryIcon, PackagePlus, Percent, RotateCcw, Search, Settings, Trash2 } from "lucide-react";
+import { Check, PackagePlus, Percent, RotateCcw, Search, Settings, Trash2 } from "lucide-react";
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 
 type Material = { id: string; name: string; location: string; is_product: boolean; is_manufactured?: boolean | null; loss_percent?: number | null };
@@ -270,17 +270,6 @@ export function BomSettingsDialog() {
             </SelectContent>
           </Select>
           <Badge variant="outline">{rows.length} componentes</Badge>
-          {selected && (
-            <Button
-              size="sm"
-              variant="outline"
-              disabled={setManufactured.isPending}
-              onClick={() => setManufactured.mutate({ id: selected, value: false })}
-              title="Remover das listas da Fábrica (continua no Estoque)"
-            >
-              <FactoryIcon className="mr-1 h-4 w-4" /> Não é produzido aqui
-            </Button>
-          )}
         </div>
 
         {nonManufactured.length > 0 && (
