@@ -94,6 +94,6 @@ export function ColumnFilter({
       {showLabel ? <CdeButton group="filter" screen="components/column-filter.tsx" active={active} className="h-7 gap-1 px-2 text-xs">{label}</CdeButton> :
         <CdeButton group="filter" screen="components/column-filter.tsx" active={active} aria-label={`Filtrar ${label}`} title={`Filtrar ${label}`} className={`${compact ? "size-4" : "size-5"} shrink-0 p-0 align-middle !bg-transparent shadow-none`} />}
     </PopoverTrigger>
-    <PopoverContent align="start" className="w-[min(18rem,calc(100vw-2rem))] space-y-2 p-3 text-left font-sans text-sm font-normal">{content}</PopoverContent>
+    <PopoverContent align="start" className="max-h-[var(--radix-popover-content-available-height)] w-[min(18rem,calc(100vw-2rem))] overflow-y-auto space-y-2 p-3 text-left font-sans text-sm font-normal">{content}</PopoverContent>
   </Popover>;
 }
