@@ -44,6 +44,9 @@ import { DamageItemDialog, DamagedItemsCard } from "@/components/damaged-items";
 import { ExternalSyncCard, ExternalLostCard } from "@/components/external-sync";
 import { pushQrsToExternal } from "@/lib/push-external";
 import { StockPhotoCell, useStockMeta, CopyCodeCell } from "@/components/stock-meta";
+import { StockDatePicker } from "./stock-date-picker";
+import { StockInventoryDialog } from "./stock-inventory-dialog";
+import { format } from "date-fns";
 
 
 
@@ -81,6 +84,7 @@ type Movement = {
   order_id: string | null;
   created_by: string | null;
   created_at: string;
+  entry_date?: string | null;
   responsible?: string | null;
 };
 
@@ -173,6 +177,7 @@ type TerceirosMovement = {
   responsible: string | null;
   created_by: string | null;
   created_at: string;
+  entry_date?: string | null;
 };
 
 function useTerceirosStock() {
@@ -192,7 +197,7 @@ function useTerceirosMovements() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("terceiros_movements")
-        .select("id, material_id, quantity, type, reason, responsible, created_by, created_at")
+        .select("id, material_id, quantity, type, reason, responsible, created_by, created_at, entry_date")
         .order("created_at", { ascending: false })
         .limit(300);
       if (error) throw error;
@@ -211,7 +216,7 @@ function MovementHistoryTable({
   profiles?: Record<string, string>;
 }) {
   const movementFilters = useTableFilters(movements, [
-    { key: "date", label: "Data", kind: "date", value: m => m.created_at.slice(0,10), display: m => fmt(m.created_at) },
+    { key: "date", label: "Data", kind: "date", value: m => m.entry_date ?? m.created_at.slice(0,10), display: m => m.entry_date ? m.entry_date.split('-').reverse().join('/') : fmt(m.created_at) },
     { key: "description", label: "Descrição", value: m => names[m.material_id] ?? "" },
     { key: "type", label: "Tipo", value: m => MOVEMENT_LABELS[m.type] },
     { key: "quantity", label: "Qtd.", kind: "number", value: m => (m.type === "saida" ? -1 : 1) * m.quantity },
@@ -228,7 +233,7 @@ function MovementHistoryTable({
       <TableBody>
         {filtered.slice(0, 50).map((movement) => (
           <TableRow key={movement.id}>
-            <TableCell className="whitespace-nowrap text-sm text-muted-foreground">{fmt(movement.created_at)}</TableCell>
+            <TableCell className="whitespace-nowrap text-sm text-muted-foreground" title={`Registrado em ${fmt(movement.created_at)}`}>{movement.entry_date ? movement.entry_date.split('-').reverse().join('/') : fmt(movement.created_at)}</TableCell>
             <TableCell className="font-medium">{names[movement.material_id] ?? "—"}</TableCell>
             <TableCell><Badge variant="outline" className={MOVEMENT_CLASSES[movement.type]}>{MOVEMENT_LABELS[movement.type]}</Badge></TableCell>
             <TableCell className="text-right">{movement.type === "saida" ? "-" : "+"}{movement.quantity}</TableCell>
@@ -267,6 +272,7 @@ function MovementDialog({
   const galleryRef = useRef<HTMLInputElement>(null);
   const isExit = type === "saida";
   const needsQr = isExit && !!isManufactured;
+  const [entryDate, setEntryDate] = useState(format(new Date(), 'yyyy-MM-dd'));
 
   const save = useMutation({
     mutationFn: async (v: { quantity: number; reason: string | null }) => {
@@ -285,6 +291,7 @@ function MovementDialog({
           type,
           reason: v.reason,
           created_by: userId,
+          ...(type === 'entrada' ? { entry_date: entryDate } : {}),
           ...(isExit ? { responsible: responsible.trim(), photo_url } : {}),
         } as never)
         .select("id")
@@ -345,6 +352,7 @@ function MovementDialog({
           <DialogDescription>Saldo atual: {row.balance}</DialogDescription>
         </DialogHeader>
         <form onSubmit={onSubmit} className="space-y-4">
+          {type === 'entrada' && <div className="space-y-2"><Label>Data da entrada</Label><StockDatePicker label="Data da entrada" value={entryDate} onChange={setEntryDate} /></div>}
           <div className="space-y-2">
             <Label htmlFor={`qty-${type}-${row.material_id}`}>Quantidade</Label>
             <Input
@@ -1317,6 +1325,7 @@ function FabricaSection({
   const toolbar = (
     <>
       <AddMaterialDialog location="fabrica" userId={userId} />
+      <StockInventoryDialog area="fabrica" rows={scoped} />
       <BomSettingsDialog />
       <StockSimulatorDialog userId={userId} />
       <ResetStockDialog rows={scoped} userId={userId} location="fabrica" />
@@ -1395,6 +1404,7 @@ function TerceirosMovementDialog({
   const cameraRef = useRef<HTMLInputElement>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
   const isExit = type === "saida";
+  const [entryDate, setEntryDate] = useState(format(new Date(), 'yyyy-MM-dd'));
 
   const save = useMutation({
     mutationFn: async (v: { quantity: number; reason: string | null }) => {
@@ -1411,6 +1421,7 @@ function TerceirosMovementDialog({
         type,
         reason: v.reason,
         created_by: userId,
+        ...(type === 'entrada' ? { entry_date: entryDate } : {}),
         ...(isExit ? { responsible: responsible.trim(), photo_url } : {}),
       } as never);
       if (error) throw error;
@@ -1451,6 +1462,7 @@ function TerceirosMovementDialog({
           <DialogDescription>Saldo atual: {row.balance} (Insumos de Instalação)</DialogDescription>
         </DialogHeader>
         <form onSubmit={onSubmit} className="space-y-4">
+          {type === 'entrada' && <div className="space-y-2"><Label>Data da entrada</Label><StockDatePicker label="Data da entrada" value={entryDate} onChange={setEntryDate} /></div>}
           <div className="space-y-2">
             <Label htmlFor={`tqty-${type}-${row.material_id}`}>Quantidade</Label>
             <Input id={`tqty-${type}-${row.material_id}`} name="quantity" type="number" min={1} defaultValue={1} required />
@@ -1876,6 +1888,7 @@ function TerceirosSection({ userId, canDelete }: { userId: string; canDelete?: b
   const toolbar = (
     <>
       <AddTerceirosDialog userId={userId} />
+      <StockInventoryDialog area="terceiros" rows={rows ?? []} />
       <TerceirosResetDialog rows={rows ?? []} />
     </>
   );
@@ -2086,6 +2099,7 @@ function MyioDevicesStockSection({ userId, canDelete }: { userId: string; canDel
   const toolbar = (
     <>
       <ResetStockDialog rows={scoped} userId={userId} location="almoxarifado" />
+      <StockInventoryDialog area="almoxarifado" rows={scoped.filter(r => manufactured?.[r.material_id])} />
     </>
   );
 
@@ -2140,6 +2154,7 @@ function StockSectionInner({ userId, location, canDelete }: { userId: string; lo
   const toolbar = (
     <>
       <AddMaterialDialog location={location} userId={userId} />
+      {location === 'almoxarifado_geral' && <StockInventoryDialog area={location} rows={scoped} />}
       <ResetStockDialog rows={scoped} userId={userId} location={location} />
     </>
   );

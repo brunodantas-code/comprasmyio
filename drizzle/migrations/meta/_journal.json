@@ -1828,6 +1828,20 @@
       "when": 1795101512625,
       "tag": "0260_message_attachments_everywhere",
       "breakpoints": true
+    },
+    {
+      "idx": 261,
+      "version": "7",
+      "when": 1795113886500,
+      "tag": "0261_stock_inventory_and_entry_dates",
+      "breakpoints": true
+    },
+    {
+      "idx": 262,
+      "version": "7",
+      "when": 1795114113305,
+      "tag": "0262_inventory_comparison",
+      "breakpoints": true
     }
   ]
 }

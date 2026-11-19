@@ -11027,6 +11027,51 @@ export type Database = {
         }
         Relationships: []
       }
+      stock_inventories: {
+        Row: {
+          area: string
+          completed_at: string | null
+          counters: string[]
+          created_at: string
+          created_by: string
+          id: string
+          inventory_date: string
+          items: Json
+          name: string
+          next_date: string | null
+          recurrence_months: number
+          status: string
+        }
+        Insert: {
+          area: string
+          completed_at?: string | null
+          counters: string[]
+          created_at?: string
+          created_by: string
+          id?: string
+          inventory_date: string
+          items?: Json
+          name: string
+          next_date?: string | null
+          recurrence_months?: number
+          status?: string
+        }
+        Update: {
+          area?: string
+          completed_at?: string | null
+          counters?: string[]
+          created_at?: string
+          created_by?: string
+          id?: string
+          inventory_date?: string
+          items?: Json
+          name?: string
+          next_date?: string | null
+          recurrence_months?: number
+          status?: string
+        }
+        Relationships: []
+      }
       stock_movement_qrs: {
         Row: {
           box_qr: string | null
@@ -11076,6 +11121,7 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string | null
+          entry_date: string | null
           id: string
           material_id: string
           order_id: string | null
@@ -11088,6 +11134,7 @@ export type Database = {
         Insert: {
           created_at?: string
           created_by?: string | null
+          entry_date?: string | null
           id?: string
           material_id: string
           order_id?: string | null
@@ -11100,6 +11147,7 @@ export type Database = {
         Update: {
           created_at?: string
           created_by?: string | null
+          entry_date?: string | null
           id?: string
           material_id?: string
           order_id?: string | null
@@ -11482,6 +11530,7 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string | null
+          entry_date: string | null
           id: string
           material_id: string
           order_id: string | null
@@ -11494,6 +11543,7 @@ export type Database = {
         Insert: {
           created_at?: string
           created_by?: string | null
+          entry_date?: string | null
           id?: string
           material_id: string
           order_id?: string | null
@@ -11506,6 +11556,7 @@ export type Database = {
         Update: {
           created_at?: string
           created_by?: string | null
+          entry_date?: string | null
           id?: string
           material_id?: string
           order_id?: string | null
@@ -12453,6 +12504,7 @@ export type Database = {
         Returns: boolean
       }
       can_edit_supply_purchase: { Args: never; Returns: boolean }
+      can_inventory_area: { Args: { _area: string }; Returns: boolean }
       can_manage_cash_flow: { Args: { _user_id: string }; Returns: boolean }
       can_manage_limits: { Args: { _user_id: string }; Returns: boolean }
       can_manage_request_subtypes: {
@@ -12607,6 +12659,14 @@ export type Database = {
       has_site_survey_permission: {
         Args: { _permission: string; _user_id: string }
         Returns: boolean
+      }
+      inventory_comparison: {
+        Args: { _after?: string; _area: string; _until?: string }
+        Returns: {
+          factory_exits: number
+          material_id: string
+          purchases: number
+        }[]
       }
       is_access_admin: { Args: { _user_id: string }; Returns: boolean }
       is_assigned_order_approver: {
@@ -12855,6 +12915,19 @@ export type Database = {
       reset_site_survey_visit: { Args: { _visit_id: string }; Returns: number }
       save_code_observation: {
         Args: { _observation_id?: string; _text: string; _ticket_id: string }
+        Returns: string
+      }
+      save_stock_inventory: {
+        Args: {
+          _area: string
+          _complete?: boolean
+          _counters: string[]
+          _date: string
+          _id: string
+          _items: Json
+          _months: number
+          _name: string
+        }
         Returns: string
       }
       security_app_access: { Args: { _apps: string[] }; Returns: boolean }

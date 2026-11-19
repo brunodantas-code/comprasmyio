@@ -11205,6 +11205,21 @@
     "group": ""
   },
   {
+    "id": "components/stock-date-picker.tsx|e96ef91e9474d31a|0",
+    "file": "components/stock-date-picker.tsx",
+    "line": 10,
+    "tag": "Button",
+    "label": "dd/MM/yyyy / Selecionar data",
+    "dynamic": true,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "CalendarIcon",
+    "variant": "outline",
+    "size": "",
+    "className": "w-full justify-start",
+    "group": ""
+  },
+  {
     "id": "components/stock-destinations-tab.tsx|72e017b7eb17e543|0",
     "file": "components/stock-destinations-tab.tsx",
     "line": 104,
@@ -11260,6 +11275,96 @@
     "autoCdeSafe": true,
     "icon": "",
     "variant": "",
+    "size": "",
+    "className": "",
+    "group": ""
+  },
+  {
+    "id": "components/stock-inventory-dialog.tsx|211da405b7e82540|0",
+    "file": "components/stock-inventory-dialog.tsx",
+    "line": 84,
+    "tag": "Button",
+    "label": "Inventário",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "ClipboardList",
+    "variant": "outline",
+    "size": "",
+    "className": "",
+    "group": ""
+  },
+  {
+    "id": "components/stock-inventory-dialog.tsx|de68b25131a6aac4|0",
+    "file": "components/stock-inventory-dialog.tsx",
+    "line": 87,
+    "tag": "CdeButton",
+    "label": "Novo inventário",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "Plus",
+    "variant": "",
+    "size": "",
+    "className": "",
+    "group": "plus"
+  },
+  {
+    "id": "components/stock-inventory-dialog.tsx|286a9ba474fad055|0",
+    "file": "components/stock-inventory-dialog.tsx",
+    "line": 90,
+    "tag": "Button",
+    "label": "Editar inventário",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "Pencil",
+    "variant": "ghost",
+    "size": "icon",
+    "className": "",
+    "group": ""
+  },
+  {
+    "id": "components/stock-inventory-dialog.tsx|37d701bafb8c5c1a|0",
+    "file": "components/stock-inventory-dialog.tsx",
+    "line": 90,
+    "tag": "Button",
+    "label": "Ver contagem",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "ClipboardList",
+    "variant": "ghost",
+    "size": "icon",
+    "className": "",
+    "group": ""
+  },
+  {
+    "id": "components/stock-inventory-dialog.tsx|e4a1ee3577a78d2a|0",
+    "file": "components/stock-inventory-dialog.tsx",
+    "line": 104,
+    "tag": "Button",
+    "label": "Salvar contagem",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "Save",
+    "variant": "ghost",
+    "size": "icon",
+    "className": "",
+    "group": ""
+  },
+  {
+    "id": "components/stock-inventory-dialog.tsx|3df6cead6c98d1e0|0",
+    "file": "components/stock-inventory-dialog.tsx",
+    "line": 104,
+    "tag": "Button",
+    "label": "Concluir inventário",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "Check",
+    "variant": "outline",
     "size": "",
     "className": "",
     "group": ""
@@ -11357,7 +11462,7 @@
   {
     "id": "components/stock-tab.tsx|ee10d9fe9cc44951|0",
     "file": "components/stock-tab.tsx",
-    "line": 397,
+    "line": 405,
     "tag": "Button",
     "label": "Câmera",
     "dynamic": false,
@@ -11372,7 +11477,7 @@
   {
     "id": "components/stock-tab.tsx|aed85e647f274abf|0",
     "file": "components/stock-tab.tsx",
-    "line": 400,
+    "line": 408,
     "tag": "Button",
     "label": "Galeria",
     "dynamic": false,
@@ -11387,7 +11492,7 @@
   {
     "id": "components/stock-tab.tsx|7cdc23f424650600|0",
     "file": "components/stock-tab.tsx",
-    "line": 433,
+    "line": 441,
     "tag": "Button",
     "label": "Confirmar",
     "dynamic": false,
@@ -11402,7 +11507,7 @@
   {
     "id": "components/stock-tab.tsx|18d0f1e79233948c|0",
     "file": "components/stock-tab.tsx",
-    "line": 450,
+    "line": 458,
     "tag": "Button",
     "label": "Histórico",
     "dynamic": false,
@@ -11417,7 +11522,7 @@
   {
     "id": "components/stock-tab.tsx|77e6160dcb39abdf|0",
     "file": "components/stock-tab.tsx",
-    "line": 508,
+    "line": 516,
     "tag": "Button",
     "label": "Excluir item",
     "dynamic": false,
@@ -11432,7 +11537,7 @@
   {
     "id": "components/stock-tab.tsx|b0515c5a7da094e8|0",
     "file": "components/stock-tab.tsx",
-    "line": 777,
+    "line": 785,
     "tag": "CdeButton",
     "label": "Adicionar item",
     "dynamic": false,
@@ -11447,7 +11552,7 @@
   {
     "id": "components/stock-tab.tsx|3e08bbf047fbcdcd|0",
     "file": "components/stock-tab.tsx",
-    "line": 792,
+    "line": 800,
     "tag": "Button",
     "label": "Criar novo",
     "dynamic": false,
@@ -11462,7 +11567,7 @@
   {
     "id": "components/stock-tab.tsx|254f470b0e5a86e6|0",
     "file": "components/stock-tab.tsx",
-    "line": 795,
+    "line": 803,
     "tag": "Button",
     "label": "Importar da biblioteca",
     "dynamic": false,
@@ -11477,7 +11582,7 @@
   {
     "id": "components/stock-tab.tsx|9e5119c6c5e072d8|0",
     "file": "components/stock-tab.tsx",
-    "line": 859,
+    "line": 867,
     "tag": "Button",
     "label": "Importar",
     "dynamic": true,
@@ -11492,7 +11597,7 @@
   {
     "id": "components/stock-tab.tsx|da84657116e54ea2|0",
     "file": "components/stock-tab.tsx",
-    "line": 872,
+    "line": 880,
     "tag": "button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -11507,7 +11612,7 @@
   {
     "id": "components/stock-tab.tsx|ed5b91da8c94f4b7|0",
     "file": "components/stock-tab.tsx",
-    "line": 906,
+    "line": 914,
     "tag": "Button",
     "label": "Biblioteca",
     "dynamic": false,
@@ -11522,7 +11627,7 @@
   {
     "id": "components/stock-tab.tsx|891aaa11be57c820|0",
     "file": "components/stock-tab.tsx",
-    "line": 1005,
+    "line": 1013,
     "tag": "Button",
     "label": "Salvando... / Salvar",
     "dynamic": true,
@@ -11537,7 +11642,7 @@
   {
     "id": "components/stock-tab.tsx|95ff6cba05827b38|0",
     "file": "components/stock-tab.tsx",
-    "line": 1068,
+    "line": 1076,
     "tag": "Button",
     "label": "Zerar estoque",
     "dynamic": false,
@@ -11552,7 +11657,7 @@
   {
     "id": "components/stock-tab.tsx|06729e3278ba8ec8|0",
     "file": "components/stock-tab.tsx",
-    "line": 1083,
+    "line": 1091,
     "tag": "Button",
     "label": "Zerar estoque",
     "dynamic": false,
@@ -11567,7 +11672,7 @@
   {
     "id": "components/stock-tab.tsx|4df33b65fce17228|0",
     "file": "components/stock-tab.tsx",
-    "line": 1173,
+    "line": 1181,
     "tag": "button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -11582,7 +11687,7 @@
   {
     "id": "components/stock-tab.tsx|4df33b65fce17228|1",
     "file": "components/stock-tab.tsx",
-    "line": 1182,
+    "line": 1190,
     "tag": "button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -11597,7 +11702,7 @@
   {
     "id": "components/stock-tab.tsx|cbd42da7ebab721e|0",
     "file": "components/stock-tab.tsx",
-    "line": 1193,
+    "line": 1201,
     "tag": "button",
     "label": "Ver QR Codes homologados",
     "dynamic": false,
@@ -11612,7 +11717,7 @@
   {
     "id": "components/stock-tab.tsx|97e7e3dfc72b7943|0",
     "file": "components/stock-tab.tsx",
-    "line": 1235,
+    "line": 1243,
     "tag": "Button",
     "label": "Entrada",
     "dynamic": false,
@@ -11627,7 +11732,7 @@
   {
     "id": "components/stock-tab.tsx|c8bcf5d7955016a4|0",
     "file": "components/stock-tab.tsx",
-    "line": 1245,
+    "line": 1253,
     "tag": "Button",
     "label": "Saída",
     "dynamic": false,
@@ -11642,7 +11747,7 @@
   {
     "id": "components/stock-tab.tsx|31caac4ec5002fbb|0",
     "file": "components/stock-tab.tsx",
-    "line": 1262,
+    "line": 1270,
     "tag": "Button",
     "label": "Sem avaria para registrar",
     "dynamic": false,
@@ -11657,7 +11762,7 @@
   {
     "id": "components/stock-tab.tsx|ee10d9fe9cc44951|1",
     "file": "components/stock-tab.tsx",
-    "line": 1479,
+    "line": 1491,
     "tag": "Button",
     "label": "Câmera",
     "dynamic": false,
@@ -11672,7 +11777,7 @@
   {
     "id": "components/stock-tab.tsx|aed85e647f274abf|1",
     "file": "components/stock-tab.tsx",
-    "line": 1482,
+    "line": 1494,
     "tag": "Button",
     "label": "Galeria",
     "dynamic": false,
@@ -11687,7 +11792,7 @@
   {
     "id": "components/stock-tab.tsx|7cdc23f424650600|1",
     "file": "components/stock-tab.tsx",
-    "line": 1515,
+    "line": 1527,
     "tag": "Button",
     "label": "Confirmar",
     "dynamic": false,
@@ -11702,7 +11807,7 @@
   {
     "id": "components/stock-tab.tsx|18d0f1e79233948c|1",
     "file": "components/stock-tab.tsx",
-    "line": 1532,
+    "line": 1544,
     "tag": "Button",
     "label": "Histórico",
     "dynamic": false,
@@ -11717,7 +11822,7 @@
   {
     "id": "components/stock-tab.tsx|77e6160dcb39abdf|1",
     "file": "components/stock-tab.tsx",
-    "line": 1586,
+    "line": 1598,
     "tag": "Button",
     "label": "Excluir item",
     "dynamic": false,
@@ -11732,7 +11837,7 @@
   {
     "id": "components/stock-tab.tsx|b0515c5a7da094e8|1",
     "file": "components/stock-tab.tsx",
-    "line": 1683,
+    "line": 1695,
     "tag": "CdeButton",
     "label": "Adicionar item",
     "dynamic": false,
@@ -11747,7 +11852,7 @@
   {
     "id": "components/stock-tab.tsx|da84657116e54ea2|1",
     "file": "components/stock-tab.tsx",
-    "line": 1700,
+    "line": 1712,
     "tag": "button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -11762,7 +11867,7 @@
   {
     "id": "components/stock-tab.tsx|891aaa11be57c820|1",
     "file": "components/stock-tab.tsx",
-    "line": 1792,
+    "line": 1804,
     "tag": "Button",
     "label": "Salvando... / Salvar",
     "dynamic": true,
@@ -11777,7 +11882,7 @@
   {
     "id": "components/stock-tab.tsx|95ff6cba05827b38|1",
     "file": "components/stock-tab.tsx",
-    "line": 1834,
+    "line": 1846,
     "tag": "Button",
     "label": "Zerar estoque",
     "dynamic": false,
@@ -11792,7 +11897,7 @@
   {
     "id": "components/stock-tab.tsx|06729e3278ba8ec8|1",
     "file": "components/stock-tab.tsx",
-    "line": 1848,
+    "line": 1860,
     "tag": "Button",
     "label": "Zerar estoque",
     "dynamic": false,
@@ -11807,7 +11912,7 @@
   {
     "id": "components/stock-tab.tsx|4df33b65fce17228|2",
     "file": "components/stock-tab.tsx",
-    "line": 1925,
+    "line": 1938,
     "tag": "button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -11822,7 +11927,7 @@
   {
     "id": "components/stock-tab.tsx|97e7e3dfc72b7943|1",
     "file": "components/stock-tab.tsx",
-    "line": 1957,
+    "line": 1970,
     "tag": "Button",
     "label": "Entrada",
     "dynamic": false,
@@ -11837,7 +11942,7 @@
   {
     "id": "components/stock-tab.tsx|c8bcf5d7955016a4|1",
     "file": "components/stock-tab.tsx",
-    "line": 1967,
+    "line": 1980,
     "tag": "Button",
     "label": "Saída",
     "dynamic": false,
@@ -11852,7 +11957,7 @@
   {
     "id": "components/stock-tab.tsx|31caac4ec5002fbb|1",
     "file": "components/stock-tab.tsx",
-    "line": 1973,
+    "line": 1986,
     "tag": "Button",
     "label": "Sem avaria para registrar",
     "dynamic": false,

@@ -1,4 +1,7 @@
 # Roadmap
+- [x] Estoque: data efetiva nas entradas manuais; inventário por área com inventariantes, data, contagem física, divergências e recorrência mensal/trimestral/semestral/anual. Contagem temporária salva/reaberta e concluída sem movimentações, removida após teste; nove testes passaram. Não publicado.
+- [x] Inventário: seis colunas de comparação, compras vinculadas e saídas da área Fábrica; saldo inclui todas as movimentações. Computador/celular conferidos; comparação entre dois inventários reais ainda não exercitada.
+- [x] Primeiro inventário em 19/11/2026: contagem inicial no Inventário N, sem inventário anterior fictício; preserva histórico e exige confirmação antes de ajustar saldos.
 - [x] Home/Central: números acima do símbolo do app e textos alinhados à esquerda; conferido no celular e computador (12/59/28/19 acima do </>, textos todos em x=61).
 - [x] Mensagens (ex-Perguntas e Respostas): clipe CDE com miniaturas em Supply, Mytosis (etapas e tarefas), Projects, Wishlist, Chamados e Code; renomeado para "Mensagens" nos cards, compositores, pendências e Central. Migration 0260, 3 testes novos passaram e 37 relacionados conferidos; envio real de anexo na tela ainda não exercitado.
 - [x] Kanban Projects: quantidade com fundo/texto coloridos e borda superior de 3 px; três opções no CDE com prévia. Salvamento/releitura da cor no quadro real conferidos e verde restaurado; celular sem excesso lateral e cinco testes passaram. Não publicado.
