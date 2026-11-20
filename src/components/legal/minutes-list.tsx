@@ -81,14 +81,16 @@ export function MinutesList({ rows, expanded, toggle, edit, remove, openPdf, use
       const open = expanded.has(row.id);
       return <article key={row.id}>
         <div className="flex items-center gap-1 px-2 py-3 sm:gap-2 sm:px-4">
-          <button type="button" className="flex h-auto min-w-0 flex-1 items-center justify-start gap-3 rounded-md bg-transparent p-0 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label={`Abrir ${row.title}`} onClick={() => toggle(row.id)}>
+          <button type="button" className="flex h-auto !min-w-0 !w-auto !flex-1 !whitespace-normal items-center justify-start gap-3 rounded-md bg-transparent p-0 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label={`Abrir ${row.title}`} onClick={() => toggle(row.id)}>
             <span className="min-w-0 flex-1"><span className="block break-words text-sm font-semibold text-foreground">{row.title}</span><span className="block text-xs font-normal text-muted-foreground">{legalDate(row.meeting_date)}{legalUserParticipated(content, user) ? ' · Você participou' : ''}</span></span>
           </button>
           {mine ? <AlertMarker role="status" title={`${mine.signature ? (mine.revision ? 'Nova assinatura pendente (edição da ata anterior)' : 'Assinatura pendente') : ''}${mine.signature && mine.actions ? ' e ' : ''}${mine.actions ? `${mine.actions} ação(ões) pendente(s)` : ''}`} aria-label={`${mine.count} pendência(s) nesta ata${pendingUser ? ` de ${pendingUser.full_name}` : ''}`}  count={mine.count} scale={0.72} /> : null}
+          <div className="ml-auto flex shrink-0 items-center justify-end gap-1 sm:gap-2">
           <Button variant="outline" size="compactIcon" title="Editar" aria-label={`Editar ${row.title}`} onClick={() => edit(row)}><Pencil /></Button>
           <Button variant="outline" size="compactIcon" title="Excluir" aria-label={`Excluir ${row.title}`} onClick={() => remove(row)}><Trash2 /></Button>
           <Button variant="outline" size="compactIcon" title={row.pdf_path ? 'PDF assinado' : 'Exportar PDF'} aria-label={`${row.pdf_path ? 'Abrir PDF assinado' : 'Exportar PDF'} de ${row.title}`} onClick={() => { if (row.pdf_path) openPdf(row.pdf_path); else void exportMinutesPdf(row.title, row.meeting_date, content); }}><FileText /></Button>
-          <Button variant="ghost" size="compactIcon" className="shrink-0" aria-expanded={open} aria-label={`${open ? 'Recolher' : 'Exibir'} ${row.title}`} title={open ? 'Recolher ata' : 'Exibir ata'} onClick={() => toggle(row.id)}><CdeDisclosureIcon open={open} screen="components/legal/minutes-list.tsx" /></Button>
+          <Button variant="ghost" size="compactIcon" className="!w-6 !min-w-0 !px-0 shrink-0" aria-expanded={open} aria-label={`${open ? 'Recolher' : 'Exibir'} ${row.title}`} title={open ? 'Recolher ata' : 'Exibir ata'} onClick={() => toggle(row.id)}><CdeDisclosureIcon open={open} screen="components/legal/minutes-list.tsx" /></Button>
+          </div>
         </div>
         {open ? <div className="border-t border-border bg-background">
           {!filteredView && <div className="space-y-2 px-4 py-4 text-sm sm:px-6"><p><span className="text-muted-foreground">Local: </span>{content.location}</p><p className="break-words"><span className="text-muted-foreground">Participantes: </span>{content.participants.map(p => p.name).join(', ')}</p></div>}
