@@ -1,9 +1,10 @@
 import * as React from "react";
 import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog";
 
-import { useCdeConfirmStyle } from "@/components/cde/cde-button";
+import { CdeCloseIcon, useCdeConfirmStyle } from "@/components/cde/cde-button";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
+import { PopupExpandButton, popupExpandedClass } from "./popup-expand";
 
 const AlertDialog = AlertDialogPrimitive.Root;
 
@@ -29,28 +30,37 @@ AlertDialogOverlay.displayName = AlertDialogPrimitive.Overlay.displayName;
 const AlertDialogContent = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Content>
->(({ className, style, ...props }, ref) => {
+>(({ className, style, children, onCloseAutoFocus, ...props }, ref) => {
   const cde = useCdeConfirmStyle();
+  const [expanded, setExpanded] = React.useState(false);
   return (
   <AlertDialogPortal>
     <AlertDialogOverlay />
     <AlertDialogPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 sm:rounded-lg",
+        "fixed left-[50%] top-[50%] z-50 grid max-h-[92dvh] w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 overflow-y-auto overscroll-contain border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 sm:rounded-lg",
         cde.className, cde.cls,
         className,
+        expanded && popupExpandedClass,
       )}
       style={{ ...cde.css, ...style }}
       {...props}
-    />
+      onCloseAutoFocus={(event) => { setExpanded(false); onCloseAutoFocus?.(event); }}
+    >
+      <div className="pointer-events-none sticky top-0 z-30 -mb-4 flex h-0 items-start justify-end gap-2">
+        <PopupExpandButton expanded={expanded} onToggle={() => setExpanded(value => !value)} />
+        <AlertDialogPrimitive.Cancel className="pointer-events-auto rounded-sm bg-background p-0.5 opacity-70 transition-opacity hover:opacity-100" aria-label="Fechar" title="Fechar"><CdeCloseIcon /></AlertDialogPrimitive.Cancel>
+      </div>
+      {children}
+    </AlertDialogPrimitive.Content>
   </AlertDialogPortal>
   );
 });
 AlertDialogContent.displayName = AlertDialogPrimitive.Content.displayName;
 
 const AlertDialogHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn("flex flex-col space-y-2 text-center sm:text-left", className)} {...props} />
+  <div className={cn("flex flex-col space-y-2 pr-16 text-center sm:text-left", className)} {...props} />
 );
 AlertDialogHeader.displayName = "AlertDialogHeader";
 

@@ -5,6 +5,7 @@ import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { CdeCloseIcon } from "@/components/cde/cde-button";
 
 import { cn } from "@/lib/utils";
+import { PopupExpandButton, popupExpandedClass } from "./popup-expand";
 
 const Dialog = DialogPrimitive.Root;
 
@@ -32,7 +33,9 @@ DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
->(({ className, children, ...props }, ref) => (
+>(({ className, children, onCloseAutoFocus, ...props }, ref) => {
+  const [expanded, setExpanded] = React.useState(false);
+  return (
   <DialogPortal>
     <DialogOverlay />
     <DialogPrimitive.Content
@@ -40,10 +43,13 @@ const DialogContent = React.forwardRef<
       className={cn(
         "fixed left-[50%] top-[50%] z-50 grid max-h-[92dvh] w-[calc(100vw-1.5rem)] max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 overflow-y-auto overscroll-contain rounded-lg border bg-background p-4 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 sm:p-6",
         className,
+        expanded && popupExpandedClass,
       )}
       {...props}
+      onCloseAutoFocus={(event) => { setExpanded(false); onCloseAutoFocus?.(event); }}
     >
-      <div className="pointer-events-none sticky top-0 z-30 flex h-0 items-start justify-end [.grid>&]:-mb-4">
+      <div className="pointer-events-none sticky top-0 z-30 flex h-0 items-start justify-end gap-2 [.grid>&]:-mb-4">
+        <PopupExpandButton expanded={expanded} onToggle={() => setExpanded(value => !value)} />
         <DialogPrimitive.Close className="pointer-events-auto -mr-1 rounded-sm bg-background p-0.5 opacity-70 cursor-pointer transition-opacity hover:opacity-100 outline-none ring-0 focus:outline-none focus-visible:outline-none focus:ring-0 shadow-none border-0 disabled:pointer-events-none">
           <CdeCloseIcon />
           <span className="sr-only">Fechar</span>
@@ -52,11 +58,12 @@ const DialogContent = React.forwardRef<
       {children}
     </DialogPrimitive.Content>
   </DialogPortal>
-));
+  );
+});
 DialogContent.displayName = DialogPrimitive.Content.displayName;
 
 const DialogHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn("flex flex-col space-y-1.5 text-center sm:text-left", className)} {...props} />
+  <div className={cn("flex flex-col space-y-1.5 pr-16 text-center sm:text-left", className)} {...props} />
 );
 DialogHeader.displayName = "DialogHeader";
 

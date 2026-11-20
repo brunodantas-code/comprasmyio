@@ -12960,6 +12960,21 @@
     "group": ""
   },
   {
+    "id": "components/ui/popup-expand.tsx|8bc3eee31c830b6d|0",
+    "file": "components/ui/popup-expand.tsx",
+    "line": 9,
+    "tag": "Button",
+    "label": "Sem nome fixo",
+    "dynamic": true,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "",
+    "variant": "ghost",
+    "size": "compactIcon",
+    "className": "pointer-events-auto",
+    "group": ""
+  },
+  {
     "id": "components/ui/searchable-select.tsx|f70035551b876979|0",
     "file": "components/ui/searchable-select.tsx",
     "line": 125,

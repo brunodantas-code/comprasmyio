@@ -6,6 +6,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { CdeCloseIcon } from "@/components/cde/cde-button";
 
 import { cn } from "@/lib/utils";
+import { PopupExpandButton, popupExpandedClass } from "./popup-expand";
 
 const Sheet = SheetPrimitive.Root;
 
@@ -57,22 +58,28 @@ interface SheetContentProps
 const SheetContent = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Content>,
   SheetContentProps
->(({ side = "right", className, children, ...props }, ref) => (
+>(({ side = "right", className, children, onCloseAutoFocus, ...props }, ref) => {
+  const [expanded, setExpanded] = React.useState(false);
+  return (
   <SheetPortal>
     <SheetOverlay />
-    <SheetPrimitive.Content ref={ref} className={cn(sheetVariants({ side }), className)} {...props}>
-      <SheetPrimitive.Close className="sticky top-0 z-30 float-right -mt-2 -mr-2 rounded-sm bg-background p-0.5 outline-none ring-0 focus:ring-0 border-0 shadow-none cursor-pointer opacity-70 transition-opacity hover:opacity-100 focus:outline-none disabled:pointer-events-none">
+    <SheetPrimitive.Content ref={ref} className={cn(sheetVariants({ side }), className, expanded && popupExpandedClass)} {...props} onCloseAutoFocus={(event) => { setExpanded(false); onCloseAutoFocus?.(event); }}>
+      <div className="sticky top-0 z-30 float-right -mt-2 -mr-2 flex shrink-0 self-end items-start gap-2">
+      <PopupExpandButton expanded={expanded} onToggle={() => setExpanded(value => !value)} />
+      <SheetPrimitive.Close className="rounded-sm bg-background p-0.5 outline-none ring-0 focus:ring-0 border-0 shadow-none cursor-pointer opacity-70 transition-opacity hover:opacity-100 focus:outline-none disabled:pointer-events-none">
         <CdeCloseIcon />
         <span className="sr-only">Fechar</span>
       </SheetPrimitive.Close>
+      </div>
       {children}
     </SheetPrimitive.Content>
   </SheetPortal>
-));
+  );
+});
 SheetContent.displayName = SheetPrimitive.Content.displayName;
 
 const SheetHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn("flex flex-col space-y-2 text-center sm:text-left", className)} {...props} />
+  <div className={cn("flex flex-col space-y-2 pr-16 text-center sm:text-left", className)} {...props} />
 );
 SheetHeader.displayName = "SheetHeader";
 
