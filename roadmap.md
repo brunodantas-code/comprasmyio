@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Botões PDF/Excel compactados com símbolos dos Approvals; Pendências Cliente, Respostas Cliente e Histórico Respostas conferidos na visita Mogi; computador/celular e abertura das opções PDF verificados, não publicado.
 - [x] Relógio estava oculto à direita: barra permite segunda linha no computador, mantendo todos os controles; largura 1282/1282 e rolagem zero conferidas em 1920px. Celular preserva rolagem; 13 testes passaram, não publicado.
 - [x] Comparar cabeçalhos: print do usuário mostra apenas o topo da visita Mogi; relógio fica na barra acima da lista, abaixo do gráfico e dos blocos de cadastro/proposta; cabeçalho preservado.
 - [x] Print da visita Mogi enviado com Histórico dos relatórios destacado em vermelho; botão abriu o PDF respondido existente. Cabeçalho original preservado.
