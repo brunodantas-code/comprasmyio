@@ -63,7 +63,7 @@ export function usePendingActions() {
         supabase.from("legal_records").select("id,title,category,content,created_by").eq("category", "minutes"),
         supabase.from("legal_actions").select("record_id,subject_id,responsible_id,completed_at,archived").eq("responsible_id", userId),
         supabase.from("legal_subject_completions").select("record_id,subject_id"),
-        supabase.from("legal_actions").select("record_id,subject_id,archived,due_date"),
+        supabase.from("legal_actions").select("record_id,subject_id,responsible_id,archived,due_date"),
         supabase.from("legal_confidential_subjects").select("record_id,subject_id,position,subject"),
         supabase.rpc("pm_pending_messages"),
       ]);

@@ -10,7 +10,7 @@ describe('totalizador pessoal do assunto', () => {
     expect(legalSubjectPendingCount('ata', subject, user, [], [])).toBe(0);
   });
   it('conta as três ações do Leonardo e não as de João nem a responsabilidade do assunto com ações', () => {
-    const action = { record_id: 'ata', subject_id: 's', responsible_id: 'leonardo', completed_at: null, archived: false };
+    const action = { record_id: 'ata', subject_id: 's', responsible_id: 'leonardo', completed_at: null, archived: false, due_date: '2026-11-30' };
     const actions = [action, action, action, { ...action, responsible_id: 'joao' }];
     expect(legalSubjectPendingCount('ata', subject, user, actions, [])).toBe(3);
     expect(legalSubjectPendingCount('ata', subject, joao, actions, [])).toBe(1);
@@ -37,7 +37,7 @@ describe('assinaturas pessoais pendentes', () => {
   });
   it('soma as ações em aberto do usuário, ignorando concluídas, arquivadas e de outros', () => {
     const r = { id: 'ata', title: 'Ata', category: 'minutes', created_by: 'autor', content: { participants: [], subjects: [{ id: 's1', title: 'A' }] } };
-    const a = (o: object) => ({ record_id: 'ata', subject_id: 's1', responsible_id: 'leonardo', completed_at: null, archived: false, ...o });
+    const a = (o: object) => ({ record_id: 'ata', subject_id: 's1', responsible_id: 'leonardo', completed_at: null, archived: false, due_date: '2026-11-30', ...o });
     const items = legalSignaturePendingItems([r], user, [a({}), a({}), a({ completed_at: '2026-11-09' }), a({ archived: true }), a({ responsible_id: 'outro' })]);
     expect(items.map(i => i.count)).toEqual([2]);
   });
@@ -55,11 +55,10 @@ d2('rótulo de reassinatura', () => {
 import { legalSignaturePendingItems as items3 } from './legal-pending';
 describe('datas previstas das ações da ata', () => {
   const rec = { id: 'ata', title: 'Ata', category: 'minutes', created_by: user.id, content: { subjects: [{ id: 's', title: 'Assunto' }] } };
-  const action = { record_id: 'ata', subject_id: 's', responsible_id: 'joao', archived: false, completed_at: null, due_date: null as string | null };
-  it('atribui cada prazo ausente ao criador da ata, mesmo quando a ação tem outro responsável', () => {
-    expect(items3([rec], user, [], [], [action, action])[0]?.missingDeadlines).toBe(2);
-    expect(items3([rec], user, [], [], [action, action])[0]?.count).toBe(2);
-    expect(items3([rec], { id: 'joao', full_name: 'João' }, [], [], [action])).toEqual([]);
+  const action = { record_id: 'ata', subject_id: 's', responsible_id: user.id, archived: false, completed_at: null, due_date: null as string | null };
+  it('não atribui ao criador da ata as datas ausentes de João Paulo', () => {
+    expect(items3([rec], user, [], [], [{ ...action, responsible_id: 'joao' }, { ...action, responsible_id: 'joao' }])).toEqual([]);
+    expect(items3([rec], { id: 'joao', full_name: 'João' }, [], [], [{ ...action, responsible_id: 'joao' }, { ...action, responsible_id: 'joao' }])[0]?.count).toBe(2);
   });
   it('retira a pendência quando a data prevista é preenchida', () => {
     expect(items3([rec], user, [], [], [action])[0]?.count).toBe(1);
@@ -86,19 +85,39 @@ describe('datas previstas no totalizador do assunto', () => {
   const joao = { id: 'joao', full_name: 'João Paulo Couto' };
   const action = (o: object = {}) => ({ record_id: 'ata', subject_id: 's', responsible_id: 'joao', completed_at: null, archived: false, due_date: null as string | null, ...o });
   it('soma as ações sem data de conclusão às demais pendências do assunto', () => {
-    expect(legalSubjectPendingCount('ata', subject, user, [action(), action()], [], user.id)).toBe(2);
+    expect(legalSubjectPendingCount('ata', subject, user, [action(), action()], [], user.id)).toBe(0);
     expect(legalSubjectPendingCount('ata', subject, user, [action({ responsible_id: 'leonardo' })], [], user.id)).toBe(2);
   });
-  it('não mostra a pendência de data a quem não criou a ata', () => {
+  it('atribui datas ausentes ao responsável mesmo sem ser criador', () => {
     expect(legalSubjectPendingCount('ata', subject, joao, [action({ responsible_id: 'ana' })], [], user.id)).toBe(0);
-    expect(legalSubjectPendingCount('ata', subject, user, [action({ responsible_id: 'ana' })], [])).toBe(0);
+    expect(legalSubjectPendingCount('ata', subject, user, [action({ responsible_id: user.id, completed_at: '2026-11-20' })], [], 'outro')).toBe(1);
   });
   it('informa quantas datas de conclusão faltam', () => {
-    expect(legalSubjectPendingBreakdown('ata', subject, user, [action(), action({ due_date: '2026-11-30' })], [], user.id)).toEqual({ count: 1, missingDeadlines: 1 });
+    expect(legalSubjectPendingBreakdown('ata', subject, user, [action({ responsible_id: user.id, completed_at: '2026-11-20' }), action({ due_date: '2026-11-30' })], [], user.id)).toEqual({ count: 1, missingDeadlines: 1 });
   });
   it('o totalizador do assunto bate com o totalizador da ata', () => {
     const actions = [action({ responsible_id: 'leonardo' }), action({ responsible_id: 'leonardo', due_date: '2026-11-30' }), action()];
     const rec = { id: 'ata', title: 'Ata', category: 'minutes', created_by: user.id, content: { subjects: [{ id: 's', title: 'Assunto' }] } };
     expect(legalSubjectPendingCount('ata', subject, user, actions, [], user.id)).toBe(legalSignaturePendingItems([rec], user, actions, [], actions)[0]?.count);
+  });
+});
+
+import { legalActionMissingDeadlineForUser } from './legal-pending';
+describe('pendências pessoais nas capturas de Leonardo', () => {
+  const subject = parseLegalContent({ subjects: [{ id: 's', title: 'Assunto' }] }).subjects[0];
+  const done = { record_id: 'ata', subject_id: 's', responsible_id: 'joao', completed_at: '2026-11-09', archived: false, due_date: null };
+  it('rescisão: somente uma data de Leonardo, não as duas datas de responsáveis distintos', () => {
+    expect(legalSubjectPendingCount('ata', subject, user, [done, { ...done, responsible_id: user.id }], [], user.id)).toBe(1);
+  });
+  it('sem trabalho próprio: zero mesmo com duas datas ausentes de João', () => {
+    expect(legalSubjectPendingCount('ata', subject, user, [done, done], [], user.id)).toBe(0);
+  });
+  it('manutenção: a data de João não se soma à única ação aberta de Leonardo', () => {
+    expect(legalSubjectPendingCount('ata', subject, user, [done, { ...done, responsible_id: user.id, completed_at: null, due_date: '2026-12-04' }], [], user.id)).toBe(1);
+  });
+  it('bolinha individual segue o responsável e some após informar data', () => {
+    expect(legalActionMissingDeadlineForUser(done, user.id)).toBe(false);
+    expect(legalActionMissingDeadlineForUser(done, 'joao')).toBe(true);
+    expect(legalActionMissingDeadlineForUser({ ...done, due_date: '2026-11-30' }, 'joao')).toBe(false);
   });
 });

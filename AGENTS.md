@@ -48,7 +48,7 @@
 - Legal action deadlines are independent of actual completion timestamps; observation removal uses author-gated soft deletion with append-only audit so signed content and history remain intact.
 - Shared CDE action buttons with visible text must fit their icon and label without shrinking; icon-only model widths must not cause adjacent controls to overlap.
 
-- Legal personal signature notifications share legalSignaturePendingItems and participant identity guards across portal and Central; count each meeting once and refresh after signing/deletion.
+- Legal notifications share legalSignaturePendingItems across portal/Central; date badges use legalActionMissingDeadlineForUser with viewed identity, separate from editing identity, to avoid third-party counts.
 - Shared dropdown menus inherit their trigger’s computed font size across portals; CDE fields_select font settings apply to both field and options.
 
 - Shared Save/Delete controls preserve descriptive and in-progress labels; CDE label overrides apply only to generic Salvar/Excluir so destructive choices remain distinguishable.

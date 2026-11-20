@@ -4,15 +4,19 @@ import { canSignParticipant } from './signatures';
 type PendingAction = { record_id: string; subject_id: string; responsible_id: string; completed_at: string | null; archived: boolean; due_date?: string | null };
 
 type SubjectCompletion = { record_id: string; subject_id: string };
-type DeadlineAction = { record_id: string; subject_id: string; archived: boolean; due_date?: string | null; completed_at?: string | null };
+type DeadlineAction = { record_id: string; subject_id: string; responsible_id: string; archived: boolean; due_date?: string | null; completed_at?: string | null };
 
-/** Subject badges count only this user's work, never meeting signatures. Missing conclusion dates belong to the minutes creator. */
-export function legalSubjectPendingBreakdown(recordId: string, subject: LegalSubject, user: { id: string; full_name: string } | null | undefined, actions: readonly PendingAction[], completions: readonly SubjectCompletion[], recordCreatedBy?: string | null) {
+export function legalActionMissingDeadlineForUser(action: { responsible_id: string; due_date?: string | null }, userId: string | null | undefined) {
+  return Boolean(userId && action.responsible_id === userId && !action.due_date?.trim());
+}
+
+/** Subject badges count only this user's work, including their own missing conclusion dates, never meeting signatures. */
+export function legalSubjectPendingBreakdown(recordId: string, subject: LegalSubject, user: { id: string; full_name: string } | null | undefined, actions: readonly PendingAction[], completions: readonly SubjectCompletion[], _recordCreatedBy?: string | null) {
   if (!user) return { count: 0, missingDeadlines: 0 };
   const ownActions = actions.filter(a => a.record_id === recordId && a.subject_id === subject.id && a.responsible_id === user.id && !a.archived && !a.completed_at).length;
   const norm = (name: string) => name.trim().toLowerCase();
   const ownDeliberation = openDeliberations(recordId, [subject], actions, completions).some(s => legalSubjectResponsibles(s).some(name => norm(name) === norm(user.full_name)));
-  const missingDeadlines = recordCreatedBy && recordCreatedBy === user.id ? actions.filter(a => a.record_id === recordId && a.subject_id === subject.id && !a.archived && !a.due_date?.trim()).length : 0;
+  const missingDeadlines = actions.filter(a => a.record_id === recordId && a.subject_id === subject.id && !a.archived && legalActionMissingDeadlineForUser(a, user.id)).length;
   return { count: ownActions + (ownDeliberation ? 1 : 0) + missingDeadlines, missingDeadlines };
 }
 
@@ -34,7 +38,7 @@ export function legalSignaturePendingItems(records: readonly { id: string; title
     const openActions = actions.filter(a => a.record_id === record.id && subjectIds.has(a.subject_id) && a.responsible_id === user.id && !a.archived && !a.completed_at).length;
     const norm = (v: string) => v.trim().toLowerCase();
     const deliberations = openDeliberations(record.id, content.subjects, allActions, completions).filter(s => legalSubjectResponsibles(s).some(n => norm(n) === norm(user.full_name))).length;
-    const missingDeadlines = record.created_by === user.id ? allActions.filter(a => a.record_id === record.id && subjectIds.has(a.subject_id) && !a.archived && !a.due_date?.trim()).length : 0;
+    const missingDeadlines = allActions.filter(a => a.record_id === record.id && subjectIds.has(a.subject_id) && !a.archived && legalActionMissingDeadlineForUser(a, user.id)).length;
     return { recordId: record.id, title: record.title, requesterId: record.created_by, signature, revision: content.revision ?? 0, actions: openActions + deliberations, missingDeadlines, count: (signature ? 1 : 0) + openActions + deliberations + missingDeadlines };
   }).filter(item => item.count > 0);
 }
