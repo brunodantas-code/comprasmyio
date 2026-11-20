@@ -17,7 +17,7 @@ import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover
 import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { ExternalLink, ArrowDownCircle, ArrowUpCircle, History, Search, Library, Trash2, Eraser, Camera, Upload, ImagePlus, QrCode, AlertTriangle } from "lucide-react";
+import { ExternalLink, ArrowDownCircle, ArrowUpCircle, History, Search, Library, Trash2, Eraser, Camera, Upload, ImagePlus, QrCode, AlertTriangle, ChevronDown } from "lucide-react";
 import { QrLinkPicker, type LinkedQr } from "@/components/myio-delivery-qr";
 import {
   AlertDialog,
@@ -1125,6 +1125,7 @@ function StockTableCard({
   simple,
   columnFilters,
   totals,
+  collapsible = false,
 }: {
   title: string;
   description: string;
@@ -1139,7 +1140,9 @@ function StockTableCard({
   simple?: boolean;
   columnFilters?: boolean;
   totals?: ReturnType<typeof stockComponentTotals>;
+  collapsible?: boolean;
 }) {
+  const [expanded, setExpanded] = useState(true);
   const { data: metaMap } = useStockMeta("materials");
   const stockFilters = useTableFilters(rows, [
     { key: "description", label: "Descrição", value: r => `${r.name} ${metaMap?.[r.material_id]?.description ?? ""}` },
@@ -1153,12 +1156,12 @@ function StockTableCard({
     <Card>
       <CardHeader className="gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2"><CardTitle>{title}</CardTitle>{totals && <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground"><span>Cadastrados: <strong className="font-normal text-foreground">{totals.registered}</strong></span><span>Saldo positivo: <strong className="font-normal text-foreground">{totals.positive}</strong></span><span>Saldo zerado: <strong className="font-normal text-foreground">{totals.zero}</strong></span></div>}</div>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2"><div className="flex items-center gap-2"><CardTitle>{title}</CardTitle>{collapsible && <Button type="button" variant="ghost" size="compactIcon" aria-expanded={expanded} aria-label={`${expanded ? "Recolher" : "Exibir"} ${title}`} title={`${expanded ? "Recolher" : "Exibir"} ${title}`} onClick={() => setExpanded(value => !value)}><ChevronDown className={`h-4 w-4 text-primary transition-transform motion-reduce:transition-none ${expanded ? "rotate-180" : ""}`} /></Button>}</div>{totals && <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground"><span>Cadastrados: <strong className="font-normal text-foreground">{totals.registered}</strong></span><span>Saldo positivo: <strong className="font-normal text-foreground">{totals.positive}</strong></span><span>Saldo zerado: <strong className="font-normal text-foreground">{totals.zero}</strong></span></div>}</div>
           <CardDescription>{description}</CardDescription>
         </div>
         {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
       </CardHeader>
-      <CardContent>
+      <CardContent hidden={collapsible && !expanded}>
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Carregando...</p>
         ) : !rows.length ? (
@@ -1369,6 +1372,7 @@ function FabricaSection({
         <ProductionCapacityCard />
         <StockTableCard
           title="Estoque de Componentes"
+          collapsible
           totals={stockComponentTotals(rows)}
           description="Componentes exclusivos da operação da fábrica, separados dos dispositivos comprados de terceiros."
           rows={rows}
