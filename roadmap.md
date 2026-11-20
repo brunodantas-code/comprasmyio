@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Legal: botões da ata de 09/11 alinhados; títulos separados dos nomes das ações evitam detecção CDE indevida. Posições iguais nas dez atas e celular sem excesso lateral; 22 testes passaram. Total de 14 na ata de 04/11 soma 4 ações próprias e 10 datas previstas ausentes para o criador, inclusive ações já concluídas conforme regra vigente; contagem preservada e explicada. Não publicado.
 - [x] Legal: Você participou após a data; filtro Participação com/sem participação. Conta Leonardo conferida: 7 com participação e 3 sem; nomes legados reconhecidos sem ampliar autorização de assinatura. Não publicado.
 - [x] Legal: cada ação sem data prevista gera pendência para o criador da ata no helper Home/Central e filtro pessoal do Legal; baixa após salvar prazo na tela conferida na Central, mantendo pendência de execução. Ata temporária removida; 29 testes passaram. Não publicado.
 - [x] Site Survey: Ordenar na barra dos botões e filtros, após o filtro de colunas.
