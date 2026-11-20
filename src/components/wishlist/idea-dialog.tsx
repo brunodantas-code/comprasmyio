@@ -49,11 +49,11 @@ export function WishlistIdeaDialog({ idea, messages, steps, users, userId, isAdm
     const link = document.createElement("a"); link.href = url; link.download = `Wishlist-${idea.title.replace(/[^\p{L}\p{N}-]+/gu, "-").slice(0, 70)}.json`; link.click();
     setTimeout(() => URL.revokeObjectURL(url), 30_000);
   }
-  return <Dialog open onOpenChange={open => { if (!open && !save.isPending) onClose(); }}><DialogContent aria-describedby={undefined} className="!max-w-3xl !min-w-0 overflow-x-hidden [&>*]:min-w-0">
-    <DialogHeader className="sticky top-0 z-20 -mx-4 -mt-1 flex flex-row items-start justify-between gap-2 bg-background px-4 pb-3 pr-12 sm:-mx-6 sm:px-6 sm:pr-14">
+  return <Dialog open onOpenChange={open => { if (!open && !save.isPending) onClose(); }}><DialogContent topActions={editing && editor ? <Button form="wishlist-idea-form" type="submit" variant="ghost" size="compactIcon" aria-label="Salvar desejo" title="Salvar desejo" disabled={save.isPending}><Save /></Button> : null} aria-describedby={undefined} className="!max-w-3xl !min-w-0 overflow-x-hidden [&>*]:min-w-0">
+    <DialogHeader className="sticky top-0 z-20 -mx-4 -mt-1 flex flex-row items-start justify-between gap-2 bg-background px-4 pb-3 pr-28 sm:-mx-6 sm:px-6 sm:pr-28">
       <DialogTitle className="min-w-0 flex-1 break-words text-left leading-snug">{idea ? idea.title : "Novo desejo"}</DialogTitle>
       <div className="flex shrink-0 items-center gap-1">
-        {editing && editor ? <><Button form="wishlist-idea-form" type="submit" variant="ghost" size="compactIcon" aria-label="Salvar desejo" title="Salvar desejo" disabled={save.isPending}><Save /></Button>{idea && <Button variant="ghost" size="compactIcon" aria-label="Cancelar edição" title="Cancelar edição" onClick={() => setEditing(false)}><X /></Button>}</> : editor && <Button variant="ghost" size="compactIcon" aria-label="Editar desejo" title="Editar desejo" onClick={() => setEditing(true)}><Pencil /></Button>}
+        {editing && editor ? <>{idea && <Button variant="ghost" size="compactIcon" aria-label="Cancelar edição" title="Cancelar edição" onClick={() => setEditing(false)}><X /></Button>}</> : editor && <Button variant="ghost" size="compactIcon" aria-label="Editar desejo" title="Editar desejo" onClick={() => setEditing(true)}><Pencil /></Button>}
         {idea && editor && <Button variant="ghost" size="compactIcon" aria-label="Excluir desejo" title="Excluir desejo" disabled={remove.isPending} onClick={() => remove.mutate()}><Trash2 /></Button>}
       </div>
     </DialogHeader>

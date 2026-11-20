@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Cabeçalhos inventariados: To Dos (Home/Central), Wishlist e editor de visita usam topActions junto de ampliar/X; salvamento contextual do título Code e internos/inferiores preservados. Dialog/Sheet/AlertDialog e expansão própria do inventário revisados em código, sem outros disquetes superiores junto de ampliar. To Dos/Wishlist conferidos em 1073px/390px: centros iguais, rascunhos preservados ao ampliar/restaurar; visita conferida em código, tentativa de abrir sem botão disponível na tela inicial. Não publicado.
 - [x] Links de anexos pretos e sublinhados em repouso, verdes ao cursor; oito links conferidos com fonte CDE 14px e alinhamento à esquerda. Approval excluído ausente na tela. Não publicado.
 - [x] Approval 202610230001 excluído por autorização expressa; releitura confirmou somente 202610230002, R$ 1.508,00 e oito comprovantes.
 - [x] Links de anexos Supply com fonte CDE e alinhamento à esquerda; oito links reais conferidos em 14px e mesma posição inicial.
