@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { SearchableSelect } from "@/components/ui/searchable-select";
+import { SearchableSelect, filterOptions } from "@/components/ui/searchable-select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { CdeColorSwatches } from "@/components/cde/top-icon-style-editor";
@@ -43,7 +43,12 @@ export async function saveTodoLabels(todoId: string, userId: string, ids: string
   }
 }
 export function TodoLabelChoices({ labels, selected, onChange, disabled }: { labels: TodoLabel[]; selected: string[]; onChange: (ids: string[]) => void; disabled?: boolean }) {
-  return <div className="space-y-2"><Label>Etiquetas</Label><SearchableSelect aria-label="Selecionar etiquetas" disabled={disabled} value="" options={labels.filter(l => !selected.includes(l.id)).map(l => ({ value: l.id, label: l.name }))} onChange={id => { if (id) onChange([...selected, id]); }} placeholder="Buscar etiqueta…" renderOption={option => { const label = labels.find(l => l.id === option.value); return label ? <TodoLabelMark label={label} /> : option.label; }} /><div className="flex flex-wrap gap-3">{labels.filter(l => selected.includes(l.id)).map(l => <label key={l.id} className="flex min-w-0 items-center gap-2"><Checkbox disabled={disabled} aria-label={`Etiqueta ${l.name}`} checked onCheckedChange={() => onChange(selected.filter(id => id !== l.id))} /><TodoLabelMark label={l} /></label>)}</div></div>;
+  const chosen = labels.filter(label => selected.includes(label.id));
+  const multipleValue = "todo-labels-multiple";
+  const value = chosen.length > 1 ? multipleValue : chosen[0]?.id ?? "";
+  const options = labels.map(label => ({ value: label.id, label: label.name }));
+  if (chosen.length > 1) options.push({ value: multipleValue, label: "Múltiplas" });
+  return <div className="space-y-2"><Label>Etiquetas</Label><SearchableSelect aria-label="Selecionar etiquetas" disabled={disabled} value={value} clearable={false} options={options} optionFilter={(options, query) => filterOptions(options.filter(option => option.value !== multipleValue && !selected.includes(option.value)), query)} onChange={id => { if (id && id !== multipleValue && !selected.includes(id)) onChange([...selected, id]); }} placeholder="Buscar etiqueta…" renderOption={option => { const label = labels.find(l => l.id === option.value); return label ? <TodoLabelMark label={label} /> : option.label; }} /><div className="flex flex-wrap gap-3">{chosen.map(l => <label key={l.id} className="flex min-w-0 items-center gap-2"><Checkbox disabled={disabled} aria-label={`Etiqueta ${l.name}`} checked onCheckedChange={() => onChange(selected.filter(id => id !== l.id))} /><TodoLabelMark label={l} /></label>)}</div></div>;
 }
 export function TodoLabelsManager({ userId }: { userId: string }) {
   const { data } = useQuery(todoLabelsOptions(userId));
