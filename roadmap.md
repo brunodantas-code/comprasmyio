@@ -1,4 +1,6 @@
 # Roadmap
+- [x] Legal: Você participou após a data; filtro Participação com/sem participação. Conta Leonardo conferida: 7 com participação e 3 sem; nomes legados reconhecidos sem ampliar autorização de assinatura. Não publicado.
+- [x] Legal: cada ação sem data prevista gera pendência para o criador da ata no helper Home/Central e filtro pessoal do Legal; baixa após salvar prazo na tela conferida na Central, mantendo pendência de execução. Ata temporária removida; 29 testes passaram. Não publicado.
 - [x] Site Survey: Ordenar na barra dos botões e filtros, após o filtro de colunas.
 - [x] Site Survey: filtro de colunas após Filtros do Checklist; barra em uma linha sem rolagem em 1073px. Telas menores usam ícones com descrição para exportar/importar e histórico; no celular a barra permite rolagem. Conferido em 1073px e 390px.
 - [x] Site Survey: seta na coluna Ações; Nome da Loja com quebra de linha e colunas compactadas. Histórico exercitado na visita temporária; controles e tabela de Mogi conferidos. Nenhuma aparência CDE alterada.

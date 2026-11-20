@@ -24,7 +24,7 @@ import { MinutesList } from './minutes-list';
 import { SubjectResponsibles } from './subject-responsibles';
 import { SubjectActions } from './subject-actions';
 import { CdeSortableList } from '@/components/cde/cde-order';
-import { allParticipantsSigned, legalSigners, clearLegalSignatures, emptyLegalContent, legalDate, legalSearchText, legalSubjectResponsibles, normalizeLegalText, normalizeLegalContentTitles, normalizeLegalTitle, parseLegalContent, mergeConfidentialSubjects, splitConfidentialSubjects, type LegalCategory, type LegalContent } from '@/lib/legal';
+import { allParticipantsSigned, legalSigners, legalUserParticipated, clearLegalSignatures, emptyLegalContent, legalDate, legalSearchText, legalSubjectResponsibles, normalizeLegalText, normalizeLegalContentTitles, normalizeLegalTitle, parseLegalContent, mergeConfidentialSubjects, splitConfidentialSubjects, type LegalCategory, type LegalContent } from '@/lib/legal';
 import { actionsForSavedSubjects, type DraftLegalAction } from '@/lib/legal-actions';
 import { legalPdf } from '@/lib/legal-pdf';
 import type { Database } from '@/integrations/supabase/types';
@@ -56,6 +56,7 @@ export function LegalWorkspace({ initialRecordId }: { initialRecordId?: string }
     { key: "title", label: "Título", value: r => r.title },
     { key: "content", label: minutes ? "Assuntos" : "Documentos", value: r => legalSearchText(r.title, parseLegalContent(r.content)) },
     { key: "date", label: "Data", kind: "date", value: r => (r.meeting_date || r.created_at).slice(0,10), display: r => legalDate((r.meeting_date || r.created_at).slice(0,10)) },
+    ...(minutes ? [{ key: 'participation', label: 'Participação', value: (r: RecordRow) => legalUserParticipated(parseLegalContent(r.content), currentUser) ? 'Você participou' : 'Você não participou' }] : []),
   ]);
   const query = legalFilters.active ? "ativo" : "";
   const filtered = [...legalFilters.filtered].sort((a,b)=>{ const av=a.meeting_date || a.created_at; const bv=b.meeting_date || b.created_at; return ascending?av.localeCompare(bv):bv.localeCompare(av); });

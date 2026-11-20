@@ -63,7 +63,7 @@ export function usePendingActions() {
         supabase.from("legal_records").select("id,title,category,content,created_by").eq("category", "minutes"),
         supabase.from("legal_actions").select("record_id,subject_id,responsible_id,completed_at,archived").eq("responsible_id", userId),
         supabase.from("legal_subject_completions").select("record_id,subject_id"),
-        supabase.from("legal_actions").select("record_id,subject_id,archived"),
+        supabase.from("legal_actions").select("record_id,subject_id,archived,due_date"),
         supabase.from("legal_confidential_subjects").select("record_id,subject_id,position,subject"),
         supabase.rpc("pm_pending_messages"),
       ]);
@@ -81,6 +81,7 @@ export function usePendingActions() {
 
       if (legalResult.error) throw legalResult.error;
       if (legalActionsResult.error) throw legalActionsResult.error;
+      if (legalAllActionsResult.error) throw legalAllActionsResult.error;
       const legalItems = legalSignaturePendingItems((legalResult.data ?? []).map(r => ({ ...r, content: mergeConfidentialSubjects(r.content, r.id, legalConfidentialResult.data ?? []) })), { id: userId, full_name: currentUser?.full_name ?? "" }, legalActionsResult.data ?? [], legalCompletionsResult.data ?? [], legalAllActionsResult.data ?? []);
       const legalCount = legalItems.reduce((sum, item) => sum + item.count, 0);
       const [todoTasks, todoMessages] = await Promise.all([supabase.from("personal_todos").select("*"), supabase.from("personal_todo_messages").select("*")]);

@@ -1,6 +1,19 @@
 import { describe, it, expect } from 'vitest';
-import { allParticipantsSigned, legalSigners, clearLegalSignatures, emptyLegalContent, legalSearchText, legalPendingCount, parseLegalContent, legalSubjectResponsibles } from './legal';
+import { allParticipantsSigned, legalSigners, legalUserParticipated, clearLegalSignatures, emptyLegalContent, legalSearchText, legalPendingCount, parseLegalContent, legalSubjectResponsibles } from './legal';
 describe('Atas do Legal', () => {
+  it('reconhece participação pelo usuário cadastrado independentemente da assinatura', () => {
+    const user = { id: 'leonardo', full_name: 'Leonardo Roedel' };
+    const content = parseLegalContent({ participants: [{ userId: 'leonardo', name: 'Leonardo Roedel', signature: '', signedAt: '' }] });
+    expect(legalUserParticipated(content, user)).toBe(true);
+    expect(legalUserParticipated(content, { id: 'joao', full_name: 'João Paulo Couto' })).toBe(false);
+    expect(legalUserParticipated(content, null)).toBe(false);
+  });
+  it('reconhece nomes legados sem vínculo, mas não confunde outro usuário com nome igual', () => {
+    const user = { id: 'leonardo', full_name: 'Leonardo Roedel' };
+    expect(legalUserParticipated(parseLegalContent({ participants: [{ name: ' LEONARDO  ROEDEL ' }] }), user)).toBe(true);
+    expect(legalUserParticipated(parseLegalContent({ participants: [{ name: 'Leonardo Roedel', userId: 'outro' }] }), user)).toBe(false);
+    expect(legalUserParticipated(parseLegalContent({ participants: [] }), user)).toBe(false);
+  });
   it('preserva responsável antigo e permite vários sem duplicar a ação pendente', () => {
     const subject = {id:'1',title:'Ação',description:'',decisions:'',responsible:'Bruno'};
     expect(legalSubjectResponsibles(subject)).toEqual(['Bruno']);

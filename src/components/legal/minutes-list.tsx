@@ -3,7 +3,7 @@ import { CdeLockIcon, CdeNumber, CdeDisclosureIcon } from "@/components/cde/cde-
 import { ChevronDown, ChevronRight, FileText, Pencil, Trash2, FileSignature, ChevronUp } from 'lucide-react';
 import { canSignParticipant, signatureDate } from '@/lib/signatures';
 import { Button } from '@/components/ui/button';
-import { legalDate, legalSigners, legalPendingCount, legalSubjectResponsibles, parseLegalContent } from '@/lib/legal';
+import { legalDate, legalSigners, legalUserParticipated, legalPendingCount, legalSubjectResponsibles, parseLegalContent } from '@/lib/legal';
 import type { Database } from '@/integrations/supabase/types';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { legalActionDelayDays, legalActionDueSoonDays, legalTrackingOptions, pendingLegalActions } from '@/lib/legal-actions';
@@ -82,7 +82,7 @@ export function MinutesList({ rows, expanded, toggle, edit, remove, openPdf, use
       return <article key={row.id}>
         <div className="flex items-center gap-1 px-2 py-3 sm:gap-2 sm:px-4">
           <button type="button" className="flex h-auto min-w-0 flex-1 items-center justify-start gap-3 rounded-md bg-transparent p-0 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label={`Abrir ${row.title}`} onClick={() => toggle(row.id)}>
-            <span className="min-w-0 flex-1"><span className="block break-words text-sm font-semibold text-foreground">{row.title}</span><span className="block text-xs font-normal text-muted-foreground">{legalDate(row.meeting_date)}</span></span>
+            <span className="min-w-0 flex-1"><span className="block break-words text-sm font-semibold text-foreground">{row.title}</span><span className="block text-xs font-normal text-muted-foreground">{legalDate(row.meeting_date)}{legalUserParticipated(content, user) ? ' · Você participou' : ''}</span></span>
           </button>
           {mine ? <AlertMarker role="status" title={`${mine.signature ? (mine.revision ? 'Nova assinatura pendente (edição da ata anterior)' : 'Assinatura pendente') : ''}${mine.signature && mine.actions ? ' e ' : ''}${mine.actions ? `${mine.actions} ação(ões) pendente(s)` : ''}`} aria-label={`${mine.count} pendência(s) nesta ata${pendingUser ? ` de ${pendingUser.full_name}` : ''}`}  count={mine.count} scale={0.72} /> : null}
           <Button variant="outline" size="compactIcon" title="Editar" aria-label={`Editar ${row.title}`} onClick={() => edit(row)}><Pencil /></Button>

@@ -53,6 +53,25 @@ d2('rótulo de reassinatura', () => {
 });
 
 import { legalSignaturePendingItems as items3 } from './legal-pending';
+describe('datas previstas das ações da ata', () => {
+  const rec = { id: 'ata', title: 'Ata', category: 'minutes', created_by: user.id, content: { subjects: [{ id: 's', title: 'Assunto' }] } };
+  const action = { record_id: 'ata', subject_id: 's', responsible_id: 'joao', archived: false, completed_at: null, due_date: null as string | null };
+  it('atribui cada prazo ausente ao criador da ata, mesmo quando a ação tem outro responsável', () => {
+    expect(items3([rec], user, [], [], [action, action])[0]?.missingDeadlines).toBe(2);
+    expect(items3([rec], user, [], [], [action, action])[0]?.count).toBe(2);
+    expect(items3([rec], { id: 'joao', full_name: 'João' }, [], [], [action])).toEqual([]);
+  });
+  it('retira a pendência quando a data prevista é preenchida', () => {
+    expect(items3([rec], user, [], [], [action])[0]?.count).toBe(1);
+    expect(items3([rec], user, [], [], [{ ...action, due_date: '2026-11-30' }])).toEqual([]);
+  });
+  it('exige data prevista também nas ações concluídas, sem usar a data real como prazo', () => {
+    expect(items3([rec], user, [], [], [{ ...action, completed_at: '2026-11-20' }])[0]?.missingDeadlines).toBe(1);
+  });
+  it('não conta ações arquivadas, assuntos removidos nem outras atas', () => {
+    expect(items3([rec], user, [], [], [{ ...action, archived: true }, { ...action, subject_id: 'removido' }, { ...action, record_id: 'outra' }])).toEqual([]);
+  });
+});
 d2('deliberação com responsável', () => {
   const rec = { id: 'r', title: 'Ata', category: 'minutes', created_by: 'x', content: { participants: [], subjects: [{ id: 's', title: 'A', description: '', decisions: 'Fazer', responsibles: ['Ana'] }] } };
   i2('é pendência sem ações até ser concluída', () => {

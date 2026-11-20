@@ -10,6 +10,12 @@ export function parseLegalContent(value: unknown): LegalContent {
 }
 /** Only ERP-registered participants (linked userId) sign; external guests stay listed as participants only. */
 export function legalSigners(content: LegalContent) { return content.participants.filter(p => Boolean(p.userId) && p.name.trim()); }
+/** Participation is descriptive, not signing authorization; legacy unlinked names remain recognizable. */
+export function legalUserParticipated(content: LegalContent, user: { id: string; full_name: string } | null | undefined): boolean {
+  if (!user) return false;
+  const name = normalizeLegalText(user.full_name.trim()).replace(/\s+/g, ' ');
+  return content.participants.some(p => p.userId ? p.userId === user.id : Boolean(name) && normalizeLegalText(p.name.trim()).replace(/\s+/g, ' ') === name);
+}
 export function allParticipantsSigned(content: LegalContent) { const signers = legalSigners(content); return signers.length > 0 && signers.every(p => p.signature && p.signedAt); }
 export function clearLegalSignatures(content: LegalContent): LegalContent { return { ...content, participants: content.participants.map(p => ({ ...p, signature: '', signedAt: '' })) }; }
 export function legalSubjectResponsibles(subject: LegalSubject): string[] {
