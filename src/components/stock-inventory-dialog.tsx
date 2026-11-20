@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
-import { ClipboardList, Save, Pencil, Check, X, FileSignature, FileSpreadsheet, FileDown, Maximize2, Minimize2, MessageSquare } from 'lucide-react';
+import { ClipboardList, Save, Pencil, Check, X, FileSignature, FileSpreadsheet, FileDown, MessageSquare } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -15,7 +15,6 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { InventorySignatureDialog } from '@/components/inventory-signature-dialog';
 import { signatureDate } from '@/lib/signatures';
 import { exportInventory } from '@/lib/inventory-export';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -47,10 +46,8 @@ function InventoryObservation({ item, readOnly, saving, onSave }: { item: Item; 
   </Popover>;
 }
 
-export function StockInventoryDialog({ area, rows }: { area: string; rows: Row[] }) {
+export function StockInventoryPanel({ area, rows, active = true }: { area: string; rows: Row[]; active?: boolean }) {
   const { data: stockMeta } = useStockMeta(area === 'terceiros' ? 'terceiros_materials' : 'materials');
-  const [open, setOpen] = useState(false);
-  const [expanded, setExpanded] = useState(false);
   const [editing, setEditing] = useState(false);
   const [id, setId] = useState<string | null>(null);
   const [name, setName] = useState('');
@@ -64,11 +61,11 @@ export function StockInventoryDialog({ area, rows }: { area: string; rows: Row[]
   const { data: me } = useCurrentUser();
   const [signing, setSigning] = useState(false);
   const [exporting, setExporting] = useState(false);
-  const signatures = useQuery({ queryKey: ['inventory-signatures', id], enabled: open && !!id, queryFn: async () => {
+  const signatures = useQuery({ queryKey: ['inventory-signatures', id], enabled: active && !!id, queryFn: async () => {
     const { data, error } = await supabase.from('stock_inventory_signatures').select('*').eq('inventory_id', id ?? '');
     if (error) throw error; return data ?? [];
   } });
-  const users = useQuery({ queryKey: ['inventory-users'], enabled: open, queryFn: async () => {
+  const users = useQuery({ queryKey: ['inventory-users'], enabled: active, queryFn: async () => {
     const { data, error } = await supabase.from('profiles').select('id, full_name').is('deleted_at', null).order('full_name');
     if (error) throw error;
     return data ?? [];
@@ -78,7 +75,7 @@ export function StockInventoryDialog({ area, rows }: { area: string; rows: Row[]
     setCounterName('');
     setAddingCounter(false);
   }
-  const catalog = useQuery({ queryKey: ['inventory-catalog', area], enabled: open, queryFn: async () => {
+  const catalog = useQuery({ queryKey: ['inventory-catalog', area], enabled: active, queryFn: async () => {
     if (area === 'terceiros') {
       const { data, error } = await supabase.from('terceiros_materials').select('id');
       if (error) throw error;
@@ -88,7 +85,7 @@ export function StockInventoryDialog({ area, rows }: { area: string; rows: Row[]
     if (error) throw error;
     return (data ?? []).filter(row => area !== 'fabrica' || !row.is_manufactured).map(row => row.id);
   }});
-  const history = useQuery({ queryKey: ['stock-inventories', area], enabled: open, queryFn: async () => {
+  const history = useQuery({ queryKey: ['stock-inventories', area], enabled: active, queryFn: async () => {
     const { data, error } = await supabase.from('stock_inventories').select('*').eq('area', area).order('created_at', { ascending: false });
     if (error) throw error;
     return data ?? [];
@@ -131,7 +128,7 @@ export function StockInventoryDialog({ area, rows }: { area: string; rows: Row[]
   const readOnly = !!selectedCompleted;
   const previousInventory = completed.find(record => record.id !== id && (!selectedCompleted?.completed_at || (record.completed_at ?? '') < selectedCompleted.completed_at));
   const previousItems = (previousInventory?.items ?? []) as unknown as Item[];
-  const comparison = useQuery({ queryKey: ['inventory-comparison', area, previousInventory?.completed_at, selectedCompleted?.completed_at], enabled: open && editing && !!previousInventory?.completed_at, queryFn: async () => {
+  const comparison = useQuery({ queryKey: ['inventory-comparison', area, previousInventory?.completed_at, selectedCompleted?.completed_at], enabled: active && editing && !!previousInventory?.completed_at, queryFn: async () => {
     const { data, error } = await supabase.rpc('inventory_comparison', { _area: area, _after: previousInventory?.completed_at ?? undefined, _until: selectedCompleted?.completed_at ?? undefined });
     if (error) throw error;
     return data ?? [];
@@ -161,15 +158,7 @@ export function StockInventoryDialog({ area, rows }: { area: string; rows: Row[]
     } catch (e) { toast.error(e instanceof Error ? e.message : 'Não foi possível exportar'); }
     finally { setExporting(false); }
   }
-  return <Dialog open={open} onOpenChange={value => { setOpen(value); if (!value) { setEditing(false); setExpanded(false); } }}>
-    <DialogTrigger asChild><Button variant="action" title="Inventário"><ClipboardList className="size-4" />Inventário</Button></DialogTrigger>
-    <DialogContent className={`stock-inventory auto-rows-min overflow-y-auto ${expanded ? 'h-dvh max-h-dvh w-screen max-w-none rounded-none sm:max-w-none' : 'max-h-[85vh] sm:max-w-4xl'}`}>
-      <DialogHeader className="sticky top-0 z-20 flex-row items-center justify-between space-y-0 gap-3 bg-background pr-9">
-        <DialogTitle>Inventário</DialogTitle>
-        <Button variant="ghost" size="icon" className="shrink-0" aria-label={expanded ? 'Restaurar tamanho do inventário' : 'Ampliar inventário'} title={expanded ? 'Restaurar tamanho do inventário' : 'Ampliar inventário'} aria-pressed={expanded} onClick={() => setExpanded(value => !value)}>
-          {expanded ? <Minimize2 className="size-4" /> : <Maximize2 className="size-4" />}
-        </Button>
-      </DialogHeader>
+  return <div className="stock-inventory space-y-4">
       {!editing ? <div className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3"><div>{upcoming?.next_date && <span className={upcoming.next_date < format(new Date(), 'yyyy-MM-dd') ? 'text-destructive' : 'text-muted-foreground'}>Próxima contagem: {format(new Date(`${upcoming.next_date}T12:00:00`), 'dd/MM/yyyy')}</span>}</div><CdeButton group="plus" title="Novo inventário" aria-label="Novo inventário" disabled={!rows.length || catalog.isLoading || history.isLoading || !!catalog.error} onClick={() => start(upcoming)} /></div>
         {history.isLoading && <p>Carregando inventários…</p>}{history.error && <p className="text-destructive">{history.error.message}</p>}
@@ -199,7 +188,6 @@ export function StockInventoryDialog({ area, rows }: { area: string; rows: Row[]
         })}</section>}
         {!history.data?.some(r => r.id === id && r.status === 'completed') && <div className="flex justify-end gap-3"><Button variant="ghost" size="icon" aria-label="Salvar contagem" title="Salvar contagem" disabled={save.isPending} onClick={() => save.mutate({ complete: false })}><Save className="size-4" /></Button><Button variant="outline" disabled={save.isPending} onClick={async () => { if (await confirmAction('Concluir o inventário e ajustar os saldos às quantidades contadas? Esta contagem ficará preservada no histórico.', { title: 'Concluir inventário', confirmLabel: 'Concluir e ajustar saldos' })) save.mutate({ complete: true }); }}><Check className="size-4" />Concluir inventário</Button></div>}
       </div>}
-    </DialogContent>
     {me && <InventorySignatureDialog inventory={signing && selectedCompleted ? selectedCompleted : null} userId={me.id} close={() => setSigning(false)} />}
-  </Dialog>;
+  </div>;
 }

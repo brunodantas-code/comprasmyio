@@ -1,5 +1,5 @@
 import { useTableFilters } from "@/components/use-table-filters";
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FlaskConical, ListTree, Search } from "lucide-react";
+import { ChevronDown, FlaskConical, ListTree, Search } from "lucide-react";
 
 type Material = { id: string; name: string; location: string; is_product: boolean; is_manufactured?: boolean | null; loss_percent?: number | null };
 type Bom = { id: string; product_material_id: string; component_material_id: string; quantity: number };
@@ -298,6 +298,15 @@ export function ProductionCapacityCard() {
   ]);
   const visible = productionFilters.filtered;
 
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+  const toggleRow = (id: string) =>
+    setExpandedRows((current) => {
+      const next = new Set(current);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+
   return (
     <Card>
       <CardHeader>
@@ -316,48 +325,104 @@ export function ProductionCapacityCard() {
               <TableHead>{productionFilters.header("name")}</TableHead>
               <TableHead className="text-right">{productionFilters.header("possible")}</TableHead>
               <TableHead>{productionFilters.header("limiter")}</TableHead>
+              <TableHead className="w-10">
+                <span className="sr-only">Exibir ou recolher componentes limitantes</span>
+              </TableHead>
             </TableRow>
 
           </TableHeader>
           <TableBody>
-            {visible.map((r) => (
-              <TableRow key={r.id}>
-                <TableCell className="font-medium">{r.name}</TableCell>
-                <TableCell className="text-right">
-                  {r.possible === null ? (
-                    <span className="text-sm text-muted-foreground">sem regras</span>
-                  ) : (
-                    <Badge
-                      variant="status"
-                    >
-                      {r.possible} un.
-                    </Badge>
-                  )}
-                </TableCell>
-                <TableCell className="text-sm text-muted-foreground">
-                  {r.allLimiters.length === 0 ? (
-                    <span>—</span>
-                  ) : (() => {
-                    const limiters = r.allLimiters.filter((it) => it.can === (r.possible ?? 0));
-                    return (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-7 border border-status-border bg-status px-2 text-status-foreground hover:bg-status"
-                        onClick={() => setLimitDialog({ name: r.name, possible: r.possible, items: limiters })}
-                        title="Ver componentes limitantes"
-                      >
-                        <ListTree className="h-4 w-4" />
-                        <span className="ml-1 text-xs">{limiters.length} limitante(s)</span>
-                      </Button>
-                    );
-                  })()}
-                </TableCell>
-              </TableRow>
-            ))}
+            {visible.map((r) => {
+              const limiters = r.allLimiters.filter((it) => it.can === (r.possible ?? 0));
+              const expanded = expandedRows.has(r.id);
+              return (
+                <Fragment key={r.id}>
+                  <TableRow>
+                    <TableCell className="font-medium">{r.name}</TableCell>
+                    <TableCell className="text-right">
+                      {r.possible === null ? (
+                        <span className="text-sm text-muted-foreground">sem regras</span>
+                      ) : (
+                        <Badge
+                          variant="status"
+                        >
+                          {r.possible} un.
+                        </Badge>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {r.allLimiters.length === 0 ? (
+                        <span>—</span>
+                      ) : (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 border border-status-border bg-status px-2 text-status-foreground hover:bg-status"
+                          onClick={() => setLimitDialog({ name: r.name, possible: r.possible, items: limiters })}
+                          title="Ver componentes limitantes"
+                        >
+                          <ListTree className="h-4 w-4" />
+                          <span className="ml-1 text-xs">{limiters.length} limitante(s)</span>
+                        </Button>
+                      )}
+                    </TableCell>
+                    <TableCell className="w-10 px-2 text-right">
+                      {limiters.length > 0 ? (
+                        <Button
+                          type="button"
+                          size="compactIcon"
+                          variant="ghost"
+                          aria-expanded={expanded}
+                          aria-label={expanded ? `Recolher componentes limitantes de ${r.name}` : `Exibir componentes limitantes de ${r.name}`}
+                          title={expanded ? "Recolher componentes limitantes" : "Exibir componentes limitantes"}
+                          onClick={() => toggleRow(r.id)}
+                        >
+                          <ChevronDown className={`h-4 w-4 transition-transform ${expanded ? "rotate-180" : ""}`} />
+                        </Button>
+                      ) : null}
+                    </TableCell>
+                  </TableRow>
+                  {expanded ? (
+                    <TableRow>
+                      <TableCell colSpan={4} className="bg-muted/20 p-3">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Componente</TableHead>
+                              <TableHead className="text-right">Pode produzir</TableHead>
+                              <TableHead className="text-right">Em estoque</TableHead>
+                              <TableHead className="text-right">Por unidade</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {limiters.map((it, idx) => (
+                              <TableRow key={`${r.id}-${idx}`}>
+                                <TableCell className="font-medium">
+                                  {it.name}
+                                  {idx === 0 && (
+                                    <Badge variant="status" className="ml-2">
+                                      limitante
+                                    </Badge>
+                                  )}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <Badge variant="status">{it.can} un.</Badge>
+                                </TableCell>
+                                <TableCell className="text-right">{it.balance}</TableCell>
+                                <TableCell className="text-right text-muted-foreground">{it.per}</TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </TableCell>
+                    </TableRow>
+                  ) : null}
+                </Fragment>
+              );
+            })}
             {visible.length === 0 && (
               <TableRow>
-                <TableCell colSpan={3} className="text-sm text-muted-foreground">
+                <TableCell colSpan={4} className="text-sm text-muted-foreground">
                   Nenhum dispositivo encontrado.
                 </TableCell>
               </TableRow>

@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { ReleaseAssembledDialog, AssemblyReleasesCard } from "@/components/assembly-release";
 import { StockSimulatorDialog, ProductionCapacityCard } from "@/components/stock-simulator";
+import { StockInventorySection } from "@/components/stock-inventory-section";
 import { StockQrDialog, BoxesCard } from "@/components/homologation";
 import { BomSettingsDialog } from "@/components/bom-settings";
 import { UnitProductsCard } from "@/components/unit-products";
@@ -45,7 +46,6 @@ import { ExternalSyncCard, ExternalLostCard } from "@/components/external-sync";
 import { pushQrsToExternal } from "@/lib/push-external";
 import { StockPhotoCell, useStockMeta, CopyCodeCell } from "@/components/stock-meta";
 import { StockDatePicker } from "./stock-date-picker";
-import { StockInventoryDialog } from "./stock-inventory-dialog";
 import { stockComponentTotals } from '@/lib/stock-totals';
 import { format } from "date-fns";
 
@@ -62,7 +62,7 @@ type StockRow = {
   last_movement_at: string | null;
 };
 
-type StockLocation = "almoxarifado" | "fabrica" | "unidade" | "tecnico" | "transito" | "perdido" | "almoxarifado_geral";
+export type StockLocation = "almoxarifado" | "fabrica" | "unidade" | "tecnico" | "transito" | "perdido" | "almoxarifado_geral";
 
 const LOCATION_LABELS: Record<StockLocation, string> = {
   fabrica: "Fábrica",
@@ -105,7 +105,7 @@ function fmt(d: string) {
   return new Date(d).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
 }
 
-function useStock() {
+export function useStock() {
   return useQuery({
     queryKey: ["material-stock"],
     queryFn: async () => {
@@ -144,7 +144,7 @@ function useStockProfiles() {
   });
 }
 
-function useManufacturedMap() {
+export function useManufacturedMap() {
   return useQuery({
     queryKey: ["materials-manufactured-map"],
     queryFn: async () => {
@@ -181,7 +181,7 @@ type TerceirosMovement = {
   entry_date?: string | null;
 };
 
-function useTerceirosStock() {
+export function useTerceirosStock() {
   return useQuery({
     queryKey: ["terceiros-stock"],
     queryFn: async () => {
@@ -540,7 +540,7 @@ function DeleteMaterialDialog({ row }: { row: StockRow }) {
   );
 }
 
-type StockPermissionKey =
+export type StockPermissionKey =
   | "armazem_fabrica" | "armazem_estoque_myio" | "armazem_expedicao" | "armazem_homologacao"
   | "armazem_transporte" | "armazem_cliente" | "armazem_tecnico" | "armazem_perdido"
   | "armazem_itens_avariados" | "armazem_checar_qr" | "armazem_almoxarifado" | "armazem_ferramentas_ativos";
@@ -569,6 +569,12 @@ export function StockTab({ userId, canDelete, canCreateNewItem = false, onlyLoca
   const permittedTabs = topTabs.filter((tab) => tab.allowed);
   if (permittedTabs.length === 0) return null;
   const [requestedGroup, requestedDetail] = section?.split(":") ?? [];
+  const canShowInventory =
+    (!onlyLocation || onlyLocation === "fabrica" || onlyLocation === "almoxarifado") &&
+    (canAccessSection("armazem_fabrica") || canAccessSection("armazem_estoque_myio") || canAccessSection("armazem_almoxarifado"));
+  if (section === "inventario" && canShowInventory) {
+    return <StockInventorySection canAccessSection={canAccessSection} onlyLocation={onlyLocation} />;
+  }
   const activeGroup = permittedTabs.some((tab) => tab.value === requestedGroup) ? requestedGroup : permittedTabs[0]?.value;
   const changeGroup = (value: string) => onSectionChange?.(value);
   return (
@@ -1328,7 +1334,6 @@ function FabricaSection({
   const toolbar = (
     <>
       <AddMaterialDialog location="fabrica" userId={userId} />
-      <StockInventoryDialog area="fabrica" rows={scoped} />
       <BomSettingsDialog />
       <StockSimulatorDialog userId={userId} />
       <ResetStockDialog rows={scoped} userId={userId} location="fabrica" />
@@ -1892,7 +1897,6 @@ function TerceirosSection({ userId, canDelete }: { userId: string; canDelete?: b
   const toolbar = (
     <>
       <AddTerceirosDialog userId={userId} />
-      <StockInventoryDialog area="terceiros" rows={rows ?? []} />
       <TerceirosResetDialog rows={rows ?? []} />
     </>
   );
@@ -2103,7 +2107,6 @@ function MyioDevicesStockSection({ userId, canDelete }: { userId: string; canDel
   const toolbar = (
     <>
       <ResetStockDialog rows={scoped} userId={userId} location="almoxarifado" />
-      <StockInventoryDialog area="almoxarifado" rows={scoped.filter(r => manufactured?.[r.material_id])} />
     </>
   );
 
@@ -2158,7 +2161,6 @@ function StockSectionInner({ userId, location, canDelete }: { userId: string; lo
   const toolbar = (
     <>
       <AddMaterialDialog location={location} userId={userId} />
-      {location === 'almoxarifado_geral' && <StockInventoryDialog area={location} rows={scoped} />}
       <ResetStockDialog rows={scoped} userId={userId} location={location} />
     </>
   );

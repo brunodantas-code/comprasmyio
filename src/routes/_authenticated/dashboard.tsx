@@ -816,6 +816,7 @@ function Dashboard() {
                     { value: "estoque:qr-check", label: "Checar QR Code", icon: Boxes, allowed: me.canAccess("armazem_checar_qr") },
                     { value: "almoxarifado_geral", label: "Almoxarifado", icon: Boxes, allowed: me.canAccess("armazem_almoxarifado") },
                     { value: "ferramentas", label: "Ferramentas/Ativos", icon: Boxes, allowed: me.canAccess("armazem_ferramentas_ativos") },
+                    { value: "inventario", label: "Inventário", icon: ClipboardList, allowed: me.canAccess("armazem_fabrica") || me.canAccess("armazem_estoque_myio") || me.canAccess("armazem_almoxarifado") },
                   ].filter((item) => item.allowed)
               : value === "projects"
                 ? [{ value: "projetos", label: "Projetos", icon: FolderKanban, allowed: me.canAccess("cadastro_projetos") }, { value: "clientes", label: "Clientes", icon: Building2, allowed: me.canAccess("cadastro_clientes") }, { value: "centros", label: "Centro de Custo", icon: Landmark, allowed: me.canAccess("cadastro_centros") }, { value: "etiquetas", label: "Etiquetas", icon: Tag, allowed: me.canAccess("cadastro_etiquetas") }, { value: "cargos", label: "Cargos", icon: Briefcase, allowed: me.canAccess("cadastro_cargos") }, { value: "lembretes", label: "Lembretes", icon: Bell, allowed: me.canAccess("cadastro_lembretes") }, { value: "diversos", label: "Diversos", icon: Layers3, allowed: me.canAccess("cadastro_diversos") }].filter((item) => item.allowed)

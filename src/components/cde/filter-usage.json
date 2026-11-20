@@ -140,6 +140,11 @@
     "general": 0
   },
   {
+    "file": "components/stock-inventory-dialog.tsx",
+    "standard": 1,
+    "general": 0
+  },
+  {
     "file": "components/stock-simulator.tsx",
     "standard": 2,
     "general": 0

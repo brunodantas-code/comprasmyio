@@ -11297,7 +11297,7 @@
   {
     "id": "components/stock-inventory-dialog.tsx|58c473277e6eced4|0",
     "file": "components/stock-inventory-dialog.tsx",
-    "line": 41,
+    "line": 40,
     "tag": "Button",
     "label": "MessageSquare",
     "dynamic": false,
@@ -11312,7 +11312,7 @@
   {
     "id": "components/stock-inventory-dialog.tsx|903635a78bfa0264|0",
     "file": "components/stock-inventory-dialog.tsx",
-    "line": 45,
+    "line": 44,
     "tag": "Button",
     "label": "Salvar observação",
     "dynamic": false,
@@ -11325,39 +11325,9 @@
     "group": ""
   },
   {
-    "id": "components/stock-inventory-dialog.tsx|211da405b7e82540|0",
-    "file": "components/stock-inventory-dialog.tsx",
-    "line": 165,
-    "tag": "Button",
-    "label": "Inventário",
-    "dynamic": false,
-    "visualCustom": false,
-    "autoCdeSafe": true,
-    "icon": "ClipboardList",
-    "variant": "action",
-    "size": "",
-    "className": "",
-    "group": ""
-  },
-  {
-    "id": "components/stock-inventory-dialog.tsx|a3c1312fa8efb0a6|0",
-    "file": "components/stock-inventory-dialog.tsx",
-    "line": 169,
-    "tag": "Button",
-    "label": "Sem nome fixo",
-    "dynamic": true,
-    "visualCustom": false,
-    "autoCdeSafe": true,
-    "icon": "",
-    "variant": "ghost",
-    "size": "icon",
-    "className": "shrink-0",
-    "group": ""
-  },
-  {
     "id": "components/stock-inventory-dialog.tsx|de68b25131a6aac4|0",
     "file": "components/stock-inventory-dialog.tsx",
-    "line": 174,
+    "line": 163,
     "tag": "CdeButton",
     "label": "Novo inventário",
     "dynamic": false,
@@ -11372,7 +11342,7 @@
   {
     "id": "components/stock-inventory-dialog.tsx|286a9ba474fad055|0",
     "file": "components/stock-inventory-dialog.tsx",
-    "line": 177,
+    "line": 166,
     "tag": "Button",
     "label": "Editar inventário",
     "dynamic": false,
@@ -11387,7 +11357,7 @@
   {
     "id": "components/stock-inventory-dialog.tsx|269bb3a32a3102d2|0",
     "file": "components/stock-inventory-dialog.tsx",
-    "line": 177,
+    "line": 166,
     "tag": "Button",
     "label": "Ver contagem",
     "dynamic": false,
@@ -11402,7 +11372,7 @@
   {
     "id": "components/stock-inventory-dialog.tsx|11ef2fc73755e25c|0",
     "file": "components/stock-inventory-dialog.tsx",
-    "line": 181,
+    "line": 170,
     "tag": "Button",
     "label": "Excel",
     "dynamic": false,
@@ -11417,7 +11387,7 @@
   {
     "id": "components/stock-inventory-dialog.tsx|3f5f46810fb5f734|0",
     "file": "components/stock-inventory-dialog.tsx",
-    "line": 181,
+    "line": 170,
     "tag": "Button",
     "label": "PDF",
     "dynamic": false,
@@ -11432,7 +11402,7 @@
   {
     "id": "components/stock-inventory-dialog.tsx|69e2bc56459fb5b0|0",
     "file": "components/stock-inventory-dialog.tsx",
-    "line": 182,
+    "line": 171,
     "tag": "CdeButton",
     "label": "Adicionar inventariante",
     "dynamic": false,
@@ -11447,7 +11417,7 @@
   {
     "id": "components/stock-inventory-dialog.tsx|34af260e4c004341|0",
     "file": "components/stock-inventory-dialog.tsx",
-    "line": 182,
+    "line": 171,
     "tag": "Button",
     "label": "Confirmar inventariante",
     "dynamic": false,
@@ -11462,7 +11432,7 @@
   {
     "id": "components/stock-inventory-dialog.tsx|7c3014cf8b1f0f5d|0",
     "file": "components/stock-inventory-dialog.tsx",
-    "line": 182,
+    "line": 171,
     "tag": "Button",
     "label": "X",
     "dynamic": false,
@@ -11477,7 +11447,7 @@
   {
     "id": "components/stock-inventory-dialog.tsx|ec1367545e8a6f4e|0",
     "file": "components/stock-inventory-dialog.tsx",
-    "line": 194,
+    "line": 183,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -11492,7 +11462,7 @@
   {
     "id": "components/stock-inventory-dialog.tsx|ca02125f397f9f38|0",
     "file": "components/stock-inventory-dialog.tsx",
-    "line": 198,
+    "line": 187,
     "tag": "Button",
     "label": "FileSignature",
     "dynamic": false,
@@ -11507,7 +11477,7 @@
   {
     "id": "components/stock-inventory-dialog.tsx|09ddca822fff16a8|0",
     "file": "components/stock-inventory-dialog.tsx",
-    "line": 200,
+    "line": 189,
     "tag": "Button",
     "label": "Salvar contagem",
     "dynamic": false,
@@ -11522,7 +11492,7 @@
   {
     "id": "components/stock-inventory-dialog.tsx|ca7d8f781576ef05|0",
     "file": "components/stock-inventory-dialog.tsx",
-    "line": 200,
+    "line": 189,
     "tag": "Button",
     "label": "Concluir inventário",
     "dynamic": false,
@@ -11531,6 +11501,21 @@
     "icon": "Check",
     "variant": "outline",
     "size": "",
+    "className": "",
+    "group": ""
+  },
+  {
+    "id": "components/stock-inventory-section.tsx|7f045fb2287106af|0",
+    "file": "components/stock-inventory-section.tsx",
+    "line": 81,
+    "tag": "Button",
+    "label": "Sem nome fixo",
+    "dynamic": true,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "",
+    "variant": "ghost",
+    "size": "icon",
     "className": "",
     "group": ""
   },
@@ -11612,7 +11597,7 @@
   {
     "id": "components/stock-simulator.tsx|948f03a4bd25362d|0",
     "file": "components/stock-simulator.tsx",
-    "line": 343,
+    "line": 357,
     "tag": "Button",
     "label": "limitante(s)",
     "dynamic": true,
@@ -11622,6 +11607,21 @@
     "variant": "ghost",
     "size": "sm",
     "className": "h-7 border border-status-border bg-status px-2 text-status-foreground hover:bg-status",
+    "group": ""
+  },
+  {
+    "id": "components/stock-simulator.tsx|619683c646a06f2d|0",
+    "file": "components/stock-simulator.tsx",
+    "line": 371,
+    "tag": "Button",
+    "label": "ChevronDown",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "ChevronDown",
+    "variant": "ghost",
+    "size": "compactIcon",
+    "className": "",
     "group": ""
   },
   {
@@ -11702,7 +11702,7 @@
   {
     "id": "components/stock-tab.tsx|b0515c5a7da094e8|0",
     "file": "components/stock-tab.tsx",
-    "line": 786,
+    "line": 792,
     "tag": "CdeButton",
     "label": "Adicionar item",
     "dynamic": false,
@@ -11717,7 +11717,7 @@
   {
     "id": "components/stock-tab.tsx|3e08bbf047fbcdcd|0",
     "file": "components/stock-tab.tsx",
-    "line": 801,
+    "line": 807,
     "tag": "Button",
     "label": "Criar novo",
     "dynamic": false,
@@ -11732,7 +11732,7 @@
   {
     "id": "components/stock-tab.tsx|254f470b0e5a86e6|0",
     "file": "components/stock-tab.tsx",
-    "line": 804,
+    "line": 810,
     "tag": "Button",
     "label": "Importar da biblioteca",
     "dynamic": false,
@@ -11747,7 +11747,7 @@
   {
     "id": "components/stock-tab.tsx|9e5119c6c5e072d8|0",
     "file": "components/stock-tab.tsx",
-    "line": 868,
+    "line": 874,
     "tag": "Button",
     "label": "Importar",
     "dynamic": true,
@@ -11762,7 +11762,7 @@
   {
     "id": "components/stock-tab.tsx|da84657116e54ea2|0",
     "file": "components/stock-tab.tsx",
-    "line": 881,
+    "line": 887,
     "tag": "button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -11777,7 +11777,7 @@
   {
     "id": "components/stock-tab.tsx|ed5b91da8c94f4b7|0",
     "file": "components/stock-tab.tsx",
-    "line": 915,
+    "line": 921,
     "tag": "Button",
     "label": "Biblioteca",
     "dynamic": false,
@@ -11792,7 +11792,7 @@
   {
     "id": "components/stock-tab.tsx|891aaa11be57c820|0",
     "file": "components/stock-tab.tsx",
-    "line": 1014,
+    "line": 1020,
     "tag": "Button",
     "label": "Salvando... / Salvar",
     "dynamic": true,
@@ -11807,7 +11807,7 @@
   {
     "id": "components/stock-tab.tsx|95ff6cba05827b38|0",
     "file": "components/stock-tab.tsx",
-    "line": 1077,
+    "line": 1083,
     "tag": "Button",
     "label": "Zerar estoque",
     "dynamic": false,
@@ -11822,7 +11822,7 @@
   {
     "id": "components/stock-tab.tsx|06729e3278ba8ec8|0",
     "file": "components/stock-tab.tsx",
-    "line": 1092,
+    "line": 1098,
     "tag": "Button",
     "label": "Zerar estoque",
     "dynamic": false,
@@ -11837,7 +11837,7 @@
   {
     "id": "components/stock-tab.tsx|4df33b65fce17228|0",
     "file": "components/stock-tab.tsx",
-    "line": 1184,
+    "line": 1190,
     "tag": "button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -11852,7 +11852,7 @@
   {
     "id": "components/stock-tab.tsx|4df33b65fce17228|1",
     "file": "components/stock-tab.tsx",
-    "line": 1193,
+    "line": 1199,
     "tag": "button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -11867,7 +11867,7 @@
   {
     "id": "components/stock-tab.tsx|cbd42da7ebab721e|0",
     "file": "components/stock-tab.tsx",
-    "line": 1204,
+    "line": 1210,
     "tag": "button",
     "label": "Ver QR Codes homologados",
     "dynamic": false,
@@ -11882,7 +11882,7 @@
   {
     "id": "components/stock-tab.tsx|97e7e3dfc72b7943|0",
     "file": "components/stock-tab.tsx",
-    "line": 1246,
+    "line": 1252,
     "tag": "Button",
     "label": "Entrada",
     "dynamic": false,
@@ -11897,7 +11897,7 @@
   {
     "id": "components/stock-tab.tsx|c8bcf5d7955016a4|0",
     "file": "components/stock-tab.tsx",
-    "line": 1256,
+    "line": 1262,
     "tag": "Button",
     "label": "Saída",
     "dynamic": false,
@@ -11912,7 +11912,7 @@
   {
     "id": "components/stock-tab.tsx|31caac4ec5002fbb|0",
     "file": "components/stock-tab.tsx",
-    "line": 1273,
+    "line": 1279,
     "tag": "Button",
     "label": "Sem avaria para registrar",
     "dynamic": false,
@@ -11927,7 +11927,7 @@
   {
     "id": "components/stock-tab.tsx|ee10d9fe9cc44951|1",
     "file": "components/stock-tab.tsx",
-    "line": 1495,
+    "line": 1500,
     "tag": "Button",
     "label": "Câmera",
     "dynamic": false,
@@ -11942,7 +11942,7 @@
   {
     "id": "components/stock-tab.tsx|aed85e647f274abf|1",
     "file": "components/stock-tab.tsx",
-    "line": 1498,
+    "line": 1503,
     "tag": "Button",
     "label": "Galeria",
     "dynamic": false,
@@ -11957,7 +11957,7 @@
   {
     "id": "components/stock-tab.tsx|7cdc23f424650600|1",
     "file": "components/stock-tab.tsx",
-    "line": 1531,
+    "line": 1536,
     "tag": "Button",
     "label": "Confirmar",
     "dynamic": false,
@@ -11972,7 +11972,7 @@
   {
     "id": "components/stock-tab.tsx|18d0f1e79233948c|1",
     "file": "components/stock-tab.tsx",
-    "line": 1548,
+    "line": 1553,
     "tag": "Button",
     "label": "Histórico",
     "dynamic": false,
@@ -11987,7 +11987,7 @@
   {
     "id": "components/stock-tab.tsx|77e6160dcb39abdf|1",
     "file": "components/stock-tab.tsx",
-    "line": 1602,
+    "line": 1607,
     "tag": "Button",
     "label": "Excluir item",
     "dynamic": false,
@@ -12002,7 +12002,7 @@
   {
     "id": "components/stock-tab.tsx|b0515c5a7da094e8|1",
     "file": "components/stock-tab.tsx",
-    "line": 1699,
+    "line": 1704,
     "tag": "CdeButton",
     "label": "Adicionar item",
     "dynamic": false,
@@ -12017,7 +12017,7 @@
   {
     "id": "components/stock-tab.tsx|da84657116e54ea2|1",
     "file": "components/stock-tab.tsx",
-    "line": 1716,
+    "line": 1721,
     "tag": "button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -12032,7 +12032,7 @@
   {
     "id": "components/stock-tab.tsx|891aaa11be57c820|1",
     "file": "components/stock-tab.tsx",
-    "line": 1808,
+    "line": 1813,
     "tag": "Button",
     "label": "Salvando... / Salvar",
     "dynamic": true,
@@ -12047,7 +12047,7 @@
   {
     "id": "components/stock-tab.tsx|95ff6cba05827b38|1",
     "file": "components/stock-tab.tsx",
-    "line": 1850,
+    "line": 1855,
     "tag": "Button",
     "label": "Zerar estoque",
     "dynamic": false,
@@ -12062,7 +12062,7 @@
   {
     "id": "components/stock-tab.tsx|06729e3278ba8ec8|1",
     "file": "components/stock-tab.tsx",
-    "line": 1864,
+    "line": 1869,
     "tag": "Button",
     "label": "Zerar estoque",
     "dynamic": false,
@@ -12077,7 +12077,7 @@
   {
     "id": "components/stock-tab.tsx|4df33b65fce17228|2",
     "file": "components/stock-tab.tsx",
-    "line": 1942,
+    "line": 1946,
     "tag": "button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -12092,7 +12092,7 @@
   {
     "id": "components/stock-tab.tsx|97e7e3dfc72b7943|1",
     "file": "components/stock-tab.tsx",
-    "line": 1974,
+    "line": 1978,
     "tag": "Button",
     "label": "Entrada",
     "dynamic": false,
@@ -12107,7 +12107,7 @@
   {
     "id": "components/stock-tab.tsx|c8bcf5d7955016a4|1",
     "file": "components/stock-tab.tsx",
-    "line": 1984,
+    "line": 1988,
     "tag": "Button",
     "label": "Saída",
     "dynamic": false,
@@ -12122,7 +12122,7 @@
   {
     "id": "components/stock-tab.tsx|31caac4ec5002fbb|1",
     "file": "components/stock-tab.tsx",
-    "line": 1990,
+    "line": 1994,
     "tag": "Button",
     "label": "Sem avaria para registrar",
     "dynamic": false,
@@ -13712,7 +13712,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|d0369c2e1caa3d54|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 829,
+    "line": 830,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -13727,7 +13727,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|d0369c2e1caa3d54|1",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 830,
+    "line": 831,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -13742,7 +13742,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|90d69567eaa28178|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 1126,
+    "line": 1127,
     "tag": "Button",
     "label": "Sim, é este item",
     "dynamic": false,
@@ -13757,7 +13757,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|5431e8c31016069f|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 1134,
+    "line": 1135,
     "tag": "Button",
     "label": "Não, continuar com item novo",
     "dynamic": false,
@@ -13772,7 +13772,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|8a66744ea2b59c1f|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 1887,
+    "line": 1888,
     "tag": "Button",
     "label": "Remover solicitação",
     "dynamic": false,
@@ -13787,7 +13787,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|c078db9f49fbcfe5|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 1919,
+    "line": 1920,
     "tag": "CdeButton",
     "label": "Adicionar",
     "dynamic": false,
@@ -13802,7 +13802,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|9e45e0f921850701|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 1933,
+    "line": 1934,
     "tag": "Button",
     "label": "Remover reembolso",
     "dynamic": false,
@@ -13817,7 +13817,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|f30fc22f282e6329|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 1953,
+    "line": 1954,
     "tag": "CdeButton",
     "label": "Adicionar",
     "dynamic": false,
@@ -13832,7 +13832,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|b44f12905c0bbc7c|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 2228,
+    "line": 2229,
     "tag": "Button",
     "label": "Remover material",
     "dynamic": false,
@@ -13847,7 +13847,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|6823fff49eb12503|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 2240,
+    "line": 2241,
     "tag": "CdeButton",
     "label": "Adicionar material",
     "dynamic": false,
@@ -13862,7 +13862,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|d8ed6de5f4eaee01|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 2386,
+    "line": 2387,
     "tag": "Button",
     "label": "Verificando estoque... / Enviando... / Salvar",
     "dynamic": true,
@@ -13877,7 +13877,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|26bdaa768686a500|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 2405,
+    "line": 2406,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -13892,7 +13892,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|b68cd3df50c50194|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 2406,
+    "line": 2407,
     "tag": "Button",
     "label": "Confirmar",
     "dynamic": false,
@@ -13907,7 +13907,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|0e42fea0ff950a0d|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 2651,
+    "line": 2652,
     "tag": "Button",
     "label": "Agrupar por Projeto e Cliente",
     "dynamic": false,
@@ -13922,7 +13922,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|dde1c78882142ec2|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 2653,
+    "line": 2654,
     "tag": "Button",
     "label": "Custo por Etiqueta",
     "dynamic": false,
@@ -13937,7 +13937,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|e12dfe5673446df8|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 2654,
+    "line": 2655,
     "tag": "Button",
     "label": "Exportar custo por Etiqueta em PDF",
     "dynamic": false,
@@ -13952,7 +13952,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|b5ab8ecb208a4602|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 2810,
+    "line": 2811,
     "tag": "Button",
     "label": "Editar Approval",
     "dynamic": false,
@@ -13967,7 +13967,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|d9d23398d9014c37|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 2818,
+    "line": 2819,
     "tag": "Button",
     "label": "Digite ou selecione",
     "dynamic": true,
@@ -13982,7 +13982,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|b303b1b282a8a79b|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 2826,
+    "line": 2827,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -13997,7 +13997,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|af3d25c273e19851|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 2826,
+    "line": 2827,
     "tag": "Button",
     "label": "Save",
     "dynamic": false,
@@ -14012,7 +14012,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|8bf4bb2937a4342e|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3225,
+    "line": 3226,
     "tag": "button",
     "label": "Ver relatório completo",
     "dynamic": true,
@@ -14027,7 +14027,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|0fbcbb029b4cde41|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3393,
+    "line": 3394,
     "tag": "button",
     "label": "Clique para editar",
     "dynamic": true,
@@ -14042,7 +14042,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|eaa2bbed90ba75c3|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3549,
+    "line": 3550,
     "tag": "Button",
     "label": "Editar solicitação pendente como solicitante",
     "dynamic": false,
@@ -14057,7 +14057,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|b303b1b282a8a79b|1",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3650,
+    "line": 3651,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -14072,7 +14072,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|891aaa11be57c820|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3651,
+    "line": 3652,
     "tag": "Button",
     "label": "Salvando... / Salvar",
     "dynamic": true,
@@ -14087,7 +14087,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|9ddcd7ddce1a378e|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3681,
+    "line": 3682,
     "tag": "Button",
     "label": "Excluir solicitação",
     "dynamic": false,
@@ -14102,7 +14102,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|439484d97dcb8080|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3879,
+    "line": 3880,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -14117,7 +14117,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|4df33b65fce17228|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3926,
+    "line": 3927,
     "tag": "button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -14132,7 +14132,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|dbe7afbb506329df|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3945,
+    "line": 3946,
     "tag": "Button",
     "label": "Marcar como implantado",
     "dynamic": false,
@@ -14147,7 +14147,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|2e3048fb239fe8e0|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3948,
+    "line": 3949,
     "tag": "Button",
     "label": "Cancelar projeto",
     "dynamic": false,
@@ -14162,7 +14162,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|2865b23725fc6c87|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3954,
+    "line": 3955,
     "tag": "Button",
     "label": "Reativar projeto",
     "dynamic": false,
@@ -14177,7 +14177,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|5ecf0ecc993a5786|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3972,
+    "line": 3973,
     "tag": "Button",
     "label": "Excluir projeto",
     "dynamic": false,
@@ -14192,7 +14192,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|47a894e7a4e2f49b|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 4096,
+    "line": 4097,
     "tag": "Button",
     "label": "Editar projeto",
     "dynamic": false,
@@ -14207,7 +14207,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|439484d97dcb8080|1",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 4156,
+    "line": 4157,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -14222,7 +14222,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|4df33b65fce17228|1",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 4217,
+    "line": 4218,
     "tag": "button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -14237,7 +14237,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|a60f755b5ed09042|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 4319,
+    "line": 4320,
     "tag": "Button",
     "label": "Gerar backup",
     "dynamic": false,
@@ -14252,7 +14252,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|aaa6dc3d2bb41971|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 4332,
+    "line": 4333,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -14267,7 +14267,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|4e0d335dec619872|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 4333,
+    "line": 4334,
     "tag": "Button",
     "label": "Confirmar e baixar",
     "dynamic": true,

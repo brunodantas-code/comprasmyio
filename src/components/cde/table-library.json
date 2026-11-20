@@ -122,7 +122,7 @@
   {
     "id": "components/bom-settings.tsx|0",
     "file": "components/bom-settings.tsx",
-    "line": 366,
+    "line": 355,
     "context": "Regras de componentes por dispositivo",
     "headers": [
       "Componente",
@@ -606,7 +606,7 @@
   {
     "id": "components/opdesk/legacy-calls.tsx|0",
     "file": "components/opdesk/legacy-calls.tsx",
-    "line": 77,
+    "line": 79,
     "context": "Acompanhamento",
     "headers": [
       "Nº",
@@ -656,7 +656,7 @@
   {
     "id": "components/projects/workspace.tsx|0",
     "file": "components/projects/workspace.tsx",
-    "line": 104,
+    "line": 112,
     "context": "",
     "headers": [
       "Projeto",
@@ -670,7 +670,7 @@
   {
     "id": "components/projects/workspace.tsx|1",
     "file": "components/projects/workspace.tsx",
-    "line": 107,
+    "line": 115,
     "context": "Atividades",
     "headers": [
       "Atividade",
@@ -685,7 +685,7 @@
   {
     "id": "components/projects/workspace.tsx|2",
     "file": "components/projects/workspace.tsx",
-    "line": 111,
+    "line": 119,
     "context": "Atividades",
     "headers": [
       "Profissional",
@@ -698,7 +698,7 @@
   {
     "id": "components/projects/workspace.tsx|3",
     "file": "components/projects/workspace.tsx",
-    "line": 113,
+    "line": 121,
     "context": "Recursos",
     "headers": [
       "Recurso",
@@ -711,7 +711,7 @@
   {
     "id": "components/projects/workspace.tsx|4",
     "file": "components/projects/workspace.tsx",
-    "line": 114,
+    "line": 122,
     "context": "Recursos",
     "headers": [
       "Atividade / recurso",
@@ -725,7 +725,7 @@
   {
     "id": "components/projects/workspace.tsx|5",
     "file": "components/projects/workspace.tsx",
-    "line": 115,
+    "line": 123,
     "context": "·",
     "headers": [
       "Atividade",
@@ -771,6 +771,36 @@
     ]
   },
   {
+    "id": "components/stock-inventory-dialog.tsx|0",
+    "file": "components/stock-inventory-dialog.tsx",
+    "line": 165,
+    "context": "",
+    "headers": [
+      "Inventário",
+      "Data",
+      "Inventariantes",
+      "Situação",
+      "Recorrência",
+      "Ações"
+    ]
+  },
+  {
+    "id": "components/stock-inventory-dialog.tsx|1",
+    "file": "components/stock-inventory-dialog.tsx",
+    "line": 176,
+    "context": "",
+    "headers": [
+      "Item",
+      "Imagem",
+      "Inventário N",
+      "Entradas por compras",
+      "Saídas da Fábrica",
+      "Saldo",
+      "Inventário N+1",
+      "Divergências ou confirmação"
+    ]
+  },
+  {
     "id": "components/stock-simulator.tsx|0",
     "file": "components/stock-simulator.tsx",
     "line": 132,
@@ -793,18 +823,31 @@
   {
     "id": "components/stock-simulator.tsx|2",
     "file": "components/stock-simulator.tsx",
-    "line": 313,
+    "line": 322,
     "context": "Capacidade de produção",
     "headers": [
       "Dispositivo",
       "Pode produzir",
-      "Componente limitante"
+      "Componente limitante",
+      "Exibir ou recolher componentes limitantes"
     ]
   },
   {
     "id": "components/stock-simulator.tsx|3",
     "file": "components/stock-simulator.tsx",
-    "line": 389,
+    "line": 388,
+    "context": "Capacidade de produção",
+    "headers": [
+      "Componente",
+      "Pode produzir",
+      "Em estoque",
+      "Por unidade"
+    ]
+  },
+  {
+    "id": "components/stock-simulator.tsx|4",
+    "file": "components/stock-simulator.tsx",
+    "line": 454,
     "context": "Componentes limitantes —",
     "headers": [
       "Componente",
@@ -816,7 +859,7 @@
   {
     "id": "components/stock-tab.tsx|0",
     "file": "components/stock-tab.tsx",
-    "line": 224,
+    "line": 230,
     "context": "",
     "headers": [
       "Data",
@@ -830,7 +873,7 @@
   {
     "id": "components/stock-tab.tsx|1",
     "file": "components/stock-tab.tsx",
-    "line": 1150,
+    "line": 1167,
     "context": "Zerar estoque —",
     "headers": [
       "Descrição",
@@ -844,7 +887,7 @@
   {
     "id": "components/stock-tab.tsx|2",
     "file": "components/stock-tab.tsx",
-    "line": 1902,
+    "line": 1923,
     "context": "Insumos de Instalação",
     "headers": [
       "Descrição",
@@ -978,7 +1021,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3012,
+    "line": 3001,
     "context": "Itens e valores",
     "headers": [
       "Approval",
@@ -998,7 +1041,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|1",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3305,
+    "line": 3294,
     "context": "Aprovações",
     "headers": [
       "Etapa",
@@ -1011,7 +1054,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|2",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3924,
+    "line": 3913,
     "context": "Projetos",
     "headers": [
       "Nome do projeto",
@@ -1025,7 +1068,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|3",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 4385,
+    "line": 4374,
     "context": "Logs de pedidos",
     "headers": [
       "Quando",
@@ -1038,7 +1081,7 @@
   {
     "id": "routes/_authenticated/development.tsx|0",
     "file": "routes/_authenticated/development.tsx",
-    "line": 259,
+    "line": 261,
     "context": "Acompanhamento",
     "headers": [
       "Nº",
@@ -1048,8 +1091,18 @@
       "Título",
       "Prioridade",
       "Situação",
-      "Perguntas",
+      "Mensagens",
       "Data"
+    ]
+  },
+  {
+    "id": "routes/_authenticated/inventory-signatures.tsx|0",
+    "file": "routes/_authenticated/inventory-signatures.tsx",
+    "line": 28,
+    "context": "",
+    "headers": [
+      "Item",
+      "Contagem"
     ]
   }
 ]
