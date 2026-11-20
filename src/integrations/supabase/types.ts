@@ -9085,6 +9085,54 @@ export type Database = {
           },
         ]
       }
+      site_survey_client_report_imports: {
+        Row: {
+          confirmations: Json
+          created_at: string
+          file_name: string
+          id: string
+          imported_items: Json
+          storage_path: string
+          uploaded_by: string
+          visit_id: string
+        }
+        Insert: {
+          confirmations?: Json
+          created_at?: string
+          file_name: string
+          id?: string
+          imported_items?: Json
+          storage_path: string
+          uploaded_by: string
+          visit_id: string
+        }
+        Update: {
+          confirmations?: Json
+          created_at?: string
+          file_name?: string
+          id?: string
+          imported_items?: Json
+          storage_path?: string
+          uploaded_by?: string
+          visit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_survey_client_report_imports_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_survey_client_report_imports_visit_id_fkey"
+            columns: ["visit_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_visits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       site_survey_commercial_proposals: {
         Row: {
           electrical: number | null
@@ -12709,6 +12757,16 @@ export type Database = {
       has_site_survey_permission: {
         Args: { _permission: string; _user_id: string }
         Returns: boolean
+      }
+      import_survey_client_report: {
+        Args: {
+          _edits: Json
+          _file_name: string
+          _items: Json
+          _storage_path: string
+          _visit_id: string
+        }
+        Returns: string
       }
       inventory_comparison: {
         Args: { _after?: string; _area: string; _until?: string }

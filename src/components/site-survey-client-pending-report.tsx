@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Download, LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import nunitoBoldUrl from "@/assets/fonts/nunito-bold.ttf?url";
 import { surveyPointType } from "@/lib/site-survey-point-type";
 import { clipRoundedPhoto } from "@/lib/site-survey-photo";
 import { textColumnWidth } from "@/lib/site-survey-pdf-measure";
-import { encodeCustomerAnswerMap, type CustomerAnswerField } from "@/lib/site-survey-customer-answer-import";
+import { confirmedReportPoints, encodeCustomerAnswerMap, type ClientReportField } from "@/lib/site-survey-customer-answer-import";
 
 type Props = {
   visit: { id: string; survey_number: number; completed_at: string | null; scheduled_start: string };
@@ -68,6 +68,11 @@ const addGreenCheckbox = (pdf: any, fieldName: string, x: number, midY: number, 
 export function SiteSurveyClientPendingReport({ visit, client, unit, project, points, questions }: Props) {
   const [busy, setBusy] = useState(false);
   const [prepared, setPrepared] = useState<Blob | null>(null);
+  useEffect(() => {
+    const clear = (event: Event) => { if (event instanceof CustomEvent && event.detail === visit.id) setPrepared(null); };
+    window.addEventListener("survey-client-report-imported", clear);
+    return () => window.removeEventListener("survey-client-report-imported", clear);
+  }, [visit.id]);
   const filename = `site-survey-${visit.survey_number}-pendencias-cliente.pdf`;
   const download = (blob: Blob) => {
     const url = URL.createObjectURL(blob), anchor = document.createElement("a");
@@ -136,6 +141,11 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
       const [responses, calls, freshPoints, texts, facades, { jsPDF }, { default: autoTable }, { PDFDocument, PDFName, PDFDict, PDFTextField }] = await Promise.all([loadResponses(), loadCalls(), loadPoints(), loadTexts(), loadFacades(), import("jspdf"), import("jspdf-autotable"), import("pdf-lib")]);
       if (calls.some((call) => call.internal_call_id && !call.internal_calls)) throw new Error("Não foi possível consultar todos os chamados vinculados. Verifique seu acesso aos chamados antes de gerar o relatório.");
       const groups = buildClientPendingGroups(freshPoints.length ? freshPoints : points, responses, questions, calls, texts);
+      const imported = await supabase.from("site_survey_client_report_imports").select("confirmations").eq("visit_id", visit.id);
+      if (imported.error) throw imported.error;
+      const confirmations = (imported.data ?? []).flatMap((row) => Array.isArray(row.confirmations) ? row.confirmations as unknown as ClientReportField[] : []);
+      const duplicateConfirmed = confirmedReportPoints(confirmations, "duplicate");
+      const vacantConfirmed = confirmedReportPoints(confirmations, "vacant");
       const pdf = new jsPDF({ unit: "mm", format: "a4" });
       const loadFont = async (url: string) => {
         const response = await fetch(url);
@@ -171,7 +181,7 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
       if (questionCount > 0) {
         pdf.setFont("Nunito", "normal"); pdf.setFontSize(10); pdf.text(`${questionCount} pergunta(s) aguardando resposta do cliente`, 14, y); y += 10;
       }
-      const answerFields: CustomerAnswerField[] = [];
+      const answerFields: ClientReportField[] = [];
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const TextFieldClass = (pdf.AcroForm as any).TextField as new () => any;
       // Miniaturas de fachada compartilhadas: perguntas e identificação de LUC usam a mesma foto.
@@ -324,6 +334,8 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
               pdf.setDrawColor(...green); pdf.setLineWidth(0.3); pdf.roundedRect(x, top, w, h, 1, 1, "S");
               const field = new TextFieldClass();
               field.fieldName = `obs_${obsFieldIndex++}`; field.multiline = true; field.fontSize = 9; field.readOnly = false;
+              const point = group[cell.row.index];
+              if (point) answerFields.push({ field: field.fieldName, point: point.value, label: point.label, question: "Observações finais e fotos adicionais", kind: "observation" });
               field.x = x + 0.4; field.y = top + 0.4; field.width = w - 0.8; field.height = h - 0.8;
               pdf.addField(field);
               return;
@@ -339,7 +351,7 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
         renderGroup(namedGroup, "Lojas e quiosques com nome identificado e sem LUC", `${namedGroup.length} ponto(s) para identificação do LUC`);
         renderGroup(unnamedGroup, "Lojas e quiosques sem LUC e sem nome identificados", `${unnamedGroup.length} ponto(s) para identificação do LUC e do nome`, true);
       }
-      const duplicated = duplicateNamePoints(freshPoints.length ? freshPoints : points);
+      const duplicated = duplicateNamePoints(freshPoints.length ? freshPoints : points).map((group) => group.filter((point) => !duplicateConfirmed.has(point.value))).filter((group) => group.length);
       if (duplicated.length) {
         sectionHeading("Lojas e quiosques com nomes repetidos", "Confirme que os pontos abaixo, de mesmo nome e LUCs diferentes, existem de fato no shopping e não são erro de cadastro.");
         // Sem nenhum número de medidor na tabela, a coluna não aparece (padrão do Cadastro).
@@ -369,6 +381,8 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
             const options: [string, string, number][] = [["OK", `confirma_ok_${rowIndex}`, cell.cell.x + 2], ["Duplicado", `confirma_dup_${rowIndex}`, cell.cell.x + 14]];
             pdf.setFont("Nunito", "normal"); pdf.setFontSize(7); pdf.setTextColor(...ink);
             for (const [label, fieldName, x] of options) {
+              const point = duplicated.flat()[rowIndex];
+              if (point) answerFields.push({ field: fieldName, point: point.value, label: point.label, question: "Confirmação de nome repetido", kind: "confirmation", category: "duplicate", choice: label === "Duplicado" ? "Duplicado" : "OK" });
               addGreenCheckbox(pdf, fieldName, x, midY);
               pdf.text(label, x + 4.5, midY + 1.2);
             }
@@ -376,7 +390,7 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
         });
         advanceTable();
       }
-      const vacant = vacantShopPoints(freshPoints.length ? freshPoints : points);
+      const vacant = vacantShopPoints(freshPoints.length ? freshPoints : points).filter((point) => !vacantConfirmed.has(point.value));
       if (vacant.length) {
         sectionHeading("Lojas e quiosques vagos cadastrados", `Confirme os ${vacant.length} espaço(s) vago(s) abaixo, cadastrados para futura implantação.`);
         // Sem nenhum número de medidor na tabela, a coluna não aparece (padrão do Cadastro).
@@ -397,6 +411,8 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
             if (cell.section !== "body" || cell.column.index !== vacantWidths.length - 1) return;
             // Caixa verde editável para o cliente confirmar cada loja vaga.
             const midY = cell.cell.y + cell.cell.height / 2;
+            const point = vacant[cell.row.index];
+            if (point) answerFields.push({ field: `confirma_vaga_${cell.row.index}`, point: point.value, label: point.label, question: "Confirmação de espaço vago", kind: "confirmation", category: "vacant", choice: "OK" });
             addGreenCheckbox(pdf, `confirma_vaga_${cell.row.index}`, cell.cell.x + 2, midY);
             pdf.setFont("Nunito", "normal"); pdf.setFontSize(7); pdf.setTextColor(...ink);
             pdf.text("OK", cell.cell.x + 6.5, midY + 1.2);
@@ -424,7 +440,7 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
         pdf.setDrawColor(...green); pdf.line(14, 280, 196, 280);
         pdf.text("myio Automação Ltda", 14, 287); pdf.text(`Página ${page} de ${pages}`, 196, 287, { align: "right" });
       }
-      pdf.setProperties({ title: `Pendências para o cliente SS-${number}`, subject: encodeCustomerAnswerMap({ visit: visit.id, fields: answerFields }) });
+      pdf.setProperties({ title: `Pendências para o cliente SS-${number}`, subject: encodeCustomerAnswerMap({ visit: visit.id, version: 2, fields: answerFields }) });
       // Campos editáveis do cliente usam a mesma fonte e tamanho do texto do relatório (Nunito 9).
       const formDoc = await PDFDocument.load(await pdf.output("arraybuffer"));
       const form = formDoc.getForm();
@@ -453,5 +469,5 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
     } catch (error) { toast.error(error instanceof Error ? error.message : "Não foi possível gerar o relatório.", { id: toastId }); }
     finally { setBusy(false); }
   };
-  return <Button type="button" size="sm" variant="action" disabled={busy} aria-busy={busy} onClick={() => void exportReport()} aria-label={prepared ? "Baixar PDF de pendências para o cliente" : "Pendências para o cliente"}>{busy ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}{busy ? "Gerando…" : prepared ? "Baixar PDF" : "Pendências para o cliente"}</Button>;
+  return <Button type="button" size="sm" variant="action" disabled={busy} aria-busy={busy} title="Pendências para o cliente" onClick={() => void exportReport()} aria-label={prepared ? "Baixar PDF de pendências para o cliente" : "Pendências para o cliente"}>{busy ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}<span className="hidden xl:inline">{busy ? "Gerando…" : prepared ? "Baixar PDF" : "Pendências para o cliente"}</span></Button>;
 }

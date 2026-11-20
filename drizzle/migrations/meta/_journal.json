@@ -1863,6 +1863,20 @@
       "when": 1795117762015,
       "tag": "0265_inventory_integer_counts",
       "breakpoints": true
+    },
+    {
+      "idx": 266,
+      "version": "7",
+      "when": 1795201973483,
+      "tag": "0266_survey_client_report_imports",
+      "breakpoints": true
+    },
+    {
+      "idx": 267,
+      "version": "7",
+      "when": 1795202169872,
+      "tag": "0267_survey_client_report_guard",
+      "breakpoints": true
     }
   ]
 }

@@ -1,4 +1,8 @@
 # Roadmap
+- [x] Site Survey: Ordenar na barra dos botões e filtros, após o filtro de colunas.
+- [x] Site Survey: filtro de colunas após Filtros do Checklist; barra em uma linha sem rolagem em 1073px. Telas menores usam ícones com descrição para exportar/importar e histórico; no celular a barra permite rolagem. Conferido em 1073px e 390px.
+- [x] Site Survey: seta na coluna Ações; Nome da Loja com quebra de linha e colunas compactadas. Histórico exercitado na visita temporária; controles e tabela de Mogi conferidos. Nenhuma aparência CDE alterada.
+- [x] Site Survey: importação de checks e observações finais por ponto, PDF respondido no histórico privado e baixa das confirmações nos próximos PDFs. Teste completo de cinco informações: gravação, releitura em tela, rejeição de checks conflitantes, PDF histórico idêntico e novo PDF sem perguntas/confirmações resolvidas. Teste temporário removido. 14 testes passaram; PDF real de Mogi reconheceu 4 respostas, 14 observações e 10 confirmações, sem aplicar esses dados. Não publicado.
 - [x] Site Survey: PDF de Mogi tem quatro respostas nos campos de perguntas; leitura dos registros confirmou somente Tem Total Home salva, demais três pendentes. Importador não trata campos de cadastro/observações nem checks OK/Duplicado. Usuário informado; nenhum dado alterado. Prévia da importação não exercitada por timeout no envio do arquivo.
 - [x] Site Survey: Recolher tudo entre Importar respostas do cliente e a seta da lista, seguindo o CDE; conferido recolhendo dois históricos simultaneamente.
 - [x] Site Survey: colunas compactadas; cabeçalhos e Ações visíveis em 1073px, lista com largura 997px sem rolagem horizontal no computador. Fonte e aparência existentes preservadas.
