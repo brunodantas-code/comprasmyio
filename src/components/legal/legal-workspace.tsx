@@ -24,7 +24,7 @@ import { MinutesList } from './minutes-list';
 import { SubjectResponsibles } from './subject-responsibles';
 import { SubjectActions } from './subject-actions';
 import { CdeSortableList } from '@/components/cde/cde-order';
-import { allParticipantsSigned, legalSigners, clearLegalSignatures, emptyLegalContent, legalDate, legalSearchText, legalSubjectResponsibles, normalizeLegalText, parseLegalContent, mergeConfidentialSubjects, splitConfidentialSubjects, type LegalCategory, type LegalContent } from '@/lib/legal';
+import { allParticipantsSigned, legalSigners, clearLegalSignatures, emptyLegalContent, legalDate, legalSearchText, legalSubjectResponsibles, normalizeLegalText, normalizeLegalContentTitles, normalizeLegalTitle, parseLegalContent, mergeConfidentialSubjects, splitConfidentialSubjects, type LegalCategory, type LegalContent } from '@/lib/legal';
 import { actionsForSavedSubjects, type DraftLegalAction } from '@/lib/legal-actions';
 import { legalPdf } from '@/lib/legal-pdf';
 import type { Database } from '@/integrations/supabase/types';
@@ -72,7 +72,8 @@ export function LegalWorkspace({ initialRecordId }: { initialRecordId?: string }
     if(minutes && (!draft.date || !draft.content.location.trim() || draft.content.participants.length===0 || draft.content.participants.some(p=>!p.name.trim()))) {toast.error('Informe data, local e participantes');return;}
     if(category!=='contracts' && (!draft.content.subjects.length || draft.content.subjects.some(s=>!s.title.trim()))) {toast.error(minutes?'Informe o título de cada assunto':'Informe o título de cada seção');return;}
     if(pdf && minutes && !allParticipantsSigned(draft.content)) {setSignatureDialog(true);return;}
-    let content=draft.content;
+    const title=normalizeLegalTitle(draft.title);
+    let content=normalizeLegalContentTitles(draft.content);
     if(minutes && currentUser?.isAdmin) {
       const originalIds=new Set(draft.original ? parseLegalContent(draft.original.content).subjects.map(s=>s.id) : []);
       const subjects=[];
@@ -90,9 +91,9 @@ export function LegalWorkspace({ initialRecordId }: { initialRecordId?: string }
       let pdfPath=draft.original?.pdf_path || null; let filePath=draft.original?.file_path||null; let fileName=draft.original?.file_name||null;
       const prefix=`${userData.user.id}/${draft.id}/${crypto.randomUUID()}`;
       if(file) {filePath=`${prefix}-${file.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`; const {error}=await supabase.storage.from('legal-documents').upload(filePath,file);if(error)throw error;uploaded.push(filePath);fileName=file.name;}
-      if(pdf) {const blob=await legalPdf(draft.title,draft.date||null,split.content,minutes);pdfPath=`${prefix}.pdf`;const {error}=await supabase.storage.from('legal-documents').upload(pdfPath,blob,{contentType:'application/pdf'});if(error)throw error;uploaded.push(pdfPath);}
-      else if(draft.original && (draft.title!==draft.original.title || draft.date!==(draft.original.meeting_date||'') || JSON.stringify(content)!==JSON.stringify(parseLegalContent(draft.original.content)))) pdfPath=null;
-      const payload={id:draft.id,category,title:draft.title.trim(),meeting_date:minutes?draft.date:null,content:JSON.parse(JSON.stringify(split.content)),pdf_path:pdfPath,file_path:filePath,file_name:fileName};
+      if(pdf) {const blob=await legalPdf(title,draft.date||null,split.content,minutes);pdfPath=`${prefix}.pdf`;const {error}=await supabase.storage.from('legal-documents').upload(pdfPath,blob,{contentType:'application/pdf'});if(error)throw error;uploaded.push(pdfPath);}
+      else if(draft.original && (title!==draft.original.title || draft.date!==(draft.original.meeting_date||'') || JSON.stringify(content)!==JSON.stringify(parseLegalContent(draft.original.content)))) pdfPath=null;
+      const payload={id:draft.id,category,title,meeting_date:minutes?draft.date:null,content:JSON.parse(JSON.stringify(split.content)),pdf_path:pdfPath,file_path:filePath,file_name:fileName};
       const response=draft.original?await supabase.from('legal_records').update(payload).eq('id',draft.id).select('*').single():await supabase.from('legal_records').insert({...payload,created_by:userData.user.id}).select('*').single();
       if(response.error)throw response.error;
       setDraft(current=>current?{...current,original:response.data}:current);

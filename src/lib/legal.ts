@@ -38,3 +38,21 @@ export function splitConfidentialSubjects(content: LegalContent) {
   const confidential = content.subjects.map((subject, position) => ({ subject, position })).filter(x => x.subject.confidential);
   return { content: { ...content, subjects: content.subjects.filter(s => !s.confidential).map(({ confidential: _c, ...s }) => s) }, confidential };
 }
+/** Acronyms and state abbreviations that stay uppercase when an all-caps title is lowered. */
+const TITLE_ACRONYMS = new Set(['OKR', 'OKRS', "OKR'S", 'OS', 'ERP', 'CRM', 'PDF', 'LUC', 'QR', 'PIX', 'CNPJ', 'CPF', 'PJ', 'PF', 'TI', 'RH', 'API', 'EAP', 'CPM', 'MEI', 'KPI', 'SLA', 'SQL', 'URL', 'UI', 'UX', 'UF', 'QE', 'BR', 'AC', 'AL', 'AM', 'AP', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MG', 'MS', 'MT', 'PA', 'PB', 'PE', 'PI', 'PR', 'RJ', 'RN', 'RO', 'RR', 'RS', 'SC', 'SE', 'SP', 'TO']);
+/**
+ * Keeps the atas' title standard: normal sentence case. A title typed with Caps Lock on
+ * (every letter uppercase) is lowered when saving, keeping known acronyms and the first
+ * letter after separators. Titles written in mixed case are kept exactly as typed.
+ */
+export function normalizeLegalTitle(value: string): string {
+  const text = value.trim();
+  const letters = [...text].filter(c => /\p{L}/u.test(c));
+  if (letters.length < 2 || letters.some(c => c !== c.toUpperCase())) return value;
+  const lowered = text.toLowerCase().replace(/[\p{L}'’&]+/gu, token => (TITLE_ACRONYMS.has(token.toUpperCase()) ? token.toUpperCase() : token));
+  return lowered.split(/([:|]|\s+[-–—]\s+)/).map(part => part.replace(/^(\s*)(\p{Ll})/u, (_m, spaces: string, letter: string) => spaces + letter.toUpperCase())).join('');
+}
+/** Applies the title standard to the ata/document title and to each subject or section title. */
+export function normalizeLegalContentTitles(content: LegalContent): LegalContent {
+  return { ...content, subjects: content.subjects.map(s => ({ ...s, title: normalizeLegalTitle(s.title) })) };
+}

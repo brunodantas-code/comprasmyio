@@ -64,3 +64,23 @@ dc('assuntos confidenciais', () => {
     ec(merged.subjects.map(s => s.id)).toEqual(['a', 'b', 'c']);
   });
 });
+import { normalizeLegalTitle, normalizeLegalContentTitles } from './legal';
+import { describe as dt, it as it2, expect as ex } from 'vitest';
+dt('título sem Caps Lock', () => {
+  it2('baixa o título digitado em CAIXA ALTA, mantendo o separador e a primeira letra depois dele', () => {
+    ex(normalizeLegalTitle('REUNIÃO DE CHECK POINT - TECNOLOGIA 17/11/26')).toBe('Reunião de check point - Tecnologia 17/11/26');
+  });
+  it2('mantém exatamente o título já escrito em maiúsculas e minúsculas', () => {
+    const typed = 'Govtech | Myio | Apsis: contrato, diligência e cronograma';
+    ex(normalizeLegalTitle(typed)).toBe(typed);
+  });
+  it2('preserva siglas conhecidas ao baixar a caixa alta', () => {
+    ex(normalizeLegalTitle('ALINHAMENTO ERP E CRM')).toBe('Alinhamento ERP e CRM');
+    ex(normalizeLegalTitle('OKR')).toBe('OKR');
+    ex(normalizeLegalTitle('CHECKIN DE OKR\'S')).toBe("Checkin de OKR'S");
+  });
+  it2('aplica o mesmo padrão ao título de cada assunto', () => {
+    const c = { location: '', counterpart: '', participants: [], subjects: [{ id: '1', title: 'DEFINIÇÃO DE ESCOPO', description: '', decisions: '' }, { id: '2', title: 'Contrato de manutenção', description: '', decisions: '' }] };
+    ex(normalizeLegalContentTitles(c).subjects.map(s => s.title)).toEqual(['Definição de escopo', 'Contrato de manutenção']);
+  });
+});
