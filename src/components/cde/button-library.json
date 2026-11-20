@@ -10365,6 +10365,21 @@
     "group": ""
   },
   {
+    "id": "components/site-survey-luc-manager.tsx|a563a36089b16df9|0",
+    "file": "components/site-survey-luc-manager.tsx",
+    "line": 489,
+    "tag": "Button",
+    "label": "Recolher tudo",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "ChevronsDownUp",
+    "variant": "ghost",
+    "size": "sm",
+    "className": "ml-auto shrink-0 gap-1 text-xs",
+    "group": ""
+  },
+  {
     "id": "components/site-survey-luc-manager.tsx|289c2e2cfafb5df7|0",
     "file": "components/site-survey-luc-manager.tsx",
     "line": 489,
@@ -10376,7 +10391,22 @@
     "icon": "ChevronDown",
     "variant": "ghost",
     "size": "compactIcon",
-    "className": "ml-auto",
+    "className": "",
+    "group": ""
+  },
+  {
+    "id": "components/site-survey-luc-manager.tsx|7204c6f8a073fce2|0",
+    "file": "components/site-survey-luc-manager.tsx",
+    "line": 492,
+    "tag": "Button",
+    "label": "CdeDisclosureIcon",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "CdeDisclosureIcon",
+    "variant": "ghost",
+    "size": "compactIcon",
+    "className": "shrink-0",
     "group": ""
   },
   {
@@ -10392,21 +10422,6 @@
     "variant": "",
     "size": "",
     "className": "block w-full break-words text-left text-foreground transition-colors hover:text-primary hover:underline",
-    "group": ""
-  },
-  {
-    "id": "components/site-survey-luc-manager.tsx|c5b513be3f2f114c|0",
-    "file": "components/site-survey-luc-manager.tsx",
-    "line": 492,
-    "tag": "Button",
-    "label": "ChevronDown",
-    "dynamic": false,
-    "visualCustom": false,
-    "autoCdeSafe": true,
-    "icon": "ChevronDown",
-    "variant": "ghost",
-    "size": "compactIcon",
-    "className": "order-last shrink-0",
     "group": ""
   },
   {
@@ -11507,7 +11522,7 @@
   {
     "id": "components/stock-inventory-section.tsx|7f045fb2287106af|0",
     "file": "components/stock-inventory-section.tsx",
-    "line": 81,
+    "line": 85,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -11516,7 +11531,7 @@
     "icon": "",
     "variant": "ghost",
     "size": "icon",
-    "className": "",
+    "className": "rounded-sm border-0 !bg-transparent opacity-70 shadow-none outline-none ring-0 focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 hover:!bg-transparent hover:opacity-100",
     "group": ""
   },
   {
@@ -12971,7 +12986,7 @@
     "icon": "",
     "variant": "ghost",
     "size": "compactIcon",
-    "className": "pointer-events-auto",
+    "className": "pointer-events-auto rounded-sm border-0 !bg-transparent opacity-70 shadow-none outline-none ring-0 focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 hover:!bg-transparent hover:opacity-100",
     "group": ""
   },
   {
