@@ -57,7 +57,9 @@ export async function buildRegistrationPdf(rows: RegistrationPdfRow[], clientNam
   // Serial decoding bounds memory even when originals are large.
   const thumbs: (string | undefined)[] = [];
   for (const row of rows) thumbs.push(row.facade ? await thumbnail(row.facade, grayscale) : undefined);
-  const pdf = new jsPDF({ unit: "mm", format: "a4" });
+  const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "landscape" });
+  const right = pdf.internal.pageSize.getWidth() - 14;
+  const bottom = pdf.internal.pageSize.getHeight();
   pdf.addFileToVFS("Nunito-Regular.ttf", regular); pdf.addFont("Nunito-Regular.ttf", "Nunito", "normal");
   pdf.addFileToVFS("Nunito-Bold.ttf", bold); pdf.addFont("Nunito-Bold.ttf", "Nunito", "bold");
   const ink: [number, number, number] = grayscale ? [30, 30, 30] : token("--myio-dark");
@@ -72,7 +74,7 @@ export async function buildRegistrationPdf(rows: RegistrationPdfRow[], clientNam
   pdf.setFontSize(11); pdf.text(`Cadastro de lojas, quiosques e ambientes${statusLabel ? ` — ${statusLabel}` : ""}`, 14, lineY);
   const ruleY = lineY + 5;
   const infoY = lineY + 12;
-  pdf.setDrawColor(...green); pdf.line(14, ruleY, 196, ruleY);
+  pdf.setDrawColor(...green); pdf.line(14, ruleY, right, ruleY);
   pdf.setFont("Nunito", "normal"); pdf.setFontSize(10);
   pdf.text(`${rows.length} ponto(s) · Emissão: ${new Date().toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" })}`, 14, infoY);
 
@@ -80,17 +82,17 @@ export async function buildRegistrationPdf(rows: RegistrationPdfRow[], clientNam
   const withMeter = rows.some((row) => row.meter.trim());
   // A coluna de tipo nunca pode quebrar "Quiosque" ou "Loja vaga" ao meio.
   const typeWidth = textColumnWidth(pdf, rows.map((row) => row.type), 1.5, 20, 28);
-  const nameWidth = Math.max(30, (withMeter ? 58 : 72) - typeWidth);
+  const nameWidth = (withMeter ? 65 : 87) - typeWidth;
   const widths = withMeter
-    ? [16, 20, 22, typeWidth, nameWidth, 33, 16, 17]
-    : [16, 20, typeWidth, nameWidth, 40, 16, 18];
-  const headers = ["Foto", "LUC", ...(withMeter ? ["Nº do medidor"] : []), "Tipo", "Nome", "Localização", "Água", "Energia"];
-  const waterIndex = headers.length - 2, energyIndex = headers.length - 1;
+    ? [16, 18, 22, typeWidth, nameWidth, 40, 14, 15, 79]
+    : [16, 18, typeWidth, nameWidth, 40, 14, 15, 79];
+  const headers = ["Foto", "LUC", ...(withMeter ? ["Nº do medidor"] : []), "Tipo", "Nome", "Localização", "Água", "Energia", "Observações para o Cliente"];
+  const waterIndex = headers.length - 3, energyIndex = headers.length - 2;
   const columnX: number[] = [];
   for (const width of widths) { columnX.push(14 + widths.slice(0, columnX.length).reduce((a, b) => a + b, 0)); }
 
   const bandY = infoY + 3, bandH = 7;
-  pdf.setFillColor(...tint(green, 0.9)); pdf.rect(14, bandY, 182, bandH, "F");
+  pdf.setFillColor(...tint(green, 0.9)); pdf.rect(14, bandY, right - 14, bandH, "F");
   pdf.setFont("Nunito", "bold"); pdf.setFontSize(10); pdf.setTextColor(...ink);
   pdf.text("Total selecionado", 17, bandY + 4.9);
   pdf.text(String(rows.filter((row) => row.water).length), columnX[waterIndex] + widths[waterIndex] / 2, bandY + 4.9, { align: "center" });
@@ -101,9 +103,9 @@ export async function buildRegistrationPdf(rows: RegistrationPdfRow[], clientNam
     styles: { font: "Nunito", fontSize: 9, textColor: ink, cellPadding: 1.5, overflow: "linebreak", valign: "middle" },
     headStyles: { fontStyle: "bold", textColor: accent, lineWidth: { bottom: 0.3 }, lineColor: green },
     bodyStyles: { minCellHeight: 14 }, rowPageBreak: "avoid", showHead: "everyPage",
-    columnStyles: Object.fromEntries(widths.map((width, index) => [index, { cellWidth: width, ...(index >= waterIndex ? { halign: "center" as const } : {}) }])),
+    columnStyles: Object.fromEntries(widths.map((width, index) => [index, { cellWidth: width, ...(index === waterIndex || index === energyIndex ? { halign: "center" as const } : {}) }])),
     head: [headers],
-    body: rows.map((row, i) => [thumbs[i] ? "" : "Sem foto", row.luc, ...(withMeter ? [row.meter] : []), row.type, row.name, row.location, "", ""]),
+    body: rows.map((row, i) => [thumbs[i] ? "" : "Sem foto", row.luc, ...(withMeter ? [row.meter] : []), row.type, row.name, row.location, "", "", row.clientObservation ?? ""]),
     didDrawCell: (cell) => {
       if (cell.section !== "body") return;
       if (cell.column.index === 0) {
@@ -122,10 +124,10 @@ export async function buildRegistrationPdf(rows: RegistrationPdfRow[], clientNam
   for (let page = 1; page <= pages; page++) {
     pdf.setPage(page); pdf.setFont("Nunito", "normal"); pdf.setFontSize(8); pdf.setTextColor(...ink);
     if (page > 1) pdf.text("myio · Cadastro de lojas, quiosques e ambientes", 14, 12);
-    pdf.setDrawColor(...green); pdf.line(14, 280, 196, 280);
-    pdf.text("myio Automação Ltda", 14, 287);
-    if (hasClient) pdf.text(String(clientName), 105, 287, { align: "center" });
-    pdf.text(`Página ${page} de ${pages}`, 196, 287, { align: "right" });
+    pdf.setDrawColor(...green); pdf.line(14, bottom - 17, right, bottom - 17);
+    pdf.text("myio Automação Ltda", 14, bottom - 10);
+    if (hasClient) pdf.text(String(clientName), pdf.internal.pageSize.getWidth() / 2, bottom - 10, { align: "center" });
+    pdf.text(`Página ${page} de ${pages}`, right, bottom - 10, { align: "right" });
   }
   const document = await PDFDocument.load(pdf.output("arraybuffer"));
   const form = document.getForm();

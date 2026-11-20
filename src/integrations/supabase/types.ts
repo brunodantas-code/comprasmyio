@@ -9085,6 +9085,41 @@ export type Database = {
           },
         ]
       }
+      site_survey_client_observations: {
+        Row: {
+          observation: string
+          point_id: string
+          point_kind: string
+          updated_at: string
+          updated_by: string | null
+          visit_id: string
+        }
+        Insert: {
+          observation?: string
+          point_id: string
+          point_kind: string
+          updated_at?: string
+          updated_by?: string | null
+          visit_id: string
+        }
+        Update: {
+          observation?: string
+          point_id?: string
+          point_kind?: string
+          updated_at?: string
+          updated_by?: string | null
+          visit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_survey_client_observations_visit_id_fkey"
+            columns: ["visit_id"]
+            isOneToOne: false
+            referencedRelation: "site_survey_visits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       site_survey_client_report_imports: {
         Row: {
           confirmations: Json

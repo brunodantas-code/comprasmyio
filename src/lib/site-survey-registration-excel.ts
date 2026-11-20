@@ -14,7 +14,7 @@ const STYLES = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleShe
   + '<xf numFmtId="0" fontId="4" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>' // 4 total value
   + '<xf numFmtId="0" fontId="3" fillId="0" borderId="1" xfId="0" applyFont="1" applyBorder="1" applyAlignment="1"><alignment vertical="center"/></xf>' // 5 header left
   + '<xf numFmtId="0" fontId="3" fillId="0" borderId="1" xfId="0" applyFont="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>' // 6 header center
-  + '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment vertical="center"/></xf>' // 7 body left
+  + '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf>' // 7 body left
   + '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>' // 8 body center
   + `<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment horizontal="center" vertical="center"/>${CHECKBOX_EXT}</xf>` // 9 checkbox
   + '</cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>';
@@ -32,13 +32,14 @@ export async function buildRegistrationExcel(rows: RegistrationExportRow[], clie
     { title: "Localização", width: 18, align: "center", value: (row) => row.location },
     { title: "Água", width: 11, align: "center", value: (row) => row.water },
     { title: "Energia", width: 13, align: "center", value: (row) => row.energy },
+    { title: "Observações para o Cliente", width: 55, align: "left", value: (row) => row.clientObservation ?? "" },
   ];
   const first = 7;
   const last = Math.max(first, first + rows.length - 1);
   const lastCol = col(columns.length - 1);
-  const waterCol = col(columns.length - 2);
-  const energyCol = lastCol;
-  const labelCol = col(columns.length - 3);
+  const waterCol = col(columns.length - 3);
+  const energyCol = col(columns.length - 2);
+  const labelCol = col(columns.length - 4);
   const strCell = (ref: string, text: string, style: number) => `<c r="${ref}" s="${style}" t="inlineStr"><is><t xml:space="preserve">${esc(text)}</t></is></c>`;
   const countCell = (c: string) => `<c r="${c}5" s="4"><f>COUNTIF(${c}${first}:${c}${last},TRUE)</f><v>${rows.filter((row) => (c === waterCol ? row.water : row.energy)).length}</v></c>`;
   const sheetRows = [
@@ -48,7 +49,8 @@ export async function buildRegistrationExcel(rows: RegistrationExportRow[], clie
     `<row r="6" ht="22" customHeight="1">${columns.map((column, index) => strCell(`${col(index)}6`, column.title, column.align === "center" ? 6 : 5)).join("")}</row>`,
     ...rows.map((row, rowIndex) => {
       const r = first + rowIndex;
-      return `<row r="${r}" ht="22" customHeight="1">${columns.map((column, index) => {
+      const observationLines = (row.clientObservation ?? "").split("\n").reduce((count, line) => count + Math.max(1, Math.ceil(line.length / 50)), 0);
+      return `<row r="${r}" ht="${Math.max(22, observationLines * 16)}" customHeight="1">${columns.map((column, index) => {
         const value = column.value(row);
         const ref = `${col(index)}${r}`;
         return typeof value === "boolean" ? `<c r="${ref}" t="b" s="9"><v>${value ? 1 : 0}</v></c>` : strCell(ref, value, column.align === "center" ? 8 : 7);
