@@ -9,6 +9,8 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { legalActionDelayDays, legalActionDueSoonDays, legalTrackingOptions, pendingLegalActions } from '@/lib/legal-actions';
 import { useMinutesAlerts } from '@/components/cde/cde-deadline-alerts';
 import { SubjectActions } from './subject-actions';
+import { MinutesAttachments } from './minutes-attachments';
+import { Paperclip } from 'lucide-react';
 import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { X } from 'lucide-react';
@@ -82,9 +84,9 @@ export function MinutesList({ rows, expanded, toggle, edit, remove, openPdf, use
       return <article key={row.id}>
         <div className="flex items-center gap-1 px-2 py-3 sm:gap-2 sm:px-4">
           <button type="button" className="flex h-auto !min-w-0 !w-auto !flex-1 !whitespace-normal items-center justify-start gap-3 rounded-md bg-transparent p-0 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label={`Abrir ${row.title}`} onClick={() => toggle(row.id)}>
-            <span className="min-w-0 flex-1"><span id={`minute-title-${row.id}`} className="block break-words text-sm font-semibold text-foreground">{row.title}</span><span className="block text-xs font-normal text-muted-foreground">{legalDate(row.meeting_date)}{legalUserParticipated(content, user) ? ' · Você participou' : ''}</span></span>
+            <span className="min-w-0 flex-1"><span id={`minute-title-${row.id}`} className="block break-words text-sm font-semibold text-foreground">{row.title}{(content.attachments?.length || content.subjects.some(subject=>subject.attachments?.length) || row.file_path) ? <Paperclip className="ml-2 inline-block size-4" aria-label="Ata com anexos" /> : null}</span><span className="block text-xs font-normal text-muted-foreground">{legalDate(row.meeting_date)}{legalUserParticipated(content, user) ? ' · Você participou' : ''}</span></span>
           </button>
-          {mine ? <AlertMarker role="status" title={`${mine.signature ? (mine.revision ? 'Nova assinatura pendente (edição da ata anterior)' : 'Assinatura pendente') : ''}${mine.signature && mine.actions ? ' e ' : ''}${mine.actions ? `${mine.actions} ação(ões) pendente(s)` : ''}`} aria-label={`${mine.count} pendência(s) nesta ata${pendingUser ? ` de ${pendingUser.full_name}` : ''}`}  count={mine.count} scale={0.72} /> : null}
+          {mine ? <AlertMarker role="status" title={`${mine.signature ? (mine.revision ? 'Nova assinatura pendente (edição da ata anterior)' : 'Assinatura pendente') : ''}${mine.signature && mine.actions ? ' e ' : ''}${mine.actions ? `${mine.actions} ação(ões) pendente(s)` : ''}${mine.missingDeadlines ? ` · Informar data de conclusão em ${mine.missingDeadlines} ação(ões)` : ''}`} aria-label={`${mine.count} pendência(s) nesta ata${pendingUser ? ` de ${pendingUser.full_name}` : ''}`}  count={mine.count} scale={0.72} /> : null}
           <div className="ml-auto flex shrink-0 items-center justify-end gap-1 sm:gap-2">
           <Button variant="outline" size="compactIcon" title="Editar" aria-label="Editar ata" aria-describedby={`minute-title-${row.id}`} onClick={() => edit(row)}><Pencil /></Button>
           <Button variant="outline" size="compactIcon" title="Excluir" aria-label="Excluir ata" aria-describedby={`minute-title-${row.id}`} onClick={() => remove(row)}><Trash2 /></Button>
@@ -110,9 +112,11 @@ export function MinutesList({ rows, expanded, toggle, edit, remove, openPdf, use
                 {legalSubjectResponsibles(subject).length > 0 ? <p className="flex items-start gap-2 break-words">{!tracking.actions.some(a=>a.record_id===row.id&&a.subject_id===subject.id&&!a.archived) ? <Checkbox className="mt-0.5" checked={tracking.completions.some(c=>c.record_id===row.id&&c.subject_id===subject.id)} aria-label="Concluir deliberação" title="Concluir deliberação (sem ações cadastradas)" onCheckedChange={v=>toggleDeliberation(row.id,subject.id,Boolean(v))} /> : null}<span><span className="text-muted-foreground">Responsáveis: </span>{legalSubjectResponsibles(subject).join(', ')}</span></p> : null}
                 {subject.completionDate ? <p><span className="text-muted-foreground">Data de conclusão: </span>{legalDate(subject.completionDate)}</p> : null}
               </div> : null}
+              <MinutesAttachments id={`anexos-assunto-${index+1}`} attachments={subject.attachments??[]} />
               <SubjectActions hideWhenEmpty recordId={row.id} subjectId={subject.id} userId={user?.id} />
             </div>}
           </section>)}
+          <div className="px-4 sm:px-6"><MinutesAttachments id="anexos-ata" attachments={[...(content.attachments??[]),...(row.file_path?[{id:"legacy",path:row.file_path,name:row.file_name??"Documento",contentType:"",bucket:"legal-documents"}]:[])]} /></div>
           {!filteredView && <div className="space-y-2 border-t border-border px-4 py-4 text-sm sm:px-6"><h2 className="text-base font-semibold">Assinaturas dos participantes</h2>{content.revision && legalSigners(content).some(p => !p.signature || !p.signedAt) ? <p className="text-xs text-destructive">Assinatura pendente referente à edição {content.revision} da ata anteriormente assinada. Confira as alterações no Histórico.</p> : null}{legalSigners(content).map(p => <div key={p.id} className="flex items-center gap-2"><span className="min-w-0 break-words">{p.name} — {p.signature && p.signedAt ? `Assinado em ${signatureDate(p.signedAt)}` : <span className="text-destructive">Aguardando assinatura</span>}</span>{!p.signature || !p.signedAt ? <><Button variant="outline" size="compactIcon" title={canSignParticipant(p,user) ? 'Assinar' : 'Somente este participante pode assinar'} disabled={!canSignParticipant(p,user)} aria-label={`Assinar como ${p.name}`} onClick={() => sign(row,p.id,p.name)}><FileSignature /></Button></> : null}</div>)}</div>}
         </div> : null}
       </article>;

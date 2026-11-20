@@ -60,7 +60,7 @@ import { SupplyTagsTab, useSupplyTags } from "@/components/supply-tags-tab";
 import { SupplyOrderStatusesTab, useOrderStatuses } from "@/components/supply-order-statuses-tab";
 import { SupplyTagCostReport, useTagCostReport } from "@/components/supply-tag-cost-report";
 import { resolveSupplyTag } from "@/lib/supply-tags";
-import { canConfirmPhysicalReceipt, fulfillmentFilterLabel, hasPhysicalDelivery } from "@/lib/supply-fulfillment";
+import { canConfirmPhysicalReceipt, fulfillmentFilterLabel, hasPhysicalDelivery, showsSupplyDeliveryFields } from "@/lib/supply-fulfillment";
 import { JobTitlesTab, useJobTitles } from "@/components/job-titles-tab";
 import { RemindersTab } from "@/components/reminders-tab";
 import { AdditionalStepTypesTab } from "@/components/additional-step-types-tab";
@@ -311,7 +311,7 @@ function AttachmentLink({ attachment }: { attachment: Attachment }) {
   };
 
   return <>
-    <Button type="button" variant="link" className="h-auto min-w-0 max-w-full justify-start truncate p-0 text-left !bg-transparent !text-primary underline hover:!bg-transparent hover:!text-primary" title={attachment.name} onClick={view}>
+    <Button type="button" variant="link" className="!h-auto !min-w-0 !max-w-full !justify-start !self-start !p-0 !text-left !text-[length:var(--td-fs)] !font-normal whitespace-normal !bg-transparent !text-foreground underline hover:!bg-transparent hover:!text-primary" title={attachment.name} onClick={view}>
       {attachment.name}
     </Button>
     <Dialog open={open} onOpenChange={(next) => { if (!next) close(); }}>
@@ -2762,6 +2762,7 @@ function AdminEditApprovalDialog({ order, items }: { order: Order; items: Approv
         ]
       : [];
   const selectedDestination = destinations.find((destination) => destination.id === destinationId);
+  const showDelivery = showsSupplyDeliveryFields({request_type:requestType,request_model:requestType !== order.request_type ? requestTypeModel(requestType,requestTypes) : order.request_model ?? requestTypeModel(requestType,requestTypes)});
 
   function reset() {
     setRequestType(order.request_type);
@@ -2821,7 +2822,7 @@ function AdminEditApprovalDialog({ order, items }: { order: Order; items: Approv
           <div className="space-y-2 sm:col-span-2"><Label>Centro de Custo</Label><Select value={costCenterId} onValueChange={setCostCenterId}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="none">Sem centro de custo</SelectItem>{(costCenters ?? []).filter((center) => center.active).map((center) => <SelectItem key={center.id} value={center.id}>{center.code ? `${center.code} — ` : ""}{center.name}</SelectItem>)}</SelectContent></Select></div>
         </section>
         <section className="space-y-3 border-t pt-4"><h3 className="text-sm font-semibold">Itens e valores</h3>{editedItems.length ? editedItems.map((item, index) => <div key={item.id} className="grid gap-3 rounded-md border p-3 sm:grid-cols-[minmax(0,2fr)_6rem_9rem]"><div className="space-y-2"><Label>Item {index + 1}</Label><Input value={item.item_name} onChange={(event) => setEditedItems((current) => current.map((row) => row.id === item.id ? { ...row, item_name: event.target.value } : row))} /><Input value={item.item_link ?? ""} placeholder="Link de referência" onChange={(event) => setEditedItems((current) => current.map((row) => row.id === item.id ? { ...row, item_link: event.target.value } : row))} /></div><div className="space-y-2"><Label>Qtd.</Label><Input type="number" min={1} value={item.quantity} onChange={(event) => setEditedItems((current) => current.map((row) => row.id === item.id ? { ...row, quantity: event.target.value } : row))} /></div><div className="space-y-2"><Label>Valor unitário</Label><MoneyInput value={item.estimated_unit_value} onChange={(value) => setEditedItems((current) => current.map((row) => row.id === item.id ? { ...row, estimated_unit_value: value } : row))} /></div></div>) : <div className="grid gap-3 sm:grid-cols-2"><div className="space-y-2 sm:col-span-2"><Label>Item</Label><Input value={itemName} onChange={(event) => setItemName(event.target.value)} /></div><div className="space-y-2"><Label>Link de referência</Label><Input value={itemLink} onChange={(event) => setItemLink(event.target.value)} /></div><div className="space-y-2"><Label>Quantidade</Label><Input type="number" min={1} value={quantity} onChange={(event) => setQuantity(event.target.value)} /></div><div className="space-y-2"><Label>Valor total</Label><MoneyInput value={estimatedValue} onChange={setEstimatedValue} /></div></div>}</section>
-        <section className="grid gap-4 border-t pt-4 sm:grid-cols-2"><div className="space-y-2"><Label>Destinatário</Label><Input value={recipient} onChange={(event) => setRecipient(event.target.value)} /></div><div className="space-y-2"><Label>Modalidade</Label><Select value={deliveryMode} onValueChange={setDeliveryMode}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="entrega">Entrega</SelectItem><SelectItem value="retirada">Retirada</SelectItem></SelectContent></Select></div><div className="space-y-2"><Label>{deliveryMode === "retirada" ? "Ponto ou endereço de retirada" : "Ponto ou endereço de entrega"}</Label><Input value={deliveryPoint} onChange={(event) => setDeliveryPoint(event.target.value)} /></div><div className="space-y-2"><Label>Prazo</Label><Select value={deadlineType} onValueChange={(value) => setDeadlineType(value as Order["deadline_type"])}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="urgente">Urgente</SelectItem><SelectItem value="esta_semana">Esta semana</SelectItem><SelectItem value="este_mes">Este mês</SelectItem><SelectItem value="customizado">Data específica</SelectItem></SelectContent></Select></div>{deadlineType === "customizado" && <div className="space-y-2"><Label>Data do prazo</Label><Input type="date" value={deadlineDate} onChange={(event) => setDeadlineDate(event.target.value)} /></div>}<div className="space-y-2"><Label>Previsão de entrega</Label><Input type="date" value={deliveryForecast} onChange={(event) => setDeliveryForecast(event.target.value)} /></div><div className="space-y-2"><Label>Observações do solicitante</Label><Textarea value={requesterNotes} onChange={(event) => setRequesterNotes(event.target.value)} /></div><div className="space-y-2 sm:col-span-2"><Label>Observações de Supply</Label><Textarea value={buyerNotes} onChange={(event) => setBuyerNotes(event.target.value)} /></div></section>
+        <section className="grid gap-4 border-t pt-4 sm:grid-cols-2">{showDelivery && <><div className="space-y-2"><Label>Destinatário</Label><Input value={recipient} onChange={(event) => setRecipient(event.target.value)} /></div><div className="space-y-2"><Label>Modalidade</Label><Select value={deliveryMode} onValueChange={setDeliveryMode}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="entrega">Entrega</SelectItem><SelectItem value="retirada">Retirada</SelectItem></SelectContent></Select></div><div className="space-y-2"><Label>{deliveryMode === "retirada" ? "Ponto ou endereço de retirada" : "Ponto ou endereço de entrega"}</Label><Input value={deliveryPoint} onChange={(event) => setDeliveryPoint(event.target.value)} /></div><div className="space-y-2"><Label>Prazo</Label><Select value={deadlineType} onValueChange={(value) => setDeadlineType(value as Order["deadline_type"])}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="urgente">Urgente</SelectItem><SelectItem value="esta_semana">Esta semana</SelectItem><SelectItem value="este_mes">Este mês</SelectItem><SelectItem value="customizado">Data específica</SelectItem></SelectContent></Select></div>{deadlineType === "customizado" && <div className="space-y-2"><Label>Data do prazo</Label><Input type="date" value={deadlineDate} onChange={(event) => setDeadlineDate(event.target.value)} /></div>}<div className="space-y-2"><Label>Previsão de entrega</Label><Input type="date" value={deliveryForecast} onChange={(event) => setDeliveryForecast(event.target.value)} /></div></>}<div className="space-y-2"><Label>Observações do solicitante</Label><Textarea value={requesterNotes} onChange={(event) => setRequesterNotes(event.target.value)} /></div><div className="space-y-2 sm:col-span-2"><Label>Observações de Supply</Label><Textarea value={buyerNotes} onChange={(event) => setBuyerNotes(event.target.value)} /></div></section>
       </div>
       <SupplyOrderConversation key={order.id} order={order} />
       <DialogFooter><Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancelar</Button><TooltipProvider><Tooltip><TooltipTrigger asChild><Button type="button" variant="ghost" size="icon" aria-label={save.isPending ? "Salvando alterações" : "Salvar alterações"} onClick={() => requestType !== order.request_type ? setConfirmTypeChange(true) : save.mutate()} disabled={save.isPending}><Save className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent>{save.isPending ? "Salvando alterações" : "Salvar alterações"}</TooltipContent></Tooltip></TooltipProvider></DialogFooter>
@@ -3242,12 +3243,12 @@ function OrderReportDialog({
             <Row label="Quantidade" value={order.quantity} />
             <Row label="Alocação" value={allocation} />
             <Row label="Solicitante" value={requesterName ? requesterName(order.requester_id) : nameFor(order.requester_id)} />
-            <Row label="Destinatário" value={order.recipient} />
+            {showsSupplyDeliveryFields(order) && <><Row label="Destinatário" value={order.recipient} />
             <Row label="Modalidade" value={order.delivery_mode === "retirada" ? "Retirada" : "Entrega"} />
             <Row label={order.delivery_mode === "retirada" ? "Endereço de retirada" : "Endereço de entrega"} value={order.delivery_point} />
             <Row label="Prazo" value={`${DEADLINE_LABELS[order.deadline_type]}${order.deadline_date ? ` — ${new Date(order.deadline_date + "T00:00:00").toLocaleDateString("pt-BR")}` : ""}`} />
             <Row label="Previsão de entrega" value={order.delivery_forecast ? new Date(order.delivery_forecast + "T00:00:00").toLocaleDateString("pt-BR") : "—"} />
-            <Row label="Status" value={orderStatusLabel(order)} />
+            </>}<Row label="Status" value={orderStatusLabel(order)} />
             {me?.id === order.requester_id && canConfirmPhysicalReceipt(order) && <Row label="Recebimento" value={<ConfirmReceiptActions order={order} />} />}
             <Row label="Código" value={order.passphrase || "—"} />
             <Row label="Criado em" value={fmtDateTime(order.created_at)} />
@@ -3278,7 +3279,7 @@ function OrderReportDialog({
             ) : (
               <ul className="space-y-1 text-sm">
                 {(order.attachments ?? []).map((a) => (
-                  <li key={a.path}>
+                  <li key={a.path} className="flex min-w-0 justify-start">
                     <AttachmentLink attachment={a} />
                   </li>
                 ))}

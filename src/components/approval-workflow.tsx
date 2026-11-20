@@ -1,3 +1,4 @@
+import { showsSupplyDeliveryFields } from '@/lib/supply-fulfillment';
 import { CdeButton, CdeDisclosureIcon } from "@/components/cde/cde-button";
 import { TableReportActions } from "@/components/table-report-actions";
 import { useTableFilters } from "@/components/use-table-filters";
@@ -156,9 +157,9 @@ function PendingApprovalDetails({ step, requestTypes }: { step: StepRow; request
   const materialItems = [...(order.purchase_order_items ?? [])].sort((a, b) => a.position - b.position);
   const fields = [
     ["Tipo", requestTypeLabel(order, requestTypes)], ["Itens", materialItems.length ? materialItems.map((item) => `${item.item_name} × ${item.quantity}`).join("\n") : order.item_name], ["Quantidade total", String(order.quantity ?? 1)],
-    ...(order.request_model === "dispositivos" ? [] : [["Valor", BRL(Number(order.estimated_value ?? 0))]]), ["Projeto ou Cliente", allocation], ["Destinatário", order.recipient || "—"],
+    ...(order.request_model === "dispositivos" ? [] : [["Valor", BRL(Number(order.estimated_value ?? 0))]]), ["Projeto ou Cliente", allocation], ...(showsSupplyDeliveryFields(order) ? [["Destinatário", order.recipient || "—"],
     [(order as { delivery_mode?: string }).delivery_mode === "retirada" ? "Endereço de retirada" : "Endereço de entrega", order.delivery_point || "—"], ["Prazo", order.deadline_date ? new Date(`${order.deadline_date}T00:00:00`).toLocaleDateString("pt-BR") : order.deadline_type],
-    ["Previsão de entrega", order.delivery_forecast ? new Date(`${order.delivery_forecast}T00:00:00`).toLocaleDateString("pt-BR") : "—"],
+    ["Previsão de entrega", order.delivery_forecast ? new Date(`${order.delivery_forecast}T00:00:00`).toLocaleDateString("pt-BR") : "—"]] : []),
     ["Status da solicitação", order.status], ["Status da aprovação", order.approval_status], ["Código", order.passphrase || "—"], ["Criado em", dt(order.created_at)],
     ["Destino da viagem", order.travel_destination || "—"], ["Ida", order.travel_departure ? new Date(`${order.travel_departure}T00:00:00`).toLocaleDateString("pt-BR") : "—"], ["Volta", order.travel_return ? new Date(`${order.travel_return}T00:00:00`).toLocaleDateString("pt-BR") : "—"],
     ["Data de pagamento", order.payment_date ? new Date(`${order.payment_date}T00:00:00`).toLocaleDateString("pt-BR") : "—"],

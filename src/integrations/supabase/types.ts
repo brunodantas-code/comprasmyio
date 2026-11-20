@@ -12789,6 +12789,7 @@ export type Database = {
       is_inventory_signer: { Args: { _id: string }; Returns: boolean }
       is_supply_member: { Args: { _user_id: string }; Returns: boolean }
       is_supply_technician: { Args: { _user_id: string }; Returns: boolean }
+      legal_attachment_visible: { Args: { _path: string }; Returns: boolean }
       legal_participant_users: {
         Args: never
         Returns: {

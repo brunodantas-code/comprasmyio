@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { canConfirmPhysicalReceipt, fulfillmentKind, fulfillmentFilterLabel, hasPhysicalDelivery, pendingPhysicalReceiptOrders } from "./supply-fulfillment";
+import { canConfirmPhysicalReceipt, fulfillmentKind, fulfillmentFilterLabel, hasPhysicalDelivery, pendingPhysicalReceiptOrders, showsSupplyDeliveryFields } from "./supply-fulfillment";
 
 describe("recebimento e atendimento do Supply", () => {
+  it('não apresenta entrega nos reembolsos, incluindo tipos personalizados e históricos', () => {
+    expect(showsSupplyDeliveryFields({request_model:'reembolso',request_type:'despesas-viagem'})).toBe(false);
+    expect(showsSupplyDeliveryFields({request_type:'reembolso'})).toBe(false);
+    expect(showsSupplyDeliveryFields({request_model:'materiais'})).toBe(true);
+  });
   it.each(["reembolso", "pagamento", "servicos", "viagens", "rh"])("não oferece recebimento físico para %s", (request_model) => {
     expect(canConfirmPhysicalReceipt({ request_model, status: "entregue" })).toBe(false);
   });

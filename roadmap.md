@@ -1,4 +1,11 @@
 # Roadmap
+- [x] Links de anexos pretos e sublinhados em repouso, verdes ao cursor; oito links conferidos com fonte CDE 14px e alinhamento à esquerda. Approval excluído ausente na tela. Não publicado.
+- [x] Approval 202610230001 excluído por autorização expressa; releitura confirmou somente 202610230002, R$ 1.508,00 e oito comprovantes.
+- [x] Links de anexos Supply com fonte CDE e alinhamento à esquerda; oito links reais conferidos em 14px e mesma posição inicial.
+- [x] Dois reembolsos criados em 23/10 às 12h35 e 12h52, descrições/valores iguais; segundo tem comprovantes. Motivo do reenvio não consta no histórico; explicado antes da autorização de exclusão.
+- [x] Reembolsos sem entrega no editor Admin, detalhes de aprovação e relatório; criação já ocultava. Editor real conferido sem modalidade/previsão; dados históricos preservados, teste de modelos personalizado/legado passou.
+- [x] Legal: documentos/fotos por assunto e ao final, clipe na lista e acesso privado por referência visível; foto/PDF salvos/reabertos em ata temporária, PDF aberto e celular sem excesso; teste removido com arquivos. Três testes de escopo/confidencialidade passaram. Anexos integram conteúdo sujeito à revisão de assinaturas; não publicado.
+- [x] Legal: aviso vermelho “Informar data de conclusão” em cada ação sem data prevista; ata de 04/11 conferida com avisos, tooltip total discrimina dez datas ausentes; contagem preservada. 56 testes relacionados passaram.
 - [x] Legal: botões da ata de 09/11 alinhados; títulos separados dos nomes das ações evitam detecção CDE indevida. Posições iguais nas dez atas e celular sem excesso lateral; 22 testes passaram. Total de 14 na ata de 04/11 soma 4 ações próprias e 10 datas previstas ausentes para o criador, inclusive ações já concluídas conforme regra vigente; contagem preservada e explicada. Não publicado.
 - [x] Legal: Você participou após a data; filtro Participação com/sem participação. Conta Leonardo conferida: 7 com participação e 3 sem; nomes legados reconhecidos sem ampliar autorização de assinatura. Não publicado.
 - [x] Legal: cada ação sem data prevista gera pendência para o criador da ata no helper Home/Central e filtro pessoal do Legal; baixa após salvar prazo na tela conferida na Central, mantendo pendência de execução. Ata temporária removida; 29 testes passaram. Não publicado.

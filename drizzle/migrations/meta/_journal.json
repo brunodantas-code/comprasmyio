@@ -1877,6 +1877,13 @@
       "when": 1795202169872,
       "tag": "0267_survey_client_report_guard",
       "breakpoints": true
+    },
+    {
+      "idx": 268,
+      "version": "7",
+      "when": 1795207128328,
+      "tag": "0268_legal_minutes_attachments",
+      "breakpoints": true
     }
   ]
 }

@@ -1,12 +1,13 @@
 export type LegalCategory = 'minutes' | 'contracts' | 'templates';
-export type LegalSubject = { id: string; title: string; description: string; decisions: string; responsible?: string; responsibles?: string[]; completionDate?: string; confidential?: boolean };
+export type LegalAttachment = { id: string; name: string; path: string; contentType: string; bucket?: string };
+export type LegalSubject = { id: string; title: string; description: string; decisions: string; responsible?: string; responsibles?: string[]; completionDate?: string; confidential?: boolean; attachments?: LegalAttachment[] };
 export type LegalParticipant = { id: string; name: string; signature: string; signedAt: string; userId?: string; signedBy?: string };
-export type LegalContent = { location: string; counterpart: string; participants: LegalParticipant[]; subjects: LegalSubject[]; revision?: number; lastEditAt?: string };
+export type LegalContent = { location: string; counterpart: string; participants: LegalParticipant[]; subjects: LegalSubject[]; revision?: number; lastEditAt?: string; attachments?: LegalAttachment[] };
 export function emptyLegalContent(): LegalContent { return { location: '', counterpart: '', participants: [], subjects: [] }; }
 export function parseLegalContent(value: unknown): LegalContent {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return emptyLegalContent();
   const v = value as Record<string, unknown>;
-  return { location: typeof v.location === 'string' ? v.location : '', counterpart: typeof v.counterpart === 'string' ? v.counterpart : '', participants: Array.isArray(v.participants) ? v.participants as LegalParticipant[] : [], subjects: Array.isArray(v.subjects) ? v.subjects as LegalSubject[] : [], ...(typeof v.revision === 'number' ? { revision: v.revision } : {}), ...(typeof v.lastEditAt === 'string' ? { lastEditAt: v.lastEditAt } : {}) };
+  return { location: typeof v.location === 'string' ? v.location : '', counterpart: typeof v.counterpart === 'string' ? v.counterpart : '', participants: Array.isArray(v.participants) ? v.participants as LegalParticipant[] : [], subjects: Array.isArray(v.subjects) ? v.subjects as LegalSubject[] : [], ...(Array.isArray(v.attachments) ? { attachments: v.attachments as LegalAttachment[] } : {}), ...(typeof v.revision === 'number' ? { revision: v.revision } : {}), ...(typeof v.lastEditAt === 'string' ? { lastEditAt: v.lastEditAt } : {}) };
 }
 /** Only ERP-registered participants (linked userId) sign; external guests stay listed as participants only. */
 export function legalSigners(content: LegalContent) { return content.participants.filter(p => Boolean(p.userId) && p.name.trim()); }

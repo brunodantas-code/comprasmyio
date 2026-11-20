@@ -1,6 +1,10 @@
 type Request = { request_type?: string | null; request_model?: string | null; status?: string };
 const physicalModels = new Set(["materiais", "dispositivos", "importacao", "maquinas_equipamentos_e_eletrodometicos"]);
 
+export function showsSupplyDeliveryFields(order: Request): boolean {
+  return order.request_model !== 'reembolso' && order.request_type !== 'reembolso';
+}
+
 export function hasPhysicalDelivery(order: Request): boolean {
   return physicalModels.has(order.request_model || order.request_type || "");
 }
