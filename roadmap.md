@@ -1,4 +1,6 @@
 # Roadmap
+- [x] Aparência P&B: roxo escuro da landing page e da faixa Home convertido para preto; roxo myio comum permanece cinza, alertas vermelhos e contraste preservados. Landing pública e Home conferidas em tela; 9 testes passaram.
+- [ ] CDE Home Page (item 13): editar nome, tamanho e cor da fonte de cada app; padrão inicial dos cabeçalhos com logo myio menor, barra vertical e nome à direita (print 2), aplicado a todos os apps.
 - [x] CDE: Aparência global Roxo myio, Verde myio e P&B com De-Para reversível, sem sobrescrever personalizações ou fotos; salvar/recarregar conferidos na conta Leonardo e cores verificadas em Home, Projects, Site Survey e CRM; celular sem excesso lateral, verde restaurado. Não publicado.
 - [x] Botões PDF/Excel compactados com símbolos dos Approvals; Pendências Cliente, Respostas Cliente e Histórico Respostas conferidos na visita Mogi; computador/celular e abertura das opções PDF verificados, não publicado.
 - [x] Relógio estava oculto à direita: barra permite segunda linha no computador, mantendo todos os controles; largura 1282/1282 e rolagem zero conferidas em 1920px. Celular preserva rolagem; 13 testes passaram, não publicado.

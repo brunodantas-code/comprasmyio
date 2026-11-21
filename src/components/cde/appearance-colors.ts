@@ -23,7 +23,10 @@ export function convertAppearanceColor(value: string, appearance: AppAppearance)
   const minChroma = color.l >= 0.85 ? 0.004 : 0.025;
   const isRedAlert = color.h !== undefined && color.c >= minChroma && (color.h <= 45 || color.h >= 345);
   if (isRedAlert) return value;
-  if (appearance === "grayscale") return formatCss({ ...color, c: 0 });
+  if (appearance === "grayscale") {
+    const isDarkLandingPurple = color.h !== undefined && color.h >= 265 && color.h <= 330 && color.c >= minChroma && color.l < 0.32;
+    return formatCss({ ...color, l: isDarkLandingPurple ? 0 : color.l, c: 0 });
+  }
   if (color.h === undefined || color.c < minChroma || color.l < 0.2) return value;
   const source = color.h >= 100 && color.h <= 185 ? BASES.green
     : color.h >= 265 && color.h <= 330 ? BASES.purple : undefined;
