@@ -36,13 +36,20 @@ describe("De-Para de Aparência", () => {
     expect(dark?.h).toBeCloseTo(295, 0);
     expect(dark?.l).toBeLessThan(0.3);
   });
-  it("P&B remove saturação de qualquer cor e preserva transparência", () => {
-    for (const value of ["#0fc482", "#673ab6", "#ff0000", "rgba(15,196,130,0.4)"]) {
+  it("P&B remove saturação das demais cores e preserva transparência", () => {
+    for (const value of ["#0fc482", "#673ab6", "rgba(15,196,130,0.4)"]) {
       const result = rgb(convertAppearanceColor(value, "grayscale"));
       expect(result?.r).toBeCloseTo(result?.g ?? -1, 5);
       expect(result?.g).toBeCloseTo(result?.b ?? -1, 5);
     }
     expect(rgb(convertAppearanceColor("rgba(15,196,130,0.4)", "grayscale"))?.alpha).toBe(0.4);
+  });
+  it("mantém bolinhas, textos e tags vermelhos em todas as aparências", () => {
+    for (const appearance of ["green", "purple", "grayscale"] as const) {
+      for (const value of ["#ff0000", "#dc2626", "#7f1d1d", "#fef2f2", "oklch(0.58 0.22 27)"]) {
+        expect(convertAppearanceColor(value, appearance)).toBe(value);
+      }
+    }
   });
   it("mantém as referências semânticas e alertas em temas coloridos", () => {
     expect(convertAppearanceColor("var(--myio-green)", "purple")).toBe("var(--myio-green)");

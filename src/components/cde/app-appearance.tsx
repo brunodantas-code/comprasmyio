@@ -53,7 +53,7 @@ export function mountAppAppearance(appearance: AppAppearance) {
       const current = attr ? element.getAttribute(name) ?? "" : element.style.getPropertyValue(name);
       if (records.get(key)?.output === current) continue;
       records.delete(key);
-      if (!current || current.includes("var(") || !CSS.supports("color", current)) continue;
+      if (!current || current.trim().toLowerCase() === "currentcolor" || current.includes("var(") || !CSS.supports("color", current)) continue;
       const output = convertAppearanceColor(resolve(current), appearance);
       if (output === current) continue;
       // Browsers may normalize assigned CSS; compare the actual serialized output on the next mutation.
