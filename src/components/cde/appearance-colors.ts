@@ -10,6 +10,9 @@ export const APP_APPEARANCES = [
 export function parseAppAppearance(raw: unknown): AppAppearance | null {
   return raw === "green" || raw === "purple" || raw === "grayscale" ? raw : null;
 }
+export function isContextualAppearanceColor(value: string): boolean {
+  return value.trim().toLowerCase() === "currentcolor";
+}
 const toOklch = converter("oklch");
 const BASES = { green: toOklch("#0fc482"), purple: toOklch("#673ab6") };
 /** Always convert the original colour, never the previous display conversion. */

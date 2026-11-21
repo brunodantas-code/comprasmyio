@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { APP_APPEARANCE_GROUP, convertAppearanceColor, parseAppAppearance, type AppAppearance } from "./appearance-colors";
+import { APP_APPEARANCE_GROUP, convertAppearanceColor, isContextualAppearanceColor, parseAppAppearance, type AppAppearance } from "./appearance-colors";
 
 export const APP_APPEARANCE_QUERY = ["cde-app-appearance"];
 export function useAppAppearance() {
@@ -34,7 +34,7 @@ export function mountAppAppearance(appearance: AppAppearance) {
     for (const name of styles) {
       if (!name.startsWith("--") || name.startsWith("--appearance-reference")) continue;
       const original = styles.getPropertyValue(name).trim();
-      if (!original || !CSS.supports("color", original)) continue;
+      if (!original || isContextualAppearanceColor(original) || !CSS.supports("color", original)) continue;
       const converted = appearance === "purple" && ["--primary-foreground", "--sidebar-primary-foreground"].includes(name)
         ? "oklch(1 0 0)" : convertAppearanceColor(resolve(original), appearance);
       rules.push(`${name}:${converted} !important`);
@@ -53,7 +53,7 @@ export function mountAppAppearance(appearance: AppAppearance) {
       const current = attr ? element.getAttribute(name) ?? "" : element.style.getPropertyValue(name);
       if (records.get(key)?.output === current) continue;
       records.delete(key);
-      if (!current || current.trim().toLowerCase() === "currentcolor" || current.includes("var(") || !CSS.supports("color", current)) continue;
+      if (!current || isContextualAppearanceColor(current) || current.includes("var(") || !CSS.supports("color", current)) continue;
       const output = convertAppearanceColor(resolve(current), appearance);
       if (output === current) continue;
       // Browsers may normalize assigned CSS; compare the actual serialized output on the next mutation.

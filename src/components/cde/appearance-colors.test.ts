@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { converter } from "culori";
-import { convertAppearanceColor, parseAppAppearance } from "./appearance-colors";
+import { convertAppearanceColor, isContextualAppearanceColor, parseAppAppearance } from "./appearance-colors";
 
 const rgb = converter("rgb");
 describe("De-Para de Aparência", () => {
@@ -50,6 +50,12 @@ describe("De-Para de Aparência", () => {
         expect(convertAppearanceColor(value, appearance)).toBe(value);
       }
     }
+  });
+  it("preserva a cor herdada pelos ícones de menus e barras de navegação", () => {
+    expect(isContextualAppearanceColor("currentColor")).toBe(true);
+    expect(isContextualAppearanceColor(" currentcolor ")).toBe(true);
+    expect(isContextualAppearanceColor("var(--foreground)")).toBe(false);
+    expect(isContextualAppearanceColor("#ffffff")).toBe(false);
   });
   it("mantém as referências semânticas e alertas em temas coloridos", () => {
     expect(convertAppearanceColor("var(--myio-green)", "purple")).toBe("var(--myio-green)");
