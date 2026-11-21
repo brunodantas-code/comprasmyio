@@ -7,34 +7,36 @@ import { SortableContext, arrayMove, sortableKeyboardCoordinates, useSortable, v
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Minus, Plus, Save, Menu } from "lucide-react";
 import { MyioPlatformLogo } from "@/components/myio-platform-logo";
+import { MyioAppLogo } from "@/components/myio-app-logo";
 import { APP_DESCRIPTIONS, AppSymbol, AppTileFace } from "./app-tile";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { CdeCategoryHeader } from "./cde-category-header";
-import { APP_TILE_COLORS, APP_TILE_DEFAULT, PORTAL_APPS, appTileColor, appTileColorVars, appTileLowContrast, homeHeaderVars, homeHeaderLogoTone, mobileTileVars, parseAppOrder, useAppOrder, useAppTile, type AppTileColorKind, type AppTileConfig } from "./app-order-config";
+import { APP_NAME_COLORS, APP_TILE_COLORS, APP_TILE_DEFAULT, PORTAL_APPS, appDisplay, appTileColor, appTileColorVars, appTileLowContrast, homeHeaderVars, homeHeaderLogoTone, mobileTileVars, parseAppOrder, useAppOrder, useAppTile, type AppDisplayOverride, type AppTileColorKind, type AppTileConfig } from "./app-order-config";
 import { useCdeSwatchStyle } from "./cde-button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { CdeMobileDockStyle } from "./mobile-dock-style";
 
-function Row({ id, index }: { id: string; index: number }) {
+function Row({ id, index, displayName }: { id: string; index: number; displayName: string }) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
   const app = PORTAL_APPS.find((a) => a.key === id);
   return <div ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition }} className="flex items-center gap-3 border-b border-border bg-card py-2">
-    <Button variant="ghost" size="compactIcon" aria-label={`Mover ${app?.name}`} title={`Mover ${app?.name}`} {...attributes} {...listeners} className="touch-none"><GripVertical /></Button>
+    <Button variant="ghost" size="compactIcon" aria-label={`Mover ${displayName}`} title={`Mover ${displayName}`} {...attributes} {...listeners} className="touch-none"><GripVertical /></Button>
     <CdeNumber screen="components/cde/cde-app-order.tsx">{index + 1}</CdeNumber>
     <span className="flex h-7 w-7 shrink-0 items-center justify-center text-foreground"><AppSymbol name={app?.name ?? ""} className="h-5 w-5" /></span>
-    <span className="flex-1 text-sm">{app?.name}</span>
+    <span className="flex-1 text-sm">{displayName}</span>
   </div>;
 }
 
 const COLOR_FIELDS: [AppTileColorKind, string][] = [["headerBg", "Fundo da faixa superior"], ["bg", "Fundo da página"], ["fill", "Preenchimento dos ícones"], ["border", "Borda dos ícones"], ["symbol", "Símbolo dentro do ícone"], ["inside", "Texto dentro do ícone"], ["below", "Texto abaixo do ícone"]];
 
-function HeaderPreview({ tile, mobile = false }: { tile: AppTileConfig; mobile?: boolean }) {
+function HeaderPreview({ tile, mobile = false, appName, display }: { tile: AppTileConfig; mobile?: boolean; appName?: string; display?: ReturnType<typeof appDisplay> }) {
   const background = tile.headerBg === "padrao" ? (mobile ? "var(--accent)" : "var(--card)") : appTileColor("headerBg", tile.headerBg).value;
-  return <div aria-label={mobile ? "Prévia da faixa superior mobile" : "Prévia da faixa superior desktop"} style={{ ...homeHeaderVars(tile), "--home-header-bg": background } as React.CSSProperties} className={`home-page-header px-4 py-5 ${mobile ? "" : "home-header-desktop-preview flex items-center"}`}>
-    <div className="flex items-center justify-between gap-3"><MyioPlatformLogo tone={homeHeaderLogoTone(tile, mobile)} className="h-10" /><div className="flex min-w-0 items-center gap-3">{!mobile && <span className="text-sm">Usuário</span>}<Menu aria-hidden className="h-6 w-6 shrink-0" /></div></div>
+  return <div aria-label={mobile ? "Prévia da faixa superior mobile" : appName ? "Prévia do cabeçalho do app" : "Prévia da faixa superior desktop"} style={{ ...homeHeaderVars(tile), "--home-header-bg": background } as React.CSSProperties} className={`home-page-header px-4 py-5 ${mobile ? "" : "home-header-desktop-preview flex items-center"}`}>
+    <div className="flex items-center justify-between gap-3">{appName ? <MyioAppLogo appName={appName} tone={homeHeaderLogoTone(tile, mobile)} {...(display ? { display } : {})} /> : <MyioPlatformLogo tone={homeHeaderLogoTone(tile, mobile)} className="h-10" />}<div className="flex min-w-0 items-center gap-3">{!mobile && <span className="text-sm">Usuário</span>}<Menu aria-hidden className="h-6 w-6 shrink-0" /></div></div>
     {mobile && <p className="mt-8 text-xl font-bold">Olá, Usuário</p>}
   </div>;
 }
@@ -49,6 +51,13 @@ function ColorChoice({ kind, label, value, onChange }: { kind: AppTileColorKind;
       <SelectContent>{APP_TILE_COLORS[kind].map((o) => <SelectItem key={o.key} value={o.key}><span style={{ display: "inline-flex", alignItems: "center", gap: 10, lineHeight: "16px" }}>{dot(o.value)}<span>{o.label}</span></span></SelectItem>)}</SelectContent></Select></div>;
 }
 
+function AppNameColorChoice({ appName, value, onChange }: { appName: string; value: string; onChange: (value: string) => void }) {
+  const swatch = useCdeSwatchStyle();
+  const current = APP_NAME_COLORS.find(option => option.key === value) ?? APP_NAME_COLORS[0];
+  const dot = (color: string) => <span aria-hidden="true" style={{ background: color, ...swatch.css }} className={`block h-4 w-4 shrink-0 rounded-full border border-border ${swatch.cls}`} />;
+  return <div className="min-w-0 space-y-1"><Label>Cor da fonte</Label><Select value={current.key} onValueChange={onChange}><SelectTrigger aria-label={`Cor da fonte de ${appName}`} className="h-9"><span className="flex min-w-0 items-center gap-2">{dot(current.value)}<span className="truncate">{current.label}</span></span></SelectTrigger><SelectContent>{APP_NAME_COLORS.map(option => <SelectItem key={option.key} value={option.key}><span className="flex items-center gap-2">{dot(option.value)}<span>{option.label}</span></span></SelectItem>)}</SelectContent></Select></div>;
+}
+
 export function CdeAppOrder({ number, handle }: { number: number; handle?: import("react").ReactNode }) {
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<string[] | null>(null);
@@ -58,6 +67,10 @@ export function CdeAppOrder({ number, handle }: { number: number; handle?: impor
   const savedTile = useAppTile().data ?? APP_TILE_DEFAULT;
   const [tileDraft, setTileDraft] = useState<AppTileConfig | null>(null);
   const tile = tileDraft ?? savedTile;
+  function updateApp(key: string, patch: Partial<AppDisplayOverride>) {
+    const existing = tile.apps?.[key] ?? {};
+    setTileDraft({ ...tile, apps: { ...tile.apps, [key]: { ...existing, ...patch } } });
+  }
   async function saveTile() {
     setSaving(true);
     try {
@@ -95,8 +108,19 @@ export function CdeAppOrder({ number, handle }: { number: number; handle?: impor
   }
   return <section className="space-y-4">
     <CdeCategoryHeader handle={handle} number={number} title="Home Page" hint="Faixa superior, apps, espaçamento e cores" open={open} onToggle={() => setOpen(!open)} />
-    {open && <div className="w-full min-w-0 py-4"><p className="mb-3 text-sm font-medium">Ordenação dos Apps na Home Page</p><DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={move}><SortableContext items={order} strategy={verticalListSortingStrategy}>{order.map((id, i) => <Row key={id} id={id} index={i} />)}</SortableContext></DndContext>
+    {open && <div className="w-full min-w-0 py-4"><p className="mb-3 text-sm font-medium">Ordenação dos Apps na Home Page</p><DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={move}><SortableContext items={order} strategy={verticalListSortingStrategy}>{order.map((id, i) => <Row key={id} id={id} index={i} displayName={appDisplay(tile, id).name} />)}</SortableContext></DndContext>
       <Button variant="action" className="mt-3" onClick={save} disabled={saving || !draft}><Save className="h-4 w-4" />Salvar</Button>
+      <div className="mt-6 space-y-4 border-t border-border pt-4">
+        <p className="text-sm font-medium">Nomes e fontes dos apps</p>
+        <div role="group" aria-label="Nomes e fontes dos apps" className="grid gap-4 xl:grid-cols-2">
+          {PORTAL_APPS.map(app => { const display = appDisplay(tile, app.key); return <div key={app.key} className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_7rem_10rem] sm:items-end">
+            <div className="min-w-0 space-y-1"><Label>Nome — {app.name}</Label><Input aria-label={`Nome do app ${app.name}`} maxLength={30} value={tile.apps?.[app.key]?.name ?? display.name} onChange={event => updateApp(app.key, { name: event.target.value })} /></div>
+            <div className="min-w-0 space-y-1"><Label>Tamanho</Label><Select value={String(display.labelPx)} onValueChange={value => updateApp(app.key, { labelPx: Number(value) })}><SelectTrigger aria-label={`Tamanho da fonte de ${app.name}`} className="h-9"><SelectValue /></SelectTrigger><SelectContent>{[10, 11, 12, 13, 14, 15, 16, 18, 20, 24, 28, 32].map(px => <SelectItem key={px} value={String(px)}>{px} px</SelectItem>)}</SelectContent></Select></div>
+            <AppNameColorChoice appName={app.name} value={display.colorKey} onChange={color => updateApp(app.key, { color })} />
+          </div>; })}
+        </div>
+        <div className="space-y-1"><Label>Prévia do cabeçalho dos apps</Label><HeaderPreview tile={tile} appName="CRM" display={appDisplay(tile, "crm", 16)} /></div>
+      </div>
       <div className="mt-6 space-y-3 border-t border-border pt-4">
         <p className="text-sm font-medium">Ícones da página principal</p>
         <div role="group" aria-label="Ajustes dos ícones da página principal" className="grid w-full max-w-5xl grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-6">

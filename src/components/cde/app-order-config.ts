@@ -103,12 +103,33 @@ export const APP_TILE_COLORS = {
     { key: "lilas_suave", label: "Lilás suave myio (tela de acesso)", value: "var(--erp-landing-muted)", dark: false },
   ],
 } as const;
+export const APP_NAME_COLORS = [
+  { key: "padrao", label: "Automática", value: "currentColor" },
+  { key: "escuro", label: "Escuro myio", value: "var(--myio-dark)" },
+  { key: "branco", label: "Branco", value: "var(--myio-white)" },
+  { key: "verde", label: "Verde myio", value: "var(--myio-green)" },
+  { key: "roxo", label: "Roxo myio", value: "var(--myio-purple)" },
+  { key: "lilas", label: "Lilás myio", value: "var(--myio-lilac)" },
+  { key: "cinza", label: "Cinza", value: "var(--muted-foreground)" },
+] as const;
 export type AppTileColorKind = keyof typeof APP_TILE_COLORS;
-export type AppTileConfig = { desktopHeaderPx?: number; labelPx: number; iconPct: number; tilePct: number; mobileTilePct: number; mobileIconPct: number; gapX: number; gapY: number; headerBg: string; bg: string; fill: string; border: string; symbol: string; inside: string; below: string };
+export type AppDisplayOverride = { name?: string; labelPx?: number; color?: string };
+export type AppDisplay = { name: string; labelPx: number; colorKey: string; color?: string };
+export type AppTileConfig = { desktopHeaderPx?: number; labelPx: number; iconPct: number; tilePct: number; mobileTilePct: number; mobileIconPct: number; gapX: number; gapY: number; headerBg: string; bg: string; fill: string; border: string; symbol: string; inside: string; below: string; apps?: Record<string, AppDisplayOverride> };
 export const APP_TILE_DEFAULT: AppTileConfig = { labelPx: 14, iconPct: 100, tilePct: 100, mobileTilePct: 100, mobileIconPct: 100, gapX: 32, gapY: 40, headerBg: "padrao", bg: "padrao", fill: "padrao", border: "padrao", symbol: "padrao", inside: "padrao", below: "padrao" };
 export function appTileColor(kind: AppTileColorKind, key: string) {
   const list = APP_TILE_COLORS[kind] as readonly { key: string; label: string; value: string; dark: boolean }[];
   return list.find((o) => o.key === key) ?? list[0];
+}
+export function appKeyForName(name: string): string {
+  return PORTAL_APPS.find(app => app.name.toLowerCase() === name.trim().toLowerCase())?.key ?? name;
+}
+export function appDisplay(tile: AppTileConfig, key: string, fallbackPx = tile.labelPx, fallbackName?: string): AppDisplay {
+  const original = PORTAL_APPS.find(app => app.key === key)?.name ?? fallbackName ?? key;
+  const saved = tile.apps?.[key];
+  const colorKey = APP_NAME_COLORS.some(option => option.key === saved?.color) ? saved?.color ?? "padrao" : "padrao";
+  const color = APP_NAME_COLORS.find(option => option.key === colorKey)?.value;
+  return { name: saved?.name?.trim() || original, labelPx: saved?.labelPx ?? fallbackPx, colorKey, ...(colorKey !== "padrao" && color ? { color } : {}) };
 }
 /** Portal CSS variables for the chosen colours (background, tile border, text inside and below the tiles). */
 export function appTileColorVars(tile: AppTileConfig): Record<string, string> {
@@ -140,6 +161,20 @@ export function parseAppTile(raw?: string): AppTileConfig {
     const labelPx = Number(p.labelPx), iconPct = Number(p.iconPct), tilePct = Number(p.tilePct);
     const mobileTilePct = Number(p.mobileTilePct), mobileIconPct = Number(p.mobileIconPct);
     const gapX = Number(p.gapX), gapY = Number(p.gapY);
+    const rawApps: Record<string, unknown> = p.apps && typeof p.apps === "object" && !Array.isArray(p.apps) ? p.apps as Record<string, unknown> : {};
+    const apps: Record<string, AppDisplayOverride> = {};
+    for (const app of PORTAL_APPS) {
+      const raw = rawApps[app.key];
+      if (!raw || typeof raw !== "object" || Array.isArray(raw)) continue;
+      const value = raw as Record<string, unknown>;
+      const name = typeof value.name === "string" ? value.name.trim().slice(0, 30) : "";
+      const appLabelPx = Number(value.labelPx), color = String(value.color ?? "");
+      const parsed: AppDisplayOverride = {};
+      if (name) parsed.name = name;
+      if (Number.isFinite(appLabelPx) && appLabelPx >= 10 && appLabelPx <= 32) parsed.labelPx = appLabelPx;
+      if (APP_NAME_COLORS.some(option => option.key === color)) parsed.color = color;
+      if (Object.keys(parsed).length) apps[app.key] = parsed;
+    }
     return { labelPx: labelPx >= 10 && labelPx <= 18 ? labelPx : APP_TILE_DEFAULT.labelPx, iconPct: iconPct >= 60 && iconPct <= 140 ? iconPct : APP_TILE_DEFAULT.iconPct, tilePct: tilePct >= 70 && tilePct <= 140 ? tilePct : APP_TILE_DEFAULT.tilePct,
       mobileTilePct: mobileTilePct >= 70 && mobileTilePct <= 140 ? mobileTilePct : APP_TILE_DEFAULT.mobileTilePct,
       mobileIconPct: mobileIconPct >= 60 && mobileIconPct <= 140 ? mobileIconPct : (iconPct >= 60 && iconPct <= 140 ? iconPct : APP_TILE_DEFAULT.mobileIconPct),
@@ -148,7 +183,8 @@ export function parseAppTile(raw?: string): AppTileConfig {
       ...(Number(p.desktopHeaderPx) >= 80 && Number(p.desktopHeaderPx) <= 240 ? { desktopHeaderPx: Number(p.desktopHeaderPx) } : {}),
       headerBg: appTileColor("headerBg", String(p.headerBg ?? "")).key,
       bg: appTileColor("bg", String(p.bg ?? "")).key, fill: appTileColor("fill", String(p.fill ?? "")).key, border: appTileColor("border", String(p.border ?? "")).key,
-      symbol: appTileColor("symbol", String(p.symbol ?? "")).key, inside: appTileColor("inside", String(p.inside ?? "")).key, below: appTileColor("below", String(p.below ?? "")).key };
+      symbol: appTileColor("symbol", String(p.symbol ?? "")).key, inside: appTileColor("inside", String(p.inside ?? "")).key, below: appTileColor("below", String(p.below ?? "")).key,
+      ...(Object.keys(apps).length ? { apps } : {}) };
   } catch { return APP_TILE_DEFAULT; }
 }
 export function useAppTile() {

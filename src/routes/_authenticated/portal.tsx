@@ -14,7 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { MyioPlatformLogo } from "@/components/myio-platform-logo";
-import { useAppOrder, useAppTile, APP_TILE_DEFAULT, appTileColorVars, homeHeaderVars, homeHeaderLogoTone, mobileTileVars } from "@/components/cde/app-order-config";
+import { useAppOrder, useAppTile, APP_TILE_DEFAULT, appDisplay, appTileColorVars, homeHeaderVars, homeHeaderLogoTone, mobileTileVars } from "@/components/cde/app-order-config";
 import { AppTileFace } from "@/components/cde/app-tile";
 import { partitionMobileApps, useMobileFavorites } from "@/components/mobile-favorites-config";
 import { mobileDockVars, useMobileDockStyle } from "@/components/cde/mobile-dock-style";
@@ -107,7 +107,8 @@ function PortalPage() {
     { key: "wishlist", name: "Wishlist", description: ["Desejos e", "inovação"], to: "/wishlist" as const },
     { key: "projects", name: "Projects", description: ["Planejamento e", "controle de projetos"], to: "/projects" as const },
     { key: "cde", name: "CDE", description: ["Padrões de", "interface"], to: "/cde" as const },
-  ].filter((app) => (app.key === "cde" ? (data.isErpAdmin || data.appKeys.has("cde")) : data.appKeys.has(app.key)) || (app.key === "chamados" && pendingActions?.isCustomerSupportAnalyst))
+  ].map(app => ({ ...app, name: appDisplay(tile, app.key).name }))
+    .filter((app) => (app.key === "cde" ? (data.isErpAdmin || data.appKeys.has("cde")) : data.appKeys.has(app.key)) || (app.key === "chamados" && pendingActions?.isCustomerSupportAnalyst))
     .sort((a, b) => (appOrder ? appOrder.indexOf(a.key) - appOrder.indexOf(b.key) : 0));
 
   const mobileApps = partitionMobileApps(apps, favorites?.keys ?? []);

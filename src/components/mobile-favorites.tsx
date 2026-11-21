@@ -11,12 +11,15 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AppSymbol } from "@/components/cde/app-tile";
 import { FAVORITE_APPS, FAVORITE_LIMIT, normalizeFavorites, toggleFavorite, useMobileFavorites } from "./mobile-favorites-config";
+import { APP_TILE_DEFAULT, appDisplay, useAppTile } from "@/components/cde/app-order-config";
 
 function FavoriteRow({ id, selected, full, onToggle }: { id: string; selected: boolean; full: boolean; onToggle: () => void }) {
   const app = FAVORITE_APPS.find(a => a.key === id);
+  const tile = useAppTile().data ?? APP_TILE_DEFAULT;
+  const displayName = appDisplay(tile, id).name;
   const { setNodeRef, attributes, listeners, transform, transition } = useSortable({ id, disabled: !selected });
   if (!app) return null;
-  return <div ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition }} className="flex items-center gap-3 border-b border-border bg-card py-2"><Button variant="ghost" size="icon" disabled={!selected} title={`Mover ${app.name}`} aria-label={`Mover ${app.name}`} className="touch-none" {...attributes} {...listeners}><GripVertical /></Button><AppSymbol name={app.name} className="size-5" /><span className="flex-1 text-sm">{app.name}</span><Button variant="ghost" size="icon" aria-pressed={selected} disabled={!selected && full} title={selected ? `Remover ${app.name} dos favoritos` : `Favoritar ${app.name}`} aria-label={selected ? `Remover ${app.name} dos favoritos` : `Favoritar ${app.name}`} onClick={onToggle}><Star className={selected ? "fill-primary text-primary" : "text-foreground"} /></Button></div>;
+  return <div ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition }} className="flex items-center gap-3 border-b border-border bg-card py-2"><Button variant="ghost" size="icon" disabled={!selected} title={`Mover ${displayName}`} aria-label={`Mover ${displayName}`} className="touch-none" {...attributes} {...listeners}><GripVertical /></Button><AppSymbol name={app.name} className="size-5" /><span className="flex-1 text-sm">{displayName}</span><Button variant="ghost" size="icon" aria-pressed={selected} disabled={!selected && full} title={selected ? `Remover ${displayName} dos favoritos` : `Favoritar ${displayName}`} aria-label={selected ? `Remover ${displayName} dos favoritos` : `Favoritar ${displayName}`} onClick={onToggle}><Star className={selected ? "fill-primary text-primary" : "text-foreground"} /></Button></div>;
 }
 function FavoritesExperience() {
   const { data, isError } = useMobileFavorites();

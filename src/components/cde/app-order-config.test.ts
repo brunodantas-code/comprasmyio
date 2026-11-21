@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 vi.mock("@/integrations/supabase/client", () => ({ supabase: {} }));
-import { appTileColorVars, appTileLowContrast, homeHeaderVars, homeHeaderLogoTone, mobileTileVars, parseAppTile } from "./app-order-config";
+import { appDisplay, appKeyForName, appTileColorVars, appTileLowContrast, homeHeaderVars, homeHeaderLogoTone, mobileTileVars, parseAppTile } from "./app-order-config";
 
 describe("app spacing configuration", () => {
   it("stores desktop header height without changing mobile icon dimensions", () => {
@@ -50,5 +50,24 @@ describe("portal colours from the myio brand manual", () => {
   it("warns when the text below the tiles would disappear on the background", () => {
     expect(appTileLowContrast(parseAppTile('{"bg":"escuro","below":"escuro"}'))).toBe(true);
     expect(appTileLowContrast(parseAppTile('{"bg":"escuro","below":"branco"}'))).toBe(false);
+  });
+});
+describe("app names and fonts", () => {
+  it("reads an individual name, size and brand colour without changing the app key", () => {
+    const config = parseAppTile('{"apps":{"crm":{"name":"Vendas","labelPx":20,"color":"roxo"}}}');
+    expect(appDisplay(config, "crm", 16)).toEqual({ name: "Vendas", labelPx: 20, colorKey: "roxo", color: "var(--myio-purple)" });
+    expect(appKeyForName("CRM")).toBe("crm");
+  });
+  it("keeps the global font and automatic colour when only the name is customized", () => {
+    const config = parseAppTile('{"labelPx":13,"apps":{"supply":{"name":"Suprimentos"}}}');
+    expect(appDisplay(config, "supply")).toEqual({ name: "Suprimentos", labelPx: 13, colorKey: "padrao" });
+    expect(appDisplay(config, "supply", 16)).toEqual({ name: "Suprimentos", labelPx: 16, colorKey: "padrao" });
+  });
+  it("rejects invalid font sizes and colours and limits names to 30 characters", () => {
+    const config = parseAppTile(JSON.stringify({ apps: { legal: { name: "Jurídico e contratos empresariais", labelPx: 99, color: "rosa" } } }));
+    expect(config.apps?.legal?.name).toHaveLength(30);
+    expect(config.apps?.legal?.labelPx).toBeUndefined();
+    expect(config.apps?.legal?.color).toBeUndefined();
+    expect(appDisplay(config, "legal", 16)).toEqual({ name: "Jurídico e contratos empresari", labelPx: 16, colorKey: "padrao" });
   });
 });

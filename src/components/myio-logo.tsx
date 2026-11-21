@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import logoDark from "@/assets/myio-logo-dark.png.asset.json";
 import logoLightSrc from "@/assets/myio-logo-light.svg";
+import { MyioAppLogo } from "@/components/myio-app-logo";
 
 type Props = {
   className?: string;
@@ -10,23 +11,15 @@ type Props = {
   label?: string | null;
 };
 
-/** Logotipo oficial myio (Manual da Marca) + wordmark "supply". */
+/** Logotipo oficial myio (Manual da Marca) + nome configurável do app. */
 export function MyioLogo({ className, tone = "auto", label = "supply" }: Props) {
+  if (label !== null) return <MyioAppLogo appName={label} className={className} tone={tone} />;
   return (
-    <span className={cn("inline-flex items-end gap-[0.35em]", className)}>
+    <span className={cn("inline-flex items-end", className)}>
       {tone === "auto" ? <>
         <img src={logoLightSrc} alt="myio" className="h-auto w-auto select-none dark:hidden" style={{ height: "1.5em" }} draggable={false} />
         <img src={logoDark.url} alt="myio" className="hidden h-auto w-auto select-none dark:block" style={{ height: "1.5em" }} draggable={false} />
       </> : <img src={tone === "light" ? logoDark.url : logoLightSrc} alt="myio" className="h-auto w-auto select-none" style={{ height: "1.5em" }} draggable={false} />}
-      {label !== null && <span
-        className={cn(
-          "select-none font-light leading-none tracking-tight",
-          tone === "light" ? "text-white" : tone === "auto" ? "text-foreground" : "text-[var(--myio-dark)]",
-        )}
-        style={{ fontSize: "1.5em", transform: "translateY(-0.155em)" }}
-      >
-        {label}
-      </span>}
     </span>
   );
 }

@@ -1,28 +1,32 @@
 import { cn } from "@/lib/utils";
 import logoDark from "@/assets/myio-logo-dark.png.asset.json";
 import logoLightSrc from "@/assets/myio-logo-light.svg";
+import { APP_TILE_DEFAULT, appDisplay, appKeyForName, useAppTile, type AppDisplay } from "@/components/cde/app-order-config";
 
 type Props = {
   appName: string;
   className?: string;
   tone?: "light" | "dark" | "auto";
+  display?: AppDisplay;
 };
 
-export function MyioAppLogo({ appName, className, tone = "auto" }: Props) {
+/** Official myio logo, separator and configurable app name shared by every app header. */
+export function MyioAppLogo({ appName, className, tone = "auto", display }: Props) {
+  const saved = useAppTile().data ?? APP_TILE_DEFAULT;
+  const current = display ?? appDisplay(saved, appKeyForName(appName), 16, appName);
+  const toneClass = tone === "light" ? "text-[var(--myio-white)]" : tone === "auto" ? "text-foreground" : "text-[var(--myio-dark)]";
   return (
-    <span className={cn("inline-flex items-end gap-[0.35em]", className)}>
+    <span className={cn("inline-flex max-w-full items-center gap-3", className)}>
       {tone === "auto" ? <>
-        <img src={logoLightSrc} alt="myio" className="h-auto w-auto select-none dark:hidden" style={{ height: "1.5em" }} draggable={false} />
-        <img src={logoDark.url} alt="myio" className="hidden h-auto w-auto select-none dark:block" style={{ height: "1.5em" }} draggable={false} />
-      </> : <img src={tone === "light" ? logoDark.url : logoLightSrc} alt="myio" className="h-auto w-auto select-none" style={{ height: "1.5em" }} draggable={false} />}
+        <img src={logoLightSrc} alt="myio" className="h-10 w-auto shrink-0 select-none dark:hidden sm:h-12" draggable={false} />
+        <img src={logoDark.url} alt="myio" className="hidden h-10 w-auto shrink-0 select-none dark:block sm:h-12" draggable={false} />
+      </> : <img src={tone === "light" ? logoDark.url : logoLightSrc} alt="myio" className="h-10 w-auto shrink-0 select-none sm:h-12" draggable={false} />}
+      <span aria-hidden="true" className="h-6 w-px shrink-0 bg-current opacity-30 sm:h-7" />
       <span
-        className={cn(
-          "select-none font-light leading-none tracking-normal",
-          tone === "light" ? "text-white" : tone === "auto" ? "text-foreground" : "text-[var(--myio-dark)]",
-        )}
-        style={{ fontSize: "1.5em", transform: "translateY(-0.155em)" }}
+        className={cn("min-w-0 select-none break-words font-normal leading-tight tracking-normal", toneClass)}
+        style={{ fontSize: `${current.labelPx}px`, ...(current.color ? { color: current.color } : {}) }}
       >
-        {appName}
+        {current.name}
       </span>
     </span>
   );
