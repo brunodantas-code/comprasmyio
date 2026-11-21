@@ -47,11 +47,11 @@ export function AppAppearanceItem({ number, handle }: { number: number; handle?:
         </div>}
       </div>
       <RadioGroup aria-label="Aparência dos apps" value={draft ?? saved.data ?? "green"} onValueChange={value => setDraft(parseAppAppearance(value))} disabled={saving || saved.isLoading} className="grid gap-4 sm:grid-cols-3">
-        {APP_APPEARANCES.map(option => <Label key={option.key} htmlFor={`app-appearance-${option.key}`} className="flex !flex-row cursor-pointer items-center gap-3">
+        {APP_APPEARANCES.map(option => <label key={option.key} htmlFor={`app-appearance-${option.key}`} className="flex cursor-pointer flex-nowrap items-center justify-center gap-3 text-sm font-medium leading-none">
+          <RadioGroupItem id={`app-appearance-${option.key}`} value={option.key} className="shrink-0" />
           <span data-appearance-reference="" data-palette={option.key} className="appearance-palette flex shrink-0 items-center gap-1" aria-hidden="true"><span className="appearance-sample appearance-sample-soft" /><span className="appearance-sample appearance-sample-mid" /><span className="appearance-sample appearance-sample-strong" /></span>
-          <RadioGroupItem id={`app-appearance-${option.key}`} value={option.key} />
-          <span>{option.label}</span>
-        </Label>)}
+          <span className="whitespace-nowrap">{option.label}</span>
+        </label>)}
       </RadioGroup>
     </div>}
   </section>;
