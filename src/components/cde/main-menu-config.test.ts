@@ -2,6 +2,23 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("@/integrations/supabase/client", () => ({ supabase: {} }));
 import { menuOrderForContext, parseMenuConfig, userInfoLine } from "./main-menu-config";
 describe("main menu choices", () => {
+  it("keeps favorites visible for existing configurations without changing saved positions", () => {
+    const config = parseMenuConfig(JSON.stringify({ order: ["password", "logout"], hidden: [], v: 2 }));
+    expect(config.order.slice(0, 2)).toEqual(["password", "logout"]);
+    expect(config.order.filter(id => id === "favorites")).toHaveLength(1);
+    expect(menuOrderForContext(config)).toContain("favorites");
+  });
+  it("applies the CDE favorites position in both app and Home menus", () => {
+    const config = parseMenuConfig(JSON.stringify({ order: ["favorites", "theme", "logout"], hidden: [], v: 2 }));
+    expect(menuOrderForContext(config).slice(0, 3)).toEqual(["favorites", "theme", "logout"]);
+    expect(menuOrderForContext(config, true).slice(0, 4)).toEqual(["pendentes", "favorites", "theme", "logout"]);
+  });
+  it("respects hidden favorites in every menu without hiding Appearance", () => {
+    const config = parseMenuConfig(JSON.stringify({ order: ["favorites", "theme"], hidden: ["favorites"], v: 2 }));
+    expect(menuOrderForContext(config)).not.toContain("favorites");
+    expect(menuOrderForContext(config, true)).not.toContain("favorites");
+    expect(menuOrderForContext(config)).toContain("theme");
+  });
   it("keeps the selected icon order without duplicates", () => {
     expect(parseMenuConfig(JSON.stringify({ order: ["password", "back", "logout", "manual", "password"] })).order.slice(0, 4)).toEqual(["password", "back", "logout", "manual"]);
   });

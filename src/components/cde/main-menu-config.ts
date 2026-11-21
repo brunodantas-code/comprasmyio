@@ -1,4 +1,4 @@
-import { PenLine, ArrowLeft, BookOpen, ClipboardList, DollarSign, FileSignature, KeyRound, LayoutGrid, LifeBuoy, LogOut, Moon, Phone, Search, Settings, Settings2, UsersRound } from "lucide-react";
+import { PenLine, ArrowLeft, BookOpen, ClipboardList, DollarSign, FileSignature, KeyRound, LayoutGrid, LifeBuoy, LogOut, Palette, Phone, Search, Settings, Settings2, Star, UsersRound } from "lucide-react";
 import { CrmFunnelIcon } from "@/components/crm-funnel-icon";
 import { MytosisIcon } from "@/components/mytosis-icon";
 import { CdeIcon } from "@/components/cde-icon";
@@ -9,7 +9,7 @@ export const MENU_ITEMS = [
   { id: "manual", label: "Manual do Usuário", icon: BookOpen },
   { id: "signature", label: "Minha assinatura", icon: PenLine },
   { id: "back", label: "Voltar", icon: ArrowLeft },
-  { id: "theme", label: "Aparência", icon: Moon },
+  { id: "theme", label: "Aparência", icon: Palette },
   { id: "password", label: "Alterar senha", icon: KeyRound },
   { id: "logout", label: "Sair", icon: LogOut },
   { id: "portal", label: "Todos os apps", icon: LayoutGrid, to: "/portal", optional: true },
@@ -25,6 +25,7 @@ export const MENU_ITEMS = [
   { id: "app_opdesk", label: "OpDesk", icon: Phone, to: "/chamados", optional: true },
   { id: "app_mytosis", label: "Mytosis", icon: MytosisIcon, to: "/mytosis", optional: true },
   { id: "app_cde", label: "CDE", icon: CdeIcon, to: "/cde", optional: true },
+  { id: "favorites", label: "Meus favoritos", icon: Star },
 ] as const;
 /** Optional entries start hidden until an admin enables them in the CDE. */
 const OPTIONAL_IDS = MENU_ITEMS.filter((i) => "optional" in i).map((i) => i.id);
