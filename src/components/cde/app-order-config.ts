@@ -115,7 +115,7 @@ export const APP_NAME_COLORS = [
 export type AppTileColorKind = keyof typeof APP_TILE_COLORS;
 export type AppDisplayOverride = { name?: string; labelPx?: number; color?: string };
 export type AppDisplay = { name: string; labelPx: number; colorKey: string; color?: string };
-export type AppTileConfig = { desktopHeaderPx?: number; labelPx: number; iconPct: number; tilePct: number; mobileTilePct: number; mobileIconPct: number; gapX: number; gapY: number; headerBg: string; bg: string; fill: string; border: string; symbol: string; inside: string; below: string; apps?: Record<string, AppDisplayOverride> };
+export type AppTileConfig = { desktopHeaderPx?: number; appLogoPx?: number; labelPx: number; iconPct: number; tilePct: number; mobileTilePct: number; mobileIconPct: number; gapX: number; gapY: number; headerBg: string; bg: string; fill: string; border: string; symbol: string; inside: string; below: string; apps?: Record<string, AppDisplayOverride> };
 export const APP_TILE_DEFAULT: AppTileConfig = { labelPx: 14, iconPct: 100, tilePct: 100, mobileTilePct: 100, mobileIconPct: 100, gapX: 32, gapY: 40, headerBg: "padrao", bg: "padrao", fill: "padrao", border: "padrao", symbol: "padrao", inside: "padrao", below: "padrao" };
 export function appTileColor(kind: AppTileColorKind, key: string) {
   const list = APP_TILE_COLORS[kind] as readonly { key: string; label: string; value: string; dark: boolean }[];
@@ -124,6 +124,9 @@ export function appTileColor(kind: AppTileColorKind, key: string) {
 export function appKeyForName(name: string): string {
   return PORTAL_APPS.find(app => app.name.toLowerCase() === name.trim().toLowerCase())?.key ?? name;
 }
+/** Logo height used by every app header; defaults to the Home logo (40 px). */
+export const APP_LOGO_DEFAULT_PX = 40;
+export function appLogoPx(tile: AppTileConfig): number { return tile.appLogoPx ?? APP_LOGO_DEFAULT_PX; }
 export function appDisplay(tile: AppTileConfig, key: string, fallbackPx = tile.labelPx, fallbackName?: string): AppDisplay {
   const original = PORTAL_APPS.find(app => app.key === key)?.name ?? fallbackName ?? key;
   const saved = tile.apps?.[key];
@@ -180,6 +183,7 @@ export function parseAppTile(raw?: string): AppTileConfig {
       mobileIconPct: mobileIconPct >= 60 && mobileIconPct <= 140 ? mobileIconPct : (iconPct >= 60 && iconPct <= 140 ? iconPct : APP_TILE_DEFAULT.mobileIconPct),
       gapX: Number.isFinite(gapX) && gapX >= 8 && gapX <= 80 ? gapX : APP_TILE_DEFAULT.gapX,
       gapY: Number.isFinite(gapY) && gapY >= 8 && gapY <= 80 ? gapY : APP_TILE_DEFAULT.gapY,
+      ...(Number(p.appLogoPx) >= 24 && Number(p.appLogoPx) <= 64 ? { appLogoPx: Number(p.appLogoPx) } : {}),
       ...(Number(p.desktopHeaderPx) >= 80 && Number(p.desktopHeaderPx) <= 240 ? { desktopHeaderPx: Number(p.desktopHeaderPx) } : {}),
       headerBg: appTileColor("headerBg", String(p.headerBg ?? "")).key,
       bg: appTileColor("bg", String(p.bg ?? "")).key, fill: appTileColor("fill", String(p.fill ?? "")).key, border: appTileColor("border", String(p.border ?? "")).key,

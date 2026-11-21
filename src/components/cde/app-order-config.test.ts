@@ -71,3 +71,12 @@ describe("app names and fonts", () => {
     expect(appDisplay(config, "legal", 16)).toEqual({ name: "Jurídico e contratos empresari", labelPx: 16, colorKey: "padrao" });
   });
 });
+
+describe("logo dos apps", () => {
+  it("usa 40 px da Home por padrão e aceita 24–64 px", async () => {
+    const { parseAppTile, appLogoPx } = await import("./app-order-config");
+    expect(appLogoPx(parseAppTile("{}"))).toBe(40);
+    expect(appLogoPx(parseAppTile('{"appLogoPx":32}'))).toBe(32);
+    expect(appLogoPx(parseAppTile('{"appLogoPx":90}'))).toBe(40);
+  });
+});

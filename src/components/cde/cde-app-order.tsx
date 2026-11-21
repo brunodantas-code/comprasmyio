@@ -13,7 +13,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { CdeCategoryHeader } from "./cde-category-header";
-import { APP_NAME_COLORS, APP_TILE_COLORS, APP_TILE_DEFAULT, PORTAL_APPS, appDisplay, appTileColor, appTileColorVars, appTileLowContrast, homeHeaderVars, homeHeaderLogoTone, mobileTileVars, parseAppOrder, useAppOrder, useAppTile, type AppDisplayOverride, type AppTileColorKind, type AppTileConfig } from "./app-order-config";
+import { APP_NAME_COLORS, APP_TILE_COLORS, APP_TILE_DEFAULT, PORTAL_APPS, appDisplay, appLogoPx, appTileColor, appTileColorVars, appTileLowContrast, homeHeaderVars, homeHeaderLogoTone, mobileTileVars, parseAppOrder, useAppOrder, useAppTile, type AppDisplayOverride, type AppTileColorKind, type AppTileConfig } from "./app-order-config";
 import { useCdeSwatchStyle } from "./cde-button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
@@ -36,7 +36,7 @@ const COLOR_FIELDS: [AppTileColorKind, string][] = [["headerBg", "Fundo da faixa
 function HeaderPreview({ tile, mobile = false, appName, display }: { tile: AppTileConfig; mobile?: boolean; appName?: string; display?: ReturnType<typeof appDisplay> }) {
   const background = tile.headerBg === "padrao" ? (mobile ? "var(--accent)" : "var(--card)") : appTileColor("headerBg", tile.headerBg).value;
   return <div aria-label={mobile ? "Prévia da faixa superior mobile" : appName ? "Prévia do cabeçalho do app" : "Prévia da faixa superior desktop"} style={{ ...homeHeaderVars(tile), "--home-header-bg": background } as React.CSSProperties} className={`home-page-header px-4 py-5 ${mobile ? "" : "home-header-desktop-preview flex items-center"}`}>
-    <div className="flex items-center justify-between gap-3">{appName ? <MyioAppLogo appName={appName} tone={homeHeaderLogoTone(tile, mobile)} {...(display ? { display } : {})} /> : <MyioPlatformLogo tone={homeHeaderLogoTone(tile, mobile)} className="h-10" />}<div className="flex min-w-0 items-center gap-3">{!mobile && <span className="text-sm">Usuário</span>}<Menu aria-hidden className="h-6 w-6 shrink-0" /></div></div>
+    <div className="flex items-center justify-between gap-3">{appName ? <MyioAppLogo appName={appName} logoPx={appLogoPx(tile)} tone={homeHeaderLogoTone(tile, mobile)} {...(display ? { display } : {})} /> : <MyioPlatformLogo tone={homeHeaderLogoTone(tile, mobile)} className="h-10" />}<div className="flex min-w-0 items-center gap-3">{!mobile && <span className="text-sm">Usuário</span>}<Menu aria-hidden className="h-6 w-6 shrink-0" /></div></div>
     {mobile && <p className="mt-8 text-xl font-bold">Olá, Usuário</p>}
   </div>;
 }
@@ -119,6 +119,7 @@ export function CdeAppOrder({ number, handle }: { number: number; handle?: impor
             <AppNameColorChoice appName={app.name} value={display.colorKey} onChange={color => updateApp(app.key, { color })} />
           </div>; })}
         </div>
+        <div className="max-w-[12rem] space-y-1"><Label>Tamanho do logo myio nos apps</Label><Select value={String(appLogoPx(tile))} onValueChange={value => setTileDraft({ ...tile, appLogoPx: Number(value) })}><SelectTrigger aria-label="Tamanho do logo myio nos apps" className="h-9"><SelectValue /></SelectTrigger><SelectContent>{[24, 28, 32, 36, 40, 44, 48, 56, 64].map(px => <SelectItem key={px} value={String(px)}>{px} px{px === 40 ? " (Home)" : ""}</SelectItem>)}</SelectContent></Select></div>
         <div className="space-y-1"><Label>Prévia do cabeçalho dos apps</Label><HeaderPreview tile={tile} appName="CRM" display={appDisplay(tile, "crm", 16)} /></div>
       </div>
       <div className="mt-6 space-y-3 border-t border-border pt-4">
