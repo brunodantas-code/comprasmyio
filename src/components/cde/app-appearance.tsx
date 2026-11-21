@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { APP_APPEARANCE_GROUP, convertAppearanceColor, parseAppAppearance, type AppAppearance } from "./appearance-colors";
@@ -99,8 +99,31 @@ export function mountAppAppearance(appearance: AppAppearance) {
     delete root.dataset['appAppearance'];
   };
 }
+const PERSONAL_KEY = "myio-personal-appearance";
+const PERSONAL_EVENT = "myio-personal-appearance";
+export function readPersonalAppearance() {
+  try { return parseAppAppearance(localStorage.getItem(PERSONAL_KEY)); } catch { return null; }
+}
+/** Personal choice (any user, no CDE access needed) overrides the CDE default on this device. */
+export function setPersonalAppearance(value: AppAppearance) {
+  localStorage.setItem(PERSONAL_KEY, value);
+  window.dispatchEvent(new Event(PERSONAL_EVENT));
+}
+export function usePersonalAppearance() {
+  const [value, setValue] = useState<AppAppearance | null>(null);
+  useEffect(() => {
+    const sync = () => setValue(readPersonalAppearance());
+    sync();
+    window.addEventListener(PERSONAL_EVENT, sync);
+    window.addEventListener("storage", sync);
+    return () => { window.removeEventListener(PERSONAL_EVENT, sync); window.removeEventListener("storage", sync); };
+  }, []);
+  return value;
+}
 export function AppAppearanceApplier() {
-  const { data } = useAppAppearance();
-  useEffect(() => data ? mountAppAppearance(data) : undefined, [data]);
+  const { data: cde } = useAppAppearance();
+  const personal = usePersonalAppearance();
+  const data = personal ?? cde;
+  useEffect(() => data && data !== "green" ? mountAppAppearance(data) : undefined, [data]);
   return null;
 }

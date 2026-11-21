@@ -3,6 +3,9 @@ import { ListItemStyleVars } from "@/components/cde/list-item-style";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { usePendingActions } from "@/hooks/use-pending-actions";
 import { activeTheme, toggleAppTheme } from "@/components/theme-toggle";
+import { Palette, Check } from "lucide-react";
+import { useAppAppearance, usePersonalAppearance, setPersonalAppearance } from "@/components/cde/app-appearance";
+import { APP_APPEARANCES, type AppAppearance } from "@/components/cde/appearance-colors";
 import { Moon, Sun } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
@@ -130,10 +133,19 @@ function MenuTriggerBadge() {
 }
 
 function ThemeEntry({ className }: { className: string }) {
-  const [dark, setDark] = useState(false);
-  useEffect(() => setDark(activeTheme() === "dark"), []);
-  const Icon = dark ? Sun : Moon;
-  return <Button variant="ghost" className={className} onClick={() => setDark(toggleAppTheme() === "dark")}><Icon className="h-5 w-5" />{dark ? "Modo claro" : "Modo escuro"}</Button>;
+  const personal = usePersonalAppearance();
+  const cde = useAppAppearance().data;
+  const current = personal ?? cde ?? "green";
+  const choose = (value: AppAppearance) => {
+    if (activeTheme() === "dark") toggleAppTheme();
+    setPersonalAppearance(value);
+  };
+  return <div className="flex flex-col">
+    <div className={className + " pointer-events-none"}><Palette className="h-5 w-5" />Aparência</div>
+    {APP_APPEARANCES.map(option => <Button key={option.key} variant="ghost" className={className + " pl-10"} aria-pressed={current === option.key} onClick={() => choose(option.key)}>
+      {current === option.key ? <Check className="h-4 w-4" /> : <span className="h-4 w-4" />}{option.label}
+    </Button>)}
+  </div>;
 }
 
 /** Shared CDE entries, with a bottom panel on mobile and a popover on desktop. */

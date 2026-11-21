@@ -9,7 +9,7 @@ export const MENU_ITEMS = [
   { id: "manual", label: "Manual do Usuário", icon: BookOpen },
   { id: "signature", label: "Minha assinatura", icon: PenLine },
   { id: "back", label: "Voltar", icon: ArrowLeft },
-  { id: "theme", label: "Modo escuro", icon: Moon },
+  { id: "theme", label: "Aparência", icon: Moon },
   { id: "password", label: "Alterar senha", icon: KeyRound },
   { id: "logout", label: "Sair", icon: LogOut },
   { id: "portal", label: "Todos os apps", icon: LayoutGrid, to: "/portal", optional: true },
