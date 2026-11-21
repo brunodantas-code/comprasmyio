@@ -1,110 +1,5 @@
 [
   {
-    "id": "components/access-profile-definitions-tab.tsx|fd49c1da5c5be286|0",
-    "file": "components/access-profile-definitions-tab.tsx",
-    "line": 164,
-    "tag": "Button",
-    "label": "Pencil",
-    "dynamic": false,
-    "visualCustom": false,
-    "autoCdeSafe": true,
-    "icon": "Pencil",
-    "variant": "ghost",
-    "size": "compactIcon",
-    "className": "",
-    "group": ""
-  },
-  {
-    "id": "components/access-profile-definitions-tab.tsx|616ca42b4a3c55c6|0",
-    "file": "components/access-profile-definitions-tab.tsx",
-    "line": 164,
-    "tag": "CdeButton",
-    "label": "Sem nome fixo",
-    "dynamic": false,
-    "visualCustom": false,
-    "autoCdeSafe": true,
-    "icon": "",
-    "variant": "",
-    "size": "",
-    "className": "",
-    "group": "plus"
-  },
-  {
-    "id": "components/access-profile-definitions-tab.tsx|4cb98da3d1d6169a|0",
-    "file": "components/access-profile-definitions-tab.tsx",
-    "line": 170,
-    "tag": "Button",
-    "label": "Salvar perfil",
-    "dynamic": false,
-    "visualCustom": false,
-    "autoCdeSafe": true,
-    "icon": "",
-    "variant": "",
-    "size": "",
-    "className": "",
-    "group": ""
-  },
-  {
-    "id": "components/access-profile-definitions-tab.tsx|2f4050513ae27075|0",
-    "file": "components/access-profile-definitions-tab.tsx",
-    "line": 196,
-    "tag": "Button",
-    "label": "Excluir",
-    "dynamic": false,
-    "visualCustom": false,
-    "autoCdeSafe": true,
-    "icon": "Trash2",
-    "variant": "ghost",
-    "size": "compactIcon",
-    "className": "text-destructive hover:text-destructive",
-    "group": ""
-  },
-  {
-    "id": "components/access-profile-definitions-tab.tsx|aaa6dc3d2bb41971|0",
-    "file": "components/access-profile-definitions-tab.tsx",
-    "line": 196,
-    "tag": "Button",
-    "label": "Cancelar",
-    "dynamic": false,
-    "visualCustom": false,
-    "autoCdeSafe": true,
-    "icon": "",
-    "variant": "outline",
-    "size": "",
-    "className": "",
-    "group": ""
-  },
-  {
-    "id": "components/access-profile-definitions-tab.tsx|167f8b7a9f17bfb4|0",
-    "file": "components/access-profile-definitions-tab.tsx",
-    "line": 196,
-    "tag": "Button",
-    "label": "Realocar e excluir / Excluir",
-    "dynamic": true,
-    "visualCustom": false,
-    "autoCdeSafe": true,
-    "icon": "",
-    "variant": "destructive",
-    "size": "",
-    "className": "",
-    "group": ""
-  },
-  {
-    "id": "components/access-profiles-tab.tsx|d382d9af94cd203b|0",
-    "file": "components/access-profiles-tab.tsx",
-    "line": 131,
-    "tag": "Button",
-    "label": "Sem nome fixo",
-    "dynamic": true,
-    "visualCustom": false,
-    "autoCdeSafe": true,
-    "icon": "",
-    "variant": "ghost",
-    "size": "compactIcon",
-    "className": "",
-    "group": ""
-  },
-  {
     "id": "components/access/access-workspace.tsx|fc8c45ec8ac31349|0",
     "file": "components/access/access-workspace.tsx",
     "line": 53,
@@ -207,6 +102,111 @@
     "variant": "ghost",
     "size": "compactIcon",
     "className": "text-destructive hover:text-destructive",
+    "group": ""
+  },
+  {
+    "id": "components/access-profile-definitions-tab.tsx|fd49c1da5c5be286|0",
+    "file": "components/access-profile-definitions-tab.tsx",
+    "line": 164,
+    "tag": "Button",
+    "label": "Pencil",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "Pencil",
+    "variant": "ghost",
+    "size": "compactIcon",
+    "className": "",
+    "group": ""
+  },
+  {
+    "id": "components/access-profile-definitions-tab.tsx|616ca42b4a3c55c6|0",
+    "file": "components/access-profile-definitions-tab.tsx",
+    "line": 164,
+    "tag": "CdeButton",
+    "label": "Sem nome fixo",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "",
+    "variant": "",
+    "size": "",
+    "className": "",
+    "group": "plus"
+  },
+  {
+    "id": "components/access-profile-definitions-tab.tsx|4cb98da3d1d6169a|0",
+    "file": "components/access-profile-definitions-tab.tsx",
+    "line": 170,
+    "tag": "Button",
+    "label": "Salvar perfil",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "",
+    "variant": "",
+    "size": "",
+    "className": "",
+    "group": ""
+  },
+  {
+    "id": "components/access-profile-definitions-tab.tsx|2f4050513ae27075|0",
+    "file": "components/access-profile-definitions-tab.tsx",
+    "line": 196,
+    "tag": "Button",
+    "label": "Excluir",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "Trash2",
+    "variant": "ghost",
+    "size": "compactIcon",
+    "className": "text-destructive hover:text-destructive",
+    "group": ""
+  },
+  {
+    "id": "components/access-profile-definitions-tab.tsx|aaa6dc3d2bb41971|0",
+    "file": "components/access-profile-definitions-tab.tsx",
+    "line": 196,
+    "tag": "Button",
+    "label": "Cancelar",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "",
+    "variant": "outline",
+    "size": "",
+    "className": "",
+    "group": ""
+  },
+  {
+    "id": "components/access-profile-definitions-tab.tsx|167f8b7a9f17bfb4|0",
+    "file": "components/access-profile-definitions-tab.tsx",
+    "line": 196,
+    "tag": "Button",
+    "label": "Realocar e excluir / Excluir",
+    "dynamic": true,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "",
+    "variant": "destructive",
+    "size": "",
+    "className": "",
+    "group": ""
+  },
+  {
+    "id": "components/access-profiles-tab.tsx|d382d9af94cd203b|0",
+    "file": "components/access-profiles-tab.tsx",
+    "line": 131,
+    "tag": "Button",
+    "label": "Sem nome fixo",
+    "dynamic": true,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "",
+    "variant": "ghost",
+    "size": "compactIcon",
+    "className": "",
     "group": ""
   },
   {
@@ -1335,6 +1335,36 @@
     "group": ""
   },
   {
+    "id": "components/cde/app-appearance-item.tsx|b7c2a24a4413d57c|0",
+    "file": "components/cde/app-appearance-item.tsx",
+    "line": 45,
+    "tag": "Button",
+    "label": "Salvar aparência dos apps",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "Save",
+    "variant": "ghost",
+    "size": "icon",
+    "className": "",
+    "group": ""
+  },
+  {
+    "id": "components/cde/app-appearance-item.tsx|dd990799293e296f|0",
+    "file": "components/cde/app-appearance-item.tsx",
+    "line": 46,
+    "tag": "Button",
+    "label": "Cancelar aparência dos apps",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "X",
+    "variant": "ghost",
+    "size": "icon",
+    "className": "",
+    "group": ""
+  },
+  {
     "id": "components/cde/cde-add-text-list.tsx|57e5ba803781e167|0",
     "file": "components/cde/cde-add-text-list.tsx",
     "line": 64,
@@ -2267,7 +2297,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|4df33b65fce17228|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 125,
+    "line": 126,
     "tag": "button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -2282,7 +2312,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|231a7abf9009e9c1|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 126,
+    "line": 127,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -2297,7 +2327,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|f857b332789216e5|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 332,
+    "line": 333,
     "tag": "CdeButton",
     "label": "Criar modelo",
     "dynamic": false,
@@ -2312,7 +2342,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|5da02bf919be1fcb|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 333,
+    "line": 334,
     "tag": "button",
     "label": "modelos ·",
     "dynamic": true,
@@ -2327,7 +2357,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|fa8c7d49a4be2739|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 342,
+    "line": 343,
     "tag": "CdeButton",
     "label": "Criar modelo",
     "dynamic": false,
@@ -2342,7 +2372,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|f791d685d80483f8|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 343,
+    "line": 344,
     "tag": "CdeButton",
     "label": "Sem nome fixo",
     "dynamic": false,
@@ -2357,7 +2387,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|bf4bc59b3127d3cb|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 358,
+    "line": 359,
     "tag": "Button",
     "label": "Editar modelo",
     "dynamic": false,
@@ -2372,7 +2402,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|bc74324fa1e657bf|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 359,
+    "line": 360,
     "tag": "Button",
     "label": "Trash2",
     "dynamic": false,
@@ -2387,7 +2417,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|266e760c60109aa6|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 364,
+    "line": 365,
     "tag": "Button",
     "label": "Padrão (remover) / Padrão principal (remover) / Adicionar como padrão / Tornar principal / Escolher como padrão",
     "dynamic": true,
@@ -2402,7 +2432,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|388711b738ca490e|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 368,
+    "line": 369,
     "tag": "Button",
     "label": "s / Padrão secundário por tela",
     "dynamic": true,
@@ -2417,7 +2447,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|ad4583041c4a5fe6|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 379,
+    "line": 380,
     "tag": "CdeButton",
     "label": "Sem nome fixo",
     "dynamic": false,
@@ -2432,7 +2462,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|957651bdfdf19f94|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 396,
+    "line": 397,
     "tag": "CdeButton",
     "label": "Sem nome fixo",
     "dynamic": false,
@@ -2447,7 +2477,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|b621c28901e39486|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 408,
+    "line": 409,
     "tag": "CdeButton",
     "label": "Sem nome fixo",
     "dynamic": false,
@@ -2462,7 +2492,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|fca6be028ea11516|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 418,
+    "line": 419,
     "tag": "CdeButton",
     "label": "Sem nome fixo",
     "dynamic": false,
@@ -2477,7 +2507,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|df7a84e1a6a84f82|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 424,
+    "line": 425,
     "tag": "Button",
     "label": "Restaurar modelo",
     "dynamic": false,
@@ -2492,7 +2522,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|ca37ea1739cd7ac2|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 441,
+    "line": 442,
     "tag": "Button",
     "label": "Recolher tudo",
     "dynamic": false,
@@ -2507,7 +2537,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|d28478a4de1b6b68|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 529,
+    "line": 531,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -2522,7 +2552,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|fd8d2b22c3bed015|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 530,
+    "line": 532,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -2537,7 +2567,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|758d89a80b0968e2|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 549,
+    "line": 551,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -2552,7 +2582,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|5bfeb96807f40237|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 550,
+    "line": 552,
     "tag": "Button",
     "label": "Excluir",
     "dynamic": false,
@@ -2567,7 +2597,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|558b9c4f599890d9|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 572,
+    "line": 574,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -2582,7 +2612,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|3acf816df56366de|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 573,
+    "line": 575,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -5355,6 +5385,66 @@
     "group": ""
   },
   {
+    "id": "components/legal/minutes-attachments.tsx|ac4880240f5ededd|0",
+    "file": "components/legal/minutes-attachments.tsx",
+    "line": 27,
+    "tag": "Button",
+    "label": "Sem nome fixo",
+    "dynamic": true,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "",
+    "variant": "ghost",
+    "size": "",
+    "className": "!h-auto !w-auto !min-w-0 !justify-start !p-0 whitespace-normal text-left",
+    "group": ""
+  },
+  {
+    "id": "components/legal/minutes-attachments.tsx|1b01095235fe79c8|0",
+    "file": "components/legal/minutes-attachments.tsx",
+    "line": 39,
+    "tag": "CdeButton",
+    "label": "Anexar documento ou foto",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "",
+    "variant": "",
+    "size": "",
+    "className": "",
+    "group": "attach"
+  },
+  {
+    "id": "components/legal/minutes-attachments.tsx|d347217230acc381|0",
+    "file": "components/legal/minutes-attachments.tsx",
+    "line": 40,
+    "tag": "Button",
+    "label": "Remover anexo",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "X",
+    "variant": "ghost",
+    "size": "compactIcon",
+    "className": "",
+    "group": ""
+  },
+  {
+    "id": "components/legal/minutes-attachments.tsx|462bc91c6c058aa0|0",
+    "file": "components/legal/minutes-attachments.tsx",
+    "line": 40,
+    "tag": "Button",
+    "label": "Remover arquivo selecionado",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "X",
+    "variant": "ghost",
+    "size": "compactIcon",
+    "className": "",
+    "group": ""
+  },
+  {
     "id": "components/legal/minutes-list.tsx|9fb97df7e3956985|0",
     "file": "components/legal/minutes-list.tsx",
     "line": 73,
@@ -5522,7 +5612,7 @@
   {
     "id": "components/legal/subject-actions.tsx|c5eec6e46746cbe5|0",
     "file": "components/legal/subject-actions.tsx",
-    "line": 69,
+    "line": 71,
     "tag": "CdeButton",
     "label": "Adicionar ação",
     "dynamic": false,
@@ -5537,7 +5627,7 @@
   {
     "id": "components/legal/subject-actions.tsx|a58d39df7dd51cc3|0",
     "file": "components/legal/subject-actions.tsx",
-    "line": 71,
+    "line": 73,
     "tag": "Button",
     "label": "Editar ação",
     "dynamic": false,
@@ -5552,7 +5642,7 @@
   {
     "id": "components/legal/subject-actions.tsx|562690f9bb6e922c|0",
     "file": "components/legal/subject-actions.tsx",
-    "line": 71,
+    "line": 73,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -5567,7 +5657,7 @@
   {
     "id": "components/legal/subject-actions.tsx|c98afaba4a87103a|0",
     "file": "components/legal/subject-actions.tsx",
-    "line": 73,
+    "line": 75,
     "tag": "CdeButton",
     "label": "Adicionar observação",
     "dynamic": false,
@@ -5582,7 +5672,7 @@
   {
     "id": "components/legal/subject-actions.tsx|33fc07276328516d|0",
     "file": "components/legal/subject-actions.tsx",
-    "line": 73,
+    "line": 75,
     "tag": "Button",
     "label": "Editar observação",
     "dynamic": false,
@@ -5597,7 +5687,7 @@
   {
     "id": "components/legal/subject-actions.tsx|cd179fb854a49572|0",
     "file": "components/legal/subject-actions.tsx",
-    "line": 73,
+    "line": 75,
     "tag": "Button",
     "label": "Excluir observação",
     "dynamic": false,
@@ -5612,7 +5702,7 @@
   {
     "id": "components/legal/subject-actions.tsx|e5c22db8af11aa31|0",
     "file": "components/legal/subject-actions.tsx",
-    "line": 75,
+    "line": 77,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -5627,7 +5717,7 @@
   {
     "id": "components/legal/subject-actions.tsx|439484d97dcb8080|0",
     "file": "components/legal/subject-actions.tsx",
-    "line": 76,
+    "line": 78,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -5642,7 +5732,7 @@
   {
     "id": "components/legal/subject-actions.tsx|439484d97dcb8080|1",
     "file": "components/legal/subject-actions.tsx",
-    "line": 77,
+    "line": 79,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -5680,66 +5770,6 @@
     "autoCdeSafe": true,
     "icon": "Trash2",
     "variant": "outline",
-    "size": "compactIcon",
-    "className": "",
-    "group": ""
-  },
-  {
-    "id": "components/legal/minutes-attachments.tsx|ac4880240f5ededd|0",
-    "file": "components/legal/minutes-attachments.tsx",
-    "line": 27,
-    "tag": "Button",
-    "label": "Sem nome fixo",
-    "dynamic": true,
-    "visualCustom": false,
-    "autoCdeSafe": true,
-    "icon": "",
-    "variant": "ghost",
-    "size": "",
-    "className": "!h-auto !w-auto !min-w-0 !justify-start !p-0 whitespace-normal text-left",
-    "group": ""
-  },
-  {
-    "id": "components/legal/minutes-attachments.tsx|1b01095235fe79c8|0",
-    "file": "components/legal/minutes-attachments.tsx",
-    "line": 39,
-    "tag": "CdeButton",
-    "label": "Anexar documento ou foto",
-    "dynamic": false,
-    "visualCustom": false,
-    "autoCdeSafe": true,
-    "icon": "",
-    "variant": "",
-    "size": "",
-    "className": "",
-    "group": "attach"
-  },
-  {
-    "id": "components/legal/minutes-attachments.tsx|d347217230acc381|0",
-    "file": "components/legal/minutes-attachments.tsx",
-    "line": 40,
-    "tag": "Button",
-    "label": "Remover anexo",
-    "dynamic": false,
-    "visualCustom": false,
-    "autoCdeSafe": true,
-    "icon": "X",
-    "variant": "ghost",
-    "size": "compactIcon",
-    "className": "",
-    "group": ""
-  },
-  {
-    "id": "components/legal/minutes-attachments.tsx|462bc91c6c058aa0|0",
-    "file": "components/legal/minutes-attachments.tsx",
-    "line": 40,
-    "tag": "Button",
-    "label": "Remover arquivo selecionado",
-    "dynamic": false,
-    "visualCustom": false,
-    "autoCdeSafe": true,
-    "icon": "X",
-    "variant": "ghost",
     "size": "compactIcon",
     "className": "",
     "group": ""
@@ -8612,7 +8642,7 @@
   {
     "id": "components/personal-todos/labels.tsx|9a972f9e858c9c9b|0",
     "file": "components/personal-todos/labels.tsx",
-    "line": 67,
+    "line": 72,
     "tag": "Button",
     "label": "Gerenciar etiquetas",
     "dynamic": false,
@@ -8627,7 +8657,7 @@
   {
     "id": "components/personal-todos/labels.tsx|4ef09820402572fd|0",
     "file": "components/personal-todos/labels.tsx",
-    "line": 68,
+    "line": 73,
     "tag": "Button",
     "label": "Editar etiqueta",
     "dynamic": false,
@@ -8642,7 +8672,7 @@
   {
     "id": "components/personal-todos/labels.tsx|0744f7bf89e702b9|0",
     "file": "components/personal-todos/labels.tsx",
-    "line": 68,
+    "line": 73,
     "tag": "Button",
     "label": "Excluir etiqueta",
     "dynamic": false,
@@ -8657,7 +8687,7 @@
   {
     "id": "components/personal-todos/labels.tsx|c3a1d9154b743849|0",
     "file": "components/personal-todos/labels.tsx",
-    "line": 69,
+    "line": 74,
     "tag": "Button",
     "label": "Nova etiqueta",
     "dynamic": false,
@@ -8672,7 +8702,7 @@
   {
     "id": "components/personal-todos/labels.tsx|fc0887a8802ec0ee|0",
     "file": "components/personal-todos/labels.tsx",
-    "line": 70,
+    "line": 75,
     "tag": "Button",
     "label": "Icon",
     "dynamic": false,
@@ -8687,7 +8717,7 @@
   {
     "id": "components/personal-todos/labels.tsx|2388ca47daed9c6c|0",
     "file": "components/personal-todos/labels.tsx",
-    "line": 70,
+    "line": 75,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -8702,7 +8732,7 @@
   {
     "id": "components/personal-todos/labels.tsx|6f7ad6a28f23d7c0|0",
     "file": "components/personal-todos/labels.tsx",
-    "line": 70,
+    "line": 75,
     "tag": "Button",
     "label": "Save",
     "dynamic": false,
@@ -10035,11 +10065,11 @@
     "group": ""
   },
   {
-    "id": "components/site-survey-client-answer-import.tsx|20de5ee863fe9105|0",
+    "id": "components/site-survey-client-answer-import.tsx|9a4b294692b0fba4|0",
     "file": "components/site-survey-client-answer-import.tsx",
     "line": 107,
     "tag": "Button",
-    "label": "Importar respostas do cliente",
+    "label": "Respostas Cliente",
     "dynamic": true,
     "visualCustom": false,
     "autoCdeSafe": true,
@@ -10050,11 +10080,11 @@
     "group": ""
   },
   {
-    "id": "components/site-survey-client-answer-import.tsx|aad62dd7e9908000|0",
+    "id": "components/site-survey-client-answer-import.tsx|6cdb05fc105d8a58|0",
     "file": "components/site-survey-client-answer-import.tsx",
     "line": 108,
     "tag": "Button",
-    "label": "Histórico dos relatórios",
+    "label": "Histórico Respostas",
     "dynamic": false,
     "visualCustom": false,
     "autoCdeSafe": true,
@@ -10095,11 +10125,41 @@
     "group": ""
   },
   {
-    "id": "components/site-survey-client-pending-report.tsx|e51026efe7d70f08|0",
+    "id": "components/site-survey-client-observation.tsx|3c31d81856508a79|0",
+    "file": "components/site-survey-client-observation.tsx",
+    "line": 37,
+    "tag": "Button",
+    "label": "Observações para o Cliente",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "FileText",
+    "variant": "action",
+    "size": "sm",
+    "className": "",
+    "group": ""
+  },
+  {
+    "id": "components/site-survey-client-observation.tsx|78dab82c31ed377e|0",
+    "file": "components/site-survey-client-observation.tsx",
+    "line": 39,
+    "tag": "Button",
+    "label": "Salvar observações para o cliente",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "Save",
+    "variant": "ghost",
+    "size": "compactIcon",
+    "className": "",
+    "group": ""
+  },
+  {
+    "id": "components/site-survey-client-pending-report.tsx|d1369473fe539c60|0",
     "file": "components/site-survey-client-pending-report.tsx",
     "line": 472,
     "tag": "Button",
-    "label": "Gerando… / Baixar PDF / Pendências para o cliente",
+    "label": "Gerando… / Baixar PDF / Pendências Cliente",
     "dynamic": true,
     "visualCustom": false,
     "autoCdeSafe": true,
@@ -10367,7 +10427,7 @@
   {
     "id": "components/site-survey-luc-manager.tsx|8d12b3d86baeb7ab|0",
     "file": "components/site-survey-luc-manager.tsx",
-    "line": 104,
+    "line": 105,
     "tag": "Button",
     "label": "CdeDisclosureIcon",
     "dynamic": false,
@@ -10382,7 +10442,7 @@
   {
     "id": "components/site-survey-luc-manager.tsx|d9a761072e72787c|0",
     "file": "components/site-survey-luc-manager.tsx",
-    "line": 487,
+    "line": 492,
     "tag": "CdeButton",
     "label": "Adicionar ambiente",
     "dynamic": false,
@@ -10397,7 +10457,7 @@
   {
     "id": "components/site-survey-luc-manager.tsx|5042265c2b79818c|0",
     "file": "components/site-survey-luc-manager.tsx",
-    "line": 489,
+    "line": 494,
     "tag": "Button",
     "label": "Importar Cadastro",
     "dynamic": false,
@@ -10410,11 +10470,11 @@
     "group": ""
   },
   {
-    "id": "components/site-survey-luc-manager.tsx|aceb8f1d4fc20044|0",
+    "id": "components/site-survey-luc-manager.tsx|58a97b4a2ee09706|0",
     "file": "components/site-survey-luc-manager.tsx",
-    "line": 489,
+    "line": 494,
     "tag": "Button",
-    "label": "Gerando... / Cadastro em PDF",
+    "label": "Gerando... / PDF",
     "dynamic": true,
     "visualCustom": false,
     "autoCdeSafe": true,
@@ -10425,15 +10485,15 @@
     "group": ""
   },
   {
-    "id": "components/site-survey-luc-manager.tsx|8bdf7ec953e5ea11|0",
+    "id": "components/site-survey-luc-manager.tsx|3eccfa536037acc0|0",
     "file": "components/site-survey-luc-manager.tsx",
-    "line": 489,
+    "line": 494,
     "tag": "Button",
-    "label": "Exportando... / Cadastro em Excel",
+    "label": "Exportando... / Excel",
     "dynamic": true,
     "visualCustom": false,
     "autoCdeSafe": true,
-    "icon": "Download",
+    "icon": "FileSpreadsheet",
     "variant": "ghost",
     "size": "sm",
     "className": "",
@@ -10442,7 +10502,7 @@
   {
     "id": "components/site-survey-luc-manager.tsx|a563a36089b16df9|0",
     "file": "components/site-survey-luc-manager.tsx",
-    "line": 489,
+    "line": 494,
     "tag": "Button",
     "label": "Recolher tudo",
     "dynamic": false,
@@ -10457,7 +10517,7 @@
   {
     "id": "components/site-survey-luc-manager.tsx|289c2e2cfafb5df7|0",
     "file": "components/site-survey-luc-manager.tsx",
-    "line": 489,
+    "line": 494,
     "tag": "Button",
     "label": "ChevronDown",
     "dynamic": false,
@@ -10472,7 +10532,7 @@
   {
     "id": "components/site-survey-luc-manager.tsx|58d6c4ad412fd74c|0",
     "file": "components/site-survey-luc-manager.tsx",
-    "line": 492,
+    "line": 497,
     "tag": "button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -10487,7 +10547,7 @@
   {
     "id": "components/site-survey-luc-manager.tsx|d93ef7dc6b935baa|0",
     "file": "components/site-survey-luc-manager.tsx",
-    "line": 492,
+    "line": 497,
     "tag": "Button",
     "label": "Editar ambiente",
     "dynamic": false,
@@ -10502,7 +10562,7 @@
   {
     "id": "components/site-survey-luc-manager.tsx|7204c6f8a073fce2|0",
     "file": "components/site-survey-luc-manager.tsx",
-    "line": 492,
+    "line": 497,
     "tag": "Button",
     "label": "CdeDisclosureIcon",
     "dynamic": false,
@@ -10517,7 +10577,7 @@
   {
     "id": "components/site-survey-luc-manager.tsx|9c04296342489c55|0",
     "file": "components/site-survey-luc-manager.tsx",
-    "line": 498,
+    "line": 503,
     "tag": "Button",
     "label": "Colorido",
     "dynamic": false,
@@ -10532,7 +10592,7 @@
   {
     "id": "components/site-survey-luc-manager.tsx|3a9a35e239a29535|0",
     "file": "components/site-survey-luc-manager.tsx",
-    "line": 499,
+    "line": 504,
     "tag": "Button",
     "label": "Preto e branco",
     "dynamic": false,
@@ -10547,7 +10607,7 @@
   {
     "id": "components/site-survey-luc-manager.tsx|d9d23398d9014c37|0",
     "file": "components/site-survey-luc-manager.tsx",
-    "line": 512,
+    "line": 517,
     "tag": "Button",
     "label": "Digite ou selecione",
     "dynamic": true,
@@ -10562,7 +10622,7 @@
   {
     "id": "components/site-survey-luc-manager.tsx|e52ebf226858bf17|0",
     "file": "components/site-survey-luc-manager.tsx",
-    "line": 514,
+    "line": 519,
     "tag": "Button",
     "label": "Analisando fachada... / Identificar pela fachada",
     "dynamic": true,
@@ -10577,7 +10637,7 @@
   {
     "id": "components/site-survey-luc-manager.tsx|ef6c7eca62e8f970|0",
     "file": "components/site-survey-luc-manager.tsx",
-    "line": 518,
+    "line": 523,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -10592,7 +10652,7 @@
   {
     "id": "components/site-survey-luc-manager.tsx|891aaa11be57c820|0",
     "file": "components/site-survey-luc-manager.tsx",
-    "line": 518,
+    "line": 523,
     "tag": "Button",
     "label": "Salvando... / Salvar",
     "dynamic": true,
@@ -10607,7 +10667,7 @@
   {
     "id": "components/site-survey-luc-manager.tsx|44ddb90f890d7aea|0",
     "file": "components/site-survey-luc-manager.tsx",
-    "line": 521,
+    "line": 526,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -10622,7 +10682,7 @@
   {
     "id": "components/site-survey-luc-manager.tsx|12ee4b1f51a6a7cc|0",
     "file": "components/site-survey-luc-manager.tsx",
-    "line": 521,
+    "line": 526,
     "tag": "Button",
     "label": "Importando...",
     "dynamic": true,
@@ -13637,7 +13697,7 @@
   {
     "id": "routes/__root.tsx|68898feacd882e4d|0",
     "file": "routes/__root.tsx",
-    "line": 62,
+    "line": 63,
     "tag": "Button",
     "label": "Try again",
     "dynamic": false,
@@ -14882,7 +14942,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|ac945105a5c23f7e|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 337,
+    "line": 338,
     "tag": "Button",
     "label": "ChevronDown",
     "dynamic": false,
@@ -14897,7 +14957,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|dad473270fc816ce|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 341,
+    "line": 342,
     "tag": "Button",
     "label": "0 / —",
     "dynamic": true,
@@ -14912,7 +14972,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|713ba9c5794a10c8|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 341,
+    "line": 342,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -14927,7 +14987,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|713ba9c5794a10c8|1",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 346,
+    "line": 347,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -14942,7 +15002,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|18e24e5d4f0bf28c|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 346,
+    "line": 347,
     "tag": "Button",
     "label": "Cancelar visita",
     "dynamic": false,
@@ -14957,7 +15017,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|d98f88bcac7f7ca3|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 369,
+    "line": 370,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -14972,7 +15032,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|d98f88bcac7f7ca3|1",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 373,
+    "line": 374,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -14987,7 +15047,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|6efa3dc1e94aeb94|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 402,
+    "line": 403,
     "tag": "Button",
     "label": "Salvar visita",
     "dynamic": false,
@@ -15002,7 +15062,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|bd181d466152b0dc|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 404,
+    "line": 405,
     "tag": "Button",
     "label": "Editar visita",
     "dynamic": false,
@@ -15017,7 +15077,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|6efa3dc1e94aeb94|1",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 404,
+    "line": 405,
     "tag": "Button",
     "label": "Salvar visita",
     "dynamic": false,
@@ -15032,7 +15092,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|8bc3eee31c830b6d|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 418,
+    "line": 419,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -15047,7 +15107,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|8bc3eee31c830b6d|1",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 426,
+    "line": 427,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -15062,7 +15122,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|bfc5973a1cb7b304|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 428,
+    "line": 429,
     "tag": "Button",
     "label": "Recolher",
     "dynamic": false,
@@ -15077,7 +15137,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|eb6e7bef40ac0532|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1154,
+    "line": 1155,
     "tag": "CdeButton",
     "label": "Adicionar material ou equipamento",
     "dynamic": false,
@@ -15092,7 +15152,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|5da2603f1e976dd6|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1334,
+    "line": 1335,
     "tag": "CdeButton",
     "label": "Adicionar pergunta para o cliente",
     "dynamic": false,
@@ -15107,7 +15167,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|7a806b9fa8219d6e|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1334,
+    "line": 1335,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -15122,7 +15182,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|439484d97dcb8080|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1341,
+    "line": 1342,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -15137,7 +15197,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|d544fb3391e461fb|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1341,
+    "line": 1342,
     "tag": "Button",
     "label": "Editar pergunta",
     "dynamic": false,
@@ -15152,7 +15212,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|38d156755e802bc9|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1341,
+    "line": 1342,
     "tag": "Button",
     "label": "Excluir pergunta",
     "dynamic": false,
@@ -15167,7 +15227,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|614842c25317fc69|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1341,
+    "line": 1342,
     "tag": "Button",
     "label": "Marcar como respondida",
     "dynamic": false,
@@ -15182,7 +15242,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|e5d2f83f38509a8f|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1341,
+    "line": 1342,
     "tag": "Button",
     "label": "Editar resposta",
     "dynamic": false,
@@ -15197,7 +15257,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|4378a0ac946bcd55|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1341,
+    "line": 1342,
     "tag": "Button",
     "label": "Excluir resposta",
     "dynamic": false,
@@ -15212,7 +15272,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|416baeba9e5b01c6|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1341,
+    "line": 1342,
     "tag": "Button",
     "label": "Salvar resposta",
     "dynamic": false,
@@ -15227,7 +15287,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|da7717f93bee3775|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1341,
+    "line": 1342,
     "tag": "Button",
     "label": "facade",
     "dynamic": true,
@@ -15242,7 +15302,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|3394c832318ddb2a|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1347,
+    "line": 1348,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -15257,7 +15317,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|439484d97dcb8080|1",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1347,
+    "line": 1348,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -15272,7 +15332,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|15635c027a3c1428|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1356,
+    "line": 1357,
     "tag": "Button",
     "label": "Fechar",
     "dynamic": false,
@@ -15287,7 +15347,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|439484d97dcb8080|2",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1356,
+    "line": 1357,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -15302,7 +15362,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|15635c027a3c1428|1",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1356,
+    "line": 1357,
     "tag": "Button",
     "label": "Fechar",
     "dynamic": false,
@@ -15317,7 +15377,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|7a676072b624c695|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1360,
+    "line": 1361,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -15332,7 +15392,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|77fc7b4651293671|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1362,
+    "line": 1363,
     "tag": "Button",
     "label": "Salvar progresso",
     "dynamic": false,
@@ -15347,7 +15407,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|d2796d442a5370ec|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1366,
+    "line": 1367,
     "tag": "CdeButton",
     "label": "Ambiente",
     "dynamic": false,
@@ -15362,7 +15422,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|a27a426d016ecb18|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1366,
+    "line": 1367,
     "tag": "Button",
     "label": "Recolher loja ou ambiente",
     "dynamic": false,
@@ -15377,7 +15437,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|8b6798b19c37cab7|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1366,
+    "line": 1367,
     "tag": "Button",
     "label": "Selecione ou pesquise o LUC ou nome da loja",
     "dynamic": true,
@@ -15392,7 +15452,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|0da4049992d11ead|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1366,
+    "line": 1367,
     "tag": "Button",
     "label": "Limpar busca de lojas",
     "dynamic": false,
@@ -15407,7 +15467,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|bfb469600aba7b26|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1366,
+    "line": 1367,
     "tag": "Button",
     "label": "pt-BR / 2-digit / Iniciar visita",
     "dynamic": true,
@@ -15422,7 +15482,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|f6f4c14a5f3dd90d|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1366,
+    "line": 1367,
     "tag": "Button",
     "label": "Retomar visita / Pausar visita",
     "dynamic": true,
@@ -15437,7 +15497,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|77fc7b4651293671|1",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1370,
+    "line": 1371,
     "tag": "Button",
     "label": "Salvar progresso",
     "dynamic": false,
@@ -15452,7 +15512,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|02e049f45483919f|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1370,
+    "line": 1371,
     "tag": "Button",
     "label": "Conferindo... / Concluir visita",
     "dynamic": true,
@@ -15467,7 +15527,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|8a8731df53351ea9|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1370,
+    "line": 1371,
     "tag": "Button",
     "label": "Cancelar visita",
     "dynamic": false,
@@ -15482,7 +15542,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|f579d3c586485846|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1387,
+    "line": 1388,
     "tag": "Button",
     "label": "Recolher visita",
     "dynamic": false,
@@ -15497,7 +15557,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|f579d3c586485846|1",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1456,
+    "line": 1457,
     "tag": "Button",
     "label": "Recolher visita",
     "dynamic": false,
@@ -15512,7 +15572,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|ebe2e887f7ebc777|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1456,
+    "line": 1457,
     "tag": "Button",
     "label": "Iniciar visita",
     "dynamic": false,
@@ -15527,7 +15587,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|378be691e293d2cc|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1456,
+    "line": 1457,
     "tag": "Button",
     "label": "Concluir",
     "dynamic": false,
@@ -15542,7 +15602,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|06d552b413eac24c|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1456,
+    "line": 1457,
     "tag": "Button",
     "label": "Solicitar ajustes",
     "dynamic": false,
@@ -15557,7 +15617,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|1cd36a073b3e717e|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1480,
+    "line": 1481,
     "tag": "CdeButton",
     "label": "Técnico",
     "dynamic": false,
@@ -15572,7 +15632,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|8bc3eee31c830b6d|2",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1484,
+    "line": 1485,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -15587,7 +15647,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|d7080aff7892e375|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1484,
+    "line": 1485,
     "tag": "Button",
     "label": "Selecione um modelo",
     "dynamic": false,
@@ -15602,7 +15662,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|5443eedbdbe51c70|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1491,
+    "line": 1492,
     "tag": "Button",
     "label": "Disponível sem modelo base",
     "dynamic": true,
@@ -15617,7 +15677,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|686366697b299307|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1612,
+    "line": 1613,
     "tag": "Button",
     "label": "new",
     "dynamic": true,
@@ -15632,7 +15692,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|20e22cc6beda2b60|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1612,
+    "line": 1613,
     "tag": "CdeButton",
     "label": "Criar modelo",
     "dynamic": false,
@@ -15647,7 +15707,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|5498a86b6f4701e2|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1612,
+    "line": 1613,
     "tag": "Button",
     "label": "edit",
     "dynamic": true,
@@ -15662,7 +15722,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|289c2e2cfafb5df7|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1612,
+    "line": 1613,
     "tag": "Button",
     "label": "ChevronDown",
     "dynamic": true,
@@ -15677,7 +15737,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|7d0a9d25ab7e8fda|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1612,
+    "line": 1613,
     "tag": "Button",
     "label": "Salvar modelo",
     "dynamic": false,
@@ -15692,7 +15752,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|f4e9ed1e0d392d4a|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1612,
+    "line": 1613,
     "tag": "Button",
     "label": "sections",
     "dynamic": true,
@@ -15707,7 +15767,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|4d4be3b720f9f28d|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1612,
+    "line": 1613,
     "tag": "CdeButton",
     "label": "Adicionar seção",
     "dynamic": false,
@@ -15722,7 +15782,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|b0e331627f4ba3a5|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1612,
+    "line": 1613,
     "tag": "Button",
     "label": "Editar seção",
     "dynamic": false,
@@ -15737,7 +15797,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|8c6f20b2bb48f18a|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1612,
+    "line": 1613,
     "tag": "Button",
     "label": "Salvar seção",
     "dynamic": false,
@@ -15752,7 +15812,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|58556371ae221833|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1612,
+    "line": 1613,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -15767,7 +15827,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|9b901d6be1ac92a2|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1612,
+    "line": 1613,
     "tag": "CdeButton",
     "label": "Adicionar pergunta",
     "dynamic": false,
@@ -15782,7 +15842,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|d9521549804d6823|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1612,
+    "line": 1613,
     "tag": "Button",
     "label": "Editar pergunta",
     "dynamic": false,
@@ -15797,7 +15857,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|59e987744915d1a4|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1612,
+    "line": 1613,
     "tag": "Button",
     "label": "Salvar pergunta",
     "dynamic": false,
@@ -15812,7 +15872,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|e325e236904d1ee7|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1612,
+    "line": 1613,
     "tag": "CdeButton",
     "label": "Adicionar pergunta",
     "dynamic": false,
@@ -15827,7 +15887,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|439484d97dcb8080|3",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1748,
+    "line": 1749,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -15842,7 +15902,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|db59ed42a6bf9277|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1750,
+    "line": 1751,
     "tag": "CdeButton",
     "label": "Criar novo cadastro",
     "dynamic": false,
@@ -15857,7 +15917,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|4fc6a91fd6777a16|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1755,
+    "line": 1756,
     "tag": "Button",
     "label": "Editar cadastro",
     "dynamic": false,
@@ -15872,7 +15932,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|57d3f889944ca8fd|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1755,
+    "line": 1756,
     "tag": "CdeButton",
     "label": "Adicionar item",
     "dynamic": false,
@@ -15887,7 +15947,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|231a7abf9009e9c1|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1755,
+    "line": 1756,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -15902,7 +15962,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|aa96a102ec9d5d01|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1756,
+    "line": 1757,
     "tag": "Button",
     "label": "Editar",
     "dynamic": false,
@@ -15917,7 +15977,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|439484d97dcb8080|4",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1757,
+    "line": 1758,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -15932,7 +15992,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|273714851aff6a4a|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1761,
+    "line": 1762,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -15947,7 +16007,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|891aaa11be57c820|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1761,
+    "line": 1762,
     "tag": "Button",
     "label": "Salvando... / Salvar",
     "dynamic": true,
@@ -15962,7 +16022,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|eaec305d10b6c1a1|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1762,
+    "line": 1763,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -15977,7 +16037,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|891aaa11be57c820|1",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1762,
+    "line": 1763,
     "tag": "Button",
     "label": "Salvando... / Salvar",
     "dynamic": true,
@@ -15992,7 +16052,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|640c09521c9ba752|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1850,
+    "line": 1851,
     "tag": "Button",
     "label": "Escolher anexos para excluir",
     "dynamic": false,
@@ -16007,7 +16067,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|3df0f39e6b06c033|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1870,
+    "line": 1871,
     "tag": "button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -16022,7 +16082,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|03802a8f57d2d9b0|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1881,
+    "line": 1882,
     "tag": "Button",
     "label": "FileText",
     "dynamic": true,
@@ -16037,7 +16097,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|5d8b32552a03bf1e|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1889,
+    "line": 1890,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -16052,7 +16112,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|cf05cb89eb9438a0|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1950,
+    "line": 1951,
     "tag": "Button",
     "label": "Escolher ou arrastar arquivo",
     "dynamic": true,
@@ -16067,7 +16127,7 @@
   {
     "id": "routes/_authenticated/site-survey.tsx|37e77b77ac2e703f|0",
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 2008,
+    "line": 2009,
     "tag": "Button",
     "label": "Abrir calendário",
     "dynamic": false,

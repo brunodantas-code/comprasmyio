@@ -38,3 +38,4 @@
 - Both marker groups use their saved fixed diameter and fit text internally; per-screen scale never changes marker size, keeping previews and app uses consistent.
 - Disclosure headers reserve their rightmost slot for expansion; labelled CdeButton toggles order the arrow after text, while toolbars remain separate from the expansion control.
 - Rules for shared components in src/components/ui/ (Select, Dialog/Sheet X, Button/Input/Textarea, Badge, Card, Table) live in src/components/ui/AGENTS.md.
+- App-wide appearance uses app_appearance in cde_selected and a reversible root token/legacy literal overlay; convert original colours, preserve saved models and media pixels, and exempt fixed palette-reference swatches so theme changes never compound or erase customization.

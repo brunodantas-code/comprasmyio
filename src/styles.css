@@ -4,6 +4,21 @@
 @import "../node_modules/frappe-gantt/dist/frappe-gantt.css";
 @source "../src";
 
+/* Fixed brand references keep the three appearance swatches distinguishable. */
+:root {
+  --appearance-reference-green: #0fc482;
+  --appearance-reference-purple: #673ab6;
+  --appearance-reference-gray: oklch(0.48 0 0);
+  --appearance-reference-white: oklch(1 0 0);
+}
+.appearance-palette { --appearance-reference-base: var(--appearance-reference-green); }
+.appearance-palette[data-palette="purple"] { --appearance-reference-base: var(--appearance-reference-purple); }
+.appearance-palette[data-palette="grayscale"] { --appearance-reference-base: var(--appearance-reference-gray); }
+.appearance-sample { display: block; width: 1.5rem; height: 1.5rem; border-radius: 0; }
+.appearance-sample-soft { background: color-mix(in oklab, var(--appearance-reference-base) 12%, var(--appearance-reference-white)); }
+.appearance-sample-mid { background: color-mix(in oklab, var(--appearance-reference-base) 45%, var(--appearance-reference-white)); }
+.appearance-sample-strong { background: var(--appearance-reference-base); }
+
 .pm-editor-fields input,
 .pm-editor-fields button[role="combobox"] {
   height: 2.25rem !important;

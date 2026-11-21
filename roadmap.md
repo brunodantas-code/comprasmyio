@@ -1,4 +1,5 @@
 # Roadmap
+- [x] CDE: Aparência global Roxo myio, Verde myio e P&B com De-Para reversível, sem sobrescrever personalizações ou fotos; salvar/recarregar conferidos na conta Leonardo e cores verificadas em Home, Projects, Site Survey e CRM; celular sem excesso lateral, verde restaurado. Não publicado.
 - [x] Botões PDF/Excel compactados com símbolos dos Approvals; Pendências Cliente, Respostas Cliente e Histórico Respostas conferidos na visita Mogi; computador/celular e abertura das opções PDF verificados, não publicado.
 - [x] Relógio estava oculto à direita: barra permite segunda linha no computador, mantendo todos os controles; largura 1282/1282 e rolagem zero conferidas em 1920px. Celular preserva rolagem; 13 testes passaram, não publicado.
 - [x] Comparar cabeçalhos: print do usuário mostra apenas o topo da visita Mogi; relógio fica na barra acima da lista, abaixo do gráfico e dos blocos de cadastro/proposta; cabeçalho preservado.

@@ -1,4 +1,5 @@
 import { CdeAppearance } from "./cde-appearance-item";
+import { AppAppearanceItem } from "./app-appearance-item";
 import { CdeFilterStandard } from "./cde-filter-standard";
 import { NumericMarkerEditor } from "./numeric-marker-editor";
 import { CDE_APPEARANCE_DEFAULT, cdeAppearanceVars, useCdeAppearance } from "./cde-appearance";
@@ -106,7 +107,7 @@ const PARENTS: Record<string, string> = { "1": "Campos para preenchimento", "3":
 const baseTitle = (t: string) => t.split(" ").slice(1).join(" ");
 const groupParent = (t: string) => { const n = t.split(" ")[0].replace(/\.$/, ""); return n.includes(".") ? n.split(".")[0] : null; };
 const CDE_DEFAULT_ORDER: CdeOrder = {
-  cats: ["cde_appearance", ...[...new Set(GROUPS.map((g) => groupParent(g.title) ? `p:${groupParent(g.title)}` : g.key))], "icons", "nav", "menu", "apps", "table_fonts", "title_texts", "tags", "corporate_messages", "button_library", "deadline_alerts", "project_budget", "project_appearance"],
+  cats: ["app_appearance", "cde_appearance", ...[...new Set(GROUPS.map((g) => groupParent(g.title) ? `p:${groupParent(g.title)}` : g.key))], "icons", "nav", "menu", "apps", "table_fonts", "title_texts", "tags", "corporate_messages", "button_library", "deadline_alerts", "project_budget", "project_appearance"],
   subs: Object.fromEntries(Object.keys(PARENTS).map((p) => [p, GROUPS.filter((g) => groupParent(g.title) === p).map((g) => g.key)])),
 };
 const EXTRA_LABELS: Record<string, string> = { project_appearance: "Cores do Projects", project_budget: "Orçamento do Projects", cde_appearance: "Aparência do CDE", icons: "Ícones dos Apps e menus", nav: "Navegação (UI/UX)", menu: "Menu principal", apps: "Home Page", table_fonts: "Cabeçalhos e Listas", tags: "Tags", title_texts: "Títulos e Subtítulos", corporate_messages: "Mensagens corporativas", button_library: "Biblioteca de botões em uso", deadline_alerts: "Alertas de Prazo" };
@@ -134,7 +135,7 @@ export function CdeWorkspace() {
   const [collapseKey, setCollapseKey] = useState(0);
   const appearance = useCdeAppearance().data ?? CDE_APPEARANCE_DEFAULT;
   const { order: cdeOrder, save: saveCdeOrder } = useCdeOrder(CDE_DEFAULT_ORDER);
-  const catLabel = (c: string) => c.startsWith("p:") ? PARENTS[c.slice(2)] : EXTRA_LABELS[c] ?? baseTitle(GROUPS.find((x) => x.key === c)?.title ?? c);
+  const catLabel = (c: string) => c === "app_appearance" ? "Aparência" : c.startsWith("p:") ? PARENTS[c.slice(2)] : EXTRA_LABELS[c] ?? baseTitle(GROUPS.find((x) => x.key === c)?.title ?? c);
   const groupTitle = (key: string) => {
     const g = GROUPS.find((x) => x.key === key); if (!g) return "";
     const p = groupParent(g.title);
@@ -470,6 +471,7 @@ export function CdeWorkspace() {
           if (cat === "corporate_messages") return <CdeCorporateMessages key={`CdeCorporateMessages-${collapseKey}`} number={ci + 1} handle={handle} />;
           if (cat === "title_texts") return <CdeTitleTexts key={`CdeTitleTexts-${collapseKey}`} number={ci + 1} handle={handle} />;
           if (cat === "cde_appearance") return <CdeAppearance key={`CdeAppearance-${collapseKey}`} number={ci + 1} handle={handle} />;
+          if (cat === "app_appearance") return <AppAppearanceItem key={`AppAppearance-${collapseKey}`} number={ci + 1} handle={handle} />;
           if (cat === "tags") return <CdeTags key={`CdeTags-${collapseKey}`} number={ci + 1} handle={handle} />;
           if (cat === "table_fonts") return <CdeTableFonts key={`CdeTableFonts-${collapseKey}`} number={ci + 1} handle={handle} />;
           if (cat === "button_library") return <CdeButtonLibrary key={`CdeButtonLibrary-${collapseKey}`} number={ci + 1} handle={handle} onEdit={(button, group, ids, modelKey) => {
