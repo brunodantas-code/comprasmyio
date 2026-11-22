@@ -61,7 +61,7 @@ const confidenceName = (s: string | null) => CONFIDENCES.find((c) => c.value ===
 function Advance({ value }: { value: number }) {
   return (
     <div className="space-y-1">
-      <p className="text-right text-sm tabular-nums">{value.toLocaleString("pt-BR")}%</p>
+      <p className="text-right text-xs tabular-nums">{value.toLocaleString("pt-BR")}%</p>
       <Progress value={value} className="h-1.5 bg-muted" aria-label="Avanço" />
     </div>
   );
@@ -186,9 +186,9 @@ export function IndicadoresDashboard() {
     const archived = ownerObjective ? isArchived(ownerObjective) : false;
     return (
       <Card key={m.id} className="min-w-0">
-        <CardHeader className="gap-2">
+        <CardHeader className="gap-1 space-y-1 p-3 sm:p-3">
           <div className="flex items-start gap-2">
-            <CardTitle className="min-w-0 flex-1 break-words font-normal leading-snug">
+            <CardTitle className="min-w-0 flex-1 break-words text-xs font-normal leading-snug">
               {m.title}
             </CardTitle>
             {canEdit &&
@@ -202,14 +202,14 @@ export function IndicadoresDashboard() {
                   mutation.mutate({ type: "metric", id: m.id });
               })}
           </div>
-          <CardDescription>{importedField(m.source_metadata, "responsible_name") || userName(m.responsible_id)}</CardDescription>
+          <CardDescription className="text-xs">{importedField(m.source_metadata, "responsible_name") || userName(m.responsible_id)}</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-2 p-3 pt-0 sm:p-3 sm:pt-0">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <Badge>{confidenceName(m.source_metadata && !latest(m.id)?.recorded_by ? null : m.confidence)}</Badge>
-            <span className="text-sm">{m.kind === "kpi" ? "KPI" : "Key Result"}</span>
+            <span className="text-xs">{m.kind === "kpi" ? "KPI" : "Key Result"}</span>
           </div>
-          <div className="flex flex-wrap justify-between gap-2 text-sm">
+          <div className="flex flex-wrap justify-between gap-2 text-xs">
             <span>{metricValue(m.current_value, m.measure, m.unit)}</span>
             <span className="text-muted-foreground">
               Meta: {metricValue(m.target_value, m.measure, m.unit)}
@@ -217,7 +217,7 @@ export function IndicadoresDashboard() {
           </div>
           <Advance value={pct} />
           {m.due_on && (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               Prazo: {new Date(`${m.due_on}T12:00:00`).toLocaleDateString("pt-BR")}
             </p>
           )}
@@ -248,10 +248,10 @@ export function IndicadoresDashboard() {
     return (
       <div key={o.id} className="min-w-0 space-y-3">
         <Card>
-          <CardHeader>
+          <CardHeader className="space-y-1 p-3 sm:p-3">
             <div className="flex items-start gap-2">
               <CdeNumber screen={screen}>{index + 1}</CdeNumber>
-              <CardTitle className="min-w-0 flex-1 break-words font-normal leading-snug">
+              <CardTitle className="min-w-0 flex-1 break-words text-xs font-normal leading-snug">
                 {o.title}
               </CardTitle>
               {o.confidential && (
@@ -272,7 +272,7 @@ export function IndicadoresDashboard() {
                     mutation.mutate({ type: "objective", id: o.id });
                 })}
             </div>
-            <CardDescription>
+            <CardDescription className="text-xs">
               {data.imported.filter(r => r.source_table === "objective_owners" && importedField(r.data,"objective_id") === o.id).map(r => importedField(data.imported.find(m => m.source_table === "team_members" && importedField(m.data,"id") === importedField(r.data,"team_member_id"))?.data,"full_name")).filter(Boolean).join(", ") || importedField(o.source_metadata,"responsible_name") || userName(o.responsible_id)} ·{" "}
               {o.alignment_name ??
                 {
@@ -284,9 +284,9 @@ export function IndicadoresDashboard() {
                 o.scope}
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-2 p-3 pt-0 sm:p-3 sm:pt-0">
             {o.parent_id && (
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
                 Alinhado a: {data.objectives.find((p) => p.id === o.parent_id)?.title}
               </p>
             )}
@@ -306,7 +306,7 @@ export function IndicadoresDashboard() {
                   )}
                 </>
               )}
-              <span className="flex-1 text-sm text-muted-foreground">
+              <span className="flex-1 text-xs text-muted-foreground">
                 {data.cycles.find((c) => c.id === o.cycle_id)?.name ?? "Sem ciclo"}
               </span>
               {iconButton(
@@ -325,12 +325,12 @@ export function IndicadoresDashboard() {
         </Card>
         {open && (
           <div className="space-y-3">
-            {o.description && <p className="whitespace-pre-wrap text-sm">{o.description}</p>}
+            {o.description && <p className="whitespace-pre-wrap text-xs">{o.description}</p>}
             <div className="grid gap-3">
               {visibleMetrics.filter((m) => m.objective_id === o.id).map(metricCard)}
             </div>
             {!visibleMetrics.some((m) => m.objective_id === o.id) && (
-              <p className="text-sm text-muted-foreground">Nenhum Key Result neste objetivo.</p>
+              <p className="text-xs text-muted-foreground">Nenhum Key Result neste objetivo.</p>
             )}
           </div>
         )}
@@ -469,8 +469,8 @@ export function IndicadoresDashboard() {
                   const ownedObjectives = chartObjectives.filter(o => user.objectiveIds.has(o.id));
                   const ownedKpis = chartMetrics.filter(m => user.metricIds.has(m.id) && m.kind === 'kpi');
                   return <div className="space-y-4 py-3">
-                    {ownedObjectives.length > 0 && <><h2 className="text-sm text-muted-foreground">OKRs · {ownedObjectives.length}</h2><div className="grid items-start gap-3 sm:grid-cols-2">{ownedObjectives.map((o,index) => objectiveCard(o,index,chartMetrics))}</div></>}
-                    {ownedKpis.length > 0 && <><h2 className="text-sm text-muted-foreground">KPIs · {ownedKpis.length}</h2><div className="grid items-start gap-3 sm:grid-cols-2">{ownedKpis.map(metricCard)}</div></>}
+                    {ownedObjectives.length > 0 && <><h2 className="text-sm text-muted-foreground">OKRs · {ownedObjectives.length}</h2><div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,16rem),16rem))] items-start gap-3">{ownedObjectives.map((o,index) => objectiveCard(o,index,chartMetrics))}</div></>}
+                    {ownedKpis.length > 0 && <><h2 className="text-sm text-muted-foreground">KPIs · {ownedKpis.length}</h2><div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,16rem),16rem))] items-start gap-3">{ownedKpis.map(metricCard)}</div></>}
                   </div>;
                 }}
               />
@@ -522,7 +522,7 @@ export function IndicadoresDashboard() {
                     <summary className="cursor-pointer py-3">
                       {userName(id)} · {metrics.filter((m) => m.responsible_id === id).length}
                     </summary>
-                    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                    <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,16rem),16rem))] items-start gap-3">
                       {metrics.filter((m) => m.responsible_id === id).map(metricCard)}
                     </div>
                   </details>
@@ -537,14 +537,14 @@ export function IndicadoresDashboard() {
                         ? date
                         : new Date(`${date}T12:00:00`).toLocaleDateString("pt-BR")}
                     </h2>
-                    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                    <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,16rem),16rem))] items-start gap-3">
                       {metrics.filter((m) => (m.due_on ?? "Sem prazo") === date).map(metricCard)}
                     </div>
                   </section>
                 ))}
               </div>
             ) : (
-              <div className="grid items-start gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,16rem),16rem))] items-start gap-3">
                 {tab === "okrs" ? objectives.map((o, index) => objectiveCard(o, index)) : metrics.map(metricCard)}
               </div>
             )}
