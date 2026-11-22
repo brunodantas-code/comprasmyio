@@ -2,7 +2,7 @@ import type { SVGProps } from "react";
 
 export function CrmFunnelIcon(props: SVGProps<SVGSVGElement>) {
   return (
-    <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth={16 / 3} strokeLinecap="round" strokeLinejoin="round" {...props}>
       <circle cx="13" cy="12" r="5" />
       <circle cx="32" cy="9" r="6" />
       <circle cx="51" cy="12" r="5" />
