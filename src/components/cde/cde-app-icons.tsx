@@ -28,7 +28,7 @@ const APPS: App[] = [
     { title: "Barra inferior", items: [i("Solicitações", ClipboardList, "ClipboardList"), i("Approvals", ShoppingCart, "ShoppingCart"), i("Armazém", Boxes, "Boxes"), i("Cadastro", FolderKanban, "FolderKanban"), i("Aprovações e logs", CheckCircle2, "CheckCircle2")] },
     { title: "Submenus", items: [i("Novas Solicitações", Plus, "Plus"), i("Approvals (todos)", ShoppingCart, "ShoppingCart"), i("Armazém (todos)", Boxes, "Boxes"), i("Clientes", Building2, "Building2"), i("Centro de Custo", Landmark, "Landmark"), i("Etiquetas", Tag, "Tag"), i("Cargos", Briefcase, "Briefcase"), i("Lembretes", Bell, "Bell"), i("Diversos", Layers3, "Layers3"), i("Alçadas/Organograma", CheckCircle2, "CheckCircle2"), i("Logs", ScrollText, "ScrollText"), i("Backup", DatabaseBackup, "DatabaseBackup"), i("Manual do Usuário", BookOpen, "BookOpen")] },
   ] },
-  { name: "Cash Flow", icon: DollarSign, iconName: "DollarSign", groups: [
+  { name: "Finance", icon: DollarSign, iconName: "DollarSign", groups: [
     { title: "Barra inferior", items: [i("Contas a pagar", ReceiptText, "ReceiptText"), i("Plano de Contas", ListTree, "ListTree"), i("Caixa", WalletCards, "WalletCards")] },
   ] },
   { name: "Site Survey", icon: Search, iconName: "Search", groups: [
@@ -44,8 +44,9 @@ const APPS: App[] = [
   { name: "RH", icon: UsersRound, iconName: "UsersRound", groups: [{ title: STD, items: [] }] },
   { name: "Code", icon: CodeXml, iconName: "CodeXml", groups: [{ title: STD, items: [i("Tickets", CodeXml, "CodeXml"), i("Novo ticket", Plus, "Plus")] }] },
   { name: "Mytosis", icon: MytosisIcon, iconName: "MytosisIcon", groups: [
-    { title: "Barra inferior", items: [i("OKRs", Target, "Target"), i("Fluxogramas", Workflow, "Workflow"), i("Processos", BookOpen, "BookOpen"), i("KPIs", Gauge, "Gauge")] },
+    { title: "Barra inferior", items: [i("Fluxogramas", Workflow, "Workflow"), i("Processos", BookOpen, "BookOpen")] },
   ] },
+  { name: "Indicadores", icon: Gauge, iconName: "Gauge", groups: [{ title: "Barra inferior", items: [i("OKRs", Target, "Target"), i("KPIs", Gauge, "Gauge"), i("Check-ins", CheckCircle2, "CheckCircle2"), i("Ciclos", CalendarDays, "CalendarDays")] }] },
   { name: "CDE", icon: CdeIcon, iconName: "CdeIcon", groups: [{ title: STD, items: [i("Criar modelo", Plus, "Plus")] }] },
   { name: "Projects", icon: FolderKanban, iconName: "FolderKanban", groups: [
     { title: "Seções do projeto", items: [i("Cronograma", CalendarDays, "CalendarDays"), i("Escopo", Flag, "Flag"), i("Equipe e recursos", UsersRound, "UsersRound"), i("Custos", Wallet, "Wallet"), i("Linha de base", GitBranch, "GitBranch"), i("Histórico", History, "History")] },

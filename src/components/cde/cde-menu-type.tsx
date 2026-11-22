@@ -44,13 +44,13 @@ function Preview({ type, items }: { type: MenuType; items: Item[] }) {
 export function CdeMenuType({ app, items }: { app: string; items: Item[] }) {
   const qc = useQueryClient();
   const { data } = useMenuTypes();
-  const saved: MenuType = data?.[app] ?? "bottom";
+  const saved: MenuType = data?.[app === "Finance" ? "Cash Flow" : app] ?? "bottom";
   const [draft, setDraft] = useState<MenuType | null>(null);
   const type: MenuType = draft ?? saved;
   const dirty = draft !== null && draft !== saved;
   async function save() {
     if (!draft) return;
-    const all = { ...(data ?? {}), [app]: draft };
+    const all = { ...(data ?? {}), [app === "Finance" ? "Cash Flow" : app]: draft };
     try {
       const user = (await supabase.auth.getUser()).data.user;
       if (!user) throw new Error();
@@ -72,7 +72,7 @@ export function CdeMenuType({ app, items }: { app: string; items: Item[] }) {
 
 /** Layout classes for an app's main menu per the CDE choice (desktop only; mobile keeps the bottom bar). */
 export function useAppMenuLayout(app: string) {
-  const t = useMenuTypes().data?.[app];
+  const t = useMenuTypes().data?.[app === "Finance" ? "Cash Flow" : app];
   const side = t === "left" || t === "right" ? t : null;
   const top = t === "top_tabs";
   return {

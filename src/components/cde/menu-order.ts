@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 /** Saved icon order per app menu: { "Supply|Barra inferior": ["Approvals", ...] }. Stored in cde_selected group menu_order. */
 export type MenuOrders = Record<string, string[]>;
 export const MENU_ORDER_GROUP = "menu_order";
-export const menuKey = (app: string, group: string) => `${app}|${group}`;
+export const menuKey = (app: string, group: string) => `${app === "Finance" ? "Cash Flow" : app}|${group}`;
 
 export function parseMenuOrders(raw?: string | null): MenuOrders {
   try { const v = JSON.parse(raw ?? "{}"); return v && typeof v === "object" ? v : {}; } catch { return {}; }

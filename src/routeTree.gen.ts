@@ -20,6 +20,7 @@ import { Route as AuthenticatedChamadosRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedCrmRouteImport } from './routes/_authenticated/crm'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedDevelopmentRouteImport } from './routes/_authenticated/development'
+import { Route as AuthenticatedIndicadoresRouteImport } from './routes/_authenticated/indicadores'
 import { Route as AuthenticatedInventorySignaturesRouteImport } from './routes/_authenticated/inventory-signatures'
 import { Route as AuthenticatedLegalRouteImport } from './routes/_authenticated/legal'
 import { Route as AuthenticatedMytosisRouteImport } from './routes/_authenticated/mytosis'
@@ -85,6 +86,12 @@ const AuthenticatedDevelopmentRoute =
   AuthenticatedDevelopmentRouteImport.update({
     id: '/development',
     path: '/development',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedIndicadoresRoute =
+  AuthenticatedIndicadoresRouteImport.update({
+    id: '/indicadores',
+    path: '/indicadores',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedInventorySignaturesRoute =
@@ -157,6 +164,7 @@ export interface FileRoutesByFullPath {
   '/crm': typeof AuthenticatedCrmRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/development': typeof AuthenticatedDevelopmentRoute
+  '/indicadores': typeof AuthenticatedIndicadoresRoute
   '/inventory-signatures': typeof AuthenticatedInventorySignaturesRoute
   '/legal': typeof AuthenticatedLegalRoute
   '/mytosis': typeof AuthenticatedMytosisRoute
@@ -180,6 +188,7 @@ export interface FileRoutesByTo {
   '/crm': typeof AuthenticatedCrmRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/development': typeof AuthenticatedDevelopmentRoute
+  '/indicadores': typeof AuthenticatedIndicadoresRoute
   '/inventory-signatures': typeof AuthenticatedInventorySignaturesRoute
   '/legal': typeof AuthenticatedLegalRoute
   '/mytosis': typeof AuthenticatedMytosisRoute
@@ -205,6 +214,7 @@ export interface FileRoutesById {
   '/_authenticated/crm': typeof AuthenticatedCrmRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/development': typeof AuthenticatedDevelopmentRoute
+  '/_authenticated/indicadores': typeof AuthenticatedIndicadoresRoute
   '/_authenticated/inventory-signatures': typeof AuthenticatedInventorySignaturesRoute
   '/_authenticated/legal': typeof AuthenticatedLegalRoute
   '/_authenticated/mytosis': typeof AuthenticatedMytosisRoute
@@ -230,6 +240,7 @@ export interface FileRouteTypes {
     | '/crm'
     | '/dashboard'
     | '/development'
+    | '/indicadores'
     | '/inventory-signatures'
     | '/legal'
     | '/mytosis'
@@ -253,6 +264,7 @@ export interface FileRouteTypes {
     | '/crm'
     | '/dashboard'
     | '/development'
+    | '/indicadores'
     | '/inventory-signatures'
     | '/legal'
     | '/mytosis'
@@ -277,6 +289,7 @@ export interface FileRouteTypes {
     | '/_authenticated/crm'
     | '/_authenticated/dashboard'
     | '/_authenticated/development'
+    | '/_authenticated/indicadores'
     | '/_authenticated/inventory-signatures'
     | '/_authenticated/legal'
     | '/_authenticated/mytosis'
@@ -377,6 +390,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDevelopmentRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/indicadores': {
+      id: '/_authenticated/indicadores'
+      path: '/indicadores'
+      fullPath: '/indicadores'
+      preLoaderRoute: typeof AuthenticatedIndicadoresRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/inventory-signatures': {
       id: '/_authenticated/inventory-signatures'
       path: '/inventory-signatures'
@@ -465,6 +485,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCrmRoute: typeof AuthenticatedCrmRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedDevelopmentRoute: typeof AuthenticatedDevelopmentRoute
+  AuthenticatedIndicadoresRoute: typeof AuthenticatedIndicadoresRoute
   AuthenticatedInventorySignaturesRoute: typeof AuthenticatedInventorySignaturesRoute
   AuthenticatedLegalRoute: typeof AuthenticatedLegalRoute
   AuthenticatedMytosisRoute: typeof AuthenticatedMytosisRoute
@@ -485,6 +506,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCrmRoute: AuthenticatedCrmRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedDevelopmentRoute: AuthenticatedDevelopmentRoute,
+  AuthenticatedIndicadoresRoute: AuthenticatedIndicadoresRoute,
   AuthenticatedInventorySignaturesRoute: AuthenticatedInventorySignaturesRoute,
   AuthenticatedLegalRoute: AuthenticatedLegalRoute,
   AuthenticatedMytosisRoute: AuthenticatedMytosisRoute,

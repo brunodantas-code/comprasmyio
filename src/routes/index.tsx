@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import {
   ArrowRight,
+  ChartNoAxesCombined,
   CodeXml,
   DollarSign,
   FileSignature,
@@ -48,6 +49,7 @@ export const Route = createFileRoute("/")({
 });
 
 const MODULES = [
+  { icon: ChartNoAxesCombined, title: "Indicadores", body: "OKRs, KPIs e resultados", available: true },
   { icon: FolderKanban, title: "Projects", body: "Planejamento e controle de projetos", available: true },
   { icon: Lightbulb, title: "Wishlist", body: "Desejos e inovação", available: true },
   { icon: CdeIcon, title: "CDE", body: "Padrões de interface", available: true },
@@ -59,7 +61,7 @@ const MODULES = [
   },
   {
     icon: DollarSign,
-    title: "Cash Flow",
+    title: "Finance",
     body: "Gestão financeira",
     available: true,
   },

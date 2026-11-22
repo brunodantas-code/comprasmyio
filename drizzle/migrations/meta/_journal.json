@@ -1891,6 +1891,27 @@
       "when": 1795212976366,
       "tag": "0269_survey_point_client_observations",
       "breakpoints": true
+    },
+    {
+      "idx": 270,
+      "version": "7",
+      "when": 1795354297199,
+      "tag": "0270_indicadores_cycles_objectives_metrics_checkins",
+      "breakpoints": true
+    },
+    {
+      "idx": 271,
+      "version": "7",
+      "when": 1795354345909,
+      "tag": "0271_indicadores_guard_cycles_identity_conversion",
+      "breakpoints": true
+    },
+    {
+      "idx": 272,
+      "version": "7",
+      "when": 1795354707224,
+      "tag": "0272_indicadores_returning_visibility",
+      "breakpoints": true
     }
   ]
 }

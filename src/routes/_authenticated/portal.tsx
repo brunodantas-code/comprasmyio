@@ -65,17 +65,18 @@ function PortalPage() {
       const { data: authData, error: authError } = await supabase.auth.getUser();
       if (authError || !authData.user) throw authError ?? new Error("Sessão não encontrada");
       const userId = authData.user.id;
-      const [{ data: profile }, { data: accesses, error: accessError }, { data: erpAdmin }, { data: mytosisRole }] = await Promise.all([
+      const [{ data: profile }, { data: accesses, error: accessError }, { data: erpAdmin }, { data: mytosisRole }, { data: indicadoresRole }] = await Promise.all([
         supabase.from("profiles").select("full_name, email").eq("id", userId).maybeSingle(),
         supabase.from("user_app_access").select("app_key").eq("user_id", userId),
         supabase.from("erp_admins").select("user_id").eq("user_id", userId).maybeSingle(),
         supabase.rpc("mytosis_role", { _user_id: userId }),
+        supabase.rpc("indicadores_role", { _user_id: userId }),
       ]);
       if (accessError) throw accessError;
       return {
         userId,
         name: profile?.full_name || profile?.email || authData.user.email || "Usuário",
-        appKeys: new Set([...(accesses ?? []).map((access) => access.app_key), ...(mytosisRole ? ["mytosis"] : [])]),
+        appKeys: new Set([...(accesses ?? []).map((access) => access.app_key), ...(mytosisRole ? ["mytosis"] : []), ...(indicadoresRole ? ["indicadores"] : [])]),
         isErpAdmin: Boolean(erpAdmin),
       };
     },
@@ -96,7 +97,7 @@ function PortalPage() {
 
   const apps = [
     { key: "supply", name: "Supply", description: ["Solicitações", "e Estoque"], to: "/dashboard" as const },
-    { key: "cash_flow", name: "Cash Flow", description: ["Gestão financeira"], to: "/cash-flow" as const },
+    { key: "cash_flow", name: "Finance", description: ["Gestão financeira"], to: "/cash-flow" as const },
     { key: "crm", name: "CRM", description: ["Vendas e", "Relacionamento"], to: "/crm" as const },
     { key: "legal", name: "Legal", description: ["Contratos", "Atas de Reunião", "Jurídico"], to: "/legal" as const },
     { key: "rh", name: "RH", description: ["Gestão de Pessoas"], to: "/rh" as const },
@@ -104,6 +105,7 @@ function PortalPage() {
     { key: "chamados", name: "OpDesk", description: ["Suporte ao cliente", "e operação"], to: "/chamados" as const },
     { key: "development", name: "Code", description: ["Melhorias e Bugs"], to: "/development" as const },
     { key: "mytosis", name: "Mytosis", description: ["Fluxogramas", "e processos"], to: "/mytosis" as const },
+    { key: "indicadores", name: "Indicadores", description: ["OKRs e KPIs", "Resultados e metas"], to: "/indicadores" as const },
     { key: "wishlist", name: "Wishlist", description: ["Desejos e", "inovação"], to: "/wishlist" as const },
     { key: "projects", name: "Projects", description: ["Planejamento e", "controle de projetos"], to: "/projects" as const },
     { key: "cde", name: "CDE", description: ["Padrões de", "interface"], to: "/cde" as const },

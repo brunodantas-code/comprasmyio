@@ -21,9 +21,9 @@ export const Route = createFileRoute("/_authenticated/cash-flow")({
   component: CashFlowPage,
   head: () => ({
     meta: [
-      { title: "Gestão financeira | myio cash flow" },
-      { name: "description", content: "Plano de Contas, pagamentos e movimentações bancárias no myio cash flow." },
-      { property: "og:title", content: "Gestão financeira | myio cash flow" },
+      { title: "Gestão financeira | myio Finance" },
+      { name: "description", content: "Plano de Contas, pagamentos e movimentações bancárias no myio Finance." },
+      { property: "og:title", content: "Gestão financeira | myio Finance" },
       { property: "og:description", content: "Plano de Contas, pagamentos e movimentações bancárias da plataforma myio ERP." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -32,7 +32,7 @@ export const Route = createFileRoute("/_authenticated/cash-flow")({
 });
 
 function CashFlowPage() {
-  const ml = useAppMenuLayout("Cash Flow");
+  const ml = useAppMenuLayout("Finance");
   const user = Route.useRouteContext().user;
   const { data: menuOrders } = useMenuOrders();
   const [section, setSection] = useState("payables");
@@ -44,7 +44,7 @@ function CashFlowPage() {
   const orderedTabs = sortByMenuOrder(tabs, menuOrders?.["Cash Flow|Barra inferior"]);
   return (
     <div className="min-h-screen bg-background">
-      <AppHeader manualApp="Cash Flow" logo={<MyioCashFlowLogo className="text-xl sm:text-2xl" />} />
+      <AppHeader manualApp="Finance" logo={<MyioCashFlowLogo className="text-xl sm:text-2xl" />} />
       <main className={`mx-auto max-w-[1500px] px-4 pb-28 pt-6 sm:px-6 ${ml.main}`}>
         <p className="mb-6 text-muted-foreground">Planejamento, pagamentos e posição bancária em um só lugar.</p>
         <Tabs value={section} onValueChange={setSection} className="space-y-5">
@@ -53,7 +53,7 @@ function CashFlowPage() {
           <TabsContent value="cash"><CashRegisterTab userId={user.id} /></TabsContent>
         </Tabs>
       </main>
-      <AppNavigation className={ml.nav} aria-label="Navegação do Cash Flow">
+      <AppNavigation className={ml.nav} aria-label="Navegação do Finance">
         <div className={`mx-auto grid max-w-md grid-cols-3 items-stretch rounded-[1.75rem] border border-border bg-card/95 p-1.5 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-card/90 ${ml.grid}`}>
           {orderedTabs.map(({ value, label, icon: Icon }) => {
             const active = section === value;

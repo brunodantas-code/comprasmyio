@@ -1,4 +1,9 @@
 # Roadmap
+- [x] Central: destaque em toda a largura da linha do usuário; 1049/1049 px e expansão conferidos na conta Leonardo, contagens preservadas.
+- [x] Finance: Home, cabeçalho, menus, CDE, Acessos e catálogo renomeados; chaves financeiras e preferências antigas preservadas, cabeçalho conferido.
+- [x] Indicadores separado do Mytosis e integrado à Home/CDE/Acessos/favoritos; Mytosis somente Fluxogramas/Processos. Banco não tinha OKRs/KPIs anteriores; registros de teste removidos.
+- [x] Indicadores: cards CDE, avanço, filtros combinados, gráfico, lista por responsável, árvore e calendário; desktop e celular conferidos sem excesso lateral.
+- [x] Indicadores: medições, check-ins auditados, ciclos e confidencialidade. Criação/check-in/recarga/histórico, conversão KPI→OKR, arquivamento e rejeição de check-in arquivado conferidos; visualizador não lê sigilo nem atualiza indicador alheio; autoria falsa ignorada. 43 testes passaram. Não publicado.
 - [x] Menu principal: Meus favoritos na edição de ordem/visibilidade e prévia do CDE, mantendo favoritos pessoais e configurações salvas. Aparência abre opções ao selecionar no menu compartilhado por Home, 12 apps, Central, Acessos, assinaturas e manual; consumidores e catálogo lidos. Home e CDE conferidos em computador/celular, 11 testes passaram; nenhuma escolha real alterada, não publicado.
 - [x] Aparência P&B: roxo escuro da landing page e da faixa Home convertido para preto; roxo myio comum permanece cinza, alertas vermelhos e contraste preservados. Landing pública e Home conferidas em tela; 9 testes passaram.
 - [x] CDE Home Page (item 13): nome, fonte de 10–32 px e cor da marca por app; cabeçalhos com logo myio 48/40 px, divisória vertical e nome à direita no padrão do print 2. Personalização temporária do CRM salva e conferida na Home/cabeçalho, configuração original restaurada; 12 apps e celular sem excesso lateral, 22 testes passaram. Não publicado.

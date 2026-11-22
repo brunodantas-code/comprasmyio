@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { ExternalLink } from "lucide-react";
 import { cdeHighlightHash } from "./cde-highlight";
 
-type UsageTarget = { to: "/acessos" | "/dashboard" | "/cash-flow" | "/legal" | "/mytosis" | "/cde" | "/site-survey" | "/portal" | "/development" | "/chamados" | "/" | "/reset-password"; label: string; search?: { section: string; subsection?: string; app?: string } };
+type UsageTarget = { to: "/acessos" | "/dashboard" | "/cash-flow" | "/legal" | "/mytosis" | "/indicadores" | "/cde" | "/site-survey" | "/portal" | "/development" | "/chamados" | "/" | "/reset-password"; label: string; search?: { section: string; subsection?: string; app?: string } };
 const supply = (section: string, subsection: string): UsageTarget => ({ to: "/dashboard", label: "Supply", search: { section, subsection } });
 const supplyFiles: Record<string, UsageTarget> = {
   "access-profile-definitions-tab": supply("admin", "acesso-restrito"),
@@ -34,9 +34,10 @@ export function usageTargets(file: string): UsageTarget[] {
   const routes: Record<string, UsageTarget> = { dashboard: supply("queue", "all"), development: { to: "/development", label: "Code" }, chamados: { to: "/chamados", label: "OpDesk" }, portal: { to: "/portal", label: "Todos os apps" } };
   if (file.startsWith("routes/") && routes[name]) return [routes[name]];
   if (file.includes("/cde/")) return [{ to: "/cde", label: "CDE" }];
-  if (file.includes("/cash-flow/")) return [{ to: "/cash-flow", label: "Cash Flow" }];
+  if (file.includes("/cash-flow/")) return [{ to: "/cash-flow", label: "Finance" }];
   if (file.includes("/legal/")) return [{ to: "/legal", label: "Legal" }];
   if (file.includes("/mytosis/")) return [{ to: "/mytosis", label: "Mytosis" }];
+  if (file.includes("/indicadores/")) return [{ to: "/indicadores", label: "Indicadores" }];
   if (name.startsWith("site-survey")) return [{ to: "/site-survey", label: "Site Survey" }];
   if (supplyFiles[name]) return [supplyFiles[name]];
   if (various.has(name)) return [supply("projects", "diversos")];

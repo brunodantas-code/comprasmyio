@@ -17,7 +17,7 @@ type Site = { id: string; file: string; line: number; context: string; headers: 
 /** App > Menu by source file; Submenu comes from the nearest title above the list. */
 function appMenu(file: string): [string, string] {
   const f = file.replace(/^.*\//, "");
-  if (file.includes("cash-flow/")) return ["Cash Flow", "Financeiro"];
+  if (file.includes("cash-flow/")) return ["Finance", "Financeiro"];
   if (file.includes("mytosis/")) return ["Mytosis", f.startsWith("okrs") ? "OKRs" : f.startsWith("kpis") ? "KPIs" : "Usuários"];
   if (f === "chamados.tsx") return ["OpDesk", "Chamados"];
   if (f === "development.tsx") return ["Code", "Tickets"];

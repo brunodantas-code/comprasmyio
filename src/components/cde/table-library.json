@@ -25,7 +25,7 @@
   {
     "id": "components/approval-workflow.tsx|0",
     "file": "components/approval-workflow.tsx",
-    "line": 348,
+    "line": 349,
     "context": "Histórico de auditoria",
     "headers": [
       "Data/Hora",
@@ -38,7 +38,7 @@
   {
     "id": "components/approval-workflow.tsx|1",
     "file": "components/approval-workflow.tsx",
-    "line": 455,
+    "line": 456,
     "context": "Histórico de auditoria",
     "headers": [
       "Approval",
@@ -54,7 +54,7 @@
   {
     "id": "components/approval-workflow.tsx|2",
     "file": "components/approval-workflow.tsx",
-    "line": 1169,
+    "line": 1170,
     "context": "Nova Etapa Adicional",
     "headers": [
       "Ordem",
@@ -69,7 +69,7 @@
   {
     "id": "components/approval-workflow.tsx|3",
     "file": "components/approval-workflow.tsx",
-    "line": 1425,
+    "line": 1426,
     "context": "Alçadas de Dispositivos myio",
     "headers": [
       "Usuário",
@@ -81,7 +81,7 @@
   {
     "id": "components/approval-workflow.tsx|4",
     "file": "components/approval-workflow.tsx",
-    "line": 1446,
+    "line": 1447,
     "context": "Alçadas de Dispositivos myio",
     "headers": [
       "Usuário",
@@ -95,7 +95,7 @@
   {
     "id": "components/approval-workflow.tsx|5",
     "file": "components/approval-workflow.tsx",
-    "line": 1790,
+    "line": 1791,
     "context": "Organograma de Aprovação",
     "headers": [
       "Cargo",
@@ -873,7 +873,7 @@
   {
     "id": "components/stock-tab.tsx|1",
     "file": "components/stock-tab.tsx",
-    "line": 1167,
+    "line": 1170,
     "context": "Zerar estoque —",
     "headers": [
       "Descrição",
@@ -887,7 +887,7 @@
   {
     "id": "components/stock-tab.tsx|2",
     "file": "components/stock-tab.tsx",
-    "line": 1923,
+    "line": 1927,
     "context": "Insumos de Instalação",
     "headers": [
       "Descrição",
@@ -1019,9 +1019,19 @@
     ]
   },
   {
+    "id": "components/indicadores/access.tsx|0",
+    "file": "components/indicadores/access.tsx",
+    "line": 81,
+    "context": "Perfis · Indicadores",
+    "headers": [
+      "Usuário",
+      "Perfil"
+    ]
+  },
+  {
     "id": "routes/_authenticated/dashboard.tsx|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3001,
+    "line": 3002,
     "context": "Itens e valores",
     "headers": [
       "Approval",
@@ -1041,7 +1051,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|1",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3294,
+    "line": 3295,
     "context": "Aprovações",
     "headers": [
       "Etapa",
@@ -1054,7 +1064,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|2",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3913,
+    "line": 3914,
     "context": "Projetos",
     "headers": [
       "Nome do projeto",
@@ -1068,7 +1078,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|3",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 4374,
+    "line": 4375,
     "context": "Logs de pedidos",
     "headers": [
       "Quando",

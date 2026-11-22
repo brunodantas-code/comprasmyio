@@ -79,7 +79,7 @@ type TicketMessage = {
 
 const APP_NAMES: Record<string, string> = {
   supply: "Supply",
-  cash_flow: "Cash Flow",
+  cash_flow: "Finance",
   crm: "CRM",
   legal: "Legal",
   rh: "RH",

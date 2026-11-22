@@ -1,4 +1,4 @@
-import { PenLine, ArrowLeft, BookOpen, ClipboardList, DollarSign, FileSignature, KeyRound, LayoutGrid, LifeBuoy, LogOut, Palette, Phone, Search, Settings, Settings2, Star, UsersRound } from "lucide-react";
+import { PenLine, ArrowLeft, BookOpen, ClipboardList, DollarSign, FileSignature, KeyRound, LayoutGrid, LifeBuoy, LogOut, Palette, Phone, Search, Settings, Settings2, Star, UsersRound, ChartNoAxesCombined } from "lucide-react";
 import { CrmFunnelIcon } from "@/components/crm-funnel-icon";
 import { MytosisIcon } from "@/components/mytosis-icon";
 import { CdeIcon } from "@/components/cde-icon";
@@ -17,13 +17,14 @@ export const MENU_ITEMS = [
   { id: "pendentes", label: "Minhas Pendências", icon: ClipboardList, to: "/pendentes" },
   { id: "chamados", label: "Abrir chamado (Code)", icon: LifeBuoy, to: "/development", optional: true },
   { id: "app_supply", label: "Supply", icon: Settings, to: "/dashboard", optional: true },
-  { id: "app_cash_flow", label: "Cash Flow", icon: DollarSign, to: "/cash-flow", optional: true },
+  { id: "app_cash_flow", label: "Finance", icon: DollarSign, to: "/cash-flow", optional: true },
   { id: "app_crm", label: "CRM", icon: CrmFunnelIcon, to: "/crm", optional: true },
   { id: "app_legal", label: "Legal", icon: FileSignature, to: "/legal", optional: true },
   { id: "app_rh", label: "RH", icon: UsersRound, to: "/rh", optional: true },
   { id: "app_site_survey", label: "Site Survey", icon: Search, to: "/site-survey", optional: true },
   { id: "app_opdesk", label: "OpDesk", icon: Phone, to: "/chamados", optional: true },
   { id: "app_mytosis", label: "Mytosis", icon: MytosisIcon, to: "/mytosis", optional: true },
+  { id: "app_indicadores", label: "Indicadores", icon: ChartNoAxesCombined, to: "/indicadores", optional: true },
   { id: "app_cde", label: "CDE", icon: CdeIcon, to: "/cde", optional: true },
   { id: "favorites", label: "Meus favoritos", icon: Star },
 ] as const;

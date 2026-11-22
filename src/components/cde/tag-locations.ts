@@ -2,7 +2,7 @@
 export const TAG_LOCATIONS: Record<string, { app: string; menu: string }> = {
   "components/access-profiles-tab.tsx": { app: "Usuários", menu: "Perfis de acesso" },
   "components/approval-workflow.tsx": { app: "Supply", menu: "Approvals › Fluxo de aprovação" },
-  "components/cash-flow/payables-tab.tsx": { app: "Cash Flow", menu: "Contas a pagar" },
+  "components/cash-flow/payables-tab.tsx": { app: "Finance", menu: "Contas a pagar" },
   "components/code-status-badge.tsx": { app: "Code", menu: "Chamados › Lista e detalhes" },
   "components/crm/crm-propostas.tsx": { app: "CRM", menu: "Propostas" },
   "components/damaged-items.tsx": { app: "Supply", menu: "Estoque › Itens avariados" },
@@ -38,7 +38,7 @@ export const TAG_LOCATIONS: Record<string, { app: string; menu: string }> = {
   "routes/reset-password.tsx": { app: "Acesso", menu: "Redefinir senha" },
   "components/stock-destinations-tab.tsx": { app: "Supply", menu: "Diversos › Destinos de estoque" },
   "components/materials-registry-tab.tsx": { app: "Supply", menu: "Diversos › Cadastro de materiais" },
-  "components/cash-flow/cash-register-tab.tsx": { app: "Cash Flow", menu: "Caixa" },
+  "components/cash-flow/cash-register-tab.tsx": { app: "Finance", menu: "Caixa" },
   "components/supply-tags-tab.tsx": { app: "Supply", menu: "Diversos › Tags" },
   "components/reminders-tab.tsx": { app: "Supply", menu: "Diversos › Lembretes" },
   "components/user-manuals-tab.tsx": { app: "Todos os apps", menu: "Manuais do usuário" },
@@ -46,5 +46,5 @@ export const TAG_LOCATIONS: Record<string, { app: string; menu: string }> = {
   "components/clients-tab.tsx": { app: "Supply", menu: "Diversos › Clientes" },
   "components/additional-step-types-tab.tsx": { app: "Supply", menu: "Diversos › Etapas adicionais" },
   "components/supply-order-statuses-tab.tsx": { app: "Supply", menu: "Diversos › Situações" },
-  "components/cash-flow/chart-of-accounts-tab.tsx": { app: "Cash Flow", menu: "Plano de contas" },
+  "components/cash-flow/chart-of-accounts-tab.tsx": { app: "Finance", menu: "Plano de contas" },
 };

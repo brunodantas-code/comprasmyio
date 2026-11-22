@@ -16,7 +16,7 @@ const first = 'Versão inicial';
 /** Every app manual version; editable sources live in src/content/manuals/*.json. */
 export const manualVersions = [
   ...supplyManualVersions.map((m) => ({ app: 'Supply', ...m })),
-  { app: 'Cash Flow', version: 1, date: '08.11.2026', url: cashFlowV1.url, summary: first, current: true },
+  { app: 'Finance', version: 1, date: '08.11.2026', url: cashFlowV1.url, summary: first, current: true },
   { app: 'Legal', version: 1, date: '08.11.2026', url: legalV1.url, summary: first, current: true },
   { app: 'RH', version: 1, date: '08.11.2026', url: rhV1.url, summary: first, current: true },
   { app: 'Site Survey', version: 1, date: '08.11.2026', url: siteSurveyV1.url, summary: first, current: true },

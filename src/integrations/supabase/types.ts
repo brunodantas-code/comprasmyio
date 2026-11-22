@@ -4862,6 +4862,276 @@ export type Database = {
         }
         Relationships: []
       }
+      indicadores_checkins: {
+        Row: {
+          comment: string
+          confidence: string
+          id: string
+          metric_id: string
+          recorded_at: string
+          recorded_by: string
+          value: number
+        }
+        Insert: {
+          comment?: string
+          confidence: string
+          id?: string
+          metric_id: string
+          recorded_at?: string
+          recorded_by?: string
+          value: number
+        }
+        Update: {
+          comment?: string
+          confidence?: string
+          id?: string
+          metric_id?: string
+          recorded_at?: string
+          recorded_by?: string
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "indicadores_checkins_metric_id_fkey"
+            columns: ["metric_id"]
+            isOneToOne: false
+            referencedRelation: "indicadores_metrics"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "indicadores_checkins_recorded_by_fkey"
+            columns: ["recorded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      indicadores_cycles: {
+        Row: {
+          archived: boolean
+          created_by: string
+          ends_on: string
+          id: string
+          name: string
+          starts_on: string
+        }
+        Insert: {
+          archived?: boolean
+          created_by?: string
+          ends_on: string
+          id?: string
+          name: string
+          starts_on: string
+        }
+        Update: {
+          archived?: boolean
+          created_by?: string
+          ends_on?: string
+          id?: string
+          name?: string
+          starts_on?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "indicadores_cycles_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      indicadores_members: {
+        Row: {
+          role: string
+          user_id: string
+        }
+        Insert: {
+          role?: string
+          user_id: string
+        }
+        Update: {
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "indicadores_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      indicadores_metrics: {
+        Row: {
+          confidence: string
+          created_at: string
+          created_by: string
+          current_value: number
+          due_on: string | null
+          id: string
+          initial_value: number
+          kind: string
+          legacy_kpi_id: string | null
+          measure: string
+          objective_id: string | null
+          responsible_id: string
+          target_value: number
+          title: string
+          unit: string
+        }
+        Insert: {
+          confidence?: string
+          created_at?: string
+          created_by?: string
+          current_value?: number
+          due_on?: string | null
+          id?: string
+          initial_value?: number
+          kind: string
+          legacy_kpi_id?: string | null
+          measure?: string
+          objective_id?: string | null
+          responsible_id: string
+          target_value?: number
+          title: string
+          unit?: string
+        }
+        Update: {
+          confidence?: string
+          created_at?: string
+          created_by?: string
+          current_value?: number
+          due_on?: string | null
+          id?: string
+          initial_value?: number
+          kind?: string
+          legacy_kpi_id?: string | null
+          measure?: string
+          objective_id?: string | null
+          responsible_id?: string
+          target_value?: number
+          title?: string
+          unit?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "indicadores_metrics_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "indicadores_metrics_legacy_kpi_id_fkey"
+            columns: ["legacy_kpi_id"]
+            isOneToOne: true
+            referencedRelation: "mytosis_kpis"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "indicadores_metrics_objective_id_fkey"
+            columns: ["objective_id"]
+            isOneToOne: false
+            referencedRelation: "indicadores_objectives"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "indicadores_metrics_responsible_id_fkey"
+            columns: ["responsible_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      indicadores_objectives: {
+        Row: {
+          alignment_name: string | null
+          allowed_user_ids: string[]
+          confidential: boolean
+          created_at: string
+          created_by: string
+          cycle_id: string | null
+          description: string | null
+          id: string
+          legacy_node_id: string | null
+          parent_id: string | null
+          responsible_id: string | null
+          scope: string
+          title: string
+        }
+        Insert: {
+          alignment_name?: string | null
+          allowed_user_ids?: string[]
+          confidential?: boolean
+          created_at?: string
+          created_by?: string
+          cycle_id?: string | null
+          description?: string | null
+          id?: string
+          legacy_node_id?: string | null
+          parent_id?: string | null
+          responsible_id?: string | null
+          scope?: string
+          title: string
+        }
+        Update: {
+          alignment_name?: string | null
+          allowed_user_ids?: string[]
+          confidential?: boolean
+          created_at?: string
+          created_by?: string
+          cycle_id?: string | null
+          description?: string | null
+          id?: string
+          legacy_node_id?: string | null
+          parent_id?: string | null
+          responsible_id?: string | null
+          scope?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "indicadores_objectives_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "indicadores_objectives_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "indicadores_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "indicadores_objectives_legacy_node_id_fkey"
+            columns: ["legacy_node_id"]
+            isOneToOne: true
+            referencedRelation: "mytosis_nodes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "indicadores_objectives_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "indicadores_objectives"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "indicadores_objectives_responsible_id_fkey"
+            columns: ["responsible_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       internal_call_attachments: {
         Row: {
           call_id: string
@@ -12802,6 +13072,30 @@ export type Database = {
           _visit_id: string
         }
         Returns: string
+      }
+      indicadores_checkin: {
+        Args: {
+          _comment: string
+          _confidence: string
+          _metric_id: string
+          _value: number
+        }
+        Returns: string
+      }
+      indicadores_convert_kpi: {
+        Args: { _cycle_id: string; _metric_id: string; _title: string }
+        Returns: string
+      }
+      indicadores_metric_visible: { Args: { _id: string }; Returns: boolean }
+      indicadores_objective_visible: { Args: { _id: string }; Returns: boolean }
+      indicadores_role: { Args: { _user_id: string }; Returns: string }
+      indicadores_users: {
+        Args: never
+        Returns: {
+          email: string
+          full_name: string
+          id: string
+        }[]
       }
       inventory_comparison: {
         Args: { _after?: string; _area: string; _until?: string }

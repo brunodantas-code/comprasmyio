@@ -92,7 +92,7 @@ const ACTION_MODELS: Omit<Variant, "key">[] = [{ tag: "Button", variant: "outlin
 
 /** Telas conhecidas pelo levantamento, com o app deduzido pelo caminho do arquivo. */
 const SCREENS = [...new Set([...Object.values(inventory).flatMap((g) => (g as { files: string[] }[]).flatMap((v) => v.files)), "controls/save-icon", "components/legal/minutes-list.tsx", "components/legal/legal-workspace.tsx", "components/legal/subject-actions.tsx", "routes/_authenticated/site-survey.tsx", "components/site-survey-screen-summary.tsx", "components/mytosis/processes-tab.tsx", "components/mytosis/flowchart.tsx", "components/mytosis/node-preview.tsx", "components/supply-order-statuses-tab.tsx", "components/supply-manual-reader.tsx", "components/cde/cde-app-order.tsx", "components/cde/cde-sortable-icons.tsx"])].sort();
-const APP_BY_DIR: Record<string, string> = { mytosis: "Mytosis", "cash-flow": "Cash Flow", legal: "Legal", cde: "CDE", "site-survey": "Site Survey", opdesk: "OpDesk", code: "Code" };
+const APP_BY_DIR: Record<string, string> = { mytosis: "Mytosis", indicadores: "Indicadores", "cash-flow": "Finance", legal: "Legal", cde: "CDE", "site-survey": "Site Survey", opdesk: "OpDesk", code: "Code" };
 function screenApp(f: string) {
   if (f === "controls/save-icon") return "Todos os apps · Salvar somente com disquete";
   const parts = f.split("/");

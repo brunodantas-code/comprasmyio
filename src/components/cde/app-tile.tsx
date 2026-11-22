@@ -1,5 +1,5 @@
 import type React from "react";
-import { CodeXml, DollarSign, FileSignature, FolderKanban, Lightbulb, Phone, Search, Settings, UsersRound } from "lucide-react";
+import { CodeXml, DollarSign, FileSignature, FolderKanban, Lightbulb, Phone, Search, Settings, UsersRound, ChartNoAxesCombined } from "lucide-react";
 import { CrmFunnelIcon } from "@/components/crm-funnel-icon";
 import { MytosisIcon } from "@/components/mytosis-icon";
 import { CdeIcon } from "@/components/cde-icon";
@@ -10,6 +10,7 @@ const APP_ICONS: Record<string, [React.ComponentType<{ className?: string; style
   site_survey: [Search, 2.8], chamados: [Phone, 2.4], cde: [CdeIcon, 1.8], mytosis: [MytosisIcon, 1.8], development: [CodeXml, 2.8],
   wishlist: [Lightbulb, 2],
   projects: [FolderKanban, 2],
+  indicadores: [ChartNoAxesCombined, 2],
 };
 
 export const APP_DESCRIPTIONS: Record<string, string[]> = {
@@ -18,6 +19,7 @@ export const APP_DESCRIPTIONS: Record<string, string[]> = {
   chamados: ["Suporte ao cliente", "e operação"], development: ["Melhorias e Bugs"], mytosis: ["Fluxogramas", "e processos"], cde: ["Padrões de", "interface"],
   wishlist: ["Desejos e", "inovação"],
   projects: ["Planejamento e", "controle de projetos"],
+  indicadores: ["OKRs e KPIs", "Resultados e metas"],
 };
 
 /** Symbol + name inside a portal app tile; shared by the portal and the CDE preview. */
@@ -29,7 +31,7 @@ export function AppTileFace({ appKey, name, tile, mobile = false }: { appKey: st
     <span className={`max-w-full whitespace-normal break-words text-center font-normal leading-none text-[color:var(--tile-inside,currentColor)] ${mobile ? "text-[length:var(--tile-fs-m)]" : "text-[length:var(--tile-fs)]"}`} style={{ "--tile-fs": `${display.labelPx}px`, "--tile-fs-m": `${Math.min(display.labelPx - 2, 11)}px`, ...(display.color ? { color: display.color } : {}) } as React.CSSProperties}>{display.name}</span></>;
 }
 
-const APP_NAME_KEYS: Record<string, string> = { Supply: "supply", "Cash Flow": "cash_flow", CRM: "crm", Legal: "legal", RH: "rh", "Site Survey": "site_survey", Chamados: "chamados", OpDesk: "chamados", CDE: "cde", Mytosis: "mytosis", Code: "development", Wishlist: "wishlist", Projects: "projects" };
+const APP_NAME_KEYS: Record<string, string> = { Supply: "supply", "Finance": "cash_flow", CRM: "crm", Legal: "legal", RH: "rh", "Site Survey": "site_survey", Chamados: "chamados", OpDesk: "chamados", CDE: "cde", Mytosis: "mytosis", Code: "development", Wishlist: "wishlist", Projects: "projects", Indicadores: "indicadores" };
 
 /** Small app symbol for lists (e.g. pending groups), keyed by the app display name. */
 export function AppSymbol({ name, className }: { name: string; className?: string }) {

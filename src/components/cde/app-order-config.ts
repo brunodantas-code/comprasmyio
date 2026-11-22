@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const PORTAL_APPS = [
   { key: "supply", name: "Supply" },
-  { key: "cash_flow", name: "Cash Flow" },
+  { key: "cash_flow", name: "Finance" },
   { key: "crm", name: "CRM" },
   { key: "legal", name: "Legal" },
   { key: "rh", name: "RH" },
@@ -11,6 +11,7 @@ export const PORTAL_APPS = [
   { key: "chamados", name: "OpDesk" },
   { key: "development", name: "Code" },
   { key: "mytosis", name: "Mytosis" },
+  { key: "indicadores", name: "Indicadores" },
   { key: "wishlist", name: "Wishlist" },
   { key: "projects", name: "Projects" },
   { key: "cde", name: "CDE" },
@@ -122,6 +123,7 @@ export function appTileColor(kind: AppTileColorKind, key: string) {
   return list.find((o) => o.key === key) ?? list[0];
 }
 export function appKeyForName(name: string): string {
+  if (name.trim().toLowerCase() === "cash flow") return "cash_flow";
   return PORTAL_APPS.find(app => app.name.toLowerCase() === name.trim().toLowerCase())?.key ?? name;
 }
 /** Logo height used by every app header; defaults to the Home logo (40 px). */

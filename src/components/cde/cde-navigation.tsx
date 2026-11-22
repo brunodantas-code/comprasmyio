@@ -23,7 +23,7 @@ const DECISIONS: Decision[] = [
     { key: "confirm", label: "Pop-up de confirmação", detail: "Pergunta antes de agir", uses: "25 usos em 13 telas", sketch: "confirm" },
   ] },
   { key: "nav_menu", title: "Menu principal dos apps", patterns: [
-    { key: "bottom", label: "Barra inferior", detail: "Ícones na base da tela", uses: "Supply, Cash Flow, Site Survey, Legal, Mytosis", sketch: "bottom" },
+    { key: "bottom", label: "Barra inferior", detail: "Ícones na base da tela", uses: "Supply, Finance, Site Survey, Legal, Mytosis, Indicadores", sketch: "bottom" },
     { key: "top", label: "Menu superior", detail: "Logo à esquerda, menus à direita", uses: "Todos os apps (Usuários, Logs, casa)", sketch: "top" },
     { key: "side", label: "Menu lateral", detail: "Coluna à esquerda", uses: "Nenhum app hoje", sketch: "side" },
   ] },

@@ -23,7 +23,7 @@ describe("main menu choices", () => {
     expect(parseMenuConfig(JSON.stringify({ order: ["password", "back", "logout", "manual", "password"] })).order.slice(0, 4)).toEqual(["password", "back", "logout", "manual"]);
   });
   it("keeps selected hidden actions and starts optional menus hidden", () => {
-    expect(parseMenuConfig(JSON.stringify({ hidden: ["back"] })).hidden).toEqual(["back", "portal", "chamados", "app_supply", "app_cash_flow", "app_crm", "app_legal", "app_rh", "app_site_survey", "app_opdesk", "app_mytosis", "app_cde"]);
+    expect(parseMenuConfig(JSON.stringify({ hidden: ["back"] })).hidden).toEqual(["back", "portal", "chamados", "app_supply", "app_cash_flow", "app_crm", "app_legal", "app_rh", "app_site_survey", "app_opdesk", "app_mytosis", "app_indicadores", "app_cde"]);
   });
   it("shows Minhas Pendências by default, even if an old config hid it", () => {
     expect(parseMenuConfig(JSON.stringify({ hidden: ["pendentes"] })).hidden).not.toContain("pendentes");

@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 
 const APPS = [
   { key: "supply", label: "Supply" },
-  { key: "cash_flow", label: "Cash Flow" },
+  { key: "cash_flow", label: "Finance" },
   { key: "crm", label: "CRM" },
   { key: "legal", label: "Legal" },
   { key: "rh", label: "RH" },
@@ -22,6 +22,7 @@ const APPS = [
   { key: "chamados", label: "OpDesk" },
   { key: "development", label: "Code" },
   { key: "mytosis", label: "Mytosis" },
+  { key: "indicadores", label: "Indicadores" },
   { key: "wishlist", label: "Wishlist" },
   { key: "projects", label: "Projects" },
   { key: "cde", label: "CDE" },

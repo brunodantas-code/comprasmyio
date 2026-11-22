@@ -53,6 +53,11 @@ describe("portal colours from the myio brand manual", () => {
   });
 });
 describe("app names and fonts", () => {
+  it("identifica Finance sem mudar a chave financeira nem quebrar o nome antigo", () => {
+    expect(appKeyForName("Finance")).toBe("cash_flow");
+    expect(appKeyForName("Cash Flow")).toBe("cash_flow");
+    expect(appDisplay(parseAppTile("{}"), "cash_flow").name).toBe("Finance");
+  });
   it("reads an individual name, size and brand colour without changing the app key", () => {
     const config = parseAppTile('{"apps":{"crm":{"name":"Vendas","labelPx":20,"color":"roxo"}}}');
     expect(appDisplay(config, "crm", 16)).toEqual({ name: "Vendas", labelPx: 20, colorKey: "roxo", color: "var(--myio-purple)" });

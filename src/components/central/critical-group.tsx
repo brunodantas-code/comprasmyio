@@ -19,7 +19,7 @@ export function useCriticalPending(){
  const out:CriticalPending[]=[];
  for(const a of actions.data??[])if(a.due_date===today&&!a.archived&&!a.completed_at)out.push({key:`la:${a.id}`,title:a.title,app:'Legal',due:today,route:'/legal',record:a.record_id});
  for(const r of records.data??[])for(const s of parseLegalContent(r.content).subjects)if(s.completionDate===today&&legalSubjectResponsibles(s).some(n=>n.trim().toLowerCase()===me.full_name.trim().toLowerCase())&&!(allActions.data??[]).some(a=>a.record_id===r.id&&a.subject_id===s.id&&!a.archived)&&!(completions.data??[]).some(c=>c.record_id===r.id&&c.subject_id===s.id))out.push({key:`ls:${r.id}/${s.id}`,title:s.title,app:'Legal',due:today,route:'/legal',record:r.id});
- for(const o of criticalSupplyOrders(orders.data??[],steps.data??[],me.id,me.isComprador,today))out.push({key:`o:${o.id}`,title:o.item_name,app:o.request_model==='pagamento'?'Cash Flow':'Supply',due:today,route:'/dashboard',record:o.id});
+ for(const o of criticalSupplyOrders(orders.data??[],steps.data??[],me.id,me.isComprador,today))out.push({key:`o:${o.id}`,title:o.item_name,app:o.request_model==='pagamento'?'Finance':'Supply',due:today,route:'/dashboard',record:o.id});
  for(const n of nodes.data??[])if(n.due_date===today&&n.progress<100)out.push({key:`n:${n.id}`,title:n.title,app:'Mytosis',due:today,route:'/mytosis',record:n.id});
  for(const t of tasks.data??[])if(t.due_date===today&&!t.completed)out.push({key:`mt:${t.id}`,title:t.title,app:'Mytosis',due:today,route:'/mytosis',record:t.node_id,task:t.id});
  for(const t of todos.data??[])if(t.due_date===today&&!['concluido','excluido'].includes(t.status))out.push({key:`todo:${t.id}`,title:t.title,app:'To Dos',due:today,route:'/pendentes',record:t.id});return out;}});

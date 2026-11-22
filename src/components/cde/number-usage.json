@@ -1,7 +1,7 @@
 [
   {
     "file": "components/cde/cde-app-order.tsx",
-    "line": 25,
+    "line": 28,
     "group": "number_section"
   },
   {
@@ -41,7 +41,7 @@
   },
   {
     "file": "components/cde/cde-workspace.tsx",
-    "line": 335,
+    "line": 336,
     "group": "number_subsection"
   },
   {
@@ -51,32 +51,32 @@
   },
   {
     "file": "components/legal/legal-workspace.tsx",
-    "line": 128,
+    "line": 149,
     "group": "number_section"
   },
   {
     "file": "components/legal/legal-workspace.tsx",
-    "line": 136,
+    "line": 157,
     "group": "number_section"
   },
   {
     "file": "components/legal/minutes-list.tsx",
-    "line": 98,
+    "line": 102,
     "group": "number_section"
   },
   {
     "file": "components/legal/minutes-list.tsx",
-    "line": 107,
+    "line": 110,
     "group": "number_section"
   },
   {
     "file": "components/legal/subject-actions.tsx",
-    "line": 69,
+    "line": 73,
     "group": "number_subsection"
   },
   {
     "file": "components/legal/subject-actions.tsx",
-    "line": 71,
+    "line": 75,
     "group": "number_subsection"
   },
   {
@@ -115,19 +115,24 @@
     "group": "number_subsection"
   },
   {
-    "file": "components/projects/workspace.tsx",
-    "line": 94,
-    "group": "number_section"
-  },
-  {
-    "file": "components/projects/workspace.tsx",
-    "line": 95,
+    "file": "components/projects/gantt.tsx",
+    "line": 42,
     "group": "number_section"
   },
   {
     "file": "components/projects/phase-tasks.tsx",
     "line": 11,
     "group": "number_subsection"
+  },
+  {
+    "file": "components/projects/workspace.tsx",
+    "line": 109,
+    "group": "number_section"
+  },
+  {
+    "file": "components/projects/workspace.tsx",
+    "line": 115,
+    "group": "number_section"
   },
   {
     "file": "components/site-survey-screen-summary.tsx",
@@ -166,7 +171,7 @@
   },
   {
     "file": "components/wishlist/conversation.tsx",
-    "line": 42,
+    "line": 65,
     "group": "number_subsection"
   },
   {
@@ -175,18 +180,23 @@
     "group": "number_section"
   },
   {
-    "file": "routes/_authenticated/site-survey.tsx",
-    "line": 419,
+    "file": "components/indicadores/dashboard.tsx",
+    "line": 263,
     "group": "number_section"
   },
   {
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1673,
+    "line": 420,
+    "group": "number_section"
+  },
+  {
+    "file": "routes/_authenticated/site-survey.tsx",
+    "line": 1674,
     "group": "number_subsection"
   },
   {
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1934,
+    "line": 1935,
     "group": "number_subsection"
   }
 ]

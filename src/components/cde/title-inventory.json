@@ -402,6 +402,13 @@
   ]
  },
  {
+  "kind": "titulo",
+  "text": "Inventário",
+  "files": [
+   "components/stock-inventory-section.tsx"
+  ]
+ },
+ {
   "kind": "subtitulo",
   "text": "Itens cadastrados",
   "files": [

@@ -6,5 +6,5 @@ type Props = {
 };
 
 export function MyioCashFlowLogo({ className, tone = "auto" }: Props) {
-  return <MyioAppLogo appName="Cash Flow" className={className} tone={tone} />;
+  return <MyioAppLogo appName="Finance" className={className} tone={tone} />;
 }

@@ -1,0 +1,3 @@
+- Indicadores uses independent role grants and RLS-scoped objectives/metrics; confidential access is inherited from every ancestor, never inferred from client state.
+- Check-ins use an authenticated row-locked RPC with append-only history; updates belong to the responsible user or app admin.
+- Cards, markers, fields, filters and actions use the live shared CDE components; progress and periods share pure tested helpers.
