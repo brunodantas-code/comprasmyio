@@ -13,6 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 
 const APPS = [
+  { key: "spend", label: "Spend" },
   { key: "supply", label: "Supply" },
   { key: "cash_flow", label: "Finance" },
   { key: "crm", label: "CRM" },

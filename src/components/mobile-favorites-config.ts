@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { PORTAL_APPS } from "@/components/cde/app-order-config";
 
 export const FAVORITE_LIMIT = 4;
-export const FAVORITE_APPS = PORTAL_APPS.map(app => ({ ...app, to: ({ supply: "/dashboard", cash_flow: "/cash-flow", crm: "/crm", legal: "/legal", rh: "/rh", site_survey: "/site-survey", chamados: "/chamados", development: "/development", mytosis: "/mytosis", indicadores: "/indicadores", wishlist: "/wishlist", projects: "/projects", cde: "/cde" } as const)[app.key] }));
+export const FAVORITE_APPS = PORTAL_APPS.map(app => ({ ...app, to: ({ spend: "/spend", supply: "/dashboard", cash_flow: "/cash-flow", crm: "/crm", legal: "/legal", rh: "/rh", site_survey: "/site-survey", chamados: "/chamados", development: "/development", mytosis: "/mytosis", indicadores: "/indicadores", wishlist: "/wishlist", projects: "/projects", cde: "/cde" } as const)[app.key] }));
 export function normalizeFavorites(keys: string[], allowed: string[]): string[] {
   return [...new Set(keys)].filter(key => allowed.includes(key)).slice(0, FAVORITE_LIMIT);
 }
@@ -30,7 +30,7 @@ export function useMobileFavorites() {
       supabase.rpc("indicadores_role", { _user_id: id }),
     ]);
     for (const result of [access, admin, mytosis, support, favorites, indicadores]) if (result.error) throw result.error;
-    const allowed = [...new Set([...(access.data ?? []).map(a => a.app_key), ...(admin.data ? ["cde"] : []), ...(mytosis.data ? ["mytosis"] : []), ...(indicadores.data ? ["indicadores"] : []), ...(support.data ? ["chamados"] : [])])];
+    const allowed = [...new Set([...(access.data ?? []).map(a => a.app_key), ...(admin.data ? ["cde", "spend"] : []), ...(mytosis.data ? ["mytosis"] : []), ...(indicadores.data ? ["indicadores"] : []), ...(support.data ? ["chamados"] : [])])];
     return { id, allowed, keys: normalizeFavorites(favorites.data?.app_keys ?? [], allowed) };
   } });
 }

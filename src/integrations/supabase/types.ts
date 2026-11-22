@@ -675,6 +675,7 @@ export type Database = {
           request_type: string
           requester_id: string
           source_order_id: string
+          spend_line_id: string | null
           status: string
           updated_at: string
         }
@@ -699,6 +700,7 @@ export type Database = {
           request_type: string
           requester_id: string
           source_order_id: string
+          spend_line_id?: string | null
           status?: string
           updated_at?: string
         }
@@ -723,6 +725,7 @@ export type Database = {
           request_type?: string
           requester_id?: string
           source_order_id?: string
+          spend_line_id?: string | null
           status?: string
           updated_at?: string
         }
@@ -781,6 +784,13 @@ export type Database = {
             columns: ["source_order_id"]
             isOneToOne: true
             referencedRelation: "purchase_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_flow_payables_spend_line_id_fkey"
+            columns: ["spend_line_id"]
+            isOneToOne: true
+            referencedRelation: "spend_lines"
             referencedColumns: ["id"]
           },
         ]
@@ -11383,6 +11393,335 @@ export type Database = {
         }
         Relationships: []
       }
+      spend_cards: {
+        Row: {
+          active: boolean
+          bank: string
+          company_key: string
+          company_name: string
+          created_at: string
+          due_day: number
+          holder_id: string
+          id: string
+          last_four: string
+          name: string
+        }
+        Insert: {
+          active?: boolean
+          bank: string
+          company_key?: string
+          company_name: string
+          created_at?: string
+          due_day?: number
+          holder_id: string
+          id?: string
+          last_four: string
+          name: string
+        }
+        Update: {
+          active?: boolean
+          bank?: string
+          company_key?: string
+          company_name?: string
+          created_at?: string
+          due_day?: number
+          holder_id?: string
+          id?: string
+          last_four?: string
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spend_cards_holder_id_fkey"
+            columns: ["holder_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      spend_lines: {
+        Row: {
+          account_id: string | null
+          amount: number
+          category: string | null
+          cost_center_id: string | null
+          created_at: string
+          date: string
+          id: string
+          installment: string | null
+          last_four: string | null
+          merchant: string
+          ordinal: number
+          payable_id: string | null
+          project_id: string | null
+          receipt_id: string | null
+          statement_id: string
+          status: string
+        }
+        Insert: {
+          account_id?: string | null
+          amount: number
+          category?: string | null
+          cost_center_id?: string | null
+          created_at?: string
+          date: string
+          id?: string
+          installment?: string | null
+          last_four?: string | null
+          merchant: string
+          ordinal: number
+          payable_id?: string | null
+          project_id?: string | null
+          receipt_id?: string | null
+          statement_id: string
+          status?: string
+        }
+        Update: {
+          account_id?: string | null
+          amount?: number
+          category?: string | null
+          cost_center_id?: string | null
+          created_at?: string
+          date?: string
+          id?: string
+          installment?: string | null
+          last_four?: string | null
+          merchant?: string
+          ordinal?: number
+          payable_id?: string | null
+          project_id?: string | null
+          receipt_id?: string | null
+          statement_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spend_lines_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "cash_flow_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spend_lines_cost_center_id_fkey"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spend_lines_payable_id_fkey"
+            columns: ["payable_id"]
+            isOneToOne: true
+            referencedRelation: "cash_flow_payables"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spend_lines_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spend_lines_receipt_id_fkey"
+            columns: ["receipt_id"]
+            isOneToOne: true
+            referencedRelation: "spend_receipts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spend_lines_statement_id_fkey"
+            columns: ["statement_id"]
+            isOneToOne: false
+            referencedRelation: "spend_statements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      spend_logs: {
+        Row: {
+          action: string
+          actor_id: string
+          card_id: string
+          created_at: string
+          details: Json
+          id: string
+        }
+        Insert: {
+          action: string
+          actor_id: string
+          card_id: string
+          created_at?: string
+          details?: Json
+          id?: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string
+          card_id?: string
+          created_at?: string
+          details?: Json
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spend_logs_card_id_fkey"
+            columns: ["card_id"]
+            isOneToOne: false
+            referencedRelation: "spend_cards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      spend_notices: {
+        Row: {
+          card_id: string
+          created_at: string
+          created_by: string
+          id: string
+          line_id: string | null
+          message: string
+        }
+        Insert: {
+          card_id: string
+          created_at?: string
+          created_by: string
+          id?: string
+          line_id?: string | null
+          message: string
+        }
+        Update: {
+          card_id?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          line_id?: string | null
+          message?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spend_notices_card_id_fkey"
+            columns: ["card_id"]
+            isOneToOne: false
+            referencedRelation: "spend_cards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spend_notices_line_id_fkey"
+            columns: ["line_id"]
+            isOneToOne: false
+            referencedRelation: "spend_lines"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      spend_receipts: {
+        Row: {
+          amount: number
+          card_id: string
+          category: string
+          clear_photo: boolean
+          created_at: string
+          date: string
+          file_path: string
+          holder_id: string
+          id: string
+          merchant: string
+          observation: string
+          project_id: string | null
+          status: string
+        }
+        Insert: {
+          amount: number
+          card_id: string
+          category: string
+          clear_photo?: boolean
+          created_at?: string
+          date: string
+          file_path: string
+          holder_id: string
+          id: string
+          merchant: string
+          observation?: string
+          project_id?: string | null
+          status?: string
+        }
+        Update: {
+          amount?: number
+          card_id?: string
+          category?: string
+          clear_photo?: boolean
+          created_at?: string
+          date?: string
+          file_path?: string
+          holder_id?: string
+          id?: string
+          merchant?: string
+          observation?: string
+          project_id?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spend_receipts_card_id_fkey"
+            columns: ["card_id"]
+            isOneToOne: false
+            referencedRelation: "spend_cards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spend_receipts_holder_id_fkey"
+            columns: ["holder_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spend_receipts_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      spend_statements: {
+        Row: {
+          card_id: string
+          created_at: string
+          due_date: string
+          file_path: string
+          id: string
+          period: string
+        }
+        Insert: {
+          card_id: string
+          created_at?: string
+          due_date: string
+          file_path: string
+          id: string
+          period: string
+        }
+        Update: {
+          card_id?: string
+          created_at?: string
+          due_date?: string
+          file_path?: string
+          id?: string
+          period?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spend_statements_card_id_fkey"
+            columns: ["card_id"]
+            isOneToOne: false
+            referencedRelation: "spend_cards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stock_destinations: {
         Row: {
           active: boolean
@@ -13343,6 +13682,7 @@ export type Database = {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
       }
+      public_app_captions: { Args: never; Returns: Json }
       public_app_order: { Args: never; Returns: string }
       reallocate_allocation_link: {
         Args: {
@@ -13417,6 +13757,12 @@ export type Database = {
         }
         Returns: undefined
       }
+      spend_action: { Args: { _action: string; _data: Json }; Returns: Json }
+      spend_card_access: { Args: { _card: string }; Returns: boolean }
+      spend_project_allowed: { Args: { _project: string }; Returns: boolean }
+      spend_role: { Args: never; Returns: string }
+      spend_storage_access: { Args: { _name: string }; Returns: boolean }
+      spend_workspace: { Args: never; Returns: Json }
       split_mytosis_node: {
         Args: { _count: number; _node_id: string }
         Returns: string[]

@@ -6,7 +6,6 @@ import {
   CalendarDays,
   CheckCheck,
   ChevronDown,
-  ChevronRight,
   Gauge,
   GitBranch,
   History,
@@ -36,7 +35,8 @@ import { MyioAppLogo } from "@/components/myio-app-logo";
 import { AppNavigation } from "@/components/ui/app-navigation";
 import { useAppMenuLayout } from "@/components/cde/cde-menu-type";
 import { useMenuOrders, sortByMenuOrder } from "@/components/cde/menu-order";
-import { CdeButton, CdeNumber } from "@/components/cde/cde-button";
+import { CdeButton, CdeNumber, CdeDisclosureIcon } from "@/components/cde/cde-button";
+import { Tooltip as TextTooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import { useTableFilters } from "@/components/use-table-filters";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -57,6 +57,9 @@ import { UserPendingBars } from "@/components/central/user-bars";
 import { indicadoresUserBars } from "@/lib/indicadores-user-bars";
 import { importedField, historicalAuthor } from "@/lib/indicadores-import";
 const screen = "components/indicadores/dashboard.tsx";
+function TruncatedText({ text }: { text: string }) {
+  return <TooltipProvider><TextTooltip><TooltipTrigger asChild><span className="block w-full min-w-0 truncate" title={text}>{text}</span></TooltipTrigger><TooltipContent className="max-w-sm whitespace-normal">{text}</TooltipContent></TextTooltip></TooltipProvider>;
+}
 const confidenceName = (s: string | null) => CONFIDENCES.find((c) => c.value === s)?.label ?? (s || "Não informada na origem");
 function Advance({ value }: { value: number }) {
   return (
@@ -185,26 +188,16 @@ export function IndicadoresDashboard() {
     const ownerObjective = data.objectives.find((o) => o.id === m.objective_id);
     const archived = ownerObjective ? isArchived(ownerObjective) : false;
     return (
-      <Card key={m.id} className="min-w-0">
+      <Card key={m.id} className="flex h-72 min-w-0 flex-col">
         <CardHeader className="gap-1 space-y-1 p-3 sm:p-3">
           <div className="flex items-start gap-2">
-            <CardTitle className="min-w-0 flex-1 break-words text-xs font-normal leading-snug">
-              {m.title}
+            <CardTitle className="min-w-0 flex-1 text-xs font-normal leading-snug">
+              <TruncatedText text={m.title} />
             </CardTitle>
-            {canEdit &&
-              !archived &&
-              iconButton(`Editar ${m.title}`, Pencil, () =>
-                setEdit({ type: "metric", row: m, kind: m.kind === "kr" ? "kr" : "kpi" }),
-              )}
-            {canEdit &&
-              iconButton(`Excluir ${m.title}`, Trash2, async () => {
-                if (await confirmAction(`Excluir o indicador “${m.title}”?`))
-                  mutation.mutate({ type: "metric", id: m.id });
-              })}
           </div>
-          <CardDescription className="text-xs">{importedField(m.source_metadata, "responsible_name") || userName(m.responsible_id)}</CardDescription>
+          <CardDescription className="min-w-0 text-xs"><TruncatedText text={importedField(m.source_metadata, "responsible_name") || userName(m.responsible_id)} /></CardDescription>
         </CardHeader>
-        <CardContent className="space-y-2 p-3 pt-0 sm:p-3 sm:pt-0">
+        <CardContent className="flex flex-1 flex-col gap-2 p-3 pt-0 sm:p-3 sm:pt-0">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <Badge>{confidenceName(m.source_metadata && !latest(m.id)?.recorded_by ? null : m.confidence)}</Badge>
             <span className="text-xs">{m.kind === "kpi" ? "KPI" : "Key Result"}</span>
@@ -222,6 +215,8 @@ export function IndicadoresDashboard() {
             </p>
           )}
           <div className="flex flex-wrap items-center gap-2">
+            {canEdit && !archived && iconButton(`Editar ${m.title}`, Pencil, () => setEdit({ type: "metric", row: m, kind: m.kind === "kr" ? "kr" : "kpi" }))}
+            {canEdit && iconButton(`Excluir ${m.title}`, Trash2, async () => { if (await confirmAction(`Excluir o indicador “${m.title}”?`)) mutation.mutate({ type: "metric", id: m.id }); })}
             {!archived && (m.responsible_id === data.userId || data.role === "admin") && (
               <Button variant="outline" onClick={() => setEdit({ type: "checkin", row: m })}>
                 <CheckCheck className="size-4" />
@@ -247,32 +242,18 @@ export function IndicadoresDashboard() {
     const open = expanded.has(o.id);
     return (
       <div key={o.id} className="min-w-0 space-y-3">
-        <Card>
+        <Card className="flex h-48 min-w-0 flex-col">
           <CardHeader className="space-y-1 p-3 sm:p-3">
-            <div className="flex items-start gap-2">
+            <div className="flex items-center gap-2">
               <CdeNumber screen={screen}>{index + 1}</CdeNumber>
-              <CardTitle className="min-w-0 flex-1 break-words text-xs font-normal leading-snug">
-                {o.title}
+              <CardTitle className="min-w-0 flex-1 text-xs font-normal leading-snug">
+                <TruncatedText text={o.title} />
               </CardTitle>
               {o.confidential && (
                 <LockKeyhole aria-label="Confidencial" className="size-4 shrink-0" />
               )}
-              {canEdit &&
-                !isArchived(o) &&
-                iconButton(`Editar ${o.title}`, Pencil, () =>
-                  setEdit({ type: "objective", row: o }),
-                )}
-              {canEdit &&
-                iconButton(`Excluir ${o.title}`, Trash2, async () => {
-                  if (
-                    await confirmAction(
-                      `Excluir o objetivo “${o.title}”? Objetivos com resultados ou desdobramentos precisam ser reorganizados antes.`,
-                    )
-                  )
-                    mutation.mutate({ type: "objective", id: o.id });
-                })}
             </div>
-            <CardDescription className="text-xs">
+            <CardDescription className="min-w-0 truncate text-xs" title={`${data.imported.filter(r => r.source_table === "objective_owners" && importedField(r.data,"objective_id") === o.id).map(r => importedField(data.imported.find(m => m.source_table === "team_members" && importedField(m.data,"id") === importedField(r.data,"team_member_id"))?.data,"full_name")).filter(Boolean).join(", ") || importedField(o.source_metadata,"responsible_name") || userName(o.responsible_id)} · ${o.alignment_name ?? o.scope}`}>
               {data.imported.filter(r => r.source_table === "objective_owners" && importedField(r.data,"objective_id") === o.id).map(r => importedField(data.imported.find(m => m.source_table === "team_members" && importedField(m.data,"id") === importedField(r.data,"team_member_id"))?.data,"full_name")).filter(Boolean).join(", ") || importedField(o.source_metadata,"responsible_name") || userName(o.responsible_id)} ·{" "}
               {o.alignment_name ??
                 {
@@ -284,9 +265,9 @@ export function IndicadoresDashboard() {
                 o.scope}
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-2 p-3 pt-0 sm:p-3 sm:pt-0">
+          <CardContent className="mt-auto space-y-2 p-3 pt-0 sm:p-3 sm:pt-0">
             {o.parent_id && (
-              <p className="text-xs text-muted-foreground">
+              <p className="truncate text-xs text-muted-foreground" title={data.objectives.find((p) => p.id === o.parent_id)?.title}>
                 Alinhado a: {data.objectives.find((p) => p.id === o.parent_id)?.title}
               </p>
             )}
@@ -301,25 +282,24 @@ export function IndicadoresDashboard() {
                     title="Novo Key Result"
                     onClick={() => setEdit({ type: "metric", kind: "kr", objective: o })}
                   />
+                  {iconButton(`Editar ${o.title}`, Pencil, () => setEdit({ type: "objective", row: o }))}
+                  {iconButton(`Excluir ${o.title}`, Trash2, async () => { if (await confirmAction(`Excluir o objetivo “${o.title}”? Objetivos com resultados ou desdobramentos precisam ser reorganizados antes.`)) mutation.mutate({ type: "objective", id: o.id }); })}
                   {iconButton(`Desdobrar ${o.title}`, GitBranch, () =>
                     setEdit({ type: "objective", parent: o }),
                   )}
                 </>
               )}
-              <span className="flex-1 text-xs text-muted-foreground">
+              <span className="min-w-0 flex-1 truncate text-xs text-muted-foreground" title={data.cycles.find((c) => c.id === o.cycle_id)?.name ?? "Sem ciclo"}>
                 {data.cycles.find((c) => c.id === o.cycle_id)?.name ?? "Sem ciclo"}
               </span>
-              {iconButton(
-                `${open ? "Recolher" : "Exibir"} ${o.title}`,
-                open ? ChevronDown : ChevronRight,
-                () =>
+              {!open && <span className="shrink-0 text-xs tabular-nums text-muted-foreground" aria-label={`${visibleMetrics.filter(m => m.objective_id === o.id).length} KRs recolhidos`}>{visibleMetrics.filter(m => m.objective_id === o.id).length} KRs</span>}
+              <Button variant="ghost" size="compactIcon" aria-label={`${open ? "Recolher" : "Exibir"} ${o.title}`} title={open ? "Recolher" : "Exibir"} aria-expanded={open} onClick={() =>
                   setExpanded((current) => {
                     const n = new Set(current);
                     if (n.has(o.id)) n.delete(o.id);
                     else n.add(o.id);
                     return n;
-                  }),
-              )}
+                  })}><CdeDisclosureIcon open={open} screen={screen} /></Button>
             </div>
           </CardContent>
         </Card>
@@ -474,7 +454,7 @@ export function IndicadoresDashboard() {
                   </div>;
                 }}
               />
-              {[
+              <section className="w-full overflow-hidden rounded-md border border-border bg-card shadow-sm" aria-label="Resumo dos indicadores"><header className="flex items-center justify-between gap-3 border-b border-border px-4 py-3"><h2 className="truncate text-xs font-bold uppercase text-muted-foreground">Indicadores</h2><Badge>Atualizado</Badge></header><div className="divide-y divide-border p-2 lg:grid lg:grid-cols-4 lg:divide-x lg:divide-y-0">{[
                 { label: "Indicadores", value: metrics.length },
                 {
                   label: "Avanço médio",
@@ -490,11 +470,11 @@ export function IndicadoresDashboard() {
                     .length,
                 },
               ].map((t) => (
-                <div key={t.label} className="text-center">
-                  <p className="text-sm text-muted-foreground">{t.label}</p>
-                  <p className="text-2xl font-semibold tabular-nums">{t.value}</p>
+                <div key={t.label} className={`flex min-h-12 items-center justify-between gap-3 px-3 py-2.5 lg:min-h-16 lg:px-4 ${Number(String(t.value).replace('%','')) > 0 ? 'bg-myio-green/5' : ''}`}>
+                  <div className="flex min-w-0 items-center gap-3"><span className={`h-6 w-1.5 shrink-0 rounded-full ${Number(String(t.value).replace('%','')) > 0 ? 'bg-myio-green' : 'bg-muted-foreground/25'}`} aria-hidden="true" /><p className="truncate text-sm text-muted-foreground" title={t.label}>{t.label}</p></div>
+                  <strong className="shrink-0 text-lg leading-none tabular-nums">{t.value}</strong>
                 </div>
-              ))}
+              ))}</div></section>
             </section>
             {view === "tree" && tab === "okrs" ? (
               <div className="space-y-3">{tree(null)}</div>

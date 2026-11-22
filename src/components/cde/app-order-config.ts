@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const PORTAL_APPS = [
   { key: "supply", name: "Supply" },
+  { key: "spend", name: "Spend" },
   { key: "cash_flow", name: "Finance" },
   { key: "crm", name: "CRM" },
   { key: "legal", name: "Legal" },

@@ -96,6 +96,7 @@ function PortalPage() {
   const firstName = data.name.trim().split(/\s+/)[0] || "Usuário";
 
   const apps = [
+    { key: "spend", name: "Spend", description: ["Gestão de cartões e despesas"], to: "/spend" as const },
     { key: "supply", name: "Supply", description: ["Solicitações", "e Estoque"], to: "/dashboard" as const },
     { key: "cash_flow", name: "Finance", description: ["Gestão financeira"], to: "/cash-flow" as const },
     { key: "crm", name: "CRM", description: ["Vendas e", "Relacionamento"], to: "/crm" as const },
@@ -110,7 +111,7 @@ function PortalPage() {
     { key: "projects", name: "Projects", description: ["Planejamento e", "controle de projetos"], to: "/projects" as const },
     { key: "cde", name: "CDE", description: ["Padrões de", "interface"], to: "/cde" as const },
   ].map(app => ({ ...app, name: appDisplay(tile, app.key).name }))
-    .filter((app) => (app.key === "cde" ? (data.isErpAdmin || data.appKeys.has("cde")) : data.appKeys.has(app.key)) || (app.key === "chamados" && pendingActions?.isCustomerSupportAnalyst))
+    .filter((app) => (app.key === "cde" ? (data.isErpAdmin || data.appKeys.has("cde")) : app.key === "spend" ? data.isErpAdmin || data.appKeys.has("spend") : data.appKeys.has(app.key)) || (app.key === "chamados" && pendingActions?.isCustomerSupportAnalyst))
     .sort((a, b) => (appOrder ? appOrder.indexOf(a.key) - appOrder.indexOf(b.key) : 0));
 
   const mobileApps = partitionMobileApps(apps, favorites?.keys ?? []);

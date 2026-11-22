@@ -29,6 +29,7 @@ import { Route as AuthenticatedPortalRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedProjectsRouteImport } from './routes/_authenticated/projects'
 import { Route as AuthenticatedRhRouteImport } from './routes/_authenticated/rh'
 import { Route as AuthenticatedSiteSurveyRouteImport } from './routes/_authenticated/site-survey'
+import { Route as AuthenticatedSpendRouteImport } from './routes/_authenticated/spend'
 import { Route as AuthenticatedSupplyManualRouteImport } from './routes/_authenticated/supply-manual'
 import { Route as AuthenticatedWishlistRouteImport } from './routes/_authenticated/wishlist'
 import { Route as ApiPublicHooksSyncProductStatusRouteImport } from './routes/api/public/hooks/sync-product-status'
@@ -135,6 +136,11 @@ const AuthenticatedSiteSurveyRoute = AuthenticatedSiteSurveyRouteImport.update({
   path: '/site-survey',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedSpendRoute = AuthenticatedSpendRouteImport.update({
+  id: '/spend',
+  path: '/spend',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedSupplyManualRoute =
   AuthenticatedSupplyManualRouteImport.update({
     id: '/supply-manual',
@@ -173,6 +179,7 @@ export interface FileRoutesByFullPath {
   '/projects': typeof AuthenticatedProjectsRoute
   '/rh': typeof AuthenticatedRhRoute
   '/site-survey': typeof AuthenticatedSiteSurveyRoute
+  '/spend': typeof AuthenticatedSpendRoute
   '/supply-manual': typeof AuthenticatedSupplyManualRoute
   '/wishlist': typeof AuthenticatedWishlistRoute
   '/api/public/hooks/sync-product-status': typeof ApiPublicHooksSyncProductStatusRoute
@@ -197,6 +204,7 @@ export interface FileRoutesByTo {
   '/projects': typeof AuthenticatedProjectsRoute
   '/rh': typeof AuthenticatedRhRoute
   '/site-survey': typeof AuthenticatedSiteSurveyRoute
+  '/spend': typeof AuthenticatedSpendRoute
   '/supply-manual': typeof AuthenticatedSupplyManualRoute
   '/wishlist': typeof AuthenticatedWishlistRoute
   '/api/public/hooks/sync-product-status': typeof ApiPublicHooksSyncProductStatusRoute
@@ -223,6 +231,7 @@ export interface FileRoutesById {
   '/_authenticated/projects': typeof AuthenticatedProjectsRoute
   '/_authenticated/rh': typeof AuthenticatedRhRoute
   '/_authenticated/site-survey': typeof AuthenticatedSiteSurveyRoute
+  '/_authenticated/spend': typeof AuthenticatedSpendRoute
   '/_authenticated/supply-manual': typeof AuthenticatedSupplyManualRoute
   '/_authenticated/wishlist': typeof AuthenticatedWishlistRoute
   '/api/public/hooks/sync-product-status': typeof ApiPublicHooksSyncProductStatusRoute
@@ -249,6 +258,7 @@ export interface FileRouteTypes {
     | '/projects'
     | '/rh'
     | '/site-survey'
+    | '/spend'
     | '/supply-manual'
     | '/wishlist'
     | '/api/public/hooks/sync-product-status'
@@ -273,6 +283,7 @@ export interface FileRouteTypes {
     | '/projects'
     | '/rh'
     | '/site-survey'
+    | '/spend'
     | '/supply-manual'
     | '/wishlist'
     | '/api/public/hooks/sync-product-status'
@@ -298,6 +309,7 @@ export interface FileRouteTypes {
     | '/_authenticated/projects'
     | '/_authenticated/rh'
     | '/_authenticated/site-survey'
+    | '/_authenticated/spend'
     | '/_authenticated/supply-manual'
     | '/_authenticated/wishlist'
     | '/api/public/hooks/sync-product-status'
@@ -453,6 +465,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSiteSurveyRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/spend': {
+      id: '/_authenticated/spend'
+      path: '/spend'
+      fullPath: '/spend'
+      preLoaderRoute: typeof AuthenticatedSpendRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/supply-manual': {
       id: '/_authenticated/supply-manual'
       path: '/supply-manual'
@@ -494,6 +513,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedProjectsRoute: typeof AuthenticatedProjectsRoute
   AuthenticatedRhRoute: typeof AuthenticatedRhRoute
   AuthenticatedSiteSurveyRoute: typeof AuthenticatedSiteSurveyRoute
+  AuthenticatedSpendRoute: typeof AuthenticatedSpendRoute
   AuthenticatedSupplyManualRoute: typeof AuthenticatedSupplyManualRoute
   AuthenticatedWishlistRoute: typeof AuthenticatedWishlistRoute
 }
@@ -515,6 +535,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedProjectsRoute: AuthenticatedProjectsRoute,
   AuthenticatedRhRoute: AuthenticatedRhRoute,
   AuthenticatedSiteSurveyRoute: AuthenticatedSiteSurveyRoute,
+  AuthenticatedSpendRoute: AuthenticatedSpendRoute,
   AuthenticatedSupplyManualRoute: AuthenticatedSupplyManualRoute,
   AuthenticatedWishlistRoute: AuthenticatedWishlistRoute,
 }

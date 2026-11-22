@@ -1,0 +1,19 @@
+import { useState } from "react";
+import { Pencil, Plus, Save } from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { SearchableSelect } from "@/components/ui/searchable-select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { spendAction, type SpendCard, type SpendData } from "./data";
+export function SpendCards({ data, refresh }: { data: SpendData; refresh: () => Promise<void> }) {
+  const [editing, setEditing] = useState<SpendCard | "new" | null>(null); const [busy, setBusy] = useState(false);
+  const blank = () => ({ id: crypto.randomUUID(), name: "", bank: "", company_name: "myio", last_four: "", holder_id: data.user_id, due_day: 10 });
+  const [draft, setDraft] = useState<{ id: string; name: string; bank: string; company_name: string; last_four: string; holder_id: string; due_day: number }>(blank);
+  function open(c: SpendCard | "new") { setDraft(c === "new" ? blank() : { id: c.id, name: c.name, bank: c.bank, company_name: c.company_name, last_four: c.last_four, holder_id: c.holder_id, due_day: c.due_day }); setEditing(c); }
+  async function save() { setBusy(true); try { await spendAction("card", draft); await refresh(); setEditing(null); toast.success("Cartão salvo"); } catch(e) { toast.error(e instanceof Error ? e.message : "Não foi possível salvar"); } finally { setBusy(false); } }
+  return <section className="space-y-4"><header className="flex items-center justify-between gap-3"><h2 className="text-lg">Cartões</h2><Button onClick={() => open("new")}><Plus />Novo cartão</Button></header><div className="divide-y divide-border">{data.cards.map(c => <div key={c.id} className="flex min-h-16 items-center justify-between gap-3 py-3"><div className="min-w-0"><p className="truncate" title={c.name}>{c.name} · •••• {c.last_four}</p><p className="truncate text-xs text-muted-foreground">{c.company_name} · {c.bank} · {data.users.find(u => u.id === c.holder_id)?.name}</p></div><Button variant="ghost" size="icon" aria-label={`Editar cartão ${c.name}`} title="Editar cartão" onClick={() => open(c)}><Pencil /></Button></div>)}</div>
+    <Dialog open={!!editing} onOpenChange={o => { if (!o) setEditing(null); }}><DialogContent><DialogHeader><DialogTitle>{editing === "new" ? "Novo cartão" : "Editar cartão"}</DialogTitle></DialogHeader><div className="grid gap-4 sm:grid-cols-2">{([['name','Nome'],['company_name','Empresa'],['bank','Banco'],['last_four','Últimos quatro dígitos']] as const).map(([key,label]) => <label key={key} className="space-y-1"><Label>{label}</Label><Input aria-label={label} value={draft[key]} onChange={e => setDraft({ ...draft, [key]: e.target.value })} {...(key === 'last_four' ? { maxLength: 4, inputMode: 'numeric' as const } : {})} /></label>)}<label className="space-y-1"><Label>Portador</Label><SearchableSelect aria-label="Portador do cartão" value={draft.holder_id} disabled={editing !== 'new'} onChange={holder_id => setDraft({ ...draft, holder_id })} options={data.users.map(u => ({ value: u.id, label: u.name }))} /></label><label className="space-y-1"><Label>Dia do vencimento</Label><Input type="number" aria-label="Dia do vencimento" min={1} max={31} value={draft.due_day} onChange={e => setDraft({ ...draft, due_day: Number(e.target.value) })} /></label></div><Button variant="ghost" size="icon" title="Salvar cartão" aria-label="Salvar cartão" disabled={busy} onClick={save}><Save /></Button></DialogContent></Dialog>
+  </section>;
+}

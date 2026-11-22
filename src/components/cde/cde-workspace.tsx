@@ -1,4 +1,5 @@
 import { CdeAppearance } from "./cde-appearance-item";
+import { SpendCategoryConfig } from "@/components/spend/category-config";
 import { AppAppearanceItem } from "./app-appearance-item";
 import { CdeFilterStandard } from "./cde-filter-standard";
 import { NumericMarkerEditor } from "./numeric-marker-editor";
@@ -107,10 +108,10 @@ const PARENTS: Record<string, string> = { "1": "Campos para preenchimento", "3":
 const baseTitle = (t: string) => t.split(" ").slice(1).join(" ");
 const groupParent = (t: string) => { const n = t.split(" ")[0].replace(/\.$/, ""); return n.includes(".") ? n.split(".")[0] : null; };
 const CDE_DEFAULT_ORDER: CdeOrder = {
-  cats: ["app_appearance", "cde_appearance", ...[...new Set(GROUPS.map((g) => groupParent(g.title) ? `p:${groupParent(g.title)}` : g.key))], "icons", "nav", "menu", "apps", "table_fonts", "title_texts", "tags", "corporate_messages", "button_library", "deadline_alerts", "project_budget", "project_appearance"],
+  cats: ["app_appearance", "cde_appearance", ...[...new Set(GROUPS.map((g) => groupParent(g.title) ? `p:${groupParent(g.title)}` : g.key))], "icons", "nav", "menu", "apps", "table_fonts", "title_texts", "tags", "corporate_messages", "button_library", "deadline_alerts", "project_budget", "project_appearance", "spend_categories"],
   subs: Object.fromEntries(Object.keys(PARENTS).map((p) => [p, GROUPS.filter((g) => groupParent(g.title) === p).map((g) => g.key)])),
 };
-const EXTRA_LABELS: Record<string, string> = { project_appearance: "Cores do Projects", project_budget: "Orçamento do Projects", cde_appearance: "Aparência do CDE", icons: "Ícones dos Apps e menus", nav: "Navegação (UI/UX)", menu: "Menu principal", apps: "Home Page", table_fonts: "Cabeçalhos e Listas", tags: "Tags", title_texts: "Títulos e Subtítulos", corporate_messages: "Mensagens corporativas", button_library: "Biblioteca de botões em uso", deadline_alerts: "Alertas de Prazo" };
+const EXTRA_LABELS: Record<string, string> = { spend_categories: "Spend — categorias de despesas", project_appearance: "Cores do Projects", project_budget: "Orçamento do Projects", cde_appearance: "Aparência do CDE", icons: "Ícones dos Apps e menus", nav: "Navegação (UI/UX)", menu: "Menu principal", apps: "Home Page", table_fonts: "Cabeçalhos e Listas", tags: "Tags", title_texts: "Títulos e Subtítulos", corporate_messages: "Mensagens corporativas", button_library: "Biblioteca de botões em uso", deadline_alerts: "Alertas de Prazo" };
 
 const inventoryKey = (v: Omit<Variant, "key">) => [v.tag, v.variant, v.size, v.className, v.icon, v.iconClass].join("|");
 
@@ -463,6 +464,7 @@ export function CdeWorkspace() {
             );
           }
           if (cat === "icons") return <CdeAppIcons key={`CdeAppIcons-${collapseKey}`} number={ci + 1} handle={handle} />;
+          if (cat === "spend_categories") return <SpendCategoryConfig key={`SpendCategories-${collapseKey}`} number={ci + 1} handle={handle} />;
           if (cat === "nav") return <CdeNavigation key={`CdeNavigation-${collapseKey}`} number={ci + 1} handle={handle} />;
           if (cat === "menu") return <CdeMainMenu key={`CdeMainMenu-${collapseKey}`} number={ci + 1} handle={handle} />;
           if (cat === "project_appearance") return <CdeProjectAppearance key={`CdeProjectAppearance-${collapseKey}`} number={ci + 1} handle={handle} />;

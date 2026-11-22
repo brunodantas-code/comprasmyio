@@ -10,6 +10,8 @@ import { CrmFunnelIcon } from "@/components/crm-funnel-icon";
 import { MytosisIcon } from "@/components/mytosis-icon";
 import { CdeIcon } from "@/components/cde-icon";
 import { PORTAL_APPS, useAppOrder } from "@/components/cde/app-order-config";
+import { useQuery } from "@tanstack/react-query";
+import { SpendIcon } from "@/components/spend/icons";
 import { toast } from "sonner";
 import { z } from "zod";
 import {
@@ -49,6 +51,7 @@ export const Route = createFileRoute("/")({
 });
 
 const MODULES = [
+  { icon: SpendIcon, title: "Spend", body: "Gestão de cartões e despesas", available: true },
   { icon: ChartNoAxesCombined, title: "Indicadores", body: "OKRs, KPIs e resultados", available: true },
   { icon: FolderKanban, title: "Projects", body: "Planejamento e controle de projetos", available: true },
   { icon: Lightbulb, title: "Wishlist", body: "Desejos e inovação", available: true },
@@ -116,11 +119,15 @@ const signInSchema = z.object({
 
 export function Landing() {
   const { data: appOrder } = useAppOrder();
+  const { data: captions } = useQuery({ queryKey: ["public-app-captions"], queryFn: async () => {
+    const r = await supabase.rpc("public_app_captions"); if (r.error) throw r.error;
+    return z.record(z.object({ name: z.string().nullable(), description: z.string().nullable() })).parse(r.data);
+  } });
   const orderedModules = [...MODULES].sort((a, b) => {
     const key = (name: string) => PORTAL_APPS.find(app => app.name === name)?.key ?? "";
     const order = appOrder ?? PORTAL_APPS.map(app => app.key);
     return order.indexOf(key(a.title)) - order.indexOf(key(b.title));
-  });
+  }).map(m => { const key = PORTAL_APPS.find(app => app.name === m.title)?.key ?? ""; const saved = captions?.[key]; return { ...m, title: saved?.name?.trim() || m.title, body: saved?.description ?? m.body }; });
   const [signedIn, setSignedIn] = useState(false);
   const [loading, setLoading] = useState(false);
   const [recovering, setRecovering] = useState(false);
