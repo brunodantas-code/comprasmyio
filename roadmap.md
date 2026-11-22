@@ -1,4 +1,5 @@
 # Roadmap
+- [x] CDE Home Page: legendas abaixo do Nome, fonte/cor junto de cada legenda e cor padrão realocada; salvamento/recarga e leitura na Home em computador/celular conferidos, configuração original restaurada. Não publicado.
 - [x] Indicadores: mini gráfico compartilhado com Central (três maiores, barras finas), expansão/tela cheia e setas por usuário com OKRs/KPIs; histórico dos KRs e recolhimento conferidos em computador/celular; 13 testes passaram, sem alterar dados/permissões. Não publicado.
 - [x] Central: filtros múltiplos e ordenação compartilhados entre Todas as Pendências e gráfico expandido, incluindo App nos dois sentidos; Título + App combinados e preservados na lista, computador/celular conferidos; 34 testes passaram. Não publicado.
 - [x] Central: lista e gráficos com a mesma ordem decrescente por quantidade, conferidos com os sete usuários reais no computador e celular.

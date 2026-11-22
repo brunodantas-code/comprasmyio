@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { MyioPlatformLogo } from "@/components/myio-platform-logo";
 import { useAppOrder, useAppTile, APP_TILE_DEFAULT, appDisplay, appTileColorVars, homeHeaderVars, homeHeaderLogoTone, mobileTileVars } from "@/components/cde/app-order-config";
-import { AppTileFace } from "@/components/cde/app-tile";
+import { AppTileFace, AppTileDescription } from "@/components/cde/app-tile";
 import { partitionMobileApps, useMobileFavorites } from "@/components/mobile-favorites-config";
 import { mobileDockVars, useMobileDockStyle } from "@/components/cde/mobile-dock-style";
 import { CorporateBanner } from "@/components/corporate/corporate-banner";
@@ -114,7 +114,7 @@ function PortalPage() {
     .sort((a, b) => (appOrder ? appOrder.indexOf(a.key) - appOrder.indexOf(b.key) : 0));
 
   const mobileApps = partitionMobileApps(apps, favorites?.keys ?? []);
-  const renderApp = ({ key, name, description, to }: (typeof apps)[number]) => (
+  const renderApp = ({ key, name, to }: (typeof apps)[number]) => (
     <div key={key} className="flex min-w-0 flex-col items-center text-center">
       <AppAccessLink
         appKey={key}
@@ -129,7 +129,7 @@ function PortalPage() {
         {key === "legal" && (pendingActions?.legalSignatures ?? 0) > 0 ? <PendingBadge count={pendingActions?.legalSignatures ?? 0} label="pendências no Legal" /> : null}
         <AppTileFace appKey={key} name={name} tile={tile} mobile />
       </AppAccessLink>
-      <p className="mt-2 w-full break-words text-center text-[0.68rem] leading-4 text-[color:var(--tile-below,var(--muted-foreground))]">{description.map((line) => <span key={line} className="block">{line}</span>)}</p>
+      <AppTileDescription appKey={key} tile={tile} mobile />
     </div>
   );
 
@@ -173,7 +173,7 @@ function PortalPage() {
                     <div className="mobile-app-grid grid pb-2">{mobileApps.remaining.map(renderApp)}</div>
                   </div>
                  <div aria-label="Aplicativos disponíveis" style={{ columnGap: tile.gapX, rowGap: tile.gapY }} className="hidden flex-wrap sm:flex">
-                  {apps.map(({ key, name, description, to }) => (
+                  {apps.map(({ key, name, to }) => (
                      <div key={key} className="relative min-w-0 snap-start justify-self-center sm:justify-self-start">
                          {key === "supply" && (pendingActions?.supply ?? 0) > 0 ? <PendingBadge count={pendingActions?.supply ?? 0} label="pendências no Supply" /> : null}
                           {key === "development" && (pendingActions?.codeTickets ?? 0) > 0 ? <PendingBadge count={pendingActions?.codeTickets ?? 0} label="tickets pendentes no Code" /> : null}
@@ -189,9 +189,7 @@ function PortalPage() {
                       >
         <AppTileFace appKey={key} name={name} tile={tile} />
                      </AppAccessLink>
-                      <p className="mt-3 w-24 max-w-full break-words text-center text-xs leading-4 text-[color:var(--tile-below,var(--muted-foreground))] sm:w-28 sm:text-sm sm:leading-5">
-                        {description.map((line) => <span key={line} className="block sm:whitespace-nowrap">{line}</span>)}
-                      </p>
+                      <AppTileDescription appKey={key} tile={tile} />
                      </div>
                      </div>
                    ))}

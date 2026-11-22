@@ -8,7 +8,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Minus, Plus, Save, Menu } from "lucide-react";
 import { MyioPlatformLogo } from "@/components/myio-platform-logo";
 import { MyioAppLogo } from "@/components/myio-app-logo";
-import { APP_DESCRIPTIONS, AppSymbol, AppTileFace } from "./app-tile";
+import { appDescription, AppTileDescription, AppSymbol, AppTileFace } from "./app-tile";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,6 +18,7 @@ import { useCdeSwatchStyle } from "./cde-button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { CdeMobileDockStyle } from "./mobile-dock-style";
 
 function Row({ id, index, displayName }: { id: string; index: number; displayName: string }) {
@@ -31,7 +32,7 @@ function Row({ id, index, displayName }: { id: string; index: number; displayNam
   </div>;
 }
 
-const COLOR_FIELDS: [AppTileColorKind, string][] = [["headerBg", "Fundo da faixa superior"], ["bg", "Fundo da página"], ["fill", "Preenchimento dos ícones"], ["border", "Borda dos ícones"], ["symbol", "Símbolo dentro do ícone"], ["inside", "Texto dentro do ícone"], ["below", "Texto abaixo do ícone"]];
+const COLOR_FIELDS: [AppTileColorKind, string][] = [["headerBg", "Fundo da faixa superior"], ["bg", "Fundo da página"], ["fill", "Preenchimento dos ícones"], ["border", "Borda dos ícones"], ["symbol", "Símbolo dentro do ícone"], ["inside", "Texto dentro do ícone"]];
 
 function HeaderPreview({ tile, mobile = false, appName, display }: { tile: AppTileConfig; mobile?: boolean; appName?: string; display?: ReturnType<typeof appDisplay> }) {
   const background = tile.headerBg === "padrao" ? (mobile ? "var(--accent)" : "var(--card)") : appTileColor("headerBg", tile.headerBg).value;
@@ -113,12 +114,18 @@ export function CdeAppOrder({ number, handle }: { number: number; handle?: impor
       <div className="mt-6 space-y-4 border-t border-border pt-4">
         <p className="text-sm font-medium">Nomes e fontes dos apps</p>
         <div role="group" aria-label="Nomes e fontes dos apps" className="grid gap-4 xl:grid-cols-2">
-          {PORTAL_APPS.map(app => { const display = appDisplay(tile, app.key); return <div key={app.key} className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_7rem_10rem] sm:items-end">
+          {PORTAL_APPS.map(app => { const display = appDisplay(tile, app.key); const caption = tile.apps?.[app.key]; return <div key={app.key} className="space-y-3"><div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_7rem_10rem] sm:items-end">
             <div className="min-w-0 space-y-1"><Label>Nome — {app.name}</Label><Input aria-label={`Nome do app ${app.name}`} maxLength={30} value={tile.apps?.[app.key]?.name ?? display.name} onChange={event => updateApp(app.key, { name: event.target.value })} /></div>
             <div className="min-w-0 space-y-1"><Label>Tamanho</Label><Select value={String(display.labelPx)} onValueChange={value => updateApp(app.key, { labelPx: Number(value) })}><SelectTrigger aria-label={`Tamanho da fonte de ${app.name}`} className="h-9"><SelectValue /></SelectTrigger><SelectContent>{[10, 11, 12, 13, 14, 15, 16, 18, 20, 24, 28, 32].map(px => <SelectItem key={px} value={String(px)}>{px} px</SelectItem>)}</SelectContent></Select></div>
             <AppNameColorChoice appName={app.name} value={display.colorKey} onChange={color => updateApp(app.key, { color })} />
+          </div><div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_7rem_10rem] sm:items-end">
+            <div className="min-w-0 space-y-1"><Label>Texto abaixo do ícone — {app.name}</Label><Textarea aria-label={`Texto abaixo do ícone de ${app.name}`} rows={2} value={appDescription(tile, app.key)} onChange={event => updateApp(app.key, { description: event.target.value })} /></div>
+            <div className="min-w-0 space-y-1"><Label>Tamanho</Label><Select value={String(caption?.descriptionPx ?? "padrao")} onValueChange={value => { const { descriptionPx: _old, ...rest } = caption ?? {}; setTileDraft({ ...tile, apps: { ...tile.apps, [app.key]: { ...rest, ...(value !== "padrao" ? { descriptionPx: Number(value) } : {}) } } }); }}><SelectTrigger aria-label={`Tamanho da legenda de ${app.name}`} className="h-9"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="padrao">Atual</SelectItem>{[10, 11, 12, 13, 14, 15, 16, 18, 20, 24, 28, 32].map(px => <SelectItem key={px} value={String(px)}>{px} px</SelectItem>)}</SelectContent></Select></div>
+            <AppNameColorChoice appName={`legenda de ${app.name}`} value={caption?.descriptionColor ?? "padrao"} onChange={descriptionColor => updateApp(app.key, { descriptionColor })} />
+          </div>
           </div>; })}
         </div>
+        <div className="max-w-xs"><ColorChoice kind="below" label="Cor padrão dos textos abaixo dos ícones" value={tile.below} onChange={below => setTileDraft({ ...tile, below })} /></div>
         <div className="max-w-[12rem] space-y-1"><Label>Tamanho do logo myio nos apps</Label><Select value={String(appLogoPx(tile))} onValueChange={value => setTileDraft({ ...tile, appLogoPx: Number(value) })}><SelectTrigger aria-label="Tamanho do logo myio nos apps" className="h-9"><SelectValue /></SelectTrigger><SelectContent>{[24, 28, 32, 36, 40, 44, 48, 56, 64].map(px => <SelectItem key={px} value={String(px)}>{px} px{px === 40 ? " (Home)" : ""}</SelectItem>)}</SelectContent></Select></div>
         <div className="space-y-1"><Label>Prévia do cabeçalho dos apps</Label><HeaderPreview tile={tile} appName="CRM" display={appDisplay(tile, "crm", 16)} /></div>
       </div>
@@ -165,7 +172,7 @@ export function CdeAppOrder({ number, handle }: { number: number; handle?: impor
           <div aria-label="Prévia dos apps" style={{ columnGap: tile.gapX, rowGap: tile.gapY, ...appTileColorVars(tile) } as React.CSSProperties} className="flex w-full flex-wrap bg-[var(--portal-bg)] px-4 py-10 sm:py-14">
             {order.map((key) => { const app = PORTAL_APPS.find((a) => a.key === key); return app ? <div key={key} style={{ zoom: tile.tilePct / 100 }} className="flex w-28 min-w-0 flex-col items-center text-center">
               <div className="relative flex h-28 w-28 flex-col items-center justify-between rounded-3xl border-2 border-[color:var(--tile-border)] bg-[var(--tile-fill)] px-2 pb-2 pt-1.5 text-primary-foreground"><AppTileFace appKey={key} name={app.name} tile={tile} /></div>
-              <p className="mt-3 w-28 max-w-full break-words text-center text-sm leading-5 text-[color:var(--tile-below)]">{APP_DESCRIPTIONS[key]?.map(line => <span key={line} className="block">{line}</span>)}</p>
+              <AppTileDescription appKey={key} tile={tile} />
             </div> : null; })}
           </div></div>
         <div className="space-y-1"><Label>Prévia mobile</Label>
@@ -173,7 +180,7 @@ export function CdeAppOrder({ number, handle }: { number: number; handle?: impor
           <div aria-label="Prévia mobile dos apps" style={{ ...appTileColorVars(tile), ...mobileTileVars(tile) } as React.CSSProperties} className="mobile-app-grid grid w-full max-w-[390px] bg-[var(--portal-bg)] px-3 py-8">
             {order.map(key => { const app = PORTAL_APPS.find(a => a.key === key); return app ? <div key={key} className="flex min-w-0 flex-col items-center text-center">
               <div className="mobile-app-tile relative flex flex-col items-center justify-between rounded-2xl border-2 border-[color:var(--tile-border)] bg-[var(--tile-fill)] px-1 pb-2 pt-1 text-primary-foreground"><AppTileFace appKey={key} name={app.name} tile={tile} mobile /></div>
-              <p className="mt-2 w-full break-words text-center text-[0.68rem] leading-4 text-[color:var(--tile-below)]">{APP_DESCRIPTIONS[key]?.map(line => <span key={line} className="block">{line}</span>)}</p>
+              <AppTileDescription appKey={key} tile={tile} mobile />
             </div> : null; })}
           </div>
         </div>

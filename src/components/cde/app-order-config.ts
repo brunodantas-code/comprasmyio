@@ -114,7 +114,7 @@ export const APP_NAME_COLORS = [
   { key: "cinza", label: "Cinza", value: "var(--muted-foreground)" },
 ] as const;
 export type AppTileColorKind = keyof typeof APP_TILE_COLORS;
-export type AppDisplayOverride = { name?: string; labelPx?: number; color?: string };
+export type AppDisplayOverride = { name?: string; labelPx?: number; color?: string; description?: string; descriptionPx?: number; descriptionColor?: string };
 export type AppDisplay = { name: string; labelPx: number; colorKey: string; color?: string };
 export type AppTileConfig = { desktopHeaderPx?: number; appLogoPx?: number; labelPx: number; iconPct: number; tilePct: number; mobileTilePct: number; mobileIconPct: number; gapX: number; gapY: number; headerBg: string; bg: string; fill: string; border: string; symbol: string; inside: string; below: string; apps?: Record<string, AppDisplayOverride> };
 export const APP_TILE_DEFAULT: AppTileConfig = { labelPx: 14, iconPct: 100, tilePct: 100, mobileTilePct: 100, mobileIconPct: 100, gapX: 32, gapY: 40, headerBg: "padrao", bg: "padrao", fill: "padrao", border: "padrao", symbol: "padrao", inside: "padrao", below: "padrao" };
@@ -178,6 +178,10 @@ export function parseAppTile(raw?: string): AppTileConfig {
       if (name) parsed.name = name;
       if (Number.isFinite(appLabelPx) && appLabelPx >= 10 && appLabelPx <= 32) parsed.labelPx = appLabelPx;
       if (APP_NAME_COLORS.some(option => option.key === color)) parsed.color = color;
+      if (typeof value.description === "string") parsed.description = value.description;
+      const descriptionPx = Number(value.descriptionPx);
+      if (Number.isFinite(descriptionPx) && descriptionPx >= 10 && descriptionPx <= 32) parsed.descriptionPx = descriptionPx;
+      if (APP_NAME_COLORS.some(option => option.key === value.descriptionColor)) parsed.descriptionColor = String(value.descriptionColor);
       if (Object.keys(parsed).length) apps[app.key] = parsed;
     }
     return { labelPx: labelPx >= 10 && labelPx <= 18 ? labelPx : APP_TILE_DEFAULT.labelPx, iconPct: iconPct >= 60 && iconPct <= 140 ? iconPct : APP_TILE_DEFAULT.iconPct, tilePct: tilePct >= 70 && tilePct <= 140 ? tilePct : APP_TILE_DEFAULT.tilePct,

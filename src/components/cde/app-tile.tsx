@@ -3,7 +3,7 @@ import { CodeXml, DollarSign, FileSignature, FolderKanban, Lightbulb, Phone, Sea
 import { CrmFunnelIcon } from "@/components/crm-funnel-icon";
 import { MytosisIcon } from "@/components/mytosis-icon";
 import { CdeIcon } from "@/components/cde-icon";
-import { APP_ICON_OPTICAL, appDisplay, type AppTileConfig } from "./app-order-config";
+import { APP_ICON_OPTICAL, APP_NAME_COLORS, appDisplay, type AppTileConfig } from "./app-order-config";
 
 const APP_ICONS: Record<string, [React.ComponentType<{ className?: string; style?: React.CSSProperties }>, number]> = {
   supply: [Settings, 1.7], cash_flow: [DollarSign, 3.5], crm: [CrmFunnelIcon, 3], legal: [FileSignature, 1.8], rh: [UsersRound, 1.8],
@@ -21,6 +21,21 @@ export const APP_DESCRIPTIONS: Record<string, string[]> = {
   projects: ["Planejamento e", "controle de projetos"],
   indicadores: ["OKRs e KPIs", "Resultados e metas"],
 };
+
+export function appDescription(tile: AppTileConfig, appKey: string): string {
+  return tile.apps?.[appKey]?.description ?? APP_DESCRIPTIONS[appKey]?.join("\n") ?? "";
+}
+
+/** Shared saved caption and typography for portal tiles and both CDE previews. */
+export function AppTileDescription({ appKey, tile, mobile = false }: { appKey: string; tile: AppTileConfig; mobile?: boolean }) {
+  const saved = tile.apps?.[appKey];
+  const color = APP_NAME_COLORS.find(option => option.key === saved?.descriptionColor);
+  const vars = {
+    "--app-caption-size": `${saved?.descriptionPx ?? (mobile ? 10.88 : 14)}px`,
+    "--app-caption-color": color && color.key !== "padrao" ? color.value : "var(--tile-below,var(--muted-foreground))",
+  } as React.CSSProperties;
+  return <p style={vars} className={`${mobile ? "mt-2 w-full" : "mt-3 w-28 max-w-full"} break-words text-center text-[length:var(--app-caption-size)] leading-normal text-[color:var(--app-caption-color)]`}>{appDescription(tile, appKey).split("\n").map((line, index) => <span key={index} className="block">{line || "\u00a0"}</span>)}</p>;
+}
 
 /** Symbol + name inside a portal app tile; shared by the portal and the CDE preview. */
 export function AppTileFace({ appKey, name, tile, mobile = false }: { appKey: string; name: string; tile: AppTileConfig; mobile?: boolean }) {

@@ -85,3 +85,21 @@ describe("logo dos apps", () => {
     expect(appLogoPx(parseAppTile('{"appLogoPx":90}'))).toBe(40);
   });
 });
+
+describe("configuração de legendas por app", () => {
+  it("preserva a legenda vazia e opções independentes do nome ao reler o padrão", () => {
+    const config = parseAppTile(JSON.stringify({ below: "verde", apps: { indicadores: { description: "", descriptionPx: 12, descriptionColor: "escuro", labelPx: 20, color: "roxo" } } }));
+    expect(config.apps?.indicadores?.description).toBe("");
+    expect(config.apps?.indicadores?.descriptionPx).toBe(12);
+    expect(config.apps?.indicadores?.descriptionColor).toBe("escuro");
+    expect(config.apps?.indicadores?.labelPx).toBe(20);
+    expect(config.below).toBe("verde");
+  });
+  it("não substitui configurações antigas nem aceita cores fora da marca", () => {
+    const config = parseAppTile(JSON.stringify({ apps: { crm: { name: "Vendas", descriptionPx: 99, descriptionColor: "rosa" } } }));
+    expect(config.apps?.crm?.description).toBeUndefined();
+    expect(config.apps?.crm?.descriptionPx).toBeUndefined();
+    expect(config.apps?.crm?.descriptionColor).toBeUndefined();
+    expect(config.apps?.crm?.name).toBe("Vendas");
+  });
+});
