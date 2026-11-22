@@ -607,7 +607,7 @@ export function IndicadoresDashboard() {
         )}
       </main>
       <AppNavigation className={ml.nav} aria-label="Navegação de Indicadores">
-        <div className={`mx-auto grid max-w-lg grid-cols-4 items-stretch bg-card p-2 ${ml.grid}`}>
+        <div className={`mx-auto grid max-w-2xl grid-cols-4 items-stretch rounded-[1.75rem] border border-border bg-card/95 p-1.5 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-card/90 ${ml.grid}`}>
           {tabs.map(({ value, label, icon: Icon }) => (
             <Button
               key={value}
@@ -617,13 +617,13 @@ export function IndicadoresDashboard() {
                 setTab(value);
                 setView("cards");
               }}
-              className="h-auto min-w-0"
+              className={`h-auto min-w-0 rounded-[1.35rem] p-0 shadow-none ${tab === value ? "!bg-primary/15 !text-primary hover:!bg-primary/20 hover:!text-primary" : "!bg-transparent !text-muted-foreground hover:!bg-muted hover:!text-foreground"}`}
             >
-              <span className="flex min-h-14 flex-col items-center justify-center gap-1">
+              <span className="flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 px-1">
                 <span className="menu-icon">
-                  <Icon className="size-5" />
+                  <Icon className="h-5 w-5 shrink-0" />
                 </span>
-                <span className="text-xs">{label}</span>
+                <span className="max-w-full truncate text-[10px] font-semibold leading-none">{label}</span>
               </span>
             </Button>
           ))}
