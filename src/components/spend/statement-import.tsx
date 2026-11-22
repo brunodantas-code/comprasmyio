@@ -9,7 +9,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { extractSpendDocument } from "@/lib/spend.functions";
 import { extractionSchema, type Extracted } from "./rules";
 import { uploadSpend, spendAction, type SpendCard } from "./data";
-export function SpendStatementImport({ card, period, onDone, onClose }: { card: SpendCard; period: string; onDone: () => Promise<void>; onClose: () => void }) {
+import { spendDescription } from "./text-case";
+import { SpendTextCaseToggle } from "./text-case-toggle";
+export function SpendStatementImport({ card, period, onDone, onClose, sentenceCase, onSentenceCaseChange }: { card: SpendCard; period: string; onDone: () => Promise<void>; onClose: () => void; sentenceCase: boolean; onSentenceCaseChange: (active: boolean) => void }) {
   const extract = useServerFn(extractSpendDocument); const picker = useRef<HTMLInputElement>(null); const [busy, setBusy] = useState(false); const [path, setPath] = useState("");
   const [rows, setRows] = useState<Extracted['lancamentos']>([]); const [due, setDue] = useState(`${period}-${String(Math.min(card.due_day, new Date(Number(period.slice(0,4)),Number(period.slice(5,7)),0).getDate())).padStart(2,'0')}`);
   const [id] = useState(() => crypto.randomUUID()); const [error, setError] = useState("");
@@ -21,10 +23,10 @@ export function SpendStatementImport({ card, period, onDone, onClose }: { card: 
     <div className="hidden gap-2 sm:grid sm:grid-cols-[130px_minmax(0,1fr)_80px_110px_90px]">{["Data", "Descrição", "Parcela", "Valor", "Final do cartão"].map(label => <span key={label} className="cde-th font-normal text-[length:var(--th-fs)]">{label}</span>)}</div>
     {rows.map((r,i) => <div key={i} className="grid gap-2 sm:grid-cols-[130px_minmax(0,1fr)_80px_110px_90px]">
       <label className="min-w-0"><span className="cde-th block font-normal text-[length:var(--th-fs)] sm:hidden">Data</span><Input aria-label={`Data lançamento ${i+1}`} type="date" value={r.data} onChange={e => setRows(rows.map((x,j) => j===i ? {...x,data:e.target.value} : x))} /></label>
-      <label className="min-w-0"><span className="cde-th block font-normal text-[length:var(--th-fs)] sm:hidden">Descrição</span><Input aria-label={`Estabelecimento lançamento ${i+1}`} value={r.estabelecimento} onChange={e => setRows(rows.map((x,j) => j===i ? {...x,estabelecimento:e.target.value} : x))} /></label>
+      <label className="min-w-0"><span className="cde-th block font-normal text-[length:var(--th-fs)] sm:hidden">Descrição</span><Input aria-label={`Estabelecimento lançamento ${i+1}`} title={r.estabelecimento} value={spendDescription(r.estabelecimento, sentenceCase)} onChange={e => setRows(rows.map((x,j) => j===i ? {...x,estabelecimento:e.target.value} : x))} /></label>
       <label className="min-w-0"><span className="cde-th block font-normal text-[length:var(--th-fs)] sm:hidden">Parcela</span><Input aria-label={`Parcela lançamento ${i+1}`} value={r.parcela ?? ""} placeholder="Parcela" onChange={e => setRows(rows.map((x,j) => j===i ? {...x,parcela:e.target.value || null} : x))} /></label>
       <label className="min-w-0"><span className="cde-th block font-normal text-[length:var(--th-fs)] sm:hidden">Valor</span><Input aria-label={`Valor lançamento ${i+1}`} type="number" step="0.01" value={r.valor} onChange={e => setRows(rows.map((x,j) => j===i ? {...x,valor:Number(e.target.value)} : x))} /></label>
       <label className="min-w-0"><span className="cde-th block font-normal text-[length:var(--th-fs)] sm:hidden">Final do cartão</span><Input aria-label={`Final cartão lançamento ${i+1}`} maxLength={4} value={r.final_cartao ?? ""} placeholder="Final" onChange={e => setRows(rows.map((x,j) => j===i ? {...x,final_cartao:e.target.value || null} : x))} /></label>
     </div>)}
-  </div><div className="flex items-center justify-between"><span className="text-sm text-muted-foreground">{rows.length} lançamentos</span><Button variant="ghost" size="icon" aria-label="Salvar fatura" title="Salvar fatura" disabled={busy || !rows.length} onClick={save}><Save /></Button></div></DialogContent></Dialog>;
+  </div><div className="flex items-center justify-between"><span className="text-sm text-muted-foreground">{rows.length} lançamentos</span><div className="flex items-center gap-2"><SpendTextCaseToggle active={sentenceCase} onChange={onSentenceCaseChange} /><Button variant="ghost" size="icon" aria-label="Salvar fatura" title="Salvar fatura" disabled={busy || !rows.length} onClick={save}><Save /></Button></div></div></DialogContent></Dialog>;
 }

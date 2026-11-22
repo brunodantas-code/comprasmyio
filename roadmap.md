@@ -1,4 +1,8 @@
 # Roadmap
+- [x] Spend: barra de conciliação reduzida a 288 px, limitada à largura disponível, altura de 6 px e texto compacto como OKRs; percentuais/valores preservados.
+- [x] Spend: Furo de Caixa explicado — lançamento da fatura sem comprovante vinculado, não comprova falta de dinheiro; nome/regra preservados.
+- [x] Spend: bloqueio de Aprovar explicado — falta comprovante vinculado, conforme print e guarda do botão; alocação não substitui comprovante. Nenhuma regra de aprovação alterada.
+- [x] Spend: botão Aa alterna descrições na conciliação e prévia da importação; lançamento real convertido/restaurado sem gravação, PDF de teste convertido/restaurado e removido. Originais preservados em registros/exportação; 16 testes passaram.
 - [x] Spend: cabeçalhos Data, Descrição, Parcela e Valor na importação, preservando Final do cartão; leitura real de PDF de teste e edição do valor conferidas no computador/celular, sem salvar fatura, PDF temporário removido. Nove testes passaram.
 - [x] Spend: duplicidade explicada — título da página e título da lista repetem Cartões, não são cadastros duplicados; nenhuma alteração solicitada.
 - [x] Spend: prévia aprovada aplicada ao símbolo compartilhado, com check interno centralizado entre faixa e borda inferior; entrada e Home conferidas no computador/celular.

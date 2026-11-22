@@ -1937,7 +1937,7 @@
   {
     "id": "components/cde/cde-menu-type.tsx|508a61e0b582140b|0",
     "file": "components/cde/cde-menu-type.tsx",
-    "line": 53,
+    "line": 54,
     "tag": "Button",
     "label": "Icon",
     "dynamic": true,
@@ -1952,7 +1952,7 @@
   {
     "id": "components/cde/cde-menu-type.tsx|6af669d6166bec55|0",
     "file": "components/cde/cde-menu-type.tsx",
-    "line": 53,
+    "line": 54,
     "tag": "Button",
     "label": "Salvar menus Mobile e Desktop",
     "dynamic": false,
@@ -1967,7 +1967,7 @@
   {
     "id": "components/cde/cde-menu-type.tsx|c223d03aad47d7b9|0",
     "file": "components/cde/cde-menu-type.tsx",
-    "line": 54,
+    "line": 55,
     "tag": "Button",
     "label": "Selecionado / Padrão / Escolher como padrão",
     "dynamic": true,
@@ -13952,7 +13952,7 @@
   {
     "id": "components/spend/statement-import.tsx|87f4f31ec83c3893|0",
     "file": "components/spend/statement-import.tsx",
-    "line": 19,
+    "line": 21,
     "tag": "Button",
     "label": "Substituir PDF / Upload PDF da fatura",
     "dynamic": true,
@@ -13967,7 +13967,7 @@
   {
     "id": "components/spend/statement-import.tsx|0d5fa4057567f9b2|0",
     "file": "components/spend/statement-import.tsx",
-    "line": 19,
+    "line": 21,
     "tag": "Button",
     "label": "Tentar leitura novamente",
     "dynamic": false,
@@ -13982,7 +13982,7 @@
   {
     "id": "components/spend/statement-import.tsx|2c3ab5a11e4912a6|0",
     "file": "components/spend/statement-import.tsx",
-    "line": 20,
+    "line": 31,
     "tag": "Button",
     "label": "Salvar fatura",
     "dynamic": false,
@@ -14087,7 +14087,7 @@
   {
     "id": "components/spend/workspace.tsx|173d3ea5eab2e9d1|0",
     "file": "components/spend/workspace.tsx",
-    "line": 52,
+    "line": 54,
     "tag": "Button",
     "label": "Notificar Portador",
     "dynamic": false,
@@ -14102,7 +14102,7 @@
   {
     "id": "components/spend/workspace.tsx|d590578a08001fe3|0",
     "file": "components/spend/workspace.tsx",
-    "line": 52,
+    "line": 54,
     "tag": "Button",
     "label": "Anexar Invoice",
     "dynamic": false,
@@ -14117,7 +14117,7 @@
   {
     "id": "components/spend/workspace.tsx|da043c6897fb389b|0",
     "file": "components/spend/workspace.tsx",
-    "line": 54,
+    "line": 56,
     "tag": "Button",
     "label": "Rejeitar / Pedir ajuste",
     "dynamic": false,
@@ -14132,7 +14132,7 @@
   {
     "id": "components/spend/workspace.tsx|029d0b428333890e|0",
     "file": "components/spend/workspace.tsx",
-    "line": 54,
+    "line": 56,
     "tag": "Button",
     "label": "Enviado ao Finance / Aprovar",
     "dynamic": true,
@@ -14147,7 +14147,7 @@
   {
     "id": "components/spend/workspace.tsx|84108eaf3b9bc766|0",
     "file": "components/spend/workspace.tsx",
-    "line": 73,
+    "line": 76,
     "tag": "Button",
     "label": "Cadastrar cartão",
     "dynamic": false,
@@ -14162,7 +14162,7 @@
   {
     "id": "components/spend/workspace.tsx|ad7317219e907ada|0",
     "file": "components/spend/workspace.tsx",
-    "line": 74,
+    "line": 77,
     "tag": "Button",
     "label": "Registrar gasto",
     "dynamic": false,
@@ -14177,7 +14177,7 @@
   {
     "id": "components/spend/workspace.tsx|f803f53b4e8609f5|0",
     "file": "components/spend/workspace.tsx",
-    "line": 75,
+    "line": 78,
     "tag": "Button",
     "label": "Upload PDF Fatura",
     "dynamic": false,
@@ -14192,7 +14192,7 @@
   {
     "id": "components/spend/workspace.tsx|1286d0a529993e2d|0",
     "file": "components/spend/workspace.tsx",
-    "line": 75,
+    "line": 78,
     "tag": "Button",
     "label": "Exportar ZIP",
     "dynamic": false,
@@ -14207,7 +14207,7 @@
   {
     "id": "components/spend/workspace.tsx|49704063d1da9c09|0",
     "file": "components/spend/workspace.tsx",
-    "line": 75,
+    "line": 78,
     "tag": "Button",
     "label": "Conciliar automaticamente",
     "dynamic": false,
@@ -14222,7 +14222,7 @@
   {
     "id": "components/spend/workspace.tsx|71a7608c2bbe7e4d|0",
     "file": "components/spend/workspace.tsx",
-    "line": 75,
+    "line": 78,
     "tag": "Button",
     "label": "Aprovar lote ( / )",
     "dynamic": true,
@@ -14237,7 +14237,7 @@
   {
     "id": "components/spend/workspace.tsx|646b13a31bf52349|0",
     "file": "components/spend/workspace.tsx",
-    "line": 75,
+    "line": 78,
     "tag": "Button",
     "label": "✓ / ! / · / Sem comprovante",
     "dynamic": true,
@@ -14252,7 +14252,7 @@
   {
     "id": "components/spend/workspace.tsx|d0425bb7cc25c69a|0",
     "file": "components/spend/workspace.tsx",
-    "line": 77,
+    "line": 80,
     "tag": "Button",
     "label": "Icon",
     "dynamic": true,
@@ -14267,7 +14267,7 @@
   {
     "id": "components/spend/workspace.tsx|ad5881bcd5f598cb|0",
     "file": "components/spend/workspace.tsx",
-    "line": 79,
+    "line": 82,
     "tag": "Button",
     "label": "Enviar aviso no app",
     "dynamic": false,
@@ -14276,6 +14276,21 @@
     "icon": "",
     "variant": "",
     "size": "",
+    "className": "",
+    "group": ""
+  },
+  {
+    "id": "components/spend/text-case-toggle.tsx|4aa357ba96f2fbbd|0",
+    "file": "components/spend/text-case-toggle.tsx",
+    "line": 5,
+    "tag": "Button",
+    "label": "Primeira letra maiúscula",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "CaseSensitive",
+    "variant": "ghost",
+    "size": "icon",
     "className": "",
     "group": ""
   },
