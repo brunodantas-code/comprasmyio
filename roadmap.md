@@ -1,4 +1,6 @@
 # Roadmap
+- [x] Roxo myio conferido: base #673AB6; print aproximadamente #6C4BC0, semelhante mas não exato; informado sem alterar paleta. Print 2 seleciona Verde.
+- [x] Indicadores: filtros próprios de OKR/KPI e ordenação no cabeçalho; filtro de OKR por Nome, remoção e ordem decrescente conferidos em dados reais; menus KPI disponíveis, mas conta sem KPIs para verificar cards. Mobile sem overflow; 12 testes passaram.
 - [x] Spend: check no canto superior direito com traço grosso no ícone compartilhado.
 - [x] CDE: prévias distintas de flutuante/base e laterais corretas; escolhas Mobile/Desktop salvas pelo CDE e lidas no app, sem overflow. Preferências originais restauradas após teste; 3 testes passaram.
 - [x] CDE: conferido e respondido — escolha atual afeta Desktop; Mobile mantém barra inferior. Configurações independentes ainda não implementadas, pois foi uma pergunta.

@@ -1,0 +1,6 @@
+import { expect,it } from "vitest";
+import { sortIndicatorCards } from "./card-order";
+const rows=[{name:"Zeta",progress:10,due:null},{name:"Alfa",progress:90,due:"2026-11-25"},{name:"Beta",progress:50,due:"2026-11-22"}];
+const columns=[{key:"name",value:(r:typeof rows[number])=>r.name},{key:"progress",kind:"number" as const,value:(r:typeof rows[number])=>r.progress},{key:"due",kind:"date" as const,value:(r:typeof rows[number])=>r.due}];
+it("ordena nomes e avanço sem alterar a origem",()=>{expect(sortIndicatorCards(rows,{key:"name",direction:"asc"},columns).map(r=>r.name)).toEqual(["Alfa","Beta","Zeta"]);expect(sortIndicatorCards(rows,{key:"progress",direction:"desc"},columns).map(r=>r.progress)).toEqual([90,50,10]);expect(rows[0]?.name).toBe("Zeta");});
+it("ordena prazo mantendo sem prazo no fim e restaura ordem",()=>{expect(sortIndicatorCards(rows,{key:"due",direction:"asc"},columns).map(r=>r.name)).toEqual(["Beta","Alfa","Zeta"]);expect(sortIndicatorCards(rows,undefined,columns)).toEqual(rows);});

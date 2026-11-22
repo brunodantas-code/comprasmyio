@@ -6,10 +6,11 @@ import type { SortDirection } from "@/lib/column-sort";
 
 export type TableSorting = { key: string; direction: SortDirection };
 
-export function TableSortMenu({ columns, value, onChange }: {
+export function TableSortMenu({ columns, value, onChange, iconOnly = false }: {
   columns: { key: string; label: string }[];
   value?: TableSorting;
   onChange: (value: TableSorting | undefined) => void;
+  iconOnly?: boolean;
 }) {
   const selected = columns.find(column => column.key === value?.key);
   const chooseDirection = (direction: SortDirection) => {
@@ -18,8 +19,8 @@ export function TableSortMenu({ columns, value, onChange }: {
   };
   return <Popover>
     <PopoverTrigger asChild>
-      <Button type="button" variant="outline" size="sm" aria-label="Ordenar" title={selected ? `Ordenar: ${selected.label}, ${value?.direction === "desc" ? "decrescente" : "crescente"}` : "Ordenar"} className="!w-auto !min-w-max shrink-0">
-        <ArrowUpDown className="size-4" /> Ordenar
+      <Button type="button" variant={iconOnly ? "ghost" : "outline"} size={iconOnly ? "compactIcon" : "sm"} aria-label="Ordenar" title={selected ? `Ordenar: ${selected.label}, ${value?.direction === "desc" ? "decrescente" : "crescente"}` : "Ordenar"} className={iconOnly ? "" : "!w-auto !min-w-max shrink-0"}>
+        <ArrowUpDown className="size-4" />{!iconOnly && " Ordenar"}
       </Button>
     </PopoverTrigger>
     <PopoverContent align="start" className="w-[min(18rem,calc(100vw-2rem))] space-y-3 p-3">

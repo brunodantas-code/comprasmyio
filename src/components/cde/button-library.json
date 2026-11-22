@@ -4997,7 +4997,7 @@
   {
     "id": "components/indicadores/dashboard.tsx|0432d3e046f07afa|0",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 182,
+    "line": 181,
     "tag": "Button",
     "label": "Icon",
     "dynamic": false,
@@ -5012,7 +5012,7 @@
   {
     "id": "components/indicadores/dashboard.tsx|a8dffd5f98a1302d|0",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 222,
+    "line": 221,
     "tag": "Button",
     "label": "Check-in",
     "dynamic": false,
@@ -5027,7 +5027,7 @@
   {
     "id": "components/indicadores/dashboard.tsx|9e77056673298c3b|0",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 229,
+    "line": 228,
     "tag": "Button",
     "label": "Criar OKR",
     "dynamic": false,
@@ -5042,7 +5042,7 @@
   {
     "id": "components/indicadores/dashboard.tsx|186b26e208d5a78a|0",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 278,
+    "line": 277,
     "tag": "CdeButton",
     "label": "Novo Key Result",
     "dynamic": false,
@@ -5057,7 +5057,7 @@
   {
     "id": "components/indicadores/dashboard.tsx|f78efca9e424c46c|0",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 296,
+    "line": 295,
     "tag": "Button",
     "label": "Expandir OKR",
     "dynamic": false,
@@ -5072,7 +5072,7 @@
   {
     "id": "components/indicadores/dashboard.tsx|2466d7a3dce4a979|0",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 345,
+    "line": 344,
     "tag": "CdeButton",
     "label": "Sem nome fixo",
     "dynamic": false,
@@ -5087,7 +5087,7 @@
   {
     "id": "components/indicadores/dashboard.tsx|1b6135276a72b3a5|0",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 407,
+    "line": 406,
     "tag": "Button",
     "label": "v.icon",
     "dynamic": false,
@@ -5102,7 +5102,7 @@
   {
     "id": "components/indicadores/dashboard.tsx|d850325f261cf0df|0",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 562,
+    "line": 561,
     "tag": "CdeButton",
     "label": "Novo Key Result",
     "dynamic": false,
@@ -5117,7 +5117,7 @@
   {
     "id": "components/indicadores/dashboard.tsx|56e0edbf13436716|0",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 562,
+    "line": 561,
     "tag": "Button",
     "label": "Check-in",
     "dynamic": false,
@@ -5132,7 +5132,7 @@
   {
     "id": "components/indicadores/dashboard.tsx|e2c6700f08e432bb|0",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 566,
+    "line": 565,
     "tag": "Button",
     "label": "Icon",
     "dynamic": true,
@@ -12992,22 +12992,22 @@
   {
     "id": "components/table-sort-menu.tsx|a9d6ca143b687a0a|0",
     "file": "components/table-sort-menu.tsx",
-    "line": 21,
+    "line": 22,
     "tag": "Button",
     "label": "Ordenar",
-    "dynamic": false,
+    "dynamic": true,
     "visualCustom": false,
     "autoCdeSafe": true,
     "icon": "ArrowUpDown",
-    "variant": "outline",
-    "size": "sm",
-    "className": "!w-auto !min-w-max shrink-0",
+    "variant": "",
+    "size": "",
+    "className": "",
     "group": ""
   },
   {
     "id": "components/table-sort-menu.tsx|5152bd25ef9ff776|0",
     "file": "components/table-sort-menu.tsx",
-    "line": 31,
+    "line": 32,
     "tag": "Button",
     "label": "Crescente",
     "dynamic": false,
@@ -13022,7 +13022,7 @@
   {
     "id": "components/table-sort-menu.tsx|d7972830a26bbb00|0",
     "file": "components/table-sort-menu.tsx",
-    "line": 32,
+    "line": 33,
     "tag": "Button",
     "label": "Decrescente",
     "dynamic": false,
@@ -13037,7 +13037,7 @@
   {
     "id": "components/table-sort-menu.tsx|8dfcb51e840887c0|0",
     "file": "components/table-sort-menu.tsx",
-    "line": 34,
+    "line": 35,
     "tag": "Button",
     "label": "Restaurar ordem",
     "dynamic": false,

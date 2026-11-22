@@ -38,7 +38,9 @@ import { useAppMenuLayout } from "@/components/cde/cde-menu-type";
 import { useMenuOrders, sortByMenuOrder } from "@/components/cde/menu-order";
 import { CdeButton, CdeNumber } from "@/components/cde/cde-button";
 import { Tooltip as TextTooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
-import { useTableFilters } from "@/components/use-table-filters";
+import { useTableFilters, type FilterColumn } from "@/components/use-table-filters";
+import { TableSortMenu } from "@/components/table-sort-menu";
+import { sortIndicatorCards, type CardSort } from "./card-order";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -78,6 +80,7 @@ export function IndicadoresDashboard() {
   const [view, setView] = useState("cards");
   const [mine, setMine] = useState(false);
   const [cycleId, setCycleId] = useState("active");
+  const [cardSorts, setCardSorts] = useState<Record<string, CardSort | undefined>>({});
   const [edit, setEdit] = useState<EditSelection | null>(null);
   const [history, setHistory] = useState<Metric | null>(null);
   const [focusedObjective, setFocusedObjective] = useState<{ id: string; metricIds: string[] } | null>(null);
@@ -96,49 +99,45 @@ export function IndicadoresDashboard() {
           ? !isArchived(o)
           : o.cycle_id === cycleId;
   const availableObjectives = data.objectives.filter(objectiveVisible);
-  const filters = useTableFilters(
-    data.metrics.filter(
-      (m) =>
-        (tab === "checkins" || m.kind === (tab === "kpis" ? "kpi" : "kr")) &&
-        (m.objective_id === null || availableObjectives.some((o) => o.id === m.objective_id)) &&
-        (!(mine || tab === "checkins") || m.responsible_id === data.userId),
-    ),
-    [
-      { key: "responsible", label: "Responsável", value: (m) => importedField(m.source_metadata, "responsible_name") || userName(m.responsible_id) },
-      { key: "type", label: "Tipo", value: (m) => (m.kind === "kpi" ? "KPI" : "KR") },
-      { key: "confidence", label: "Criticidade", value: (m) => confidenceName(m.confidence) },
-      { key: "title", label: "Nome", value: (m) => m.title },
-      {
-        key: "progress",
-        label: "Avanço",
-        kind: "number",
-        value: (m) => metricProgress(m.initial_value, m.target_value, m.current_value),
-      },
-    ],
-  );
-  const metrics = filters.filtered;
-  const matching = new Set(metrics.map((m) => m.objective_id));
-  const objectiveHasMatch = (id: string, seen = new Set<string>()): boolean => {
-    if (seen.has(id)) return false;
-    seen.add(id);
-    return (
-      matching.has(id) ||
-      data.objectives.some((o) => o.parent_id === id && objectiveHasMatch(o.id, seen))
-    );
+  const progress = useMemo(() => new Map(data.objectives.map(o => [o.id, objectiveProgress(o.id,data.objectives,data.metrics)])),[data.objectives,data.metrics]);
+  const checkinPending = (m: Metric) => checkinDue(data.checkins.find(c=>c.metric_id===m.id)?.recorded_at,new Date());
+  const objectiveOwner = (o: Objective) => data.imported.filter(r=>r.source_table==='objective_owners' && importedField(r.data,'objective_id')===o.id).map(r=>importedField(data.imported.find(m=>m.source_table==='team_members' && importedField(m.data,'id')===importedField(r.data,'team_member_id'))?.data,'full_name')).filter(Boolean).join(', ') || importedField(o.source_metadata,'responsible_name') || userName(o.responsible_id);
+  const metricColumns: FilterColumn<Metric>[] = [
+    {key:'title',label:'Nome',value:m=>m.title},
+    {key:'responsible',label:'Responsável',value:m=>importedField(m.source_metadata,'responsible_name') || userName(m.responsible_id)},
+    {key:'confidence',label:'Criticidade',value:m=>confidenceName(m.source_metadata && !data.checkins.find(c=>c.metric_id===m.id)?.recorded_by ? null : m.confidence)},
+    {key:'progress',label:'Avanço',kind:'number',value:m=>metricProgress(m.initial_value,m.target_value,m.current_value)},
+    {key:'due',label:'Prazo',kind:'date',value:m=>m.due_on},
+    {key:'current',label:'Valor atual',kind:'number',value:m=>m.current_value},
+    {key:'target',label:'Meta',kind:'number',value:m=>m.target_value},
+    {key:'checkin',label:'Check-in',value:m=>checkinPending(m)?'Pendente':'Atualizado'},
+  ];
+  const metricFilters = useTableFilters(data.metrics.filter(m =>
+    (tab==='checkins' || m.kind===(tab==='kpis'?'kpi':'kr')) &&
+    (m.objective_id===null || availableObjectives.some(o=>o.id===m.objective_id)) &&
+    (!(mine || tab==='checkins') || m.responsible_id===data.userId)),metricColumns);
+  const objectiveColumns: FilterColumn<Objective>[] = [
+    {key:'title',label:'Nome',value:o=>o.title},
+    {key:'responsible',label:'Responsável',value:objectiveOwner},
+    {key:'cycle',label:'Ciclo',value:o=>data.cycles.find(c=>c.id===o.cycle_id)?.name ?? 'Sem ciclo'},
+    {key:'scope',label:'Abrangência',value:o=>({empresa:'Empresa',departamento:'Departamento',equipe:'Equipe',individual:'Individual'}[o.scope] ?? o.scope)},
+    {key:'alignment',label:'Alinhamento',value:o=>o.alignment_name},
+    {key:'progress',label:'Avanço',kind:'number',value:o=>progress.get(o.id) ?? 0},
+    {key:'krs',label:'Quantidade de KRs',kind:'number',value:o=>data.metrics.filter(m=>m.objective_id===o.id).length},
+    {key:'visibility',label:'Confidencialidade',value:o=>o.confidential?'Confidencial':'Não confidencial'},
+    {key:'checkin',label:'Check-in',value:o=>data.metrics.some(m=>m.objective_id===o.id && checkinPending(m))?'Pendente':'Atualizado'},
+  ];
+  const matching = new Set(metricFilters.filtered.map(m=>m.objective_id));
+  const objectiveHasMatch = (id:string, seen=new Set<string>()):boolean => {
+    if(seen.has(id)) return false; seen.add(id);
+    return matching.has(id) || data.objectives.some(o=>o.parent_id===id && objectiveHasMatch(o.id,seen));
   };
-  const objectives = availableObjectives.filter(
-    (o) =>
-      !(mine || filters.active) ||
-      objectiveHasMatch(o.id) ||
-      (!mine && o.responsible_id === data.userId && !filters.active),
-  );
-  const progress = useMemo(
-    () =>
-      new Map(
-        data.objectives.map((o) => [o.id, objectiveProgress(o.id, data.objectives, data.metrics)]),
-      ),
-    [data.objectives, data.metrics],
-  );
+  const objectiveFilters = useTableFilters(availableObjectives.filter(o=>!mine || objectiveHasMatch(o.id) || o.responsible_id===data.userId),objectiveColumns);
+  const filters = tab==='okrs' ? objectiveFilters : metricFilters;
+  const objectives = sortIndicatorCards(objectiveFilters.filtered,cardSorts['okrs'],objectiveColumns);
+  const metricRows = tab==='okrs' ? metricFilters.filtered.filter(m=>objectives.some(o=>o.id===m.objective_id)) : metricFilters.filtered;
+  const metrics = sortIndicatorCards(metricRows,cardSorts[tab],metricColumns);
+  const sortColumns = tab==='okrs' ? objectiveColumns : metricColumns;
   const chartMetrics = data.metrics.filter(m =>
     (m.objective_id === null || availableObjectives.some(o => o.id === m.objective_id)) &&
     (!mine || m.responsible_id === data.userId));
@@ -329,8 +328,8 @@ export function IndicadoresDashboard() {
     <div className="min-h-screen bg-background">
       <AppHeader logo={<MyioAppLogo appName="Indicadores" />} />
       <main className={`mx-auto max-w-[1500px] space-y-5 px-4 pb-28 pt-6 sm:px-6 ${ml.main}`}>
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h1 className="text-xl font-normal">
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:flex sm:justify-between">
+          <h1 className="min-w-0 text-xl font-normal">
             {tab === "okrs"
               ? "Objetivos e Key Results"
               : tab === "kpis"
@@ -340,7 +339,7 @@ export function IndicadoresDashboard() {
                   : "Ciclos e períodos"}
           </h1>
           <div className="flex items-center gap-2">
-            {tab !== "cycles" && filters.menu}
+            {tab !== "cycles" && <>{filters.menu}<TableSortMenu iconOnly columns={sortColumns} {...(cardSorts[tab] ? {value:cardSorts[tab]} : {})} onChange={value=>setCardSorts(current=>({...current,[tab]:value}))} /></>}
             {canEdit && tab !== "checkins" && (
               <CdeButton
                 group="plus"
