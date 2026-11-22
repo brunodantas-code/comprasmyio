@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Indicadores: mini gráfico compartilhado com Central (três maiores, barras finas), expansão/tela cheia e setas por usuário com OKRs/KPIs; histórico dos KRs e recolhimento conferidos em computador/celular; 13 testes passaram, sem alterar dados/permissões. Não publicado.
 - [x] Central: filtros múltiplos e ordenação compartilhados entre Todas as Pendências e gráfico expandido, incluindo App nos dois sentidos; Título + App combinados e preservados na lista, computador/celular conferidos; 34 testes passaram. Não publicado.
 - [x] Central: lista e gráficos com a mesma ordem decrescente por quantidade, conferidos com os sete usuários reais no computador e celular.
 - [x] Indicadores: ZIP OKR Tracker conferido e filtrado: 88 objetivos, 268 KRs, 1227 atualizações, quatro trimestres e relações íntegras; Bruno confirmado como usuário Bruno ativo do ERP.

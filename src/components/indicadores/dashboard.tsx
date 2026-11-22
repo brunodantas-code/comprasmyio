@@ -53,6 +53,8 @@ import {
 import { indicadoresOptions, type Metric, type Objective } from "./data";
 import { Choice, IndicadorEditor, type EditSelection } from "./editors";
 import { ImportedSummary } from "./imported-summary";
+import { UserPendingBars } from "@/components/central/user-bars";
+import { indicadoresUserBars } from "@/lib/indicadores-user-bars";
 import { importedField, historicalAuthor } from "@/lib/indicadores-import";
 const screen = "components/indicadores/dashboard.tsx";
 const confidenceName = (s: string | null) => CONFIDENCES.find((c) => c.value === s)?.label ?? (s || "Não informada na origem");
@@ -133,25 +135,11 @@ export function IndicadoresDashboard() {
       ),
     [data.objectives, data.metrics],
   );
-  const chartData = data.users
-    .map((u) => ({
-      name: u.full_name
-        .split(" ")
-        .map((w) => w[0])
-        .join("")
-        .slice(0, 3),
-      fullName: u.full_name,
-      value: Math.round(
-        metrics
-          .filter((m) => m.responsible_id === u.id)
-          .reduce(
-            (s, m) => s + metricProgress(m.initial_value, m.target_value, m.current_value),
-            0,
-          ) / (metrics.filter((m) => m.responsible_id === u.id).length || 1),
-      ),
-      count: metrics.filter((m) => m.responsible_id === u.id).length,
-    }))
-    .filter((u) => u.count);
+  const chartMetrics = data.metrics.filter(m =>
+    (m.objective_id === null || availableObjectives.some(o => o.id === m.objective_id)) &&
+    (!mine || m.responsible_id === data.userId));
+  const chartObjectives = availableObjectives.filter(o => !mine || o.responsible_id === data.userId || chartMetrics.some(m => m.objective_id === o.id));
+  const userBars = indicadoresUserBars(chartObjectives, chartMetrics, data.users);
   const mutation = useMutation({
     mutationFn: async (action: {
       type: "metric" | "objective" | "archive";
@@ -255,7 +243,7 @@ export function IndicadoresDashboard() {
       </Card>
     );
   }
-  function objectiveCard(o: Objective, index: number) {
+  function objectiveCard(o: Objective, index: number, visibleMetrics = metrics) {
     const open = expanded.has(o.id);
     return (
       <div key={o.id} className="min-w-0 space-y-3">
@@ -339,9 +327,9 @@ export function IndicadoresDashboard() {
           <div className="space-y-3">
             {o.description && <p className="whitespace-pre-wrap text-sm">{o.description}</p>}
             <div className="grid gap-3">
-              {metrics.filter((m) => m.objective_id === o.id).map(metricCard)}
+              {visibleMetrics.filter((m) => m.objective_id === o.id).map(metricCard)}
             </div>
-            {!metrics.some((m) => m.objective_id === o.id) && (
+            {!visibleMetrics.some((m) => m.objective_id === o.id) && (
               <p className="text-sm text-muted-foreground">Nenhum Key Result neste objetivo.</p>
             )}
           </div>
@@ -469,24 +457,23 @@ export function IndicadoresDashboard() {
             </div>
             {filters.summary}
             <section className="flex flex-wrap items-center gap-6">
-              <div className="h-24 w-full sm:h-40 sm:w-72">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={chartData}>
-                    <XAxis
-                      dataKey="name"
-                      stroke="var(--muted-foreground)"
-                      tick={{ fontSize: 11 }}
-                    />
-                    <Tooltip />
-                    <Bar
-                      dataKey="value"
-                      name="Avanço %"
-                      fill="var(--primary)"
-                      radius={[4, 4, 0, 0]}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
+              <UserPendingBars
+                data={userBars}
+                title="OKRs e KPIs por usuário"
+                expandLabel="Expandir gráfico de OKRs e KPIs por usuário"
+                itemLabel="OKRs e KPIs"
+                screen={screen}
+                renderDetails={id => {
+                  const user = userBars.find(u => u.id === id);
+                  if (!user) return null;
+                  const ownedObjectives = chartObjectives.filter(o => user.objectiveIds.has(o.id));
+                  const ownedKpis = chartMetrics.filter(m => user.metricIds.has(m.id) && m.kind === 'kpi');
+                  return <div className="space-y-4 py-3">
+                    {ownedObjectives.length > 0 && <><h2 className="text-sm text-muted-foreground">OKRs · {ownedObjectives.length}</h2><div className="grid items-start gap-3 sm:grid-cols-2">{ownedObjectives.map((o,index) => objectiveCard(o,index,chartMetrics))}</div></>}
+                    {ownedKpis.length > 0 && <><h2 className="text-sm text-muted-foreground">KPIs · {ownedKpis.length}</h2><div className="grid items-start gap-3 sm:grid-cols-2">{ownedKpis.map(metricCard)}</div></>}
+                  </div>;
+                }}
+              />
               {[
                 { label: "Indicadores", value: metrics.length },
                 {
@@ -558,7 +545,7 @@ export function IndicadoresDashboard() {
               </div>
             ) : (
               <div className="grid items-start gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                {tab === "okrs" ? objectives.map(objectiveCard) : metrics.map(metricCard)}
+                {tab === "okrs" ? objectives.map((o, index) => objectiveCard(o, index)) : metrics.map(metricCard)}
               </div>
             )}
             {(tab === "okrs" ? objectives.length === 0 : metrics.length === 0) && (
