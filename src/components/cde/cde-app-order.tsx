@@ -55,7 +55,7 @@ function AppNameColorChoice({ appName, value, onChange }: { appName: string; val
   const swatch = useCdeSwatchStyle();
   const current = APP_NAME_COLORS.find(option => option.key === value) ?? APP_NAME_COLORS[0];
   const dot = (color: string) => <span aria-hidden="true" style={{ background: color, ...swatch.css }} className={`block h-4 w-4 shrink-0 rounded-full border border-border ${swatch.cls}`} />;
-  return <div className="min-w-0 space-y-1"><Label>Cor da fonte</Label><Select value={current.key} onValueChange={onChange}><SelectTrigger aria-label={`Cor da fonte de ${appName}`} className="h-9"><span className="flex min-w-0 items-center gap-2">{dot(current.value)}<span className="truncate">{current.label}</span></span></SelectTrigger><SelectContent>{APP_NAME_COLORS.map(option => <SelectItem key={option.key} value={option.key}><span className="flex items-center gap-2">{dot(option.value)}<span>{option.label}</span></span></SelectItem>)}</SelectContent></Select></div>;
+  return <div className="min-w-0 space-y-1"><Label>Cor da fonte</Label><Select value={current.key} onValueChange={onChange}><SelectTrigger aria-label={`Cor da fonte de ${appName}`} className="h-9"><div className="flex min-w-0 flex-1 items-center gap-2 text-left">{dot(current.value)}<span className="truncate">{current.label}</span></div></SelectTrigger><SelectContent>{APP_NAME_COLORS.map(option => <SelectItem key={option.key} value={option.key}><span className="flex items-center gap-2">{dot(option.value)}<span>{option.label}</span></span></SelectItem>)}</SelectContent></Select></div>;
 }
 
 export function CdeAppOrder({ number, handle }: { number: number; handle?: import("react").ReactNode }) {
