@@ -1,6 +1,6 @@
 # Roadmap
 - [x] Spend: duplicidade explicada — título da página e título da lista repetem Cartões, não são cadastros duplicados; nenhuma alteração solicitada.
-- [x] Spend: alternativa com check centralizado abaixo do cartão apresentada em imagem, sem aplicar; ícone atual preservado.
+- [x] Spend: prévia v2 corrigida com check dentro do cartão, centralizado entre a faixa horizontal e a borda inferior; sem aplicar, ícone atual preservado.
 - [x] CDE: menus laterais/inferior com painel fixo forte, seleção escura e itens em linha; cápsula clara exclusiva do flutuante. Supply conferido em 1280/390 px nos quatro modos com escolhas simuladas só no navegador; submenu Inventário abre. Três testes passaram; escolhas salvas preservadas.
 - [x] Roxo myio conferido: base #673AB6; print aproximadamente #6C4BC0, semelhante mas não exato; informado sem alterar paleta. Print 2 seleciona Verde.
 - [x] Indicadores: filtros próprios de OKR/KPI e ordenação no cabeçalho; filtro de OKR por Nome, remoção e ordem decrescente conferidos em dados reais; menus KPI disponíveis, mas conta sem KPIs para verificar cards. Mobile sem overflow; 12 testes passaram.
