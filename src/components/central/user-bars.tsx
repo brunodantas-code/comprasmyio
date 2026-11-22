@@ -4,14 +4,15 @@ import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis, LabelList } 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { CdeDisclosureIcon } from '@/components/cde/cde-button';
+import { centralUserBars, type UserBar } from '@/lib/central-user-bars';
 
-export type UserBar = { id: string; name: string; total: number };
+export type { UserBar } from '@/lib/central-user-bars';
 
 export function UserPendingBars({ data, renderDetails }: { data: UserBar[]; renderDetails: (id: string) => ReactNode }) {
   const [open, setOpen] = useState(false);
   const [expandedUsers, setExpandedUsers] = useState<Set<string>>(new Set());
   if (!data.length) return null;
-  const sorted = [...data].sort((a, b) => b.total - a.total);
+  const { all: sorted, summary } = centralUserBars(data);
   const maximum = Math.max(1, ...sorted.map(user => user.total));
   const toggleUser = (id: string) => setExpandedUsers(previous => {
     const next = new Set(previous);
@@ -20,7 +21,7 @@ export function UserPendingBars({ data, renderDetails }: { data: UserBar[]; rend
   });
   return <>
     <Button variant="ghost" type="button" onClick={() => setOpen(true)} title="Expandir gráfico de pendências por usuário" aria-label="Expandir gráfico de pendências por usuário" className="!flex !h-40 !w-80 !max-w-full !bg-transparent items-end gap-2 px-1 text-left">
-      <div className="h-full min-w-0 flex-1"><ResponsiveContainer width="100%" height="100%"><BarChart data={sorted} layout="vertical" margin={{ top: 2, right: 20, bottom: 2, left: 0 }}><XAxis type="number" hide /><YAxis type="category" dataKey="name" width={132} axisLine={false} tickLine={false} interval={0} tick={{ fontSize: 10, fill: 'var(--foreground)' }} /><Tooltip cursor={false} formatter={(v) => [v, 'Pendências']} /><Bar dataKey="total" fill="var(--primary)" radius={[0, 2, 2, 0]} isAnimationActive={false}><LabelList dataKey="total" position="right" fontSize={10} fill="var(--foreground)" /></Bar></BarChart></ResponsiveContainer></div>
+      <div className="h-full min-w-0 flex-1"><ResponsiveContainer width="100%" height="100%"><BarChart data={summary} layout="vertical" margin={{ top: 2, right: 20, bottom: 2, left: 0 }}><XAxis type="number" hide /><YAxis type="category" dataKey="name" width={132} axisLine={false} tickLine={false} interval={0} tick={{ fontSize: 10, fill: 'var(--foreground)' }} /><Tooltip cursor={false} formatter={(v) => [v, 'Pendências']} /><Bar dataKey="total" fill="var(--primary)" radius={[0, 2, 2, 0]} isAnimationActive={false}><LabelList dataKey="total" position="right" fontSize={10} fill="var(--foreground)" /></Bar></BarChart></ResponsiveContainer></div>
       <BarChart3 className="h-4 w-4 shrink-0 text-foreground" />
     </Button>
     <Dialog open={open} onOpenChange={setOpen}><DialogContent className="max-w-3xl"><DialogHeader><DialogTitle>Pendências por usuário</DialogTitle></DialogHeader>
