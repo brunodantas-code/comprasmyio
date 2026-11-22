@@ -1,4 +1,6 @@
 # Roadmap
+- [x] Spend: check no canto superior direito com traço grosso no ícone compartilhado.
+- [x] CDE: prévias distintas de flutuante/base e laterais corretas; escolhas Mobile/Desktop salvas pelo CDE e lidas no app, sem overflow. Preferências originais restauradas após teste; 3 testes passaram.
 - [x] CDE: conferido e respondido — escolha atual afeta Desktop; Mobile mantém barra inferior. Configurações independentes ainda não implementadas, pois foi uma pergunta.
 - [x] Indicadores: OKR em tela cheia com KRs em lista, quantidade antes do botão ampliar, retorno mantém cards imóveis; histórico conferido no Desktop/Mobile sem overflow.
 - [x] Indicadores: cards uniformes, reticências/tooltip, ações após + e resumo Site Survey; página de entrada lê nome/descrição CDE.

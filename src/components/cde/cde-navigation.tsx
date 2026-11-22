@@ -8,6 +8,8 @@ import { cn } from "@/lib/utils";
 import { CdeNumber } from "./cde-button";
 import { CdeCategoryHeader } from "./cde-category-header";
 import { standardsFirst } from "./model-order";
+import { CdeMenuType } from "./cde-menu-type";
+import { Target, Gauge, CheckCheck, CalendarDays } from "lucide-react";
 
 type Pattern = { key: string; label: string; detail: string; uses: string; sketch: "screen" | "popup" | "confirm" | "bottom" | "top" | "side" | "floating" | "popover" | "collapse" | "tabs" };
 type Decision = { key: string; title: string; patterns: Pattern[] };
@@ -23,9 +25,7 @@ const DECISIONS: Decision[] = [
     { key: "confirm", label: "Pop-up de confirmação", detail: "Pergunta antes de agir", uses: "25 usos em 13 telas", sketch: "confirm" },
   ] },
   { key: "nav_menu", title: "Menu principal dos apps", patterns: [
-    { key: "bottom", label: "Barra inferior", detail: "Ícones na base da tela", uses: "Supply, Finance, Site Survey, Legal, Mytosis, Indicadores", sketch: "bottom" },
-    { key: "top", label: "Menu superior", detail: "Logo à esquerda, menus à direita", uses: "Todos os apps (Usuários, Logs, casa)", sketch: "top" },
-    { key: "side", label: "Menu lateral", detail: "Coluna à esquerda", uses: "Nenhum app hoje", sketch: "side" },
+    
   ] },
   { key: "nav_float", title: "Ações flutuantes e rápidas", patterns: [
     { key: "floating", label: "Botão flutuante", detail: "Botão fixo sobre o conteúdo", uses: "Nenhum app hoje (o + do OpDesk fica no cabeçalho)", sketch: "floating" },
@@ -81,7 +81,7 @@ export function CdeNavigation({ number, handle }: { number: number; handle?: imp
           {DECISIONS.map((d, di) => (
             <div key={d.key}>
               <div className="mb-2 flex items-center gap-3 text-sm font-semibold"><CdeNumber subcategory>{number}.{di + 1}</CdeNumber>{d.title}</div>
-              <div className="flex flex-wrap gap-3">
+              {d.key === "nav_menu" ? <CdeMenuType app="*" cards items={[{label:"OKRs",icon:Target},{label:"KPIs",icon:Gauge},{label:"Check-ins",icon:CheckCheck},{label:"Ciclos",icon:CalendarDays}]} /> : <div className="flex flex-wrap gap-3">
                 {standardsFirst(d.patterns, p => chosen?.some(c => c.group_key === d.key && c.variant_key === p.key) ?? false).map((p) => {
                   const sel = chosen?.some((c) => c.group_key === d.key && c.variant_key === p.key);
                   return (
@@ -92,7 +92,7 @@ export function CdeNavigation({ number, handle }: { number: number; handle?: imp
                     </div>
                   );
                 })}
-              </div>
+              </div>}
             </div>
           ))}
         </div>

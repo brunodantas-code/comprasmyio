@@ -553,6 +553,31 @@ input[data-search-field="true"] {
   }
 }
 
+@media (max-width: 1023px) {
+  .app-navigation.menu-mobile-bottom { left: 0 !important; right: 0 !important; bottom: calc(env(safe-area-inset-bottom, 0px) + var(--app-nav-viewport-bottom, 0px)) !important; background: var(--card); }
+  .app-navigation.menu-mobile-bottom > div { max-width: none !important; border-radius: 0 !important; border-inline-width: 0 !important; border-bottom-width: 0 !important; box-shadow: none !important; }
+  .app-navigation.menu-mobile-top_tabs { left: 0 !important; right: 0 !important; bottom: auto !important; top: 4.5rem !important; }
+  .app-navigation.menu-mobile-top_tabs > div { max-width: none !important; border-radius: 0 !important; box-shadow: none !important; }
+  .app-navigation.menu-mobile-left, .app-navigation.menu-mobile-right { bottom: auto !important; top: 6rem !important; width: 6rem !important; max-height: calc(100dvh - 7rem); overflow-y: auto; }
+  .app-navigation.menu-mobile-left { left: .75rem !important; right: auto !important; }
+  .app-navigation.menu-mobile-right { right: .75rem !important; left: auto !important; }
+  .app-navigation.menu-mobile-left > div, .app-navigation.menu-mobile-right > div { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; gap: .25rem; }
+  .app-navigation.menu-mobile-left > div > *, .app-navigation.menu-mobile-right > div > * { min-width: 0 !important; }
+  .app-navigation.menu-mobile-floating > div { border-radius: 1.75rem; background: var(--card); border: 1px solid var(--border); padding: .375rem; }
+}
+@media (min-width: 1024px) {
+  .app-navigation.menu-desktop-bottom { left: 0 !important; right: 0 !important; bottom: calc(env(safe-area-inset-bottom, 0px) + var(--app-nav-viewport-bottom, 0px)) !important; background: var(--card); }
+  .app-navigation.menu-desktop-bottom > div { max-width: none !important; border-radius: 0 !important; border-inline-width: 0 !important; border-bottom-width: 0 !important; box-shadow: none !important; }
+  .app-navigation.menu-desktop-top_tabs { left: 0 !important; right: 0 !important; bottom: auto !important; top: 4.5rem !important; }
+  .app-navigation.menu-desktop-top_tabs > div { max-width: none !important; border-radius: 0 !important; box-shadow: none !important; }
+  .app-navigation.menu-desktop-left, .app-navigation.menu-desktop-right { bottom: auto !important; top: 6rem !important; width: 6rem !important; max-height: calc(100dvh - 7rem); overflow-y: auto; }
+  .app-navigation.menu-desktop-left { left: .75rem !important; right: auto !important; }
+  .app-navigation.menu-desktop-right { right: .75rem !important; left: auto !important; }
+  .app-navigation.menu-desktop-left > div, .app-navigation.menu-desktop-right > div { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; gap: .25rem; }
+  .app-navigation.menu-desktop-left > div > *, .app-navigation.menu-desktop-right > div > * { min-width: 0 !important; }
+  .app-navigation.menu-desktop-floating > div { border-radius: 1.75rem; background: var(--card); border: 1px solid var(--border); padding: .375rem; }
+}
+
 .mobile-app-grid {
   grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--mobile-grid-min, calc((100% - 1.5rem) / 4))), 1fr));
   column-gap: 0.5rem;

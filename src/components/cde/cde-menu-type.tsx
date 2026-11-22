@@ -1,86 +1,62 @@
 import { useState } from "react";
+import { Save, Check, Smartphone, Monitor } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
+import { MENU_TYPES, resolveMenus, menuMainClasses, type MenuType, type MenuConfig } from "./menu-layout";
+export { MENU_TYPES } from "./menu-layout";
 type Item = { label: string; icon: React.ComponentType<{ className?: string }> };
-export const MENU_TYPES = [
-  { key: "bottom", label: "Barra inferior" },
-  { key: "bottom_fab", label: "Barra inferior com botão flutuante" },
-  { key: "top_tabs", label: "Abas superiores" },
-  { key: "left", label: "Menu lateral esquerdo" },
-  { key: "right", label: "Menu lateral direito" },
-  { key: "hamburger", label: "Dentro do menu de 3 barras" },
-] as const;
-type MenuType = typeof MENU_TYPES[number]["key"];
 const GROUP = "menu_type";
-
 export function useMenuTypes() {
   return useQuery({ queryKey: ["cde-menu-type"], queryFn: async () => {
-    const { data } = await supabase.from("cde_selected").select("variant_key").eq("group_key", GROUP).eq("is_primary", true).maybeSingle();
-    try { return JSON.parse(data?.variant_key ?? "{}") as Record<string, MenuType>; } catch { return {}; }
+    const { data, error } = await supabase.from("cde_selected").select("variant_key").eq("group_key", GROUP).eq("is_primary", true).maybeSingle();
+    if (error) throw error;
+    try { const value: unknown = JSON.parse(data?.variant_key ?? "{}"); return value && typeof value === "object" && !Array.isArray(value) ? value as MenuConfig : {}; } catch { return {}; }
   } });
 }
-
 function Preview({ type, items }: { type: MenuType; items: Item[] }) {
-  const icons = items.slice(0, 5);
-  const btn = (it: Item, i: number, row = false) => { const I = it.icon; return <span key={i} className={`flex ${row ? "flex-row gap-1.5" : "flex-col"} items-center gap-0.5 text-[8px] ${i === 0 ? "text-primary" : "text-muted-foreground"}`}><I className="h-3.5 w-3.5" /><span className="truncate">{it.label}</span></span>; };
-  const header = <div className="flex h-5 items-center justify-between border-b border-border px-2"><span className="h-1.5 w-8 rounded bg-primary/60" /><span className="h-1.5 w-4 rounded bg-muted-foreground/40" /></div>;
-  const body = <div className="flex-1 space-y-1 p-2"><div className="h-1.5 w-2/3 rounded bg-muted" /><div className="h-1.5 w-1/2 rounded bg-muted" /><div className="h-1.5 w-3/4 rounded bg-muted" /></div>;
-  const side = <div className="flex w-20 flex-col gap-1.5 border-border bg-muted/40 p-1.5">{icons.map((it, i) => btn(it, i, true))}</div>;
-  return <div className="relative flex h-36 w-60 flex-col overflow-hidden rounded-lg border border-border bg-background">
-    {header}
-    {type === "top_tabs" ? <div className="flex justify-around border-b border-border py-1">{icons.map((it, i) => btn(it, i))}</div> : null}
-    <div className="flex min-h-0 flex-1">{type === "left" ? <div className="border-r border-border">{side}</div> : null}{body}{type === "right" ? <div className="border-l border-border">{side}</div> : null}</div>
-    {type === "bottom" || type === "bottom_fab" ? <div className="m-1.5 flex justify-around rounded-full border border-border bg-card py-1">{icons.map((it, i) => btn(it, i))}</div> : null}
-    {type === "bottom_fab" ? <span className="absolute bottom-10 right-3 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">+</span> : null}
-    {type === "hamburger" ? <div className="absolute right-1 top-5 w-24 space-y-1 rounded border border-border bg-card p-1.5 shadow">{icons.map((it, i) => btn(it, i, true))}</div> : null}
+  const icons = items.slice(0, 4);
+  const btn = (it: Item, i: number, row = false) => { const I = it.icon; return <span key={i} className={`flex min-w-0 ${row ? "flex-row gap-1" : "flex-col"} items-center gap-0.5 text-[8px] ${i === 0 ? "text-primary" : "text-muted-foreground"}`}><I className="size-3 shrink-0" /><span className="max-w-full truncate">{it.label}</span></span>; };
+  return <div aria-label={`Prévia ${MENU_TYPES.find(t => t.key === type)?.label}`} className="relative flex h-36 w-full max-w-60 flex-col overflow-hidden rounded-md border border-border bg-background">
+    <div className="flex h-5 shrink-0 items-center justify-between border-b border-border px-2"><span className="h-1.5 w-8 rounded bg-primary/60" /><span className="h-1.5 w-4 rounded bg-muted-foreground/40" /></div>
+    {type === "top_tabs" && <div className="flex justify-around border-b border-border py-1">{icons.map((it,i)=>btn(it,i))}</div>}
+    <div className="relative flex min-h-0 flex-1">
+      {(type === "left" || type === "right") && <div data-preview-side={type} className={`absolute inset-y-0 z-10 flex w-20 flex-col gap-2 bg-muted/40 p-1.5 ${type === "left" ? "left-0 border-r border-border" : "right-0 border-l border-border"}`}>{icons.map((it,i)=>btn(it,i,true))}</div>}
+      <div className={`min-w-0 flex-1 space-y-2 p-2 ${type === "left" ? "ml-20" : type === "right" ? "mr-20" : ""}`}><div className="h-1.5 w-2/3 rounded bg-muted" /><div className="h-1.5 w-1/2 rounded bg-muted" /><div className="h-1.5 w-3/4 rounded bg-muted" /></div>
+    </div>
+    {(type === "bottom" || type === "floating") && <div data-preview-base={type} className={`flex shrink-0 justify-around bg-card py-2 ${type === "floating" ? "mx-2 mb-2 rounded-full border border-border shadow-md" : "w-full border-t border-border"}`}>{icons.map((it,i)=>btn(it,i))}</div>}
   </div>;
 }
-
-/** Records each app's main-menu type with a live preview (registration only; layouts change on request). */
-export function CdeMenuType({ app, items }: { app: string; items: Item[] }) {
-  const qc = useQueryClient();
-  const { data } = useMenuTypes();
-  const saved: MenuType = data?.[app === "Finance" ? "Cash Flow" : app] ?? "bottom";
-  const [draft, setDraft] = useState<MenuType | null>(null);
-  const type: MenuType = draft ?? saved;
-  const dirty = draft !== null && draft !== saved;
+export function CdeMenuType({ app, items, cards = false }: { app: string; items: Item[]; cards?: boolean }) {
+  const qc = useQueryClient(); const { data } = useMenuTypes();
+  const [device, setDevice] = useState<"mobile" | "desktop">("mobile");
+  const [draft, setDraft] = useState<Partial<Record<"mobile" | "desktop", MenuType>>>({}); const [busy,setBusy] = useState(false);
+  const saved = resolveMenus(data ?? {}, app); const type = draft[device] ?? saved[device];
+  const dirty = !!Object.keys(draft).length;
   async function save() {
-    if (!draft) return;
-    const all = { ...(data ?? {}), [app === "Finance" ? "Cash Flow" : app]: draft };
+    setBusy(true);
     try {
-      const user = (await supabase.auth.getUser()).data.user;
-      if (!user) throw new Error();
-      const existing = await supabase.from("cde_selected").select("variant_key").eq("group_key", GROUP).eq("is_primary", true).maybeSingle();
-      const row = { variant_key: JSON.stringify(all), chosen_by: user.id };
-      const r = existing.data ? await supabase.from("cde_selected").update(row).eq("group_key", GROUP).eq("variant_key", existing.data.variant_key) : await supabase.from("cde_selected").insert({ ...row, group_key: GROUP });
-      if (r.error) throw r.error;
-      toast.success("Tipo de menu registrado"); setDraft(null);
-    } catch { toast.error("Não foi possível salvar (somente Admin)."); } finally { qc.invalidateQueries({ queryKey: ["cde-menu-type"] }); }
+      const user = (await supabase.auth.getUser()).data.user; if (!user) throw new Error("Sessão não encontrada");
+      const existing = await supabase.from("cde_selected").select("variant_key").eq("group_key",GROUP).eq("is_primary",true).maybeSingle(); if(existing.error) throw existing.error;
+      const all: MenuConfig = JSON.parse(existing.data?.variant_key ?? "{}");
+      const key = app === "Finance" ? "Cash Flow" : app;
+      if(app === "*") { for(const k of Object.keys(all)) all[k] = {...resolveMenus(all,k),...draft}; }
+      all[key] = {...resolveMenus(all,app),...draft};
+      const row = { variant_key:JSON.stringify(all), chosen_by:user.id };
+      const r = existing.data ? await supabase.from("cde_selected").update(row).eq("group_key",GROUP).eq("is_primary",true).eq("variant_key",existing.data.variant_key).select("variant_key").single() : await supabase.from("cde_selected").insert({...row,group_key:GROUP,is_primary:true}).select("variant_key").single();
+      if(r.error) throw r.error; await qc.invalidateQueries({queryKey:["cde-menu-type"]}); setDraft({}); toast.success("Menus atualizados nos apps");
+    } catch(e) { toast.error(e instanceof Error ? e.message : "Não foi possível salvar"); } finally {setBusy(false);}
   }
-  return <div className="flex flex-wrap items-start gap-4">
-    <div className="space-y-1"><div className="text-xs text-muted-foreground">Tipo de menu</div>
-      <Select value={type} onValueChange={(v) => setDraft(v as MenuType)}><SelectTrigger className="h-8 w-64 text-xs"><SelectValue /></SelectTrigger>
-        <SelectContent>{MENU_TYPES.map((t) => <SelectItem key={t.key} value={t.key} disabled={t.key === "bottom_fab" || t.key === "hamburger"} className="text-xs">{t.label}{t.key === "bottom_fab" || t.key === "hamburger" ? " (em preparação)" : ""}</SelectItem>)}</SelectContent></Select></div>
-    <Preview type={type} items={items} />
-    {dirty ? <div className="flex items-end gap-2 self-end"><Button type="button" size="sm" variant="outline" onClick={() => setDraft(null)}>Cancelar</Button><Button type="button" size="sm" variant="outline" onClick={save}>Salvar</Button></div> : null}
+  return <div className="space-y-3">
+    <div className="flex items-center gap-3"><div role="group" aria-label={`Versão do menu ${app}`} className="flex gap-2">{([{key:"mobile",label:"Mobile",icon:Smartphone},{key:"desktop",label:"Desktop",icon:Monitor}] as const).map(({key,label,icon:Icon})=><Button key={key} variant="ghost" aria-pressed={device===key} onClick={()=>setDevice(key)}><Icon />{label}{device===key && <Check className="size-3" />}</Button>)}</div>{dirty && <Button variant="ghost" size="compactIcon" aria-label={`Salvar menus ${app}`} title="Salvar menus Mobile e Desktop" disabled={busy} onClick={save}><Save /></Button>}</div>
+    {cards ? <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">{MENU_TYPES.map(t=><div key={t.key} className={`flex min-w-0 flex-col gap-3 rounded-lg border p-3 ${type===t.key ? "border-primary bg-accent" : "border-border"}`}><Preview type={t.key} items={items} /><h3 className="text-sm">{t.label}</h3><Button variant="ghost" disabled={busy} aria-pressed={type===t.key} onClick={()=>setDraft(d=>({...d,[device]:t.key}))}>{type===t.key ? <><Check />{draft[device] ? "Selecionado" : "Padrão"}</> : "Escolher como padrão"}</Button></div>)}</div> : <div className="flex flex-wrap items-start gap-4"><Select value={type} onValueChange={v=>{const t=MENU_TYPES.find(t=>t.key===v);if(t)setDraft(d=>({...d,[device]:t.key}));}}><SelectTrigger aria-label={`Tipo de menu ${device} ${app}`} className="w-64 max-w-full"><SelectValue /></SelectTrigger><SelectContent>{MENU_TYPES.map(t=><SelectItem key={t.key} value={t.key}>{t.label}</SelectItem>)}</SelectContent></Select><div className="w-60 max-w-full"><Preview type={type} items={items} /></div></div>}
   </div>;
 }
-
-/** Layout classes for an app's main menu per the CDE choice (desktop only; mobile keeps the bottom bar). */
 export function useAppMenuLayout(app: string) {
-  const t = useMenuTypes().data?.[app === "Finance" ? "Cash Flow" : app];
-  const side = t === "left" || t === "right" ? t : null;
-  const top = t === "top_tabs";
-  return {
-    side,
-    nav: side === "left" ? "lg:inset-x-auto lg:bottom-auto lg:left-3 lg:top-24 lg:w-24" : side === "right" ? "lg:inset-x-auto lg:bottom-auto lg:right-3 lg:top-24 lg:w-24" : top ? "lg:bottom-auto lg:top-[4.5rem]" : "",
-    grid: side ? "lg:!grid-cols-1 lg:gap-1" : "",
-    main: side === "left" ? "lg:!pb-8 lg:!pl-32" : side === "right" ? "lg:!pb-8 lg:!pr-32" : top ? "lg:!pb-8 lg:!pt-28" : "",
-    drop: (side === "left" ? "right" : side === "right" ? "left" : top ? "bottom" : "top") as "top" | "bottom" | "left" | "right",
-  };
+  const menus = resolveMenus(useMenuTypes().data ?? {},app);
+  const side = menus.desktop === "left" || menus.desktop === "right" ? menus.desktop : null;
+  return {side, nav:`menu-mobile-${menus.mobile} menu-desktop-${menus.desktop}`,grid:"",main:menuMainClasses(menus),drop:(side === "left" ? "right" : side === "right" ? "left" : menus.desktop === "top_tabs" ? "bottom" : "top") as "top"|"bottom"|"left"|"right"};
 }
-export function useAppMenuSide(app: string) { return useAppMenuLayout(app).side; }
+export function useAppMenuSide(app:string) {return useAppMenuLayout(app).side;}

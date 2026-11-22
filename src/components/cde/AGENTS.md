@@ -16,7 +16,7 @@
 - CDE category/subcategory order lives in cde_selected group cde_order ({cats, subs}); numbers are derived from position, never hardcoded.
 - Linked + buttons share one add_text key via "shared" in add-text-usage.json.
 - App menu icon order lives in cde_selected group menu_order ("App|Group"→labels); apps sort tabs via sortByMenuOrder/useOrderedMenu (menu-order.ts).
-- Every saved CDE choice must take effect in the apps immediately (production); options not yet wired stay disabled. Menu type (menu_type) drives app nav layout via useAppMenuLayout.
+- Every saved CDE choice must take effect in the apps immediately; menu_type stores mobile/desktop choices with global defaults and app overrides. Pure menu-layout helpers preserve legacy floating bases; useAppMenuLayout and shared navigation CSS apply responsive geometry without changing items or permissions.
 - Button library counts static TSX call sites, not runtime instances; regenerate button-library.json with scripts/scan-cde-buttons.mjs whenever button sites change, retaining dynamic labels and source locations for auditing.
 - The CDE button library reuses the active model editor, resolving screen-specific standards before the primary; unbound buttons cannot save ineffective visual edits.
 - Deadline alerts (CDE "Alertas de Prazo") keep every app in one deadline_alerts JSON with a key per app (minutes for Legal); Supply shares pure supply-deadlines helpers; timing indicators read authorized logs/approval decisions and never use updated_at as delivery time or invent causal attribution.
