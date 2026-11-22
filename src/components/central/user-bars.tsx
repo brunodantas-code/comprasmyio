@@ -4,6 +4,7 @@ import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis, LabelList } 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { CdeDisclosureIcon } from '@/components/cde/cde-button';
+import { AlertMarker } from '@/components/cde/numeric-markers';
 import { centralUserBars, type UserBar } from '@/lib/central-user-bars';
 
 export type { UserBar } from '@/lib/central-user-bars';
@@ -29,13 +30,13 @@ export function UserPendingBars({ data, renderDetails }: { data: UserBar[]; rend
         {sorted.map(user => {
           const expanded = expandedUsers.has(user.id);
           return <section key={user.id} className="min-w-0">
-            <Button variant="ghost" type="button" aria-label={`Detalhar pendências de ${user.name}`} aria-expanded={expanded} aria-controls={`chart-pending-${user.id}`} title={expanded ? 'Recolher pendências' : 'Exibir pendências'} onClick={() => toggleUser(user.id)} className="!grid !h-auto !w-full !max-w-none !bg-transparent !justify-start grid-cols-[minmax(0,1fr)_auto] items-center gap-2 px-0 py-1 text-left sm:grid-cols-[200px_minmax(0,1fr)_auto]">
+            <Button variant="ghost" type="button" aria-label={`Detalhar pendências de ${user.name}`} aria-expanded={expanded} aria-controls={`chart-pending-${user.id}`} title={expanded ? 'Recolher pendências' : 'Exibir pendências'} onClick={() => toggleUser(user.id)} className="!grid !h-auto !w-full !max-w-none !bg-transparent !justify-start grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 px-0 py-1 text-left sm:grid-cols-[200px_auto_minmax(0,1fr)_auto]">
               <span className="min-w-0 whitespace-normal break-words text-sm text-muted-foreground sm:text-right">{user.name}</span>
-              <span className="col-span-2 row-start-2 flex min-w-0 items-center gap-2 sm:col-span-1 sm:col-start-2 sm:row-start-1">
+              <AlertMarker count={user.total} className="col-start-2 row-start-1" />
+              <span className="col-span-3 row-start-2 flex min-w-0 items-center gap-2 sm:col-span-1 sm:col-start-3 sm:row-start-1">
                 <span className="block min-w-0 flex-1"><span className="block h-8 rounded-sm bg-primary" style={{ width: `${user.total / maximum * 100}%` }} /></span>
-                <span className="w-8 shrink-0 text-sm tabular-nums text-muted-foreground">{user.total}</span>
               </span>
-              <span className="col-start-2 row-start-1 shrink-0 sm:col-start-3"><CdeDisclosureIcon open={expanded} screen="components/central/dashboard.tsx" /></span>
+              <span className="col-start-3 row-start-1 shrink-0 sm:col-start-4"><CdeDisclosureIcon open={expanded} screen="components/central/dashboard.tsx" /></span>
             </Button>
             {expanded && <div id={`chart-pending-${user.id}`} className="min-w-0">{renderDetails(user.id)}</div>}
           </section>;
