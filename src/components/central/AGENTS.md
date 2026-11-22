@@ -6,3 +6,4 @@
 - Portal and Central use the same useCriticalPending query and CriticalGroup; show due-today tasks even without other app pendencies to avoid hidden personal alerts.
 - Physical receipt pendencies reuse Supply fulfillment helpers and requester identity; receiptPending keeps delivered orders visible without changing dependency milestones or purchase execution.
 - User chart disclosures reuse the dashboard's filtered detail renderer and stable user IDs, so expanded chart rows retain the same counts, commands and authorized records as the list.
+- Dashboard and expanded chart share filter state and the pure pending-item sorter; user ranking remains independent so sorting details never changes assignment counts.

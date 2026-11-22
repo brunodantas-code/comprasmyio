@@ -9,10 +9,10 @@ import { centralUserBars, type UserBar } from '@/lib/central-user-bars';
 
 export type { UserBar } from '@/lib/central-user-bars';
 
-export function UserPendingBars({ data, renderDetails }: { data: UserBar[]; renderDetails: (id: string) => ReactNode }) {
+export function UserPendingBars({ data, renderDetails, controls }: { data: UserBar[]; renderDetails: (id: string) => ReactNode; controls?: ReactNode }) {
   const [open, setOpen] = useState(false);
   const [expandedUsers, setExpandedUsers] = useState<Set<string>>(new Set());
-  if (!data.length) return null;
+  if (!data.length && !open) return null;
   const { all: sorted, summary } = centralUserBars(data);
   const maximum = Math.max(1, ...sorted.map(user => user.total));
   const toggleUser = (id: string) => setExpandedUsers(previous => {
@@ -26,6 +26,7 @@ export function UserPendingBars({ data, renderDetails }: { data: UserBar[]; rend
       <BarChart3 className="h-4 w-4 shrink-0 text-foreground" />
     </Button>
     <Dialog open={open} onOpenChange={setOpen}><DialogContent className="max-w-3xl"><DialogHeader><DialogTitle>Pendências por usuário</DialogTitle></DialogHeader>
+      {controls}
       <div className="min-w-0 space-y-2">
         {sorted.map(user => {
           const expanded = expandedUsers.has(user.id);

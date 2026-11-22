@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Central: filtros múltiplos e ordenação compartilhados entre Todas as Pendências e gráfico expandido, incluindo App nos dois sentidos; Título + App combinados e preservados na lista, computador/celular conferidos; 34 testes passaram. Não publicado.
 - [x] Central: lista e gráficos com a mesma ordem decrescente por quantidade, conferidos com os sete usuários reais no computador e celular.
 - [ ] Indicadores: conferir dados e históricos do OKR Tracker para migração; aguarda JSON solicitado por Leonardo ao João Paulo.
 - [x] Central: resumo com os três usuários com mais pendências; gráfico clicável, tela cheia e detalhamento dos sete usuários reais conferidos em 1073px/390px. 32 testes passaram; não publicado.
