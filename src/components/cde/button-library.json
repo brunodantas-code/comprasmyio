@@ -14087,7 +14087,7 @@
   {
     "id": "components/spend/workspace.tsx|173d3ea5eab2e9d1|0",
     "file": "components/spend/workspace.tsx",
-    "line": 54,
+    "line": 58,
     "tag": "Button",
     "label": "Notificar Portador",
     "dynamic": false,
@@ -14102,7 +14102,7 @@
   {
     "id": "components/spend/workspace.tsx|d590578a08001fe3|0",
     "file": "components/spend/workspace.tsx",
-    "line": 54,
+    "line": 58,
     "tag": "Button",
     "label": "Anexar Invoice",
     "dynamic": false,
@@ -14117,7 +14117,7 @@
   {
     "id": "components/spend/workspace.tsx|da043c6897fb389b|0",
     "file": "components/spend/workspace.tsx",
-    "line": 56,
+    "line": 60,
     "tag": "Button",
     "label": "Rejeitar / Pedir ajuste",
     "dynamic": false,
@@ -14130,9 +14130,24 @@
     "group": ""
   },
   {
+    "id": "components/spend/workspace.tsx|edf32a844ec74442|0",
+    "file": "components/spend/workspace.tsx",
+    "line": 60,
+    "tag": "Button",
+    "label": "Salvar classificação",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "Save",
+    "variant": "ghost",
+    "size": "icon",
+    "className": "",
+    "group": ""
+  },
+  {
     "id": "components/spend/workspace.tsx|029d0b428333890e|0",
     "file": "components/spend/workspace.tsx",
-    "line": 56,
+    "line": 60,
     "tag": "Button",
     "label": "Enviado ao Finance / Aprovar",
     "dynamic": true,
@@ -14147,7 +14162,7 @@
   {
     "id": "components/spend/workspace.tsx|84108eaf3b9bc766|0",
     "file": "components/spend/workspace.tsx",
-    "line": 76,
+    "line": 81,
     "tag": "Button",
     "label": "Cadastrar cartão",
     "dynamic": false,
@@ -14162,7 +14177,7 @@
   {
     "id": "components/spend/workspace.tsx|ad7317219e907ada|0",
     "file": "components/spend/workspace.tsx",
-    "line": 77,
+    "line": 82,
     "tag": "Button",
     "label": "Registrar gasto",
     "dynamic": false,
@@ -14177,7 +14192,7 @@
   {
     "id": "components/spend/workspace.tsx|f803f53b4e8609f5|0",
     "file": "components/spend/workspace.tsx",
-    "line": 78,
+    "line": 83,
     "tag": "Button",
     "label": "Upload PDF Fatura",
     "dynamic": false,
@@ -14192,7 +14207,7 @@
   {
     "id": "components/spend/workspace.tsx|1286d0a529993e2d|0",
     "file": "components/spend/workspace.tsx",
-    "line": 78,
+    "line": 83,
     "tag": "Button",
     "label": "Exportar ZIP",
     "dynamic": false,
@@ -14207,7 +14222,7 @@
   {
     "id": "components/spend/workspace.tsx|49704063d1da9c09|0",
     "file": "components/spend/workspace.tsx",
-    "line": 78,
+    "line": 83,
     "tag": "Button",
     "label": "Conciliar automaticamente",
     "dynamic": false,
@@ -14222,7 +14237,7 @@
   {
     "id": "components/spend/workspace.tsx|71a7608c2bbe7e4d|0",
     "file": "components/spend/workspace.tsx",
-    "line": 78,
+    "line": 83,
     "tag": "Button",
     "label": "Aprovar lote ( / )",
     "dynamic": true,
@@ -14235,11 +14250,11 @@
     "group": ""
   },
   {
-    "id": "components/spend/workspace.tsx|646b13a31bf52349|0",
+    "id": "components/spend/workspace.tsx|10c650613a809c11|0",
     "file": "components/spend/workspace.tsx",
-    "line": 78,
+    "line": 83,
     "tag": "Button",
-    "label": "✓ / ! / · / Sem comprovante",
+    "label": "✓ / ! / · / Sem comprovante / Com CNPJ myio / Sem CNPJ myio",
     "dynamic": true,
     "visualCustom": false,
     "autoCdeSafe": true,
@@ -14252,7 +14267,7 @@
   {
     "id": "components/spend/workspace.tsx|d0425bb7cc25c69a|0",
     "file": "components/spend/workspace.tsx",
-    "line": 80,
+    "line": 85,
     "tag": "Button",
     "label": "Icon",
     "dynamic": true,
@@ -14267,7 +14282,7 @@
   {
     "id": "components/spend/workspace.tsx|ad5881bcd5f598cb|0",
     "file": "components/spend/workspace.tsx",
-    "line": 82,
+    "line": 87,
     "tag": "Button",
     "label": "Enviar aviso no app",
     "dynamic": false,

@@ -1,4 +1,6 @@
 # Roadmap
+- [x] Spend: site publicado conferido com sessão: barra 288×6 px e botão Aa disponíveis; print estava desatualizado, conversão opcional exige acionar Aa.
+- [x] Spend: disquete salva classificação parcial sem comprovante, sem liberar aprovação nem criar Finance; identificação opcional Com CNPJ myio / Sem CNPJ myio persistida. Conferidos salvamento e recarga com sessão; campos de teste restaurados; 19 testes passaram. Novos controles aguardam publicação.
 - [x] Spend: barra de conciliação reduzida a 288 px, limitada à largura disponível, altura de 6 px e texto compacto como OKRs; percentuais/valores preservados.
 - [x] Spend: Furo de Caixa explicado — lançamento da fatura sem comprovante vinculado, não comprova falta de dinheiro; nome/regra preservados.
 - [x] Spend: bloqueio de Aprovar explicado — falta comprovante vinculado, conforme print e guarda do botão; alocação não substitui comprovante. Nenhuma regra de aprovação alterada.

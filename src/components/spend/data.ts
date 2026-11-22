@@ -21,6 +21,11 @@ export async function spendAction(action: string, data: Json) {
   const r = await supabase.rpc("spend_action", { _action: action, _data: data });
   if (r.error) throw new Error(r.error.message); return r.data;
 }
+export async function saveSpendClassification(data: Json) {
+  const r = await supabase.rpc("spend_save_classification", { _data: data });
+  if (r.error) throw new Error(r.error.message);
+  return r.data;
+}
 export async function uploadSpend(file: File, card: SpendCard, period: string) {
   if (file.size > 20 * 1024 * 1024) throw new Error("O arquivo deve ter até 20 MB");
   if (!["application/pdf", "image/jpeg", "image/png", "image/webp"].includes(file.type)) throw new Error("Use PDF, JPG, PNG ou WebP");

@@ -11452,6 +11452,7 @@ export type Database = {
           installment: string | null
           last_four: string | null
           merchant: string
+          myio_cnpj: boolean | null
           ordinal: number
           payable_id: string | null
           project_id: string | null
@@ -11470,6 +11471,7 @@ export type Database = {
           installment?: string | null
           last_four?: string | null
           merchant: string
+          myio_cnpj?: boolean | null
           ordinal: number
           payable_id?: string | null
           project_id?: string | null
@@ -11488,6 +11490,7 @@ export type Database = {
           installment?: string | null
           last_four?: string | null
           merchant?: string
+          myio_cnpj?: boolean | null
           ordinal?: number
           payable_id?: string | null
           project_id?: string | null
@@ -13761,6 +13764,7 @@ export type Database = {
       spend_card_access: { Args: { _card: string }; Returns: boolean }
       spend_project_allowed: { Args: { _project: string }; Returns: boolean }
       spend_role: { Args: never; Returns: string }
+      spend_save_classification: { Args: { _data: Json }; Returns: Json }
       spend_storage_access: { Args: { _name: string }; Returns: boolean }
       spend_workspace: { Args: never; Returns: Json }
       split_mytosis_node: {
