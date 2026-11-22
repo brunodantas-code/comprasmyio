@@ -4,3 +4,4 @@
 - Imported OKR records retain original IDs and payloads separately from ERP identities; unknown authors and confidence remain unknown, and historical imports never grant app roles.
 - Read check-in history in stable paginated batches so the API row limit cannot truncate a user's history; imported areas, memberships and meetings remain a read-only historical view.
 - User summaries reuse Central's mini-chart and disclosure renderer with domain labels; group authorized OKRs/KPIs by stable ERP identity or preserved historical name without assigning new access.
+- Objective details open with the shared fullscreen Dialog and list only authorized filtered KRs; selection stores stable IDs and resolves fresh query rows so updates retain permissions and current values without shifting overview cards.

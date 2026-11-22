@@ -3,6 +3,7 @@
 - Dialog/Sheet X renders CdeCloseIcon (CDE group close); keep position in ui/, look in CDE.
 - Dialog/Sheet X is sticky at the top so it stays visible while long content scrolls.
 - Dialog, AlertDialog and Sheet share PopupExpandButton and viewport sizing; toggle only geometry without remounting children to preserve drafts, and reset on close while forwarding focus callbacks.
+- DialogContent accepts defaultExpanded for detail views that start fullscreen; shared restore/close controls still own geometry and focus behavior.
 - Shared Button/Input/Textarea apply CDE standards live via cde-look.ts (action buttons detected by label/icon: save, cancel, confirm, trash, pencil, toggle, move, sort; fields_*); never hardcode those looks per screen.
 - Shared Button resolves CDE variants before screen defaults; model cards use fixed dimensions with technical details outside. All color pickers read color_swatch shape through useCdeSwatchStyle without overriding their palette values.
 - Shared Save/Delete buttons resolve icon and label through CDE; the library aggregates their source locations to avoid presenting call sites as distinct models.

@@ -2,3 +2,4 @@
 - Approvals lock statement rows and create one uniquely linked Finance payable atomically to prevent duplicate posting.
 - Category keys and server validation remain stable when CDE changes names/icons/default classifications, preserving historical receipts.
 - Multimodal extraction runs only in authenticated server functions; normalized results remain reviewable before statement persistence.
+- Approval keyboard eligibility is a pure tested helper; the audit view ignores repeats and editing contexts before dispatching the same guarded approval action.

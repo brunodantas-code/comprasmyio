@@ -674,7 +674,7 @@ export type Database = {
           project_id: string | null
           request_type: string
           requester_id: string
-          source_order_id: string
+          source_order_id: string | null
           spend_line_id: string | null
           status: string
           updated_at: string
@@ -699,7 +699,7 @@ export type Database = {
           project_id?: string | null
           request_type: string
           requester_id: string
-          source_order_id: string
+          source_order_id?: string | null
           spend_line_id?: string | null
           status?: string
           updated_at?: string
@@ -724,7 +724,7 @@ export type Database = {
           project_id?: string | null
           request_type?: string
           requester_id?: string
-          source_order_id?: string
+          source_order_id?: string | null
           spend_line_id?: string | null
           status?: string
           updated_at?: string

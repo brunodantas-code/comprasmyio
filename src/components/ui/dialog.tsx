@@ -32,9 +32,9 @@ DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & { topActions?: React.ReactNode }
->(({ className, children, topActions, onCloseAutoFocus, ...props }, ref) => {
-  const [expanded, setExpanded] = React.useState(false);
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & { topActions?: React.ReactNode; defaultExpanded?: boolean }
+>(({ className, children, topActions, defaultExpanded = false, onCloseAutoFocus, ...props }, ref) => {
+  const [expanded, setExpanded] = React.useState(defaultExpanded);
   return (
   <DialogPortal>
     <DialogOverlay />

@@ -8,6 +8,7 @@ import {
 import { CrmFunnelIcon } from "@/components/crm-funnel-icon";
 import { MytosisIcon } from "@/components/mytosis-icon";
 import { CdeIcon } from "@/components/cde-icon";
+import { SpendIcon } from "@/components/spend/icons";
 import { CdeToggleIcon } from "./cde-button";
 import { CdeCategoryHeader } from "./cde-category-header";
 import { CdeSortableIcons } from "./cde-sortable-icons";
@@ -24,6 +25,7 @@ const i = (label: string, icon: Item["icon"], name: string): Item => ({ label, i
 const STD = "Sem barra inferior";
 
 const APPS: App[] = [
+  { name: "Spend", icon: SpendIcon, iconName: "CreditCard", groups: [{ title: "Barra inferior", items: [i("Meus gastos", ReceiptText, "ReceiptText"), i("Conciliação", CheckCircle2, "CheckCircle2"), i("Cartões", WalletCards, "WalletCards"), i("Histórico", History, "History")] }] },
   { name: "Supply", icon: Settings, iconName: "Settings", groups: [
     { title: "Barra inferior", items: [i("Solicitações", ClipboardList, "ClipboardList"), i("Approvals", ShoppingCart, "ShoppingCart"), i("Armazém", Boxes, "Boxes"), i("Cadastro", FolderKanban, "FolderKanban"), i("Aprovações e logs", CheckCircle2, "CheckCircle2")] },
     { title: "Submenus", items: [i("Novas Solicitações", Plus, "Plus"), i("Approvals (todos)", ShoppingCart, "ShoppingCart"), i("Armazém (todos)", Boxes, "Boxes"), i("Clientes", Building2, "Building2"), i("Centro de Custo", Landmark, "Landmark"), i("Etiquetas", Tag, "Tag"), i("Cargos", Briefcase, "Briefcase"), i("Lembretes", Bell, "Bell"), i("Diversos", Layers3, "Layers3"), i("Alçadas/Organograma", CheckCircle2, "CheckCircle2"), i("Logs", ScrollText, "ScrollText"), i("Backup", DatabaseBackup, "DatabaseBackup"), i("Manual do Usuário", BookOpen, "BookOpen")] },

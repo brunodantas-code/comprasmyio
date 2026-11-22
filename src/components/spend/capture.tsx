@@ -19,7 +19,6 @@ export function SpendCapture({ data, cardId, line, onDone, onClose }: { data: Sp
   const picker = useRef<HTMLInputElement>(null); const [busy, setBusy] = useState(false); const [reading, setReading] = useState(false);
   const [path, setPath] = useState(""); const [preview, setPreview] = useState(""); const [pdf, setPdf] = useState(false);
   const [draft, setDraft] = useState({ id: crypto.randomUUID(), card_id: cardId, date: line?.date ?? today(), merchant: line?.merchant ?? "", amount: line?.amount ?? 0, category: "alimentacao", observation: "", project_id: null as string | null, file_path: "", clear_photo: false });
-  useEffect(() => { picker.current?.click(); }, []);
   useEffect(() => () => { if (preview) URL.revokeObjectURL(preview); }, [preview]);
   async function filePicked(file: File) {
     if (!card) return; setBusy(true);
@@ -37,7 +36,7 @@ export function SpendCapture({ data, cardId, line, onDone, onClose }: { data: Sp
       await onDone(); toast.success("Comprovante enviado"); onClose();
     } catch (e) { toast.error(e instanceof Error ? e.message : "Não foi possível salvar"); } finally { setBusy(false); }
   }
-  return <Dialog open onOpenChange={o => { if (!o && !busy) onClose(); }}><DialogContent className="max-h-[90dvh] max-w-xl overflow-y-auto"><DialogHeader><DialogTitle>{line ? "Anexar Invoice / Comprovante" : "Registrar gasto"}</DialogTitle></DialogHeader>
+  return <Dialog open onOpenChange={o => { if (!o && !busy) onClose(); }}><DialogContent onOpenAutoFocus={e => { e.preventDefault(); picker.current?.click(); }} className="max-h-[90dvh] max-w-xl overflow-y-auto"><DialogHeader><DialogTitle>{line ? "Anexar Invoice / Comprovante" : "Registrar gasto"}</DialogTitle></DialogHeader>
     <input ref={picker} type="file" className="hidden" accept={line ? "image/jpeg,image/png,image/webp,application/pdf" : "image/jpeg,image/png,image/webp"} capture={line ? undefined : "environment"} onChange={e => { const f = e.target.files?.[0]; if (f) void filePicked(f); e.target.value = ""; }} />
     <div className="flex items-center justify-between gap-3"><span className="truncate text-sm text-muted-foreground">{card?.name} · •••• {card?.last_four}</span><Button onClick={() => picker.current?.click()} disabled={busy} aria-label="Fotografar ou selecionar comprovante"><Camera />{path ? "Substituir foto" : "Fotografar"}</Button></div>
     {reading ? <p role="status" className="flex items-center gap-2 text-sm"><Loader2 className="size-4 animate-spin" />Lendo valor e data…</p> : null}

@@ -145,6 +145,11 @@
     "general": 0
   },
   {
+    "file": "components/spend/workspace.tsx",
+    "standard": 1,
+    "general": 0
+  },
+  {
     "file": "components/stock-inventory-dialog.tsx",
     "standard": 1,
     "general": 0
