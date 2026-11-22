@@ -1,4 +1,6 @@
 # Roadmap
+- [x] Mytosis: botões da barra de fluxogramas em ghost preto, sem fundo/borda; campos, slider e checkbox preservados. Computador/celular e abertura Box padrão conferidos, 11 testes passaram; não publicado.
+- [x] Indicadores: menu no padrão Supply, seleção destacada; computador/celular conferidos, não publicado.
 - [x] Gráfico da Central: nomes sem siglas e seta à direita de cada barra para detalhar/recolher as mesmas pendências da lista. Conta Leonardo conferida em 1073px/390px, normal/tela cheia, sem rolagem lateral; 29 testes passaram. Não publicado.
 - [x] Central: destaque em toda a largura da linha do usuário; 1049/1049 px e expansão conferidos na conta Leonardo, contagens preservadas.
 - [x] Finance: Home, cabeçalho, menus, CDE, Acessos e catálogo renomeados; chaves financeiras e preferências antigas preservadas, cabeçalho conferido.

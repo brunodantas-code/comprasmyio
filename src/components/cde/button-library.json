@@ -7074,9 +7074,9 @@
     "visualCustom": false,
     "autoCdeSafe": true,
     "icon": "Search",
-    "variant": "outline",
+    "variant": "ghost",
     "size": "icon",
-    "className": "h-7 w-7 rounded-lg",
+    "className": "h-7 w-7 !border-0 !bg-transparent !text-foreground shadow-none hover:!bg-muted hover:!text-foreground",
     "group": ""
   },
   {
@@ -7089,7 +7089,7 @@
     "visualCustom": false,
     "autoCdeSafe": true,
     "icon": "RouteIcon",
-    "variant": "outline",
+    "variant": "ghost",
     "size": "",
     "className": "",
     "group": ""
@@ -7104,9 +7104,9 @@
     "visualCustom": false,
     "autoCdeSafe": true,
     "icon": "FileDown",
-    "variant": "outline",
+    "variant": "ghost",
     "size": "icon",
-    "className": "h-7 w-7 rounded-lg",
+    "className": "h-7 w-7 !border-0 !bg-transparent !text-foreground shadow-none hover:!bg-muted hover:!text-foreground",
     "group": ""
   },
   {
@@ -7119,9 +7119,9 @@
     "visualCustom": false,
     "autoCdeSafe": true,
     "icon": "Settings2",
-    "variant": "outline",
+    "variant": "ghost",
     "size": "icon",
-    "className": "h-7 w-7 rounded-lg",
+    "className": "h-7 w-7 !border-0 !bg-transparent !text-foreground shadow-none hover:!bg-muted hover:!text-foreground",
     "group": ""
   },
   {
@@ -7134,9 +7134,9 @@
     "visualCustom": false,
     "autoCdeSafe": true,
     "icon": "Plus",
-    "variant": "outline",
+    "variant": "ghost",
     "size": "icon",
-    "className": "h-7 w-7 rounded-lg",
+    "className": "h-7 w-7 !border-0 !bg-transparent !text-foreground shadow-none hover:!bg-muted hover:!text-foreground",
     "group": ""
   },
   {
@@ -7149,9 +7149,9 @@
     "visualCustom": false,
     "autoCdeSafe": true,
     "icon": "Pencil",
-    "variant": "outline",
+    "variant": "ghost",
     "size": "icon",
-    "className": "h-7 w-7 rounded-lg",
+    "className": "h-7 w-7 !border-0 !bg-transparent !text-foreground shadow-none hover:!bg-muted hover:!text-foreground",
     "group": ""
   },
   {
@@ -7164,9 +7164,9 @@
     "visualCustom": false,
     "autoCdeSafe": true,
     "icon": "Trash2",
-    "variant": "outline",
+    "variant": "ghost",
     "size": "icon",
-    "className": "h-7 w-7 rounded-lg",
+    "className": "h-7 w-7 !border-0 !bg-transparent !text-foreground shadow-none hover:!bg-muted hover:!text-foreground",
     "group": ""
   },
   {
@@ -7179,9 +7179,9 @@
     "visualCustom": false,
     "autoCdeSafe": true,
     "icon": "Plus",
-    "variant": "outline",
+    "variant": "ghost",
     "size": "sm",
-    "className": "",
+    "className": "!border-0 !bg-transparent !text-foreground shadow-none hover:!bg-muted hover:!text-foreground",
     "group": ""
   },
   {
@@ -13841,7 +13841,7 @@
     "icon": "Icon",
     "variant": "ghost",
     "size": "",
-    "className": "h-auto min-w-0",
+    "className": "",
     "group": ""
   },
   {
