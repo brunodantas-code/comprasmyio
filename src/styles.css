@@ -553,28 +553,109 @@ input[data-search-field="true"] {
   }
 }
 
+/* Fixed panels and floating capsules share CDE geometry, but not their surface. */
+:root {
+  --app-menu-fixed-background: var(--primary);
+  --app-menu-fixed-foreground: var(--myio-white);
+  --app-menu-fixed-selected: var(--myio-dark);
+  --app-menu-side-width: 15rem;
+  --app-menu-side-offset: 16rem;
+}
+@layer base {
+.app-menu-fixed-preview,
+.app-navigation:is([data-menu-layout="left"], [data-menu-layout="right"], [data-menu-layout="bottom"]) {
+  background: var(--app-menu-fixed-background) !important;
+  color: var(--app-menu-fixed-foreground) !important;
+}
+.app-menu-fixed-preview-item { color: var(--app-menu-fixed-foreground); }
+.app-menu-fixed-preview-active { background: var(--app-menu-fixed-selected); }
+.app-navigation:is([data-menu-layout="left"], [data-menu-layout="right"], [data-menu-layout="bottom"]) > div {
+  max-width: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  backdrop-filter: none !important;
+  padding: .75rem !important;
+  gap: .5rem;
+}
+.app-navigation:is([data-menu-layout="left"], [data-menu-layout="right"], [data-menu-layout="bottom"]) > div > :is(button, a) {
+  height: auto !important;
+  min-width: 0 !important;
+  width: auto !important;
+  flex-direction: row !important;
+  justify-content: flex-start !important;
+  border: 0 !important;
+  border-radius: .5rem !important;
+  padding: .5rem .75rem !important;
+  color: var(--app-menu-fixed-foreground) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.app-navigation:is([data-menu-layout="left"], [data-menu-layout="right"], [data-menu-layout="bottom"]) > div > :is(button, a):is([aria-current="page"], [data-state="active"], [aria-selected="true"], :hover) {
+  background: var(--app-menu-fixed-selected) !important;
+  color: var(--app-menu-fixed-foreground) !important;
+}
+.app-navigation:is([data-menu-layout="left"], [data-menu-layout="right"], [data-menu-layout="bottom"]) > div > :is(button, a) > span:has(.menu-icon) {
+  flex-direction: row !important;
+  justify-content: flex-start !important;
+  min-height: 2.5rem;
+  width: 100%;
+  gap: .75rem !important;
+  padding: 0;
+}
+.app-navigation:is([data-menu-layout="left"], [data-menu-layout="right"], [data-menu-layout="bottom"]) > div > :is(button, a) span:not(.menu-icon):not(:has(.menu-icon)) {
+  min-width: 0;
+  font-size: .875rem !important;
+  line-height: 1.25 !important;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.app-navigation:is([data-menu-layout="left"], [data-menu-layout="right"], [data-menu-layout="bottom"]) .menu-icon {
+  color: inherit !important;
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0;
+  flex-shrink: 0;
+}
+.app-navigation:is([data-menu-layout="left"], [data-menu-layout="right"]) {
+  top: 4.5rem !important;
+  bottom: 0 !important;
+  width: var(--app-menu-side-width) !important;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.app-navigation[data-menu-layout="left"] { left: 0 !important; right: auto !important; }
+.app-navigation[data-menu-layout="right"] { right: 0 !important; left: auto !important; }
+.app-navigation:is([data-menu-layout="left"], [data-menu-layout="right"]) > div {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+}
+.app-navigation:is([data-menu-layout="left"], [data-menu-layout="right"]) > div > :is(button, a) { flex: none !important; }
+.app-navigation[data-menu-layout="bottom"] {
+  left: 0 !important;
+  right: 0 !important;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + var(--app-nav-viewport-bottom, 0px)) !important;
+}
+.app-navigation[data-menu-layout="bottom"] > div {
+  display: flex !important;
+  overflow-x: auto;
+  justify-content: center;
+}
+.app-navigation[data-menu-layout="bottom"] > div > :is(button, a) { flex: 1 0 auto; max-width: 16rem; }
+}
 @media (max-width: 1023px) {
-  .app-navigation.menu-mobile-bottom { left: 0 !important; right: 0 !important; bottom: calc(env(safe-area-inset-bottom, 0px) + var(--app-nav-viewport-bottom, 0px)) !important; background: var(--card); }
-  .app-navigation.menu-mobile-bottom > div { max-width: none !important; border-radius: 0 !important; border-inline-width: 0 !important; border-bottom-width: 0 !important; box-shadow: none !important; }
+  :root { --app-menu-side-width: 10rem; --app-menu-side-offset: 11rem; }
+  .app-navigation[data-menu-layout="bottom"] > div { justify-content: flex-start; padding: .375rem !important; }
   .app-navigation.menu-mobile-top_tabs { left: 0 !important; right: 0 !important; bottom: auto !important; top: 4.5rem !important; }
   .app-navigation.menu-mobile-top_tabs > div { max-width: none !important; border-radius: 0 !important; box-shadow: none !important; }
-  .app-navigation.menu-mobile-left, .app-navigation.menu-mobile-right { bottom: auto !important; top: 6rem !important; width: 6rem !important; max-height: calc(100dvh - 7rem); overflow-y: auto; }
-  .app-navigation.menu-mobile-left { left: .75rem !important; right: auto !important; }
-  .app-navigation.menu-mobile-right { right: .75rem !important; left: auto !important; }
-  .app-navigation.menu-mobile-left > div, .app-navigation.menu-mobile-right > div { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; gap: .25rem; }
-  .app-navigation.menu-mobile-left > div > *, .app-navigation.menu-mobile-right > div > * { min-width: 0 !important; }
   .app-navigation.menu-mobile-floating > div { border-radius: 1.75rem; background: var(--card); border: 1px solid var(--border); padding: .375rem; }
 }
 @media (min-width: 1024px) {
-  .app-navigation.menu-desktop-bottom { left: 0 !important; right: 0 !important; bottom: calc(env(safe-area-inset-bottom, 0px) + var(--app-nav-viewport-bottom, 0px)) !important; background: var(--card); }
-  .app-navigation.menu-desktop-bottom > div { max-width: none !important; border-radius: 0 !important; border-inline-width: 0 !important; border-bottom-width: 0 !important; box-shadow: none !important; }
   .app-navigation.menu-desktop-top_tabs { left: 0 !important; right: 0 !important; bottom: auto !important; top: 4.5rem !important; }
   .app-navigation.menu-desktop-top_tabs > div { max-width: none !important; border-radius: 0 !important; box-shadow: none !important; }
-  .app-navigation.menu-desktop-left, .app-navigation.menu-desktop-right { bottom: auto !important; top: 6rem !important; width: 6rem !important; max-height: calc(100dvh - 7rem); overflow-y: auto; }
-  .app-navigation.menu-desktop-left { left: .75rem !important; right: auto !important; }
-  .app-navigation.menu-desktop-right { right: .75rem !important; left: auto !important; }
-  .app-navigation.menu-desktop-left > div, .app-navigation.menu-desktop-right > div { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; gap: .25rem; }
-  .app-navigation.menu-desktop-left > div > *, .app-navigation.menu-desktop-right > div > * { min-width: 0 !important; }
   .app-navigation.menu-desktop-floating > div { border-radius: 1.75rem; background: var(--card); border: 1px solid var(--border); padding: .375rem; }
 }
 

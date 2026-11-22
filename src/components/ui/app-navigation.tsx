@@ -4,8 +4,19 @@ import { createPortal } from "react-dom";
 /** Keep app navigation outside page stacking/scrolling contexts, below dialogs. */
 export function AppNavigation({ className = "", ...props }: ComponentProps<"nav">) {
   const [mounted, setMounted] = useState(false);
+  const [layout, setLayout] = useState("floating");
   const ref = useRef<HTMLElement>(null);
   useEffect(() => { setMounted(true); }, []);
+  useEffect(() => {
+    const breakpoint = window.matchMedia("(min-width: 1024px)");
+    const update = () => {
+      const prefix = breakpoint.matches ? "menu-desktop-" : "menu-mobile-";
+      setLayout(className.split(/\s+/).find(value => value.startsWith(prefix))?.slice(prefix.length) ?? "floating");
+    };
+    update();
+    breakpoint.addEventListener("change", update);
+    return () => breakpoint.removeEventListener("change", update);
+  }, [className]);
   useEffect(() => {
     if (!mounted) return;
     const viewport = window.visualViewport;
@@ -37,5 +48,5 @@ export function AppNavigation({ className = "", ...props }: ComponentProps<"nav"
     };
   }, [mounted]);
   if (!mounted) return null;
-  return createPortal(<nav ref={ref} className={`app-navigation fixed inset-x-3 bottom-3 z-40 ${className}`} {...props} />, document.body);
+  return createPortal(<nav ref={ref} data-menu-layout={layout} className={`app-navigation fixed inset-x-3 bottom-3 z-40 ${className}`} {...props} />, document.body);
 }

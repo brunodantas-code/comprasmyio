@@ -27,6 +27,6 @@ export function resolveMenus(config: MenuConfig, app: string): DeviceMenus {
   return defaults;
 }
 export function menuMainClasses({ mobile, desktop }: DeviceMenus) {
-  const main = (t: MenuType, p: string) => t === "left" ? `${p}!pl-32 ${p}!pb-8` : t === "right" ? `${p}!pr-32 ${p}!pb-8` : t === "top_tabs" ? `${p}!pt-28 ${p}!pb-8` : "";
+  const main = (t: MenuType, p: string) => t === "left" ? `${p}!pl-[var(--app-menu-side-offset)] ${p}!pb-8` : t === "right" ? `${p}!pr-[var(--app-menu-side-offset)] ${p}!pb-8` : t === "top_tabs" ? `${p}!pt-28 ${p}!pb-8` : "";
   return `${main(mobile, "max-lg:")} ${main(desktop, "lg:")}`;
 }

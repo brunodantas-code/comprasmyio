@@ -18,15 +18,16 @@ export function useMenuTypes() {
 }
 function Preview({ type, items }: { type: MenuType; items: Item[] }) {
   const icons = items.slice(0, 4);
-  const btn = (it: Item, i: number, row = false) => { const I = it.icon; return <span key={i} className={`flex min-w-0 ${row ? "flex-row gap-1" : "flex-col"} items-center gap-0.5 text-[8px] ${i === 0 ? "text-primary" : "text-muted-foreground"}`}><I className="size-3 shrink-0" /><span className="max-w-full truncate">{it.label}</span></span>; };
+  const fixed = type === "left" || type === "right" || type === "bottom";
+  const btn = (it: Item, i: number, row = false) => { const I = it.icon; return <span key={i} className={`flex min-w-0 ${row ? "flex-row gap-1" : "flex-col"} items-center gap-0.5 text-[8px] ${fixed ? `app-menu-fixed-preview-item ${i === 0 ? "app-menu-fixed-preview-active" : ""} rounded p-1` : i === 0 ? "text-primary" : "text-muted-foreground"}`}><I className="size-3 shrink-0" /><span className="max-w-full truncate">{it.label}</span></span>; };
   return <div aria-label={`Prévia ${MENU_TYPES.find(t => t.key === type)?.label}`} className="relative flex h-36 w-full max-w-60 flex-col overflow-hidden rounded-md border border-border bg-background">
     <div className="flex h-5 shrink-0 items-center justify-between border-b border-border px-2"><span className="h-1.5 w-8 rounded bg-primary/60" /><span className="h-1.5 w-4 rounded bg-muted-foreground/40" /></div>
     {type === "top_tabs" && <div className="flex justify-around border-b border-border py-1">{icons.map((it,i)=>btn(it,i))}</div>}
     <div className="relative flex min-h-0 flex-1">
-      {(type === "left" || type === "right") && <div data-preview-side={type} className={`absolute inset-y-0 z-10 flex w-20 flex-col gap-2 bg-muted/40 p-1.5 ${type === "left" ? "left-0 border-r border-border" : "right-0 border-l border-border"}`}>{icons.map((it,i)=>btn(it,i,true))}</div>}
+      {(type === "left" || type === "right") && <div data-preview-side={type} className={`app-menu-fixed-preview absolute inset-y-0 z-10 flex w-20 flex-col gap-2 p-1.5 ${type === "left" ? "left-0" : "right-0"}`}>{icons.map((it,i)=>btn(it,i,true))}</div>}
       <div className={`min-w-0 flex-1 space-y-2 p-2 ${type === "left" ? "ml-20" : type === "right" ? "mr-20" : ""}`}><div className="h-1.5 w-2/3 rounded bg-muted" /><div className="h-1.5 w-1/2 rounded bg-muted" /><div className="h-1.5 w-3/4 rounded bg-muted" /></div>
     </div>
-    {(type === "bottom" || type === "floating") && <div data-preview-base={type} className={`flex shrink-0 justify-around bg-card py-2 ${type === "floating" ? "mx-2 mb-2 rounded-full border border-border shadow-md" : "w-full border-t border-border"}`}>{icons.map((it,i)=>btn(it,i))}</div>}
+    {(type === "bottom" || type === "floating") && <div data-preview-base={type} className={`flex shrink-0 justify-around py-2 ${type === "floating" ? "mx-2 mb-2 rounded-full border border-border bg-card shadow-md" : "app-menu-fixed-preview w-full"}`}>{icons.map((it,i)=>btn(it,i))}</div>}
   </div>;
 }
 export function CdeMenuType({ app, items, cards = false }: { app: string; items: Item[]; cards?: boolean }) {
