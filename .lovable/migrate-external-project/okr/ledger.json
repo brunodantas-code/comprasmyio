@@ -1,0 +1,138 @@
+{
+  "source": "OKR Tracker myio",
+  "archive": "export-okr-myio.zip",
+  "sha256": "96f3f8e6c9679888d94055f7e8e67e83602301d93e8dde4b4cc0511a773b2ec1",
+  "counts": {
+    "dimensions": 8,
+    "key_results": 268,
+    "meeting_participants": 2,
+    "meetings": 2,
+    "objective_owners": 110,
+    "objectives": 88,
+    "profiles": 6,
+    "progress_updates": 1227,
+    "team_member_dimensions": 13,
+    "team_members": 8,
+    "user_roles": 1
+  },
+  "unique_records": 1733,
+  "periods": {
+    "Q1 2026": 11,
+    "Q2 2026": 26,
+    "Q3 2026": 21,
+    "Q4 2026": 30
+  },
+  "history_date_range": [
+    "2026-01-05",
+    "2026-11-17"
+  ],
+  "sanitized": true,
+  "imported": false,
+  "capabilities": [
+    {
+      "capability": "source code",
+      "source": "ZIP com dados JSON/CSV e resumo, sem código",
+      "outcome": "not_required_for_data_import",
+      "status": "inspected",
+      "next_action": "Preservar Indicadores existente; nenhuma aplicação externa executada."
+    },
+    {
+      "capability": "schema",
+      "source": "11 tabelas de origem; destino possui ciclos, objetivos, métricas e check-ins",
+      "outcome": "migrate",
+      "status": "mapped",
+      "next_action": "Adicionar suporte a áreas, membros legados, corresponsáveis, reuniões e metadados históricos sem perder campos."
+    },
+    {
+      "capability": "records",
+      "source": "1733 registros únicos; JSON e CSV duplicam as mesmas entidades",
+      "outcome": "migrate",
+      "status": "validated_not_imported",
+      "next_action": "Importar apenas os JSON filtrados, uma vez, após resolver identidades; preservar todos os IDs, valores e datas."
+    },
+    {
+      "capability": "auth identities",
+      "source": "6 perfis e 8 membros; cinco logins correspondem a e-mails confirmados ativos do ERP",
+      "outcome": "map_to_existing_erp",
+      "status": "awaiting_user",
+      "next_action": "Bruno Dantas confirmado pelo usuário como Bruno ativo do ERP (17c59146-1061-464e-b127-7fcea676851d). André confirmado como andre@myio.com.br, sem conta ERP; preservar identidade histórica sem vincular a terceiros ou conceder acesso."
+    },
+    {
+      "capability": "authorization",
+      "source": "Admin de origem exportado; permissões ERP existentes",
+      "outcome": "preserve_existing_erp",
+      "status": "pending",
+      "next_action": "Não importar função Admin nem conceder acesso automaticamente; preservar papel antigo apenas como dado histórico."
+    },
+    {
+      "capability": "uploaded file bytes",
+      "source": "Resumo declara ausência de anexos; ZIP não contém mídia",
+      "outcome": "not_present_in_export",
+      "status": "inspected",
+      "next_action": "Nenhum arquivo a copiar; não inferir ausência de outras capacidades pela falta de código."
+    },
+    {
+      "capability": "areas and memberships",
+      "source": "8 áreas, 8 membros, 13 vínculos",
+      "outcome": "migrate",
+      "status": "validated_not_imported",
+      "next_action": "Preservar nomes, gestores, ordem e cores de origem sem sobrepor padrões CDE."
+    },
+    {
+      "capability": "shared responsibility",
+      "source": "110 vínculos; KRs também têm nomes livres de vários responsáveis",
+      "outcome": "migrate",
+      "status": "mapped",
+      "next_action": "Preservar todos os responsáveis, nomes e liderança explícita; não reduzir equipe a um responsável escolhido arbitrariamente."
+    },
+    {
+      "capability": "historical checkins",
+      "source": "1227 atualizações com valor, nota, recorded_at e created_at, sem autor ou confiança",
+      "outcome": "migrate",
+      "status": "mapped",
+      "next_action": "Preservar duas datas distintas; identificar autor e confiança como não informados, nunca atribuir ao importador ou responsável por inferência."
+    },
+    {
+      "capability": "zero target",
+      "source": "Um KR: Manter churn em 0% na carteira ativa, meta 0, valor -20",
+      "outcome": "preserve_values",
+      "status": "pending",
+      "next_action": "Não inventar valor inicial ou converter a meta para 100; adaptar apresentação histórica antes da importação."
+    },
+    {
+      "capability": "meetings",
+      "source": "2 reuniões e 2 participantes; IDs de participante referem-se aos membros do time",
+      "outcome": "migrate",
+      "status": "validated_not_imported",
+      "next_action": "Preservar descrição, duração, local, organizador, área, data e situação dos participantes."
+    },
+    {
+      "capability": "external providers",
+      "source": "Não incluídos na exportação de dados",
+      "outcome": "preserve_source",
+      "status": "not_inspectable_from_export",
+      "next_action": "Nenhuma integração alterada; escopo é histórico no Indicadores, não substituição do aplicativo original."
+    },
+    {
+      "capability": "public endpoints/callbacks/webhooks/schedules/secrets",
+      "source": "Não incluídos na exportação de dados",
+      "outcome": "preserve_source",
+      "status": "not_inspectable_from_export",
+      "next_action": "Não remover chamadores ou solicitar credenciais por conta dessa exportação."
+    },
+    {
+      "capability": "cutover",
+      "source": "OKR Tracker original e Indicadores no ERP",
+      "outcome": "keep_original_intact",
+      "status": "pending",
+      "next_action": "Não alterar origem nem publicar antes da conferência da importação."
+    },
+    {
+      "capability": "verification",
+      "source": "IDs únicos e relações OKR/KR/check-in e membros íntegros; destino vazio",
+      "outcome": "verify",
+      "status": "partial",
+      "next_action": "Após importar: conferir 88 objetivos, 268 KRs, 1227 históricos, quatro trimestres, reuniões, leitura por usuários e novo check-in; remover testes."
+    }
+  ]
+}

@@ -1,7 +1,8 @@
 # Roadmap
 - [x] Central: filtros múltiplos e ordenação compartilhados entre Todas as Pendências e gráfico expandido, incluindo App nos dois sentidos; Título + App combinados e preservados na lista, computador/celular conferidos; 34 testes passaram. Não publicado.
 - [x] Central: lista e gráficos com a mesma ordem decrescente por quantidade, conferidos com os sete usuários reais no computador e celular.
-- [ ] Indicadores: conferir dados e históricos do OKR Tracker para migração; aguarda JSON solicitado por Leonardo ao João Paulo.
+- [x] Indicadores: ZIP OKR Tracker conferido e filtrado: 88 objetivos, 268 KRs, 1227 atualizações, quatro trimestres e relações íntegras; Bruno confirmado como usuário Bruno ativo do ERP.
+- [ ] Indicadores: importar histórico, áreas, corresponsáveis e reuniões; André confirmado como andre@myio.com.br, sem conta ERP correspondente, preservar identidade sem atribuir acesso a terceiros.
 - [x] Central: resumo com os três usuários com mais pendências; gráfico clicável, tela cheia e detalhamento dos sete usuários reais conferidos em 1073px/390px. 32 testes passaram; não publicado.
 - [x] Mytosis: botões da barra de fluxogramas em ghost preto, sem fundo/borda; campos, slider e checkbox preservados. Computador/celular e abertura Box padrão conferidos, 11 testes passaram; não publicado.
 - [x] Indicadores: menu no padrão Supply, seleção destacada; computador/celular conferidos, não publicado.
