@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Gráfico da Central: nomes sem siglas e seta à direita de cada barra para detalhar/recolher as mesmas pendências da lista. Conta Leonardo conferida em 1073px/390px, normal/tela cheia, sem rolagem lateral; 29 testes passaram. Não publicado.
 - [x] Central: destaque em toda a largura da linha do usuário; 1049/1049 px e expansão conferidos na conta Leonardo, contagens preservadas.
 - [x] Finance: Home, cabeçalho, menus, CDE, Acessos e catálogo renomeados; chaves financeiras e preferências antigas preservadas, cabeçalho conferido.
 - [x] Indicadores separado do Mytosis e integrado à Home/CDE/Acessos/favoritos; Mytosis somente Fluxogramas/Processos. Banco não tinha OKRs/KPIs anteriores; registros de teste removidos.

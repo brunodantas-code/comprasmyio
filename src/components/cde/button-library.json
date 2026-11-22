@@ -2775,9 +2775,24 @@
     "group": ""
   },
   {
+    "id": "components/central/dashboard.tsx|33adedf1438e8f09|0",
+    "file": "components/central/dashboard.tsx",
+    "line": 22,
+    "tag": "Button",
+    "label": "Abrir pendência",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "ExternalLink",
+    "variant": "ghost",
+    "size": "compactIcon",
+    "className": "!text-foreground !bg-transparent !border-0",
+    "group": ""
+  },
+  {
     "id": "components/central/dashboard.tsx|05963756db27b385|0",
     "file": "components/central/dashboard.tsx",
-    "line": 25,
+    "line": 26,
     "tag": "Button",
     "label": "I",
     "dynamic": false,
@@ -2792,7 +2807,7 @@
   {
     "id": "components/central/dashboard.tsx|99af609e1187feb3|0",
     "file": "components/central/dashboard.tsx",
-    "line": 27,
+    "line": 28,
     "tag": "button",
     "label": "none / Sem prazo",
     "dynamic": true,
@@ -2807,7 +2822,7 @@
   {
     "id": "components/central/dashboard.tsx|7782c6a9cd678d1f|0",
     "file": "components/central/dashboard.tsx",
-    "line": 27,
+    "line": 28,
     "tag": "button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -2822,7 +2837,7 @@
   {
     "id": "components/central/dashboard.tsx|dd3d6fbc09fc2ce0|0",
     "file": "components/central/dashboard.tsx",
-    "line": 27,
+    "line": 28,
     "tag": "Button",
     "label": "unassigned / Sem responsável",
     "dynamic": true,
@@ -2832,21 +2847,6 @@
     "variant": "ghost",
     "size": "",
     "className": "!flex !h-auto !w-full !max-w-none !justify-start !bg-transparent items-center gap-3 px-2 py-3 text-left",
-    "group": ""
-  },
-  {
-    "id": "components/central/dashboard.tsx|33adedf1438e8f09|0",
-    "file": "components/central/dashboard.tsx",
-    "line": 27,
-    "tag": "Button",
-    "label": "Abrir pendência",
-    "dynamic": false,
-    "visualCustom": false,
-    "autoCdeSafe": true,
-    "icon": "ExternalLink",
-    "variant": "ghost",
-    "size": "compactIcon",
-    "className": "!text-foreground !bg-transparent !border-0",
     "group": ""
   },
   {
@@ -2895,18 +2895,33 @@
     "group": ""
   },
   {
-    "id": "components/central/user-bars.tsx|b5876f983330552e|0",
+    "id": "components/central/user-bars.tsx|9aee5576e1e9bed4|0",
     "file": "components/central/user-bars.tsx",
-    "line": 13,
-    "tag": "button",
+    "line": 22,
+    "tag": "Button",
     "label": "Expandir gráfico de pendências por usuário",
     "dynamic": false,
     "visualCustom": false,
     "autoCdeSafe": true,
     "icon": "XAxis",
-    "variant": "",
+    "variant": "ghost",
     "size": "",
-    "className": "flex h-24 w-64 items-end gap-2 rounded-md px-1 text-left hover:bg-muted",
+    "className": "!flex !h-40 !w-80 !max-w-full !bg-transparent items-end gap-2 px-1 text-left",
+    "group": ""
+  },
+  {
+    "id": "components/central/user-bars.tsx|8ecf29539b755979|0",
+    "file": "components/central/user-bars.tsx",
+    "line": 31,
+    "tag": "Button",
+    "label": "span",
+    "dynamic": true,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "span",
+    "variant": "ghost",
+    "size": "",
+    "className": "!grid !h-auto !w-full !max-w-none !bg-transparent !justify-start grid-cols-[minmax(0,1fr)_auto] items-center gap-2 px-0 py-1 text-left sm:grid-cols-[200px_minmax(0,1fr)_auto]",
     "group": ""
   },
   {
