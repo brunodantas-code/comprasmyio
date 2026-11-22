@@ -27,7 +27,7 @@
     "2026-11-17"
   ],
   "sanitized": true,
-  "imported": false,
+  "imported": true,
   "capabilities": [
     {
       "capability": "source code",
@@ -40,29 +40,29 @@
       "capability": "schema",
       "source": "11 tabelas de origem; destino possui ciclos, objetivos, métricas e check-ins",
       "outcome": "migrate",
-      "status": "mapped",
-      "next_action": "Adicionar suporte a áreas, membros legados, corresponsáveis, reuniões e metadados históricos sem perder campos."
+      "status": "imported_preview_verified",
+      "next_action": "Consulta histórica preserva todos os registros; corresponsáveis aparecem nos objetivos. Sem permissões herdadas da origem."
     },
     {
       "capability": "records",
       "source": "1733 registros únicos; JSON e CSV duplicam as mesmas entidades",
       "outcome": "migrate",
-      "status": "validated_not_imported",
-      "next_action": "Importar apenas os JSON filtrados, uma vez, após resolver identidades; preservar todos os IDs, valores e datas."
+      "status": "verified",
+      "next_action": "Dados originais e valores preservados; históricos sem autoria ou confiança inventadas."
     },
     {
       "capability": "auth identities",
       "source": "6 perfis e 8 membros; cinco logins correspondem a e-mails confirmados ativos do ERP",
       "outcome": "map_to_existing_erp",
-      "status": "awaiting_user",
-      "next_action": "Bruno Dantas confirmado pelo usuário como Bruno ativo do ERP (17c59146-1061-464e-b127-7fcea676851d). André confirmado como andre@myio.com.br, sem conta ERP; preservar identidade histórica sem vincular a terceiros ou conceder acesso."
+      "status": "partial_waiting_for_andre",
+      "next_action": "Bruno e correspondências confirmadas vinculados. André aguarda criação e confirmação da conta andre@myio.com.br e aviso do usuário; nenhum acesso concedido automaticamente."
     },
     {
       "capability": "authorization",
       "source": "Admin de origem exportado; permissões ERP existentes",
       "outcome": "preserve_existing_erp",
-      "status": "pending",
-      "next_action": "Não importar função Admin nem conceder acesso automaticamente; preservar papel antigo apenas como dado histórico."
+      "status": "preserved",
+      "next_action": "Nenhum papel exportado foi concedido; importador revogado para authenticated e anon após carga."
     },
     {
       "capability": "uploaded file bytes",
@@ -75,36 +75,36 @@
       "capability": "areas and memberships",
       "source": "8 áreas, 8 membros, 13 vínculos",
       "outcome": "migrate",
-      "status": "validated_not_imported",
-      "next_action": "Preservar nomes, gestores, ordem e cores de origem sem sobrepor padrões CDE."
+      "status": "imported_preview_verified",
+      "next_action": "Consulta histórica preserva todos os registros; corresponsáveis aparecem nos objetivos. Sem permissões herdadas da origem."
     },
     {
       "capability": "shared responsibility",
       "source": "110 vínculos; KRs também têm nomes livres de vários responsáveis",
       "outcome": "migrate",
-      "status": "mapped",
-      "next_action": "Preservar todos os responsáveis, nomes e liderança explícita; não reduzir equipe a um responsável escolhido arbitrariamente."
+      "status": "imported_preview_verified",
+      "next_action": "Consulta histórica preserva todos os registros; corresponsáveis aparecem nos objetivos. Sem permissões herdadas da origem."
     },
     {
       "capability": "historical checkins",
       "source": "1227 atualizações com valor, nota, recorded_at e created_at, sem autor ou confiança",
       "outcome": "migrate",
-      "status": "mapped",
-      "next_action": "Preservar duas datas distintas; identificar autor e confiança como não informados, nunca atribuir ao importador ou responsável por inferência."
+      "status": "verified",
+      "next_action": "Dados originais e valores preservados; históricos sem autoria ou confiança inventadas."
     },
     {
       "capability": "zero target",
       "source": "Um KR: Manter churn em 0% na carteira ativa, meta 0, valor -20",
       "outcome": "preserve_values",
-      "status": "pending",
-      "next_action": "Não inventar valor inicial ou converter a meta para 100; adaptar apresentação histórica antes da importação."
+      "status": "verified",
+      "next_action": "Dados originais e valores preservados; históricos sem autoria ou confiança inventadas."
     },
     {
       "capability": "meetings",
       "source": "2 reuniões e 2 participantes; IDs de participante referem-se aos membros do time",
       "outcome": "migrate",
-      "status": "validated_not_imported",
-      "next_action": "Preservar descrição, duração, local, organizador, área, data e situação dos participantes."
+      "status": "imported_preview_verified",
+      "next_action": "Consulta histórica preserva todos os registros; corresponsáveis aparecem nos objetivos. Sem permissões herdadas da origem."
     },
     {
       "capability": "external providers",
@@ -124,15 +124,34 @@
       "capability": "cutover",
       "source": "OKR Tracker original e Indicadores no ERP",
       "outcome": "keep_original_intact",
-      "status": "pending",
-      "next_action": "Não alterar origem nem publicar antes da conferência da importação."
+      "status": "source_unchanged_preview_ready",
+      "next_action": "Origem intacta; publicar as telas atualizadas quando o usuário desejar."
     },
     {
       "capability": "verification",
       "source": "IDs únicos e relações OKR/KR/check-in e membros íntegros; destino vazio",
       "outcome": "verify",
       "status": "partial",
-      "next_action": "Após importar: conferir 88 objetivos, 268 KRs, 1227 históricos, quatro trimestres, reuniões, leitura por usuários e novo check-in; remover testes."
+      "next_action": "Carga, relações, conteúdo histórico, telas e novo check-in conferidos. Vínculo André e leitura individual em todas as contas aguardam verificação."
     }
-  ]
+  ],
+  "verification": {
+    "objectives": 88,
+    "metrics": 268,
+    "checkins": 1227,
+    "cycles": 4,
+    "all_history_values_notes_dates_verified": true,
+    "all_metric_titles_targets_values_relations_verified": true,
+    "new_checkin_saved_reloaded_displayed": true,
+    "temporary_records_removed": true,
+    "desktop_mobile_verified": true,
+    "tests_passed": 10,
+    "published": false,
+    "unverified": [
+      "Vínculo e entrada da futura conta André",
+      "Leitura autenticada individual de todos os usuários",
+      "Fórmula de progresso do app original não incluída no ZIP; destino usa sua fórmula existente",
+      "Áreas/equipe/reuniões preservadas como consulta histórica, sem edição operacional nova"
+    ]
+  }
 }

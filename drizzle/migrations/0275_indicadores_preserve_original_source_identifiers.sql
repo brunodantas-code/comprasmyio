@@ -1,0 +1,4 @@
+ALTER TABLE public.indicadores_import_records ADD COLUMN original_source_id text;
+CREATE OR REPLACE FUNCTION public.indicadores_source_uuid(v text) RETURNS uuid LANGUAGE sql IMMUTABLE SET search_path=public AS $$ SELECT CASE WHEN v ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' THEN v::uuid ELSE md5('okr-source/'||v)::uuid END $$;
+REVOKE ALL ON FUNCTION public.indicadores_source_uuid(text) FROM PUBLIC,anon,authenticated; GRANT EXECUTE ON FUNCTION public.indicadores_source_uuid(text) TO service_role;
+DO $$ DECLARE body text; BEGIN SELECT pg_get_functiondef('public.indicadores_import_okr(jsonb)'::regprocedure) INTO body; body:=replace(body,'INSERT INTO public.indicadores_import_records VALUES(tbl,(r->>''id'')::uuid,r)','INSERT INTO public.indicadores_import_records(source_table,source_id,data,original_source_id) VALUES(tbl,public.indicadores_source_uuid(r->>''id''),r,r->>''id'')'); EXECUTE body; END $$;

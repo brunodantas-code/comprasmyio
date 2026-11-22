@@ -1,3 +1,5 @@
 - Indicadores uses independent role grants and RLS-scoped objectives/metrics; confidential access is inherited from every ancestor, never inferred from client state.
 - Check-ins use an authenticated row-locked RPC with append-only history; updates belong to the responsible user or app admin.
 - Cards, markers, fields, filters and actions use the live shared CDE components; progress and periods share pure tested helpers.
+- Imported OKR records retain original IDs and payloads separately from ERP identities; unknown authors and confidence remain unknown, and historical imports never grant app roles.
+- Read check-in history in stable paginated batches so the API row limit cannot truncate a user's history; imported areas, memberships and meetings remain a read-only historical view.

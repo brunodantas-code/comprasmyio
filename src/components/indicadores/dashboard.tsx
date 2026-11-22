@@ -52,8 +52,10 @@ import {
 } from "@/lib/indicadores";
 import { indicadoresOptions, type Metric, type Objective } from "./data";
 import { Choice, IndicadorEditor, type EditSelection } from "./editors";
+import { ImportedSummary } from "./imported-summary";
+import { importedField, historicalAuthor } from "@/lib/indicadores-import";
 const screen = "components/indicadores/dashboard.tsx";
-const confidenceName = (s: string) => CONFIDENCES.find((c) => c.value === s)?.label ?? s;
+const confidenceName = (s: string | null) => CONFIDENCES.find((c) => c.value === s)?.label ?? (s || "Não informada na origem");
 function Advance({ value }: { value: number }) {
   return (
     <div className="space-y-1">
@@ -96,7 +98,7 @@ export function IndicadoresDashboard() {
         (!(mine || tab === "checkins") || m.responsible_id === data.userId),
     ),
     [
-      { key: "responsible", label: "Responsável", value: (m) => userName(m.responsible_id) },
+      { key: "responsible", label: "Responsável", value: (m) => importedField(m.source_metadata, "responsible_name") || userName(m.responsible_id) },
       { key: "type", label: "Tipo", value: (m) => (m.kind === "kpi" ? "KPI" : "KR") },
       { key: "confidence", label: "Criticidade", value: (m) => confidenceName(m.confidence) },
       { key: "title", label: "Nome", value: (m) => m.title },
@@ -212,11 +214,11 @@ export function IndicadoresDashboard() {
                   mutation.mutate({ type: "metric", id: m.id });
               })}
           </div>
-          <CardDescription>{userName(m.responsible_id)}</CardDescription>
+          <CardDescription>{importedField(m.source_metadata, "responsible_name") || userName(m.responsible_id)}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <Badge>{confidenceName(m.confidence)}</Badge>
+            <Badge>{confidenceName(m.source_metadata && !latest(m.id)?.recorded_by ? null : m.confidence)}</Badge>
             <span className="text-sm">{m.kind === "kpi" ? "KPI" : "Key Result"}</span>
           </div>
           <div className="flex flex-wrap justify-between gap-2 text-sm">
@@ -283,7 +285,7 @@ export function IndicadoresDashboard() {
                 })}
             </div>
             <CardDescription>
-              {userName(o.responsible_id)} ·{" "}
+              {data.imported.filter(r => r.source_table === "objective_owners" && importedField(r.data,"objective_id") === o.id).map(r => importedField(data.imported.find(m => m.source_table === "team_members" && importedField(m.data,"id") === importedField(r.data,"team_member_id"))?.data,"full_name")).filter(Boolean).join(", ") || importedField(o.source_metadata,"responsible_name") || userName(o.responsible_id)} ·{" "}
               {o.alignment_name ??
                 {
                   empresa: "Empresa",
@@ -411,6 +413,7 @@ export function IndicadoresDashboard() {
             )}
           </div>
         </div>
+        <ImportedSummary records={data.imported} />
         {tab !== "cycles" && (
           <>
             <div className="flex flex-wrap items-end gap-3">
@@ -672,11 +675,12 @@ export function IndicadoresDashboard() {
             .map((c) => (
               <div key={c.id} className="space-y-1 py-2">
                 <p className="text-sm">
-                  {new Date(c.recorded_at).toLocaleString("pt-BR")} · {userName(c.recorded_by)}
+                  {new Date(c.recorded_at).toLocaleDateString("pt-BR", { timeZone: "UTC" })} · {historicalAuthor(c.recorded_by, id => userName(id))}
                 </p>
                 <p>
                   {history ? metricValue(c.value, history.measure, history.unit) : c.value} ·{" "}
                   {confidenceName(c.confidence)}
+                  {importedField(c.source_metadata, "created_at") && <span className="block text-xs text-muted-foreground">Registro original: {new Date(importedField(c.source_metadata,"created_at")).toLocaleString("pt-BR")}</span>}
                 </p>
                 <p className="whitespace-pre-wrap text-sm text-muted-foreground">{c.comment}</p>
               </div>

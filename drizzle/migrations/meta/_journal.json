@@ -1912,6 +1912,41 @@
       "when": 1795354707224,
       "tag": "0272_indicadores_returning_visibility",
       "breakpoints": true
+    },
+    {
+      "idx": 273,
+      "version": "7",
+      "when": 1795377384682,
+      "tag": "0273_indicadores_okr_import_preserve_history",
+      "breakpoints": true
+    },
+    {
+      "idx": 274,
+      "version": "7",
+      "when": 1795377424498,
+      "tag": "0274_indicadores_guard_unlinked_historical_checkins",
+      "breakpoints": true
+    },
+    {
+      "idx": 275,
+      "version": "7",
+      "when": 1795377483723,
+      "tag": "0275_indicadores_preserve_original_source_identifiers",
+      "breakpoints": true
+    },
+    {
+      "idx": 276,
+      "version": "7",
+      "when": 1795377589078,
+      "tag": "0276_indicadores_historical_metric_validation",
+      "breakpoints": true
+    },
+    {
+      "idx": 277,
+      "version": "7",
+      "when": 1795377702563,
+      "tag": "0277_indicadores_close_history_import_access",
+      "breakpoints": true
     }
   ]
 }

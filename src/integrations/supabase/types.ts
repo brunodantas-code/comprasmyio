@@ -4865,29 +4865,32 @@ export type Database = {
       indicadores_checkins: {
         Row: {
           comment: string
-          confidence: string
+          confidence: string | null
           id: string
           metric_id: string
           recorded_at: string
-          recorded_by: string
+          recorded_by: string | null
+          source_metadata: Json | null
           value: number
         }
         Insert: {
           comment?: string
-          confidence: string
+          confidence?: string | null
           id?: string
           metric_id: string
           recorded_at?: string
-          recorded_by?: string
+          recorded_by?: string | null
+          source_metadata?: Json | null
           value: number
         }
         Update: {
           comment?: string
-          confidence?: string
+          confidence?: string | null
           id?: string
           metric_id?: string
           recorded_at?: string
-          recorded_by?: string
+          recorded_by?: string | null
+          source_metadata?: Json | null
           value?: number
         }
         Relationships: [
@@ -4942,6 +4945,27 @@ export type Database = {
           },
         ]
       }
+      indicadores_import_records: {
+        Row: {
+          data: Json
+          original_source_id: string | null
+          source_id: string
+          source_table: string
+        }
+        Insert: {
+          data: Json
+          original_source_id?: string | null
+          source_id: string
+          source_table: string
+        }
+        Update: {
+          data?: Json
+          original_source_id?: string | null
+          source_id?: string
+          source_table?: string
+        }
+        Relationships: []
+      }
       indicadores_members: {
         Row: {
           role: string
@@ -4978,7 +5002,8 @@ export type Database = {
           legacy_kpi_id: string | null
           measure: string
           objective_id: string | null
-          responsible_id: string
+          responsible_id: string | null
+          source_metadata: Json | null
           target_value: number
           title: string
           unit: string
@@ -4995,7 +5020,8 @@ export type Database = {
           legacy_kpi_id?: string | null
           measure?: string
           objective_id?: string | null
-          responsible_id: string
+          responsible_id?: string | null
+          source_metadata?: Json | null
           target_value?: number
           title: string
           unit?: string
@@ -5012,7 +5038,8 @@ export type Database = {
           legacy_kpi_id?: string | null
           measure?: string
           objective_id?: string | null
-          responsible_id?: string
+          responsible_id?: string | null
+          source_metadata?: Json | null
           target_value?: number
           title?: string
           unit?: string
@@ -5062,6 +5089,7 @@ export type Database = {
           parent_id: string | null
           responsible_id: string | null
           scope: string
+          source_metadata: Json | null
           title: string
         }
         Insert: {
@@ -5077,6 +5105,7 @@ export type Database = {
           parent_id?: string | null
           responsible_id?: string | null
           scope?: string
+          source_metadata?: Json | null
           title: string
         }
         Update: {
@@ -5092,6 +5121,7 @@ export type Database = {
           parent_id?: string | null
           responsible_id?: string | null
           scope?: string
+          source_metadata?: Json | null
           title?: string
         }
         Relationships: [
@@ -13086,9 +13116,11 @@ export type Database = {
         Args: { _cycle_id: string; _metric_id: string; _title: string }
         Returns: string
       }
+      indicadores_import_okr: { Args: { _payload: Json }; Returns: Json }
       indicadores_metric_visible: { Args: { _id: string }; Returns: boolean }
       indicadores_objective_visible: { Args: { _id: string }; Returns: boolean }
       indicadores_role: { Args: { _user_id: string }; Returns: string }
+      indicadores_source_uuid: { Args: { v: string }; Returns: string }
       indicadores_users: {
         Args: never
         Returns: {
