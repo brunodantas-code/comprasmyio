@@ -1,4 +1,8 @@
 # Roadmap
+- [x] Esclarecido: Nome do Contrato, não Contato, é a identificação contratual da loja no shopping; nenhuma regra de cadastro alterada.
+- [x] Site Survey: Aa à esquerda de Recolher Tudo, alternância conferida no computador/celular; conversão visual dos nomes e contrato preserva originais.
+- [x] Spend: De-Para no menu; cadastro/recarga/exclusão confirmada e conta automática lida na linha temporária; celular sem overflow, aprovação segue bloqueada sem requisitos. Dados temporários removidos, 19 testes passaram.
+- [x] Spend: registro mobile circular de 2 cm centralizado; desktop com total, cartão, mês e registro ghost alinhados à esquerda. Abertura da captura e dez testes conferidos.
 - [x] Spend: checkbox seleciona filtrados editáveis; classificação conjunta confirmada, cancelamento e salvar/reabrir conferidos em dois IOFs temporários. Não se aplica persistido/auditado libera aprovação sem anexo, um único registro no Finance; terceiro movimento intacto. Dados temporários removidos; 19 testes passaram.
 - [x] Spend: categorias adicionáveis/excluíveis no CDE; categoria nova salva/reaberta e disponível na captura, exclusão confirmada e registros preservados; 15 testes passaram.
 - [x] Informado: item 10 — Bordas de classificação dos cards, selecionar Indicadores.

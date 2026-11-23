@@ -1996,6 +1996,13 @@
       "when": 1795400262903,
       "tag": "0284_spend_bulk_classification_receipt_waiver",
       "breakpoints": true
+    },
+    {
+      "idx": 285,
+      "version": "7",
+      "when": 1795431473713,
+      "tag": "0285_spend_supplier_account_allocation",
+      "breakpoints": true
     }
   ]
 }

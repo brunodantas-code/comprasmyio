@@ -9,13 +9,16 @@ export type Receipt = Row<"spend_receipts">;
 export type Statement = Row<"spend_statements">;
 export type Line = Row<"spend_lines">;
 export type Lookup = { id: string; name: string };
-export type SpendData = { role: string; user_id: string; cards: SpendCard[]; receipts: Receipt[]; statements: Statement[]; lines: Line[]; notices: Row<"spend_notices">[]; logs: Row<"spend_logs">[]; users: Lookup[]; projects: Lookup[]; accounts: Lookup[]; centers: Lookup[]; settings: Record<string, CategorySetting> };
+export type SupplierAllocation = Row<"spend_supplier_allocations">;
+export type SpendData = { role: string; user_id: string; cards: SpendCard[]; receipts: Receipt[]; statements: Statement[]; lines: Line[]; notices: Row<"spend_notices">[]; logs: Row<"spend_logs">[]; users: Lookup[]; projects: Lookup[]; accounts: Lookup[]; centers: Lookup[]; settings: Record<string, CategorySetting>; allocations: SupplierAllocation[] };
 const lookup = z.object({ id: z.string(), name: z.string() });
 const workspaceSchema = z.object({ role: z.string(), user_id: z.string(), cards: z.array(z.object({ id: z.string() }).passthrough()), receipts: z.array(z.object({ id: z.string() }).passthrough()), statements: z.array(z.object({ id: z.string() }).passthrough()), lines: z.array(z.object({ id: z.string() }).passthrough()), notices: z.array(z.object({ id: z.string() }).passthrough()), logs: z.array(z.object({ id: z.string() }).passthrough()), users: z.array(lookup), projects: z.array(lookup), accounts: z.array(lookup), centers: z.array(lookup), settings: z.record(z.unknown()) });
 export const spendOptions = queryOptions({ queryKey: ["spend"], queryFn: async (): Promise<SpendData> => {
   const r = await supabase.rpc("spend_workspace"); if (r.error) throw r.error;
-  workspaceSchema.parse(r.data);
-  return r.data as unknown as SpendData;
+  const parsed = workspaceSchema.parse(r.data);
+  const allocations = parsed.role === 'finance' ? await supabase.from('spend_supplier_allocations').select('*').order('supplier') : { data: [], error: null };
+  if (allocations.error) throw allocations.error;
+  return { ...(r.data as unknown as SpendData), allocations: allocations.data ?? [] };
 } });
 export async function spendAction(action: string, data: Json) {
   const r = await supabase.rpc("spend_action", { _action: action, _data: data });

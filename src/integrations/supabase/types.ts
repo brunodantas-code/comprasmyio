@@ -11728,6 +11728,35 @@ export type Database = {
           },
         ]
       }
+      spend_supplier_allocations: {
+        Row: {
+          account_id: string
+          created_at: string
+          id: string
+          supplier: string
+        }
+        Insert: {
+          account_id: string
+          created_at?: string
+          id?: string
+          supplier: string
+        }
+        Update: {
+          account_id?: string
+          created_at?: string
+          id?: string
+          supplier?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spend_supplier_allocations_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "cash_flow_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stock_destinations: {
         Row: {
           active: boolean
@@ -13764,11 +13793,13 @@ export type Database = {
         Returns: undefined
       }
       spend_action: { Args: { _action: string; _data: Json }; Returns: Json }
+      spend_apply_supplier_allocations: { Args: never; Returns: number }
       spend_card_access: { Args: { _card: string }; Returns: boolean }
       spend_project_allowed: { Args: { _project: string }; Returns: boolean }
       spend_role: { Args: never; Returns: string }
       spend_save_classification: { Args: { _data: Json }; Returns: Json }
       spend_storage_access: { Args: { _name: string }; Returns: boolean }
+      spend_supplier_key: { Args: { _name: string }; Returns: string }
       spend_workspace: { Args: never; Returns: Json }
       split_mytosis_node: {
         Args: { _count: number; _node_id: string }
