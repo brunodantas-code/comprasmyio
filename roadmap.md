@@ -1,3 +1,4 @@
+- [x] Editar ambiente: X inferior removido; disquete ghost no cabeçalho, vinculado ao formulário e alinhado a expandir/fechar. Desktop/mobile conferidos, sem texto nem Cancelar; nenhum dado salvo durante o teste.
 - [x] Cabeçalho do Cadastro com fundo cinza-claro `bg-muted/50`, como Tickets; cor computada e captura conferidas.
 - [x] Site Survey: botões de pendência em faixa única à direita, com rolagem horizontal quando excedem a largura; três botões reais na mesma coordenada vertical.
 - [x] Site Survey: câmera antes de “Fotos e anexos deste ambiente”; centros do ícone e texto conferidos em y=1105 px, sem erros de execução.
