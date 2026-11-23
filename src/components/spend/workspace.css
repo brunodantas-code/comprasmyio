@@ -68,8 +68,8 @@
   .spend-expense-toolbar > div:not(.spend-mobile-register-slot) {
     flex: 0 1 15rem;
   }
-  .spend-expense-toolbar > .spend-card-summary {
-    flex: 0 1 auto;
+  .spend-expense-toolbar > div.spend-card-summary {
+    flex: 0 0 auto;
   }
   .spend-mobile-register-slot { display: none; }
 }
