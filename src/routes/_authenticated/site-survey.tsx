@@ -1254,8 +1254,8 @@ function VisitDetails({ pointSearch = "", visit, data, onClose, onChanged, close
     const [kind, id = ""] = pointValue.split(":");
     const scope = kind === "luc" ? { visit_luc_id: id, visit_environment_id: null } : { visit_luc_id: null, visit_environment_id: id };
     const { error } = target.response
-      ? await supabase.from("site_survey_responses").update({ answer, answered_by: data.userId }).eq("id", target.response.id)
-      : await supabase.from("site_survey_responses").insert({ visit_id: visit.id, ...scope, question_id: question.id, answered_by: data.userId, answer, question_snapshot: JSON.parse(JSON.stringify({ prompt: question.prompt, options: question.options, configuration: question.configuration })) } as never);
+      ? await supabase.from("site_survey_responses").update({ answer, answered_by: data.userId }).eq("id", target.response.id).select("id").single()
+      : await supabase.from("site_survey_responses").insert({ visit_id: visit.id, ...scope, question_id: question.id, answered_by: data.userId, answer, question_snapshot: JSON.parse(JSON.stringify({ prompt: question.prompt, options: question.options, configuration: question.configuration })) } as never).select("id").single();
     if (error) return toast.error(error.message);
     toast.success("Pergunta adicionada");
     setCustomerDraft(null);
@@ -1277,7 +1277,7 @@ function VisitDetails({ pointSearch = "", visit, data, onClose, onChanged, close
     const nextResponses = Object.fromEntries(Object.entries(responses).map(([question, response]) => [question === previous ? clean : question, response]));
     const base = existing && typeof existing === "object" && !Array.isArray(existing) ? existing : { value: rows.join("\n") };
     const answer = { ...base, value: nextRows.join("\n"), customer_questions: nextRows, customer_questions_answered: nextAnswered, customer_question_responses: nextResponses };
-    const { error } = await supabase.from("site_survey_responses").update({ answer, answered_by: data.userId }).eq("id", target.response.id);
+    const { error } = await supabase.from("site_survey_responses").update({ answer, answered_by: data.userId }).eq("id", target.response.id).select("id").single();
     if (error) return toast.error(error.message);
     toast.success("Pergunta atualizada");
     setCustomerDraft(null);
@@ -1296,7 +1296,7 @@ function VisitDetails({ pointSearch = "", visit, data, onClose, onChanged, close
     const nextResponses = Object.fromEntries(Object.entries(responses).filter(([question]) => question !== text));
     const base = existing && typeof existing === "object" && !Array.isArray(existing) ? existing : { value: rows.join("\n") };
     const answer = { ...base, value: nextRows.join("\n"), customer_questions: nextRows, customer_questions_answered: nextAnswered, customer_question_responses: nextResponses };
-    const { error } = await supabase.from("site_survey_responses").update({ answer, answered_by: data.userId }).eq("id", target.response.id);
+    const { error } = await supabase.from("site_survey_responses").update({ answer, answered_by: data.userId }).eq("id", target.response.id).select("id").single();
     if (error) return toast.error(error.message);
     toast.success("Pergunta excluída");
     await refetchDetail();
@@ -1314,7 +1314,7 @@ function VisitDetails({ pointSearch = "", visit, data, onClose, onChanged, close
     const rows = customerQuestions(existing);
     const base = existing && typeof existing === "object" && !Array.isArray(existing) ? existing : { value: rows.join("\n") };
     const answer = { ...base, value: rows.join("\n"), customer_questions: rows, customer_question_responses: nextResponses };
-    const { error } = await supabase.from("site_survey_responses").update({ answer, answered_by: data.userId }).eq("id", target.response.id);
+    const { error } = await supabase.from("site_survey_responses").update({ answer, answered_by: data.userId }).eq("id", target.response.id).select("id").single();
     if (error) return toast.error(error.message);
     toast.success("Resposta do cliente salva");
     await refetchDetail();
@@ -1328,7 +1328,7 @@ function VisitDetails({ pointSearch = "", visit, data, onClose, onChanged, close
     if (answered.includes(text)) return;
     const base = existing && typeof existing === "object" && !Array.isArray(existing) ? existing : { value: rows.join("\n") };
     const answer = { ...base, value: rows.join("\n"), customer_questions: rows, customer_questions_answered: [...answered, text] };
-    const { error } = await supabase.from("site_survey_responses").update({ answer, answered_by: data.userId }).eq("id", target.response.id);
+    const { error } = await supabase.from("site_survey_responses").update({ answer, answered_by: data.userId }).eq("id", target.response.id).select("id").single();
     if (error) return toast.error(error.message);
     toast.success("Pergunta marcada como respondida");
     await refetchDetail();

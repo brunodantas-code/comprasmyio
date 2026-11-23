@@ -1,3 +1,4 @@
+- [x] Revisados execução/autosave, Histórico, cards, confirmação manual, importação, troca de checklist, relatórios e funções/acionadores ativos: gravações diretas verificam retorno, exclusão preserva resposta da linha correta e autosave mantém confirmações; 38 testes e fluxo real conferidos, sem alterar registros concluídos ou permissões.
 - [x] Títulos dos pontos no relatório em preto; prévia conferida.
 - [x] Orientado Realizar Visita → Concluir visita → Concluir com pendências; data anterior só nas visitas manuais atualmente, sem alterar datas reais.
 - [x] Lista lê localização elétrica do checklist para lojas/quiosques; Busway conferido em 235 pontos, cadastro físico preservado.

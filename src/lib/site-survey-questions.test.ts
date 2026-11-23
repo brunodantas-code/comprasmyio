@@ -18,6 +18,17 @@ test("Edição individual salva a pergunta histórica mesmo fora das seções vi
   assert.deepEqual(focusedSurveySaveQuestions([{ id: "historica" }, { id: "outra" }], [{ id: "outra" }], "historica"), [{ id: "historica" }]);
   assert.deepEqual(focusedSurveySaveQuestions([{ id: "historica" }], [], "inexistente"), []);
 });
+test("Autosave repetido não reabre pergunta já confirmada", () => {
+  const first = editedCustomerAnswer({ customer_questions_answered: ["Original"] }, ["Editada"], ["Sim"], ["Original"]);
+  const second = editedCustomerAnswer(first, ["Editada"], ["Sim"], ["Original"]);
+  assert.deepEqual(second.customer_questions_answered, ["Editada"]);
+  assert.deepEqual(pendingCustomerQuestions(second), []);
+});
+test("Pergunta vazia não desloca a resposta da pergunta seguinte", () => {
+  const answer = editedCustomerAnswer({}, ["", "Pergunta mantida"], ["Texto descartado", "Resposta mantida"], ["", "Pergunta mantida"]);
+  assert.deepEqual(answer.customer_question_responses, { "Pergunta mantida": "Resposta mantida" });
+  assert.deepEqual(pendingCustomerQuestions(answer), ["Pergunta mantida"]);
+});
 
 test("Concluída na busca mostra somente lojas concluídas", () => {
   assert.equal(matchesSurveyPointSearch({ label: "LUC 12 — Loja", completionStatus: "concluida" }, "Concluída"), true);

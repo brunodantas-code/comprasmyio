@@ -1,6 +1,5 @@
 import { CdeButton } from "@/components/cde/cde-button";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
@@ -16,10 +15,12 @@ export function SiteSurveyCustomerQuestions({ questionId, answer, onChange }: { 
     const existing = customerQuestions(answer);
     return existing.length ? existing : [""];
   });
+  const [responses, setResponses] = useState(() => rows.map((row) => initialResponses[row] ?? ""));
   const removeRow = (index: number) => {
     const next = rows.filter((_, position) => position !== index);
     setRows(next);
     setOriginals((current) => current.filter((_, position) => position !== index));
+    setResponses((current) => current.filter((_, position) => position !== index));
     onChange?.(next.map((value) => value.trim()).filter(Boolean).join("\n"));
   };
   return <div className="w-full min-w-0 space-y-3">
@@ -43,9 +44,9 @@ export function SiteSurveyCustomerQuestions({ questionId, answer, onChange }: { 
       </div>
       <div className="space-y-1">
         <Label htmlFor={`${questionId}-customer-response-${index}`}>Resposta do cliente</Label>
-        <Textarea id={`${questionId}-customer-response-${index}`} name={`${questionId}__customer_response`} defaultValue={initialResponses[row] ?? ""} rows={2} className="bg-action/30 focus-visible:bg-action/40" />
+        <Textarea id={`${questionId}-customer-response-${index}`} name={`${questionId}__customer_response`} value={responses[index] ?? ""} onChange={(event) => { const value = event.target.value; setResponses((current) => current.map((response, position) => position === index ? value : response)); }} rows={2} className="bg-action/30 focus-visible:bg-action/40" />
       </div>
     </div>)}
-    <CdeButton group="plus" screen="components/site-survey-customer-questions.tsx" type="button" aria-label="Adicionar pergunta para o cliente" title="Adicionar pergunta para o cliente" onClick={() => { setRows((current) => [...current, ""]); setOriginals((current) => [...current, ""]); }}></CdeButton>
+    <CdeButton group="plus" screen="components/site-survey-customer-questions.tsx" type="button" aria-label="Adicionar pergunta para o cliente" title="Adicionar pergunta para o cliente" onClick={() => { setRows((current) => [...current, ""]); setOriginals((current) => [...current, ""]); setResponses((current) => [...current, ""]); }}></CdeButton>
   </div>;
 }

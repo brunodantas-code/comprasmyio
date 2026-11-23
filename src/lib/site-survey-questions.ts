@@ -114,7 +114,7 @@ export function editedCustomerAnswer(previous: unknown, texts: string[], respons
   return {
     value: rows.map((row) => row.text).join("\n"),
     customer_questions: rows.map((row) => row.text),
-    customer_questions_answered: rows.filter((row) => answered.has(row.original)).map((row) => row.text),
+    customer_questions_answered: rows.filter((row) => answered.has(row.original) || answered.has(row.text)).map((row) => row.text),
     customer_question_responses: Object.fromEntries(rows.filter((row) => row.response).map((row) => [row.text, row.response])),
   };
 }
