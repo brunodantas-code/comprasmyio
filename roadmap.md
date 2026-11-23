@@ -1,3 +1,6 @@
+- [x] Cabeçalho do Cadastro com fundo cinza-claro `bg-muted/50`, como Tickets; cor computada e captura conferidas.
+- [x] Site Survey: botões de pendência em faixa única à direita, com rolagem horizontal quando excedem a largura; três botões reais na mesma coordenada vertical.
+- [x] Site Survey: câmera antes de “Fotos e anexos deste ambiente”; centros do ícone e texto conferidos em y=1105 px, sem erros de execução.
 - [x] Mensagens múltiplas: avisos expandidos abaixo do anterior; dois avisos reais do componente conferidos com 14 px de intervalo e sem sobreposição.
 - [x] Relatório Vila Velha: Cliente/Interno com guardas compartilhadas na prévia/PDF; cliente sem planejamento/tempos/chamados internos, Aa por visita preserva LUC e nomes manuais, Subi normalizado/agregado apenas na apresentação, atalhos de equipamento/observações explícitos. PDFs reais amostrais Garage/Cobasi (2/3 páginas) conferidos sem cortes; 22 testes passaram; dados originais preservados, não publicado.
 - [x] Revisados execução/autosave, Histórico, cards, confirmação manual, importação, troca de checklist, relatórios e funções/acionadores ativos: gravações diretas verificam retorno, exclusão preserva resposta da linha correta e autosave mantém confirmações; 38 testes e fluxo real conferidos, sem alterar registros concluídos ou permissões.
