@@ -2,6 +2,7 @@
 - Receipt edits reuse capture and the owner-guarded locked RPC; approved records remain immutable and previous file paths stay audited.
 - Receipt cleanup is deterministic browser image processing, never generative reconstruction, to preserve fiscal text.
 - Receipt location is reviewable and nullable; derive UF only from a validated NF-e/NFC-e key and city only from printed merchant address, preserving approved records.
+- City suggestions query the public IBGE municipalities endpoint scoped and cached by UF; never include other-state suggestions or overwrite OCR/manual values when changing UF, and preserve manual entry on provider failure.
 - Capture confirmation labels explicitly target unique checkbox IDs with mobile-sized label touch areas; all data edits invalidate confirmation before saving.
 - Aa choices persist through the shared presentation hook without changing stored bank descriptions.
 - Capture uses a scoped mobile touch-target stylesheet and a separate desktop shared ghost Button so field ergonomics do not alter other CDE actions.
