@@ -1,7 +1,23 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { customerHistorySectionIds, pendingCustomerQuestions, customerQuestionResponses, registrationCustomerQuestion, showsCustomerQuestions, withRegisteredTechnicians, matchesSurveyPointSearch } from "./site-survey-questions";
+import { editedCustomerAnswer, focusedSurveySaveQuestions, customerHistorySectionIds, pendingCustomerQuestions, customerQuestionResponses, registrationCustomerQuestion, showsCustomerQuestions, withRegisteredTechnicians, matchesSurveyPointSearch } from "./site-survey-questions";
+
+test("Edição da pergunta mantém texto editado e pendência sem resposta", () => {
+  const answer = editedCustomerAnswer({ customer_questions: ["Não estava na lista. Mantemos?"] }, ["Não estava na lista original. Favor confirmar se mantemos na implantação."], [""], ["Não estava na lista. Mantemos?"]);
+  assert.deepEqual(pendingCustomerQuestions(answer), ["Não estava na lista original. Favor confirmar se mantemos na implantação."]);
+  assert.equal(answer.value, "Não estava na lista original. Favor confirmar se mantemos na implantação.");
+});
+test("Texto respondido preserva confirmação manual e resposta ao ser editado", () => {
+  const answer = editedCustomerAnswer({ customer_questions_answered: ["Antiga"] }, ["Editada", "Pendente"], ["Sim", ""], ["Antiga", "Pendente"]);
+  assert.deepEqual(answer.customer_questions_answered, ["Editada"]);
+  assert.deepEqual(answer.customer_question_responses, { Editada: "Sim" });
+  assert.deepEqual(pendingCustomerQuestions(answer), ["Pendente"]);
+});
+test("Edição individual salva a pergunta histórica mesmo fora das seções visíveis", () => {
+  assert.deepEqual(focusedSurveySaveQuestions([{ id: "historica" }, { id: "outra" }], [{ id: "outra" }], "historica"), [{ id: "historica" }]);
+  assert.deepEqual(focusedSurveySaveQuestions([{ id: "historica" }], [], "inexistente"), []);
+});
 
 test("Concluída na busca mostra somente lojas concluídas", () => {
   assert.equal(matchesSurveyPointSearch({ label: "LUC 12 — Loja", completionStatus: "concluida" }, "Concluída"), true);

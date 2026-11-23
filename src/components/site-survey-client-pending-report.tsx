@@ -3,7 +3,7 @@ import { Download, LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { buildClientPendingGroups, duplicateNamePoints, unidentifiedLucPoints, splitUnidentifiedByName, vacantShopPoints, facadeIdMismatchPoints, type ClientPendingPoint, type ClientPendingResponse } from "@/lib/site-survey-client-pending";
+import { clientPointQuestionsAndNotes, buildClientPendingGroups, duplicateNamePoints, unidentifiedLucPoints, splitUnidentifiedByName, vacantShopPoints, facadeIdMismatchPoints, type ClientPendingPoint, type ClientPendingResponse } from "@/lib/site-survey-client-pending";
 import nunitoRegularUrl from "@/assets/fonts/nunito-regular.ttf?url";
 import nunitoBoldUrl from "@/assets/fonts/nunito-bold.ttf?url";
 import { surveyPointType } from "@/lib/site-survey-point-type";
@@ -141,6 +141,7 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
       const [responses, calls, freshPoints, texts, facades, { jsPDF }, { default: autoTable }, { PDFDocument, PDFName, PDFDict, PDFTextField }] = await Promise.all([loadResponses(), loadCalls(), loadPoints(), loadTexts(), loadFacades(), import("jspdf"), import("jspdf-autotable"), import("pdf-lib")]);
       if (calls.some((call) => call.internal_call_id && !call.internal_calls)) throw new Error("Não foi possível consultar todos os chamados vinculados. Verifique seu acesso aos chamados antes de gerar o relatório.");
       const groups = buildClientPendingGroups(freshPoints.length ? freshPoints : points, responses, questions, calls, texts);
+      const pointNotes = (point: ClientPendingPoint) => clientPointQuestionsAndNotes(point.value, responses, questions).map((text, index) => `${index + 1}. ${text}`).join("\n") || "—";
       const imported = await supabase.from("site_survey_client_report_imports").select("confirmations").eq("visit_id", visit.id);
       if (imported.error) throw imported.error;
       const confirmations = (imported.data ?? []).flatMap((row) => Array.isArray(row.confirmations) ? row.confirmations as unknown as ClientReportField[] : []);
@@ -282,17 +283,17 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
         sectionHeading(title, subtitle, 35);
         const lucType = (point: ClientPendingPoint) => point.pointType === "kiosk" ? "Quiosque" : "Loja";
         // O tipo nunca pode quebrar ao meio: a coluna recebe a largura do rótulo mais longo.
-        const lucTypeWidth = textColumnWidth(pdf, group.map(lucType), 3, 20, 26);
+        const lucTypeWidth = textColumnWidth(pdf, group.map(lucType), 3, 20, 24);
         // Sem nenhum número de medidor na tabela, a coluna não aparece (padrão do Cadastro).
         const lucMeter = group.some((point) => Boolean(point.meterNumber?.trim()));
         // Foto no mesmo tamanho dos demais thumbnails do relatório.
         const photoSize = 18;
-        const meterWidth = textColumnWidth(pdf, ["Nº do medidor", ...group.map((point) => point.meterNumber || "—")], 4, 22, 30);
+        const meterWidth = textColumnWidth(pdf, ["Nº do medidor", ...group.map((point) => point.meterNumber || "—")], 4, 22, 26);
         // Campo do nome só na seção sem LUC e sem nome identificados.
         const nameColumn = lucMeter ? 4 : 3;
         // Observações: última coluna, editável pelo cliente, com todo o espaço restante.
-        const locationWidth = textColumnWidth(pdf, ["Localização", ...group.map((point) => point.location || "—")], 4, 24, 32);
-        const lucWidths = [photoSize + 4, 28, ...(lucMeter ? [meterWidth] : []), lucTypeWidth, 36, locationWidth];
+        const locationWidth = 38;
+        const lucWidths = [photoSize + 4, 24, ...(lucMeter ? [meterWidth] : []), lucTypeWidth, 28, locationWidth];
         lucWidths.push(182 - lucWidths.reduce((total, width) => total + width, 0));
         autoTable(pdf, {
           startY: y, theme: "plain", margin: { top: 20, bottom: 20, left: 14, right: 14 },
@@ -300,8 +301,8 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
           headStyles: { fontStyle: "bold", textColor: accent, lineWidth: { bottom: 0.3 }, lineColor: green },
           bodyStyles: { minCellHeight: photoSize + 4 }, rowPageBreak: "avoid", showHead: "everyPage",
           columnStyles: Object.fromEntries(lucWidths.map((width, index) => [index, { cellWidth: width }])),
-          head: [["Foto", "LUC", ...(lucMeter ? ["Nº do medidor"] : []), "Tipo", "Nome da loja", "Localização", "Observações"]],
-          body: group.map((point) => [thumbnails.has(point.value) ? "" : "Sem foto", point.lucNumber?.trim() || "Sem LUC", ...(lucMeter ? [point.meterNumber || "—"] : []), lucType(point), point.name?.trim() || (withNameField ? "Não identificado" : point.label), point.location || "—", ""]),
+          head: [["Foto", "LUC", ...(lucMeter ? ["Nº do medidor"] : []), "Tipo", "Nome da loja", "Perguntas / observações", "Resposta do cliente"]],
+          body: group.map((point) => [thumbnails.has(point.value) ? "" : "Sem foto", point.lucNumber?.trim() || "Sem LUC", ...(lucMeter ? [point.meterNumber || "—"] : []), lucType(point), point.name?.trim() || (withNameField ? "Não identificado" : point.label), pointNotes(point), ""]),
           didParseCell: (cell) => {
             if (cell.section === "body" && (cell.column.index === 1 || (withNameField && cell.column.index === nameColumn))) { cell.cell.styles.valign = "top"; cell.cell.styles.minCellHeight = Math.max(photoSize + 4, 16); }
             if (lucMeter && cell.column.index === 2) cell.cell.styles.overflow = "visible";
@@ -357,7 +358,7 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
         // Sem nenhum número de medidor na tabela, a coluna não aparece (padrão do Cadastro).
         const dupMeter = duplicated.some((group) => group.some((point) => Boolean(point.meterNumber?.trim())));
         const dupType = (point: ClientPendingPoint) => point.pointType === "kiosk" ? "Quiosque" : point.pointType === "vacant" ? "Loja vaga" : point.pointType === "vacant_kiosk" ? "Quiosque vago" : "Loja";
-        const dupBody = duplicated.flatMap((group) => group.map((point) => [point.name ?? point.label, point.lucNumber?.trim() || "Sem LUC", ...(dupMeter ? [point.meterNumber || "—"] : []), dupType(point), point.location || "—", ""]));
+        const dupBody = duplicated.flatMap((group) => group.map((point) => [point.name ?? point.label, point.lucNumber?.trim() || "Sem LUC", ...(dupMeter ? [point.meterNumber || "—"] : []), dupType(point), pointNotes(point), ""]));
         // O tipo nunca pode quebrar ao meio: a coluna recebe a largura do rótulo mais longo.
         const dupTypeWidth = textColumnWidth(pdf, dupBody.map((row) => row[dupMeter ? 3 : 2]), 3, 20, 30);
         // O número do medidor nunca quebra: a coluna recebe a largura do maior valor.
@@ -370,7 +371,7 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
           headStyles: { fontStyle: "bold", textColor: accent, lineWidth: { bottom: 0.3 }, lineColor: green },
           rowPageBreak: "avoid", showHead: "everyPage",
           columnStyles: Object.fromEntries(dupWidths.map((width, index) => [index, { cellWidth: width }])),
-          head: [["Nome da loja", "LUC", ...(dupMeter ? ["Nº do medidor"] : []), "Tipo", "Localização", "Confirmação"]],
+          head: [["Nome da loja", "LUC", ...(dupMeter ? ["Nº do medidor"] : []), "Tipo", "Perguntas / observações", "Confirmação"]],
           body: dupBody,
           didParseCell: (cell) => { if (dupMeter && cell.column.index === 2) cell.cell.styles.overflow = "visible"; },
           didDrawCell: (cell) => {
@@ -404,8 +405,8 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
           headStyles: { fontStyle: "bold", textColor: accent, lineWidth: { bottom: 0.3 }, lineColor: green },
           rowPageBreak: "avoid", showHead: "everyPage",
           columnStyles: Object.fromEntries(vacantWidths.map((width, index) => [index, { cellWidth: width }])),
-          head: [["LUC", ...(vacantMeter ? ["Nº do medidor"] : []), "Nome", "Localização", "Confirmação"]],
-          body: vacant.map((point) => [point.lucNumber?.trim() || "Sem LUC", ...(vacantMeter ? [point.meterNumber || "—"] : []), point.name ?? point.label, point.location || "—", ""]),
+          head: [["LUC", ...(vacantMeter ? ["Nº do medidor"] : []), "Nome", "Perguntas / observações", "Confirmação"]],
+          body: vacant.map((point) => [point.lucNumber?.trim() || "Sem LUC", ...(vacantMeter ? [point.meterNumber || "—"] : []), point.name ?? point.label, pointNotes(point), ""]),
           didParseCell: (cell) => { if (vacantMeter && cell.column.index === 1) cell.cell.styles.overflow = "visible"; },
           didDrawCell: (cell) => {
             if (cell.section !== "body" || cell.column.index !== vacantWidths.length - 1) return;
@@ -428,9 +429,9 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
           styles: { font: "Nunito", fontSize: 9, textColor: ink, cellPadding: 1.8, overflow: "linebreak", valign: "middle" },
           headStyles: { fontStyle: "bold", textColor: accent, lineWidth: { bottom: 0.3 }, lineColor: green },
           rowPageBreak: "avoid", showHead: "everyPage",
-          columnStyles: { 0: { cellWidth: 30 }, 1: { cellWidth: 82 }, 2: { cellWidth: 70 } },
-          head: [["LUC", "Nome", "Localização"]],
-          body: mismatched.map((point) => [point.lucNumber?.trim() || "Sem LUC", point.name ?? point.label, point.location || "—"]),
+          columnStyles: { 0: { cellWidth: 30 }, 1: { cellWidth: 62 }, 2: { cellWidth: 90 } },
+          head: [["LUC", "Nome", "Perguntas / observações"]],
+          body: mismatched.map((point) => [point.lucNumber?.trim() || "Sem LUC", point.name ?? point.label, pointNotes(point)]),
         });
       }
       const pages = pdf.getNumberOfPages();

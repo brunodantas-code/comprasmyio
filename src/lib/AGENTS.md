@@ -1,0 +1,2 @@
+- Site Survey focused history saves target the stored question independently of current/skipped sections and verify returned rows; customer text edits preserve manual confirmation instead of clearing pending fields.
+- Site Survey registration displays checklist electrical location separately from physical location; client confirmation tables derive questions/final notes by point from fresh responses, never from generated interventions.

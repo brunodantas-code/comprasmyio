@@ -1,5 +1,25 @@
 import { isCustomerQuestion, pendingCustomerQuestions } from "@/lib/site-survey-questions";
 
+/** Client-facing notes only: never substitute technical answers or generated calls. */
+export function clientPointQuestionsAndNotes(pointValue: string, responses: ClientPendingResponse[], questions: { id: string; prompt: string; question_key?: string | null }[]): string[] {
+  const result: string[] = [];
+  for (const response of responses) {
+    const key = response.visit_luc_id ? `luc:${response.visit_luc_id}` : response.visit_environment_id ? `environment:${response.visit_environment_id}` : "general";
+    if (key !== pointValue) continue;
+    const question = questions.find((item) => item.id === response.question_id);
+    const snapshot = response.question_snapshot;
+    const prompt = snapshot && typeof snapshot === "object" && "prompt" in snapshot && typeof snapshot.prompt === "string" ? snapshot.prompt : question?.prompt ?? "";
+    const customer = isCustomerQuestion(question ?? { prompt }) || isCustomerQuestion({ prompt }) || Boolean(response.answer && typeof response.answer === "object" && "customer_questions" in response.answer);
+    const normalize = (text: string) => text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR").trim();
+    const final = normalize(prompt).includes("observacoes finais");
+    const answer = response.answer;
+    const value = answer && typeof answer === "object" && "value" in answer ? answer.value : answer;
+    const notes = final && typeof value === "string" && normalize(value) !== "nenhuma observacao adicional" ? [value.trim()] : [];
+    for (const text of customer ? pendingCustomerQuestions(answer) : notes) if (text.trim() && !result.includes(text.trim())) result.push(text.trim());
+  }
+  return result;
+}
+
 export type ClientPendingPoint = { value: string; label: string; pointType: string; lucNumber?: string | null; name?: string; location?: string | null; meterNumber?: string | null; facadeIdOk?: boolean | null };
 export function unidentifiedLucPoints(points: ClientPendingPoint[]) {
   return points.filter((point) => {

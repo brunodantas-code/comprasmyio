@@ -102,6 +102,22 @@ export function pendingCustomerQuestions(answer: unknown): string[] {
   const answered = new Set(answeredCustomerQuestions(answer));
   return customerQuestions(answer).filter((value) => !answered.has(value));
 }
+
+/** A focused history edit targets the stored question even in a skipped/old section. */
+export function focusedSurveySaveQuestions<T extends { id: string }>(all: T[], visible: T[], focusId: string): T[] {
+  return focusId ? all.filter((question) => question.id === focusId) : visible;
+}
+
+export function editedCustomerAnswer(previous: unknown, texts: string[], responses: string[], originals: string[]) {
+  const answered = new Set(answeredCustomerQuestions(previous));
+  const rows = texts.map((text, index) => ({ text: text.trim(), response: responses[index]?.trim() ?? "", original: originals[index] ?? text })).filter((row) => row.text);
+  return {
+    value: rows.map((row) => row.text).join("\n"),
+    customer_questions: rows.map((row) => row.text),
+    customer_questions_answered: rows.filter((row) => answered.has(row.original)).map((row) => row.text),
+    customer_question_responses: Object.fromEntries(rows.filter((row) => row.response).map((row) => [row.text, row.response])),
+  };
+}
 /** Customer Q&A keeps its original section visible after a point changes templates. */
 export function customerHistorySectionIds(
   questions: { id: string; section_id: string; prompt: string; question_key?: string | null }[],

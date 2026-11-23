@@ -1,6 +1,22 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { unidentifiedLucPoints } from "./site-survey-client-pending";
+import { clientPointQuestionsAndNotes, unidentifiedLucPoints } from "./site-survey-client-pending";
+
+test("Relatório do cliente inclui observação do cofre e pergunta pendente do mesmo ponto", () => {
+  const responses = [
+    { question_id: "notes", visit_luc_id: "loja", visit_environment_id: null, answer: { value: "No cofre está Commcenter" } },
+    { question_id: "customer", visit_luc_id: "loja", visit_environment_id: null, answer: { customer_questions: ["Mantemos na implantação?"], customer_question_responses: { "Mantemos na implantação?": "Sim" } } },
+    { question_id: "notes", visit_luc_id: "outra", visit_environment_id: null, answer: "No cofre está Ponto Kids" },
+    { question_id: "electrical", visit_luc_id: "loja", visit_environment_id: null, answer: "Busway" },
+  ];
+  assert.deepEqual(clientPointQuestionsAndNotes("luc:loja", responses, [{ id: "notes", prompt: "Observações finais da visita" }, { id: "customer", prompt: "Perguntas para o cliente" }, { id: "electrical", prompt: "Onde se encontra o quadro elétrico?" }]), ["No cofre está Commcenter", "Mantemos na implantação?"]);
+});
+test("Observação vazia/atalho não entra e pergunta confirmada não volta ao relatório", () => {
+  assert.deepEqual(clientPointQuestionsAndNotes("luc:loja", [
+    { question_id: "notes", visit_luc_id: "loja", visit_environment_id: null, answer: "Nenhuma observação adicional", question_snapshot: { prompt: "Observações finais da visita" } },
+    { question_id: "customer", visit_luc_id: "loja", visit_environment_id: null, answer: { customer_questions: ["Confirmar"], customer_questions_answered: ["Confirmar"] } },
+  ], []), []);
+});
 
 test("Loja vaga sem LUC entra na conferência; com LUC não, ambiente permanece dispensado", () => {
   const points = [

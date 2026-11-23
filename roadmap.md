@@ -1,3 +1,8 @@
+- [x] Títulos dos pontos no relatório em preto; prévia conferida.
+- [x] Orientado Realizar Visita → Concluir visita → Concluir com pendências; data anterior só nas visitas manuais atualmente, sem alterar datas reais.
+- [x] Lista lê localização elétrica do checklist para lojas/quiosques; Busway conferido em 235 pontos, cadastro físico preservado.
+- [x] Edição histórica salva e reabre texto real; pergunta sem resposta mantém pendência, conteúdo de teste restaurado.
+- [x] PDF do cliente com Perguntas / observações; Commcenter e Ponto Kids presentes nas tabelas, cinco páginas conferidas.
 # Roadmap
 - [x] Margens principais alinhadas ao logo myio pela moldura compartilhada; 16 telas conferidas em 1073, 1600 e 390 px, sem overflow; recuos internos preservados.
 - [x] Site Survey: lápis, cancelar, reiniciar, lixeira e seta alinhados; cinco centros em y=400 px na visita real, aparência CDE preservada; três testes de menus passaram.
