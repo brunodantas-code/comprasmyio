@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Indicadores: filtro e ordenação com fonte 12 px conferida na conta Leonardo; Departamento/Setor explícito nos OKRs/KPIs, Comercial filtrado e Financeiro disponível. Métricas vinculadas seguem o objetivo; independentes ficam Sem departamento/setor. Doze testes passaram; sem alterar cadastros.
 - [x] Indicadores: filtro, ordenação e adição reunidos com visualizações ao lado de Visibilidade/Ciclo; botões 32×32 px e ícones 20 px. Desktop/mobile conferidos, menu de ordenação funcional e sem overflow.
 - [x] Spend: PDF real renderizado à esquerda e tabela expansível à direita com larguras iguais; campos preservados ao recolher, títulos redundantes/Furo de Caixa removidos, Sem comprovante vermelho e CNPJ oculto sem anexo. Desktop/mobile conferidos sem overflow; aprovação preservada; sem alteração dos dados.
 - [x] Spend: site publicado conferido com sessão: barra 288×6 px e botão Aa disponíveis; print estava desatualizado, conversão opcional exige acionar Aa.

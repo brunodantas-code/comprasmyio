@@ -41,6 +41,7 @@ import { Tooltip as TextTooltip, TooltipTrigger, TooltipContent, TooltipProvider
 import { useTableFilters, type FilterColumn } from "@/components/use-table-filters";
 import { TableSortMenu } from "@/components/table-sort-menu";
 import { sortIndicatorCards, type CardSort } from "./card-order";
+import { indicatorDepartment } from "./department";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -105,6 +106,7 @@ export function IndicadoresDashboard() {
   const metricColumns: FilterColumn<Metric>[] = [
     {key:'title',label:'Nome',value:m=>m.title},
     {key:'responsible',label:'Responsável',value:m=>importedField(m.source_metadata,'responsible_name') || userName(m.responsible_id)},
+    {key:'department',label:'Departamento/Setor',value:m=>indicatorDepartment(m.objective_id,data.objectives)},
     {key:'confidence',label:'Criticidade',value:m=>confidenceName(m.source_metadata && !data.checkins.find(c=>c.metric_id===m.id)?.recorded_by ? null : m.confidence)},
     {key:'progress',label:'Avanço',kind:'number',value:m=>metricProgress(m.initial_value,m.target_value,m.current_value)},
     {key:'due',label:'Prazo',kind:'date',value:m=>m.due_on},
@@ -121,7 +123,7 @@ export function IndicadoresDashboard() {
     {key:'responsible',label:'Responsável',value:objectiveOwner},
     {key:'cycle',label:'Ciclo',value:o=>data.cycles.find(c=>c.id===o.cycle_id)?.name ?? 'Sem ciclo'},
     {key:'scope',label:'Abrangência',value:o=>({empresa:'Empresa',departamento:'Departamento',equipe:'Equipe',individual:'Individual'}[o.scope] ?? o.scope)},
-    {key:'alignment',label:'Alinhamento',value:o=>o.alignment_name},
+    {key:'alignment',label:'Departamento/Setor',value:o=>indicatorDepartment(o.id,data.objectives)},
     {key:'progress',label:'Avanço',kind:'number',value:o=>progress.get(o.id) ?? 0},
     {key:'krs',label:'Quantidade de KRs',kind:'number',value:o=>data.metrics.filter(m=>m.objective_id===o.id).length},
     {key:'visibility',label:'Confidencialidade',value:o=>o.confidential?'Confidencial':'Não confidencial'},

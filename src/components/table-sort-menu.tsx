@@ -25,7 +25,7 @@ export function TableSortMenu({ columns, value, onChange, iconOnly = false }: {
     </PopoverTrigger>
     <PopoverContent align="start" className="w-[min(18rem,calc(100vw-2rem))] space-y-3 p-3">
       <Select value={value?.key ?? ""} onValueChange={key => onChange({ key, direction: value?.direction ?? "asc" })}>
-        <SelectTrigger aria-label="Coluna para ordenar"><SelectValue placeholder="Selecionar coluna" /></SelectTrigger>
+        <SelectTrigger aria-label="Coluna para ordenar" className="h-8 text-xs"><SelectValue placeholder="Selecionar coluna" /></SelectTrigger>
         <SelectContent>{columns.map(column => <SelectItem key={column.key} value={column.key}>{column.label}</SelectItem>)}</SelectContent>
       </Select>
       <div className="flex flex-wrap gap-2">
