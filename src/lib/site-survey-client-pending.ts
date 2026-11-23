@@ -35,6 +35,13 @@ export function splitUnidentifiedByName(points: ClientPendingPoint[]) {
   };
   return [points.filter((point) => !unknown(point)), points.filter(unknown)] as const;
 }
+/** Presentation-only: the dedicated LUC chapter already asks this exact registration question. */
+export function clientQuestionCoveredByLucSection(point: ClientPendingPoint, text: string): boolean {
+  if (point.pointType !== "shop" && point.pointType !== "kiosk") return false;
+  if (!unidentifiedLucPoints([point]).length || !splitUnidentifiedByName([point])[0].length) return false;
+  const normalized = text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR").trim().replace(/[.!?]+$/, "");
+  return /^(?:por favor[, ]+)?(?:informar|informe|identificar|identifique|fornecer|forneca|confirmar|confirme|qual e|qual)\s+(?:o\s+)?(?:numero\s+(?:do\s+)?)?luc(?:\s+(?:da loja|do quiosque|deste ponto))?(?:\s+para (?:o )?cadastro(?: (?:no|do) sistema)?)?$/.test(normalized);
+}
 export function vacantShopPoints(points: ClientPendingPoint[]) {
   return points
     .filter((point) => point.pointType === "vacant" || point.pointType === "vacant_kiosk")

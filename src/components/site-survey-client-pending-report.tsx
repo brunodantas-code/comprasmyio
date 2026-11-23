@@ -3,7 +3,7 @@ import { Download, LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { clientPointQuestionsAndNotes, buildClientPendingGroups, duplicateNamePoints, unidentifiedLucPoints, splitUnidentifiedByName, vacantShopPoints, facadeIdMismatchPoints, type ClientPendingPoint, type ClientPendingResponse } from "@/lib/site-survey-client-pending";
+import { clientPointQuestionsAndNotes, clientQuestionCoveredByLucSection, buildClientPendingGroups, duplicateNamePoints, unidentifiedLucPoints, splitUnidentifiedByName, vacantShopPoints, facadeIdMismatchPoints, type ClientPendingPoint, type ClientPendingResponse } from "@/lib/site-survey-client-pending";
 import nunitoRegularUrl from "@/assets/fonts/nunito-regular.ttf?url";
 import nunitoBoldUrl from "@/assets/fonts/nunito-bold.ttf?url";
 import { surveyPointType } from "@/lib/site-survey-point-type";
@@ -140,8 +140,9 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
       };
       const [responses, calls, freshPoints, texts, facades, { jsPDF }, { default: autoTable }, { PDFDocument, PDFName, PDFDict, PDFTextField }] = await Promise.all([loadResponses(), loadCalls(), loadPoints(), loadTexts(), loadFacades(), import("jspdf"), import("jspdf-autotable"), import("pdf-lib")]);
       if (calls.some((call) => call.internal_call_id && !call.internal_calls)) throw new Error("Não foi possível consultar todos os chamados vinculados. Verifique seu acesso aos chamados antes de gerar o relatório.");
-      const groups = buildClientPendingGroups(freshPoints.length ? freshPoints : points, responses, questions, calls, texts);
-      const pointNotes = (point: ClientPendingPoint) => clientPointQuestionsAndNotes(point.value, responses, questions).map((text, index) => `${index + 1}. ${text}`).join("\n") || "—";
+      const groups = buildClientPendingGroups(freshPoints.length ? freshPoints : points, responses, questions, calls, texts)
+        .map((group) => ({ ...group, questions: group.questions.filter((text) => !clientQuestionCoveredByLucSection(group, text)) }));
+      const pointNotes = (point: ClientPendingPoint) => clientPointQuestionsAndNotes(point.value, responses, questions).filter((text) => !clientQuestionCoveredByLucSection(point, text)).map((text, index) => `${index + 1}. ${text}`).join("\n") || "—";
       const imported = await supabase.from("site_survey_client_report_imports").select("confirmations").eq("visit_id", visit.id);
       if (imported.error) throw imported.error;
       const confirmations = (imported.data ?? []).flatMap((row) => Array.isArray(row.confirmations) ? row.confirmations as unknown as ClientReportField[] : []);
@@ -304,13 +305,19 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
           head: [["Foto", "LUC", ...(lucMeter ? ["Nº do medidor"] : []), "Tipo", "Nome da loja", "Perguntas / observações", "Resposta do cliente"]],
           body: group.map((point) => [thumbnails.has(point.value) ? "" : "Sem foto", point.lucNumber?.trim() || "Sem LUC", ...(lucMeter ? [point.meterNumber || "—"] : []), lucType(point), point.name?.trim() || (withNameField ? "Não identificado" : point.label), pointNotes(point), ""]),
           didParseCell: (cell) => {
-            if (cell.section === "body" && (cell.column.index === 1 || (withNameField && cell.column.index === nameColumn))) { cell.cell.styles.valign = "top"; cell.cell.styles.minCellHeight = Math.max(photoSize + 4, 16); }
+            if (cell.section === "body" && (cell.column.index === 1 || (withNameField && cell.column.index === nameColumn))) {
+              cell.cell.styles.valign = "top";
+              // Reserve the input height below all wrapped label lines, not at a fixed Y offset.
+              cell.cell.styles.cellPadding = { top: 1.8, right: 1.8, bottom: 10, left: 1.8 };
+              cell.cell.styles.minCellHeight = photoSize + 4;
+            }
             if (lucMeter && cell.column.index === 2) cell.cell.styles.overflow = "visible";
           },
           didDrawCell: (cell) => {
             if (cell.section === "body" && cell.column.index === 1) {
               // Campo editável para o cliente informar o LUC, logo abaixo de "Não identificado".
-              const x = cell.cell.x + 1.5, w = cell.cell.width - 3, top = cell.cell.y + 7, h = 6;
+              const textHeight = cell.cell.text.length * cell.cell.styles.fontSize * pdf.getLineHeightFactor() / pdf.internal.scaleFactor;
+              const x = cell.cell.x + 1.5, w = cell.cell.width - 3, top = cell.cell.y + cell.cell.padding("top") + textHeight + 1.5, h = 6;
               pdf.setDrawColor(...green); pdf.setLineWidth(0.3); pdf.roundedRect(x, top, w, h, 1, 1, "S");
               const field = new TextFieldClass();
               field.fieldName = `luc_${lucFieldIndex++}`; field.fontSize = 9; field.readOnly = false;
@@ -320,7 +327,8 @@ const result = await supabase.from("site_survey_visit_environments").select("id,
             }
             if (withNameField && cell.section === "body" && cell.column.index === nameColumn) {
               // Campo editável para o cliente informar o nome, logo abaixo de "Não identificado".
-              const x = cell.cell.x + 1.5, w = cell.cell.width - 3, top = cell.cell.y + 7, h = 6;
+              const textHeight = cell.cell.text.length * cell.cell.styles.fontSize * pdf.getLineHeightFactor() / pdf.internal.scaleFactor;
+              const x = cell.cell.x + 1.5, w = cell.cell.width - 3, top = cell.cell.y + cell.cell.padding("top") + textHeight + 1.5, h = 6;
               pdf.setDrawColor(...green); pdf.setLineWidth(0.3); pdf.roundedRect(x, top, w, h, 1, 1, "S");
               const field = new TextFieldClass();
               field.fieldName = `nome_${nameFieldIndex++}`; field.fontSize = 9; field.readOnly = false;

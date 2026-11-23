@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { clientPointQuestionsAndNotes, unidentifiedLucPoints } from "./site-survey-client-pending";
+import { clientPointQuestionsAndNotes, clientQuestionCoveredByLucSection, unidentifiedLucPoints } from "./site-survey-client-pending";
 
 test("Relatório do cliente inclui observação do cofre e pergunta pendente do mesmo ponto", () => {
   const responses = [
@@ -70,4 +70,19 @@ test("splitUnidentifiedByName separa nome identificado de nome não identificado
   ]);
   assert.deepEqual(named.map((p) => p.value), ["a"]);
   assert.deepEqual(unnamed.map((p) => p.value), ["b"]);
+});
+
+test("Magic Game com nome conhecido e LUC não identificado não repete a cobrança exclusiva de LUC", () => {
+  const point = { value: "luc:magic", label: "Magic Game", name: "Magic Game", pointType: "kiosk", lucNumber: "Não identificado" };
+  assert.equal(clientQuestionCoveredByLucSection(point, "Informar o LUC para cadastro no sistema."), true);
+  assert.equal(clientQuestionCoveredByLucSection({ ...point, pointType: "shop", lucNumber: "" }, "Informar o número do LUC."), true);
+});
+
+test("A deduplicação de LUC preserva outras perguntas, pedidos compostos e pontos fora do capítulo", () => {
+  const point = { value: "luc:magic", label: "Magic Game", name: "Magic Game", pointType: "kiosk", lucNumber: "Não identificado" };
+  assert.equal(clientQuestionCoveredByLucSection(point, "Confirmar implantação do medidor?"), false);
+  assert.equal(clientQuestionCoveredByLucSection(point, "Informar o LUC e confirmar a implantação."), false);
+  assert.equal(clientQuestionCoveredByLucSection({ ...point, lucNumber: "Q123" }, "Informar o LUC para cadastro no sistema."), false);
+  assert.equal(clientQuestionCoveredByLucSection({ ...point, name: "Não identificado" }, "Informar o LUC para cadastro no sistema."), false);
+  assert.equal(clientQuestionCoveredByLucSection({ ...point, pointType: "environment" }, "Informar o LUC para cadastro no sistema."), false);
 });
