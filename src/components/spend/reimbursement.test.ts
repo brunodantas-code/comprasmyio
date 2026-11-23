@@ -9,6 +9,9 @@ describe('consolidação de reembolsos Spend', () => {
   it('exclui cartão myio da solicitação de reembolso', () => {
     expect(availableReimbursements([{ ...receipt, payment_source: 'myio_card' }, receipt], 'holder')).toEqual([receipt]);
   });
+  it('exige identificação explícita de reembolso, sem tratar pagamento desconhecido como reembolso', () => {
+    expect(availableReimbursements([{ ...receipt, payment_source: '' }, { ...receipt, payment_source: 'unknown' }, receipt], 'holder')).toEqual([receipt]);
+  });
   it('não solicita novamente comprovante já encaminhado ao Supply', () => {
     expect(availableReimbursements([{ ...receipt, reimbursement_order_id: 'order' }], 'holder')).toEqual([]);
   });

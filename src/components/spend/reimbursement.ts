@@ -1,9 +1,8 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { Receipt } from './data';
-import { isCardReceipt } from './payment-source';
 
 export function availableReimbursements<T extends { payment_source: string; holder_id: string; status: string; reimbursement_order_id: string | null }>(receipts: T[], userId: string) {
-  return receipts.filter(r => !isCardReceipt(r) && r.holder_id === userId && r.status !== 'approved' && !r.reimbursement_order_id);
+  return receipts.filter(r => r.payment_source === 'reimbursement' && r.holder_id === userId && r.status !== 'approved' && !r.reimbursement_order_id);
 }
 export function reimbursementTotal(receipts: { amount: number }[]) {
   return receipts.reduce((sum, r) => sum + Math.round(r.amount * 100), 0) / 100;
