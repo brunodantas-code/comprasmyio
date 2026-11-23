@@ -635,7 +635,7 @@ export function SiteSurveyReportButton({ visit, clients, units, projects, techni
     ["Instalação hidráulica aprovada — gerais", String(sortedPoints.filter((p) => p.pointType === "environment" && approved(p, "hydraulic")).length)],
     ["Instalação elétrica aprovada", String(sortedPoints.filter((p) => approved(p, "electrical")).length)],
   ];
-  const reportTitle = reportType === "complete-internal" ? "Relatório completo — Interno" : reportType === "purchases" ? "Relatório de compras" : reportType === "interventions" ? "Intervenções do cliente" : reportType === "equipment" ? "Equipamentos e ferramentas" : "Relatório completo — Cliente";
+  const reportTitle = reportType === "complete-internal" ? "Relatório completo — Interno" : reportType === "purchases" ? "Relatório de compras" : reportType === "interventions" ? "Intervenções do cliente" : reportType === "equipment" ? "Equipamentos e ferramentas" : "Relatório completo";
   const openMaterialRequest = async () => {
     if (!purchaseDraftItems.length) return;
     const { count, error } = await supabase.from("purchase_orders").select("id", { count: "exact", head: true }).eq("site_survey_visit_id", visit.id).neq("status", "cancelado");
