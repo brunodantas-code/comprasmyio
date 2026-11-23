@@ -10,7 +10,7 @@
 - [x] Spend: comprovante processado em P&B com recorte do papel e remoção do fundo; foto sintética colorida resultou em 527×631 px e zero pixels coloridos, sem upload.
 - [x] Editar ambiente: X inferior removido; disquete ghost no cabeçalho, vinculado ao formulário e alinhado a expandir/fechar. Desktop/mobile conferidos, sem texto nem Cancelar; nenhum dado salvo durante o teste.
 - [x] Cabeçalho do Cadastro com fundo cinza-claro `bg-muted/50`, como Tickets; cor computada e captura conferidas.
-- [x] Site Survey: botões de pendência em faixa única à direita, com rolagem horizontal quando excedem a largura; três botões reais na mesma coordenada vertical.
+- [x] Site Survey: botões de pendência usam toda a largura disponível e se alinham à direita, sem painel estreito nem rolagem horizontal; quebram a linha somente quando necessário.
 - [x] Site Survey: câmera antes de “Fotos e anexos deste ambiente”; centros do ícone e texto conferidos em y=1105 px, sem erros de execução.
 - [x] Mensagens múltiplas: avisos expandidos abaixo do anterior; dois avisos reais do componente conferidos com 14 px de intervalo e sem sobreposição.
 - [x] Relatório Vila Velha: Cliente/Interno com guardas compartilhadas na prévia/PDF; cliente sem planejamento/tempos/chamados internos, Aa por visita preserva LUC e nomes manuais, Subi normalizado/agregado apenas na apresentação, atalhos de equipamento/observações explícitos. PDFs reais amostrais Garage/Cobasi (2/3 páginas) conferidos sem cortes; 22 testes passaram; dados originais preservados, não publicado.
