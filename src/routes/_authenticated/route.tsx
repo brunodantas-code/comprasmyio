@@ -11,5 +11,5 @@ export const Route = createFileRoute("/_authenticated")({
     if (!user) throw redirect({ to: "/auth" });
     return { user };
   },
-  component: () => <Outlet />,
+  component: () => <div className="erp-shell contents"><Outlet /></div>,
 });

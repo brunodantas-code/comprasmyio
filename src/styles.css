@@ -428,25 +428,25 @@ input[data-search-field="true"] {
   }
 }
 
-/* Desktop workspaces gain about 1 cm per side without touching dialogs/mobile. */
+/* One frame for authenticated page content and its brand header; dialogs stay independent. */
+.erp-shell {
+  --erp-workspace-width: calc(80rem + 2cm);
+  --erp-workspace-gutter: 1rem;
+}
+.erp-shell main:not(main main),
+.erp-shell .app-header-workspace,
+.erp-shell .portal-header-workspace {
+  width: 100%;
+  max-width: var(--erp-workspace-width);
+  margin-inline: auto;
+  padding-inline: var(--erp-workspace-gutter);
+}
+.erp-shell main main {
+  max-width: none;
+  padding-inline: 0;
+}
 @media (min-width: 768px) {
-  main.mx-auto {
-    padding-inline: 0.75rem;
-  }
-  main.mx-auto.max-w-7xl { max-width: calc(80rem + 2cm); }
-  main.mx-auto.max-w-5xl { max-width: calc(64rem + 2cm); }
-  main.mx-auto.max-w-3xl { max-width: calc(48rem + 2cm); }
-  main.mx-auto[class~="max-w-[1500px]"] { max-width: calc(1500px + 2cm); }
-  main[class~="sm:max-w-6xl"] { max-width: calc(72rem + 2cm); }
-  main[class~="sm:max-w-7xl"] { max-width: calc(80rem + 2cm); padding-inline: 0.75rem; }
-  .app-header-workspace {
-    max-width: calc(80rem + 2cm);
-    padding-inline: 0.75rem;
-  }
-  .portal-header-workspace {
-    max-width: calc(72rem + 2cm);
-    padding-inline: 1.5rem;
-  }
+  .erp-shell { --erp-workspace-gutter: 0.75rem; }
 }
 
 /* Fotos de relatório: mesmo arredondamento suave dos thumbnails (raio 32 em 240).
