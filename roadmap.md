@@ -1,6 +1,6 @@
 # Roadmap
-- [ ] Alinhar margens principais de todas as telas ao logo myio, preservando menus laterais e recuos internos.
-- [ ] Supply: alinhar verticalmente lápis, cancelar, reabrir, lixeira e seta na coluna Ações do print.
+- [x] Margens principais alinhadas ao logo myio pela moldura compartilhada; 16 telas conferidas em 1073, 1600 e 390 px, sem overflow; recuos internos preservados.
+- [x] Site Survey: lápis, cancelar, reiniciar, lixeira e seta alinhados; cinco centros em y=400 px na visita real, aparência CDE preservada; três testes de menus passaram.
 - [x] Esclarecido: Nome do Contrato, não Contato, é a identificação contratual da loja no shopping; nenhuma regra de cadastro alterada.
 - [x] Site Survey: Aa à esquerda de Recolher Tudo, alternância conferida no computador/celular; conversão visual dos nomes e contrato preserva originais.
 - [x] Spend: De-Para no menu; cadastro/recarga/exclusão confirmada e conta automática lida na linha temporária; celular sem overflow, aprovação segue bloqueada sem requisitos. Dados temporários removidos, 19 testes passaram.
