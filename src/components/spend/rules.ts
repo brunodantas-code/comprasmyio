@@ -5,6 +5,7 @@ export const categories = [
   { key: "transporte", name: "Táxi/Uber", icon: "Car", account: "Despesas com Locomoção Urbana" },
   { key: "estacionamento", name: "Estacionamento", icon: "ParkingCircle", account: "Despesas com Veículos e Estacionamento" },
   { key: "pedagio", name: "Pedágio", icon: "Route", account: "Despesas com Viagens e Pedágios" },
+  { key: "combustivel", name: "Combustível", icon: "Fuel", account: "Despesas com Combustíveis" },
   { key: "ferramentas", name: "Ferramentas", icon: "Wrench", account: "Ferramentas e Equipamentos de Pequeno Porte" },
   { key: "insumos", name: "Insumos de instalação", icon: "Cable", account: "Materiais e Insumos Aplicados em Obra" },
   { key: "servicos", name: "Serviços diversos", icon: "Briefcase", account: "Serviços de Terceiros PJ/PP" },
@@ -12,12 +13,13 @@ export const categories = [
   { key: "software", name: "Licenças e Assinaturas", icon: "AppWindow", account: "Assinaturas e Licenças de Software SaaS" },
   { key: "outros", name: "Outros", icon: "Ellipsis", account: "Outras Despesas Operacionais" },
 ] as const;
-export const categoryKey = z.string().regex(/^(alimentacao|transporte|estacionamento|pedagio|ferramentas|insumos|servicos|ia|software|outros|custom_[0-9a-f-]{36})$/, "Categoria inválida");
+export const categoryKey = z.string().regex(/^(alimentacao|transporte|estacionamento|pedagio|combustivel|ferramentas|insumos|servicos|ia|software|outros|custom_[0-9a-f-]{36})$/, "Categoria inválida");
 export const expenseSchema = z.object({
   id: z.string().uuid(), card_id: z.string().uuid(), date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   merchant: z.string().trim().min(1, "Informe o estabelecimento"), amount: z.number().positive("Informe o valor"),
   category: categoryKey, observation: z.string().trim().max(2000), project_id: z.string().uuid().nullable(),
-  file_path: z.string().min(1), clear_photo: z.boolean(),
+  file_path: z.string().min(1), clear_photo: z.boolean(), myio_cnpj: z.boolean({ message: "Confirme Com ou Sem CNPJ myio" }),
+  confirmed: z.literal(true, { message: "Confirme todas as informações antes de salvar" }),
 }).superRefine((v, ctx) => {
   if (v.category === "insumos" && !v.project_id) ctx.addIssue({ code: "custom", path: ["project_id"], message: "Insumos de instalação exige Projeto" });
   if (["servicos", "outros"].includes(v.category) && !v.observation) ctx.addIssue({ code: "custom", path: ["observation"], message: v.category === "outros" ? "Especifique a despesa em Outros" : "Serviços diversos exige observação" });
@@ -32,12 +34,13 @@ export function canMatch(a: MatchItem, b: MatchItem) {
 export const extractionSchema = z.object({ lancamentos: z.array(z.object({
   data: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), estabelecimento: z.string().min(1), valor: z.number(),
   parcela: z.string().nullable(), final_cartao: z.string().regex(/^\d{4}$/).nullable(),
+  categoria_sugerida: z.string().nullable(), myio_cnpj: z.boolean().nullable(),
 })).max(1000) });
 export type Extracted = z.infer<typeof extractionSchema>;
 export const extractedJsonSchema = { type: "object", additionalProperties: false, properties: {
   lancamentos: { type: "array", items: { type: "object", additionalProperties: false,
-    properties: { data: { type: "string" }, estabelecimento: { type: "string" }, valor: { type: "number" }, parcela: { type: ["string", "null"] }, final_cartao: { type: ["string", "null"] } },
-    required: ["data", "estabelecimento", "valor", "parcela", "final_cartao"] } },
+    properties: { data: { type: "string" }, estabelecimento: { type: "string" }, valor: { type: "number" }, parcela: { type: ["string", "null"] }, final_cartao: { type: ["string", "null"] }, categoria_sugerida: { type: ["string", "null"] }, myio_cnpj: { type: ["boolean", "null"] } },
+    required: ["data", "estabelecimento", "valor", "parcela", "final_cartao", "categoria_sugerida", "myio_cnpj"] } },
 }, required: ["lancamentos"] };
 export type CategorySetting = { name: string; icon: string; account_id: string; cost_center_id: string; active: boolean; deleted?: boolean };
 export function configuredCategories(settings: Record<string, CategorySetting>, includeInactive = false) {

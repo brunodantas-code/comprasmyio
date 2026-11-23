@@ -11635,6 +11635,7 @@ export type Database = {
           holder_id: string
           id: string
           merchant: string
+          myio_cnpj: boolean | null
           observation: string
           project_id: string | null
           status: string
@@ -11650,6 +11651,7 @@ export type Database = {
           holder_id: string
           id: string
           merchant: string
+          myio_cnpj?: boolean | null
           observation?: string
           project_id?: string | null
           status?: string
@@ -11665,6 +11667,7 @@ export type Database = {
           holder_id?: string
           id?: string
           merchant?: string
+          myio_cnpj?: boolean | null
           observation?: string
           project_id?: string | null
           status?: string

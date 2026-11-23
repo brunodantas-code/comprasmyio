@@ -1,3 +1,13 @@
+- [x] Spend mobile: nome/perfil abaixo do logo; grade Todos os apps imediatamente à esquerda do menu de três barras, coordenadas conferidas.
+- [x] Spend: seletor Mês da fatura removido de Meus comprovantes; data da despesa determina o período e o histórico não fica limitado a um mês.
+- [x] Spend: Meus comprovantes mostra somente o cartão do usuário logado, sem droplist de outros cartões, inclusive Admin; conciliação preserva a seleção do Financeiro.
+- [x] Spend: menu “Meus gastos” renomeado para “Meus comprovantes”.
+- [x] Spend: ação de salvar alinhada à direita e título “Salvar Comprovante Fiscal”; posição e liberação após confirmação conferidas.
+- [x] Spend conciliação mobile: conteúdo à esquerda, data em linha dedicada, seletor à esquerda da descrição e seta na extremidade direita; geometria e expansão conferidas.
+- [x] Spend: linhas Valor/Data alinhadas pela base; fatura e OCR usam 1.000,00, com ponto de milhar e duas casas decimais; importação real de teste conferida sem salvar.
+- [x] Spend: Combustível incluído no Plano de Contas reduzido, preservando categorias e históricos existentes.
+- [x] Spend: OCR real sugeriu R$ 100,00, Posto Sol da Dutra, Combustível e Com CNPJ myio; salvar bloqueado antes e liberado após a confirmação, sem gravar comprovante de teste.
+- [x] Spend: comprovante processado em P&B com recorte do papel e remoção do fundo; foto sintética colorida resultou em 527×631 px e zero pixels coloridos, sem upload.
 - [x] Editar ambiente: X inferior removido; disquete ghost no cabeçalho, vinculado ao formulário e alinhado a expandir/fechar. Desktop/mobile conferidos, sem texto nem Cancelar; nenhum dado salvo durante o teste.
 - [x] Cabeçalho do Cadastro com fundo cinza-claro `bg-muted/50`, como Tickets; cor computada e captura conferidas.
 - [x] Site Survey: botões de pendência em faixa única à direita, com rolagem horizontal quando excedem a largura; três botões reais na mesma coordenada vertical.

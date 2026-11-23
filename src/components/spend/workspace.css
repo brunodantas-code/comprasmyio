@@ -71,6 +71,106 @@
   .spend-mobile-register-slot { display: none; }
 }
 
+.spend-line-date-label,
+.spend-line-merchant-label { display: none; }
+
+@media (max-width: 767px) {
+  .spend-reconciliation-table tbody tr.spend-line-row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 0.35rem 0.5rem;
+    padding: 0.5rem;
+  }
+  .spend-reconciliation-table .spend-line-row > td {
+    border-top: 0;
+    padding: 0;
+  }
+  .spend-reconciliation-table .spend-line-select::before,
+  .spend-reconciliation-table .spend-line-detail::before,
+  .spend-reconciliation-table .spend-line-actions::before,
+  .spend-reconciliation-table .spend-audit-row > td::before {
+    content: none;
+  }
+  .spend-reconciliation-table .spend-line-select {
+    grid-column: 1;
+    grid-row: 2;
+    display: block;
+    align-self: center;
+  }
+  .spend-reconciliation-table .spend-line-detail { display: contents; }
+  .spend-reconciliation-table .spend-line-date {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-bottom: 0.35rem;
+  }
+  .spend-reconciliation-table .spend-line-date-label {
+    display: inline;
+    color: var(--muted-foreground);
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+  .spend-reconciliation-table .spend-line-merchant {
+    grid-column: 2;
+    grid-row: 2;
+    display: flex;
+    align-items: center;
+    align-self: center;
+    gap: 0.5rem;
+    min-width: 0;
+  }
+  .spend-reconciliation-table .spend-line-merchant-label {
+    display: inline;
+    flex: 0 0 auto;
+    color: var(--muted-foreground);
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+  .spend-reconciliation-table .spend-line-merchant-text {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .spend-reconciliation-table .spend-line-actions {
+    grid-column: 3;
+    grid-row: 2;
+    display: block;
+    justify-self: end;
+  }
+  .spend-reconciliation-table .spend-line-amount,
+  .spend-reconciliation-table .spend-line-status {
+    display: flex;
+    grid-column: 1 / -1;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.5rem;
+    border-top: 1px solid color-mix(in oklab, var(--border) 60%, transparent) !important;
+    padding: 0.4rem 0 !important;
+    text-align: left !important;
+  }
+  .spend-reconciliation-table .spend-line-amount { grid-row: 3; }
+  .spend-reconciliation-table .spend-line-status { grid-row: 4; }
+  .spend-reconciliation-table .spend-line-amount::before,
+  .spend-reconciliation-table .spend-line-status::before {
+    content: attr(data-label);
+    display: block;
+    flex: 0 0 auto;
+  }
+  .spend-reconciliation-table tbody tr.spend-audit-row > td {
+    display: block;
+    padding: 0.25rem 0;
+    border-top: 0;
+    text-align: left !important;
+  }
+  .spend-reconciliation-table .spend-audit-row [aria-label="Ações do lançamento"] {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .spend-mobile-register { transition: none; }
 }

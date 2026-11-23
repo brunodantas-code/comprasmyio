@@ -58,16 +58,17 @@ export function AppHeader({ logo, children, supplyManual = false, manualApp, men
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
           <Link to="/portal" className="flex min-w-0 items-center" title="Voltar aos aplicativos">{logo}</Link>
           <div className="flex shrink-0 items-center gap-1 sm:hidden">
+            <Button asChild variant="ghost" size="icon" className="top-icon shrink-0 !bg-transparent !text-foreground shadow-none hover:!bg-muted hover:!text-foreground" title="Início" aria-label="Voltar aos aplicativos">
+              <Link to="/portal"><LayoutGrid className="h-4 w-4" /></Link>
+            </Button>
             <HeaderMenu supplyManual={supplyManual} {...extra} userName={userName} onSignOut={signOut} onChangePassword={() => setPasswordOpen(true)} buttonClass={iconButton} />
           </div>
         </div>
-        <div className="mt-5 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:mt-0 sm:flex sm:min-w-0 sm:justify-end">
-          <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
-            <UserNameBlock userName={userName} />
-            <Button asChild variant="ghost" size="icon" className="top-icon shrink-0 !bg-transparent !text-foreground shadow-none hover:!bg-transparent hover:!text-foreground" title="Início" aria-label="Voltar aos aplicativos">
-              <Link to="/portal"><LayoutGrid className="h-4 w-4" /></Link>
-            </Button>
-          </div>
+        <div className="mt-5 flex min-w-0 items-center justify-between gap-3 sm:mt-0 sm:justify-end">
+          <UserNameBlock userName={userName} />
+          <Button asChild variant="ghost" size="icon" className="top-icon hidden shrink-0 !bg-transparent !text-foreground shadow-none hover:!bg-transparent hover:!text-foreground sm:inline-flex" title="Início" aria-label="Voltar aos aplicativos">
+            <Link to="/portal"><LayoutGrid className="h-4 w-4" /></Link>
+          </Button>
           {children}
           <div className="hidden shrink-0 items-center gap-1 sm:flex">
             <HeaderMenu supplyManual={supplyManual} {...extra} userName={userName} onSignOut={signOut} onChangePassword={() => setPasswordOpen(true)} buttonClass={iconButton} />
@@ -86,7 +87,7 @@ export function UserNameBlock({ userName }: { userName: string }) {
   const mode = useMainMenuConfig().data?.userInfo;
   const { data: me } = useCurrentUser();
   const line = userInfoLine(mode, me?.jobTitle?.name, me?.accessProfileName);
-  return <div className="min-w-0 text-right"><p className="truncate text-sm font-semibold">{userName}</p>{line ? <p className="truncate text-xs text-muted-foreground">{line}</p> : null}</div>;
+  return <div className="min-w-0 text-left sm:text-right"><p className="truncate text-sm font-semibold">{userName}</p>{line ? <p className="truncate text-xs text-muted-foreground">{line}</p> : null}</div>;
 }
 
 export function UserGreetingInfo() {

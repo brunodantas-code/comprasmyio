@@ -3,6 +3,10 @@ import { configuredCategories, removeCategory, categoryKey, type CategorySetting
 const key = "custom_00000000-0000-4000-8000-000000000001";
 const setting: CategorySetting = { name: "Hospedagem", icon: "Ellipsis", active: true, account_id: "", cost_center_id: "" };
 describe("Categorias simplificadas do Spend", () => {
+  it("inclui Combustível no Plano de Contas reduzido", () => {
+    expect(configuredCategories({}).some(c => c.key === "combustivel" && c.name === "Combustível")).toBe(true);
+    expect(categoryKey.safeParse("combustivel").success).toBe(true);
+  });
   it("inclui novas despesas com identidade estável", () => {
     expect(configuredCategories({ [key]: setting }).find(c => c.key === key)?.name).toBe("Hospedagem");
     expect(categoryKey.safeParse(key).success).toBe(true);

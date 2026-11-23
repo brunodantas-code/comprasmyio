@@ -2003,6 +2003,13 @@
       "when": 1795431473713,
       "tag": "0285_spend_supplier_account_allocation",
       "breakpoints": true
+    },
+    {
+      "idx": 286,
+      "version": "7",
+      "when": 1795449878770,
+      "tag": "0286_spend_receipt_cnpj_confirmation_fuel",
+      "breakpoints": true
     }
   ]
 }
