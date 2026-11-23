@@ -7,3 +7,4 @@
 - Portal and app headers share HeaderMenu entries from CDE; mobile uses a bottom Sheet and desktop a Popover, preserving identical visibility and actions without duplicate menu lists.
 - Code editors initialize drafts by ticket identity, not refreshed row objects; progress saves reject unsent conversation text and verify returned rows, avoiding silent draft loss and false success.
 - Code selection keeps only the ticket ID and resolves the live query row; confirmed saves replace the cached row before refresh/close to prevent stale status and reopened dialogs.
+- Survey visit completion uses an explicit real end time and a status-scoped verified update after pending saves flush; only the visit closes, preserving point status, pending fields and original technical timestamps.
