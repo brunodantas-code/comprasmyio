@@ -8736,6 +8736,7 @@ export type Database = {
           requester_notes: string | null
           site_survey_visit_id: string | null
           source_myio_order_item_id: string | null
+          spend_receipt_ids: string[]
           status: Database["public"]["Enums"]["order_status"]
           tag_id: string | null
           terceiros_material_id: string | null
@@ -8791,6 +8792,7 @@ export type Database = {
           requester_notes?: string | null
           site_survey_visit_id?: string | null
           source_myio_order_item_id?: string | null
+          spend_receipt_ids?: string[]
           status?: Database["public"]["Enums"]["order_status"]
           tag_id?: string | null
           terceiros_material_id?: string | null
@@ -8846,6 +8848,7 @@ export type Database = {
           requester_notes?: string | null
           site_survey_visit_id?: string | null
           source_myio_order_item_id?: string | null
+          spend_receipt_ids?: string[]
           status?: Database["public"]["Enums"]["order_status"]
           tag_id?: string | null
           terceiros_material_id?: string | null
@@ -11639,7 +11642,9 @@ export type Database = {
           merchant: string
           myio_cnpj: boolean | null
           observation: string
+          payment_source: string
           project_id: string | null
+          reimbursement_order_id: string | null
           status: string
           uf: string | null
         }
@@ -11658,7 +11663,9 @@ export type Database = {
           merchant: string
           myio_cnpj?: boolean | null
           observation?: string
+          payment_source?: string
           project_id?: string | null
+          reimbursement_order_id?: string | null
           status?: string
           uf?: string | null
         }
@@ -11677,7 +11684,9 @@ export type Database = {
           merchant?: string
           myio_cnpj?: boolean | null
           observation?: string
+          payment_source?: string
           project_id?: string | null
+          reimbursement_order_id?: string | null
           status?: string
           uf?: string | null
         }
@@ -11701,6 +11710,13 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spend_receipts_reimbursement_order_id_fkey"
+            columns: ["reimbursement_order_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_orders"
             referencedColumns: ["id"]
           },
         ]
@@ -13808,6 +13824,36 @@ export type Database = {
       spend_apply_supplier_allocations: { Args: never; Returns: number }
       spend_card_access: { Args: { _card: string }; Returns: boolean }
       spend_project_allowed: { Args: { _project: string }; Returns: boolean }
+      spend_reimbursement_receipts: {
+        Args: { _ids: string[] }
+        Returns: {
+          access_key: string | null
+          amount: number
+          card_id: string
+          category: string
+          city: string | null
+          clear_photo: boolean
+          created_at: string
+          date: string
+          file_path: string
+          holder_id: string
+          id: string
+          merchant: string
+          myio_cnpj: boolean | null
+          observation: string
+          payment_source: string
+          project_id: string | null
+          reimbursement_order_id: string | null
+          status: string
+          uf: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "spend_receipts"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       spend_role: { Args: never; Returns: string }
       spend_save_classification: { Args: { _data: Json }; Returns: Json }
       spend_storage_access: { Args: { _name: string }; Returns: boolean }

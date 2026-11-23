@@ -18,6 +18,7 @@ import { formatSpendAmount, parseSpendAmount } from "./amount";
 import { prepareSpendReceipt } from "./receipt-image";
 import { spendFiscalLocation, spendStates } from "./fiscal-location";
 import { SpendCityField } from "./city-field";
+import { paymentSourceSchema } from "./payment-source";
 
 const today = () => new Date().toLocaleDateString("en-CA");
 
@@ -34,7 +35,7 @@ export function SpendCapture({ data, cardId, line, receipt, onDone, onClose }: {
   const [preview, setPreview] = useState("");
   const [pdf, setPdf] = useState(receipt?.file_path.toLowerCase().endsWith(".pdf") ?? false);
   const [amountText, setAmountText] = useState(receipt ? formatSpendAmount(receipt.amount) : line?.amount ? formatSpendAmount(line.amount) : "");
-  const [draft, setDraft] = useState({ id: receipt?.id ?? crypto.randomUUID(), card_id: cardId, date: receipt?.date ?? line?.date ?? today(), merchant: receipt?.merchant ?? line?.merchant ?? "", amount: receipt?.amount ?? line?.amount ?? 0, category: receipt?.category ?? availableCategories[0]?.key ?? "", observation: receipt?.observation ?? "", project_id: receipt?.project_id ?? null as string | null, file_path: receipt?.file_path ?? "", clear_photo: receipt?.clear_photo ?? false, myio_cnpj: receipt?.myio_cnpj ?? null as boolean | null, city: receipt?.city ?? "", uf: receipt?.uf ?? "", access_key: receipt?.access_key ?? null as string | null, confirmed: false });
+  const [draft, setDraft] = useState({ id: receipt?.id ?? crypto.randomUUID(), card_id: cardId, payment_source: receipt?.payment_source ?? (line ? "myio_card" : ""), date: receipt?.date ?? line?.date ?? today(), merchant: receipt?.merchant ?? line?.merchant ?? "", amount: receipt?.amount ?? line?.amount ?? 0, category: receipt?.category ?? availableCategories[0]?.key ?? "", observation: receipt?.observation ?? "", project_id: receipt?.project_id ?? null as string | null, file_path: receipt?.file_path ?? "", clear_photo: receipt?.clear_photo ?? false, myio_cnpj: receipt?.myio_cnpj ?? null as boolean | null, city: receipt?.city ?? "", uf: receipt?.uf ?? "", access_key: receipt?.access_key ?? null as string | null, confirmed: false });
 
   useEffect(() => {
     if (!receipt) return;
@@ -80,6 +81,7 @@ export function SpendCapture({ data, cardId, line, receipt, onDone, onClose }: {
   }
 
   async function submit() {
+    if (!paymentSourceSchema.safeParse(draft.payment_source).success) { toast.error("Informe Cartão myio ou Reembolso"); return; }
     if (!draft.confirmed) { toast.error("Confirme todas as informações antes de salvar"); return; }
     if (draft.myio_cnpj === null) { toast.error("Confirme Com ou Sem CNPJ myio"); return; }
     if (!availableCategories.some(c => c.key === draft.category)) { toast.error("Selecione uma categoria disponível"); return; }
@@ -102,7 +104,8 @@ export function SpendCapture({ data, cardId, line, receipt, onDone, onClose }: {
 
   return <Dialog open onOpenChange={open => { if (!open && !busy) onClose(); }}><DialogContent onOpenAutoFocus={event => { if (!receipt) { event.preventDefault(); picker.current?.click(); } }} className="max-h-[90dvh] max-w-xl overflow-y-auto"><DialogHeader className="pr-24"><DialogTitle>{receipt ? "Editar comprovante" : line ? "Anexar Invoice / Comprovante" : "Salvar Comprovante Fiscal"}</DialogTitle></DialogHeader>
     <input ref={picker} type="file" className="hidden" accept={line ? "image/jpeg,image/png,image/webp,application/pdf" : "image/jpeg,image/png,image/webp"} capture={line ? undefined : "environment"} onChange={event => { const file = event.target.files?.[0]; if (file) void filePicked(file); event.target.value = ""; }} />
-    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3"><span className="min-w-0 truncate text-sm text-muted-foreground">{card?.name} · •••• {card?.last_four}</span><Button className="shrink-0" onClick={() => picker.current?.click()} disabled={busy} aria-label="Fotografar ou selecionar comprovante"><Camera />{path ? "Substituir foto" : "Fotografar"}</Button></div>
+    <div className="space-y-1"><Label>Forma de pagamento *</Label><RadioGroup aria-label="Forma de pagamento" value={draft.payment_source} disabled={busy || !!line} onValueChange={payment_source => change({ payment_source })} className="gap-1"><label className="flex min-h-11 cursor-pointer items-center gap-2 text-sm"><RadioGroupItem value="myio_card" /><span>Cartão myio · •••• {card?.last_four}</span></label><label className="flex min-h-11 cursor-pointer items-center gap-2 text-sm"><RadioGroupItem value="reimbursement" /><span>Reembolso · dinheiro ou cartão pessoal</span></label></RadioGroup></div>
+    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3"><span className="min-w-0 truncate text-sm text-muted-foreground">{draft.payment_source === "reimbursement" ? "Reembolso" : `${card?.name} · •••• ${card?.last_four}`}</span><Button className="shrink-0" onClick={() => picker.current?.click()} disabled={busy} aria-label="Fotografar ou selecionar comprovante"><Camera />{path ? "Substituir foto" : "Fotografar"}</Button></div>
     {busy && !path && !reading ? <p role="status" className="flex items-center gap-2 text-sm"><Loader2 className="size-4 animate-spin" />Preparando comprovante em P&B e removendo o fundo…</p> : null}
     {reading ? <p role="status" className="flex items-center gap-2 text-sm"><Loader2 className="size-4 animate-spin" />Lendo valor, categoria e CNPJ…</p> : null}
     {preview && !pdf ? <img src={preview} alt="Comprovante do gasto em P&B, sem o fundo" className="h-40 w-full rounded-md object-contain" /> : pdf ? <p className="text-sm">Invoice PDF anexada</p> : null}
@@ -115,7 +118,7 @@ export function SpendCapture({ data, cardId, line, receipt, onDone, onClose }: {
     <label className="space-y-1"><Label>{draft.category === "outros" ? "Especifique a despesa *" : `Observação ${draft.category === "servicos" ? "*" : "(opcional)"}`}</Label><Textarea aria-label="Observação do gasto" value={draft.observation} onChange={event => change({ observation: event.target.value })} /></label>
     {draft.category === "ferramentas" ? <div className="flex min-h-11 items-center gap-2 text-sm"><Checkbox id={`spend-photo-${draft.id}`} checked={draft.clear_photo} onCheckedChange={value => change({ clear_photo: value === true })} /><Label htmlFor={`spend-photo-${draft.id}`} className="flex min-h-11 flex-1 cursor-pointer items-center font-normal">A foto da NF/cupom está nítida</Label></div> : null}
     {draft.category === "ia" || draft.category === "software" ? <p className="text-xs text-muted-foreground">Recorrência mensal</p> : null}
-    {path ? <div className="flex min-h-11 items-center gap-2 text-sm"><Checkbox id={`spend-confirm-${draft.id}`} aria-label="Conferi e confirmo as informações do comprovante" disabled={busy} checked={draft.confirmed} onCheckedChange={value => setDraft(current => ({ ...current, confirmed: value === true }))} /><Label htmlFor={`spend-confirm-${draft.id}`} className="flex min-h-11 flex-1 cursor-pointer items-center py-2 font-normal">Conferi e confirmo valor, data, estabelecimento, categoria, CNPJ e demais informações.</Label></div> : null}
-    <div className="flex w-full justify-end"><Button className="ml-auto" variant="ghost" size="icon" title="Salvar Comprovante Fiscal" aria-label="Salvar Comprovante Fiscal" onClick={submit} disabled={busy || !path || !draft.confirmed || draft.myio_cnpj === null}><Save /></Button></div>
+    {path ? <div className="flex min-h-11 items-center gap-2 text-sm"><Checkbox id={`spend-confirm-${draft.id}`} aria-label="Conferi e confirmo as informações do comprovante" disabled={busy} checked={draft.confirmed} onCheckedChange={value => setDraft(current => ({ ...current, confirmed: value === true }))} /><Label htmlFor={`spend-confirm-${draft.id}`} className="flex min-h-11 flex-1 cursor-pointer items-center py-2 font-normal">Conferi e confirmo forma de pagamento, valor, data, estabelecimento, categoria, CNPJ e demais informações.</Label></div> : null}
+    <div className="flex w-full justify-end"><Button className="ml-auto" variant="ghost" size="icon" title="Salvar Comprovante Fiscal" aria-label="Salvar Comprovante Fiscal" onClick={submit} disabled={busy || !path || !draft.confirmed || draft.myio_cnpj === null || !paymentSourceSchema.safeParse(draft.payment_source).success}><Save /></Button></div>
   </DialogContent></Dialog>;
 }

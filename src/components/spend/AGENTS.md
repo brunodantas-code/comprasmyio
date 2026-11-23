@@ -14,3 +14,5 @@
 - Description case conversion is display-only and shared by reconciliation/import preview; retain bank originals in writes, exports and audit.
 - Reconciliation keeps line editors mounted while collapsed, limits Enter approval to the expanded line, and renders private statement PDFs with browser-loaded PDF.js to preserve drafts and support scrolling on mobile.
 - Bulk classification uses one finance-authorized, statement-scoped atomic RPC after confirmation; receipt waiver is persisted and audited, never inferred from merchant text or a caller's approval payload.
+- Payment source is independent of private card storage scope; matching helpers and locked RPCs exclude reimbursements, while pre-approval source corrections detach statement links with audit to prevent card posting.
+- Reimbursements hand off owner-verified IDs to Supply; photos stage privately before the existing request insert atomically locks and links receipts, preserving canonical values and blocking duplicate submission without changing approval chains.

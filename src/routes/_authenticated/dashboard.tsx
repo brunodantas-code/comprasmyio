@@ -89,6 +89,8 @@ import { Save } from "lucide-react";
 import { MilestoneTimeline } from "@/components/milestone-timeline";
 import { UserManualsTab } from "@/components/user-manuals-tab";
 import { legacySupplyAccessDestination } from "@/lib/access-management";
+import { loadReimbursementDraft, stageReimbursementAttachments, type ReimbursementDraft } from "@/components/spend/reimbursement";
+import { ReimbursementAttachments } from "@/components/spend/reimbursement-attachments";
 
 
 
@@ -97,6 +99,7 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
     section: typeof search.section === "string" ? search.section : undefined,
     subsection: typeof search.subsection === "string" ? search.subsection : undefined,
     ...(typeof search.order === "string" ? { order: search.order } : {}),
+    ...(typeof search['spendReceipts'] === 'string' ? { spendReceipts: search['spendReceipts'] } : {}),
   }),
   beforeLoad: async ({ context, search }) => {
     if (search.section === "admin") {
@@ -711,7 +714,7 @@ function Dashboard() {
           {canSeeRequests && <TabsContent value="pedidos">
             <Tabs value={activeRequestSection} onValueChange={setRequestSection}>
               {me.canAccess("solicitacoes_minhas") && <TabsContent value="mine"><MyOrders userId={me.id} canManageDevices={isAdmin} /></TabsContent>}
-              {me.canAccess("solicitacoes_novas") && <TabsContent value="new"><NewOrder userId={me.id} canImport={canImport} canManageProducts={isAdmin || me.isComprador} canShowCostCenter={me.canAccess("solicitacoes_centro_custo")} canCreateNewItem={me.canAccess("solicitacoes_item_novo")} canAllocateProject={me.canAccess("solicitacoes_alocacao_projeto")} canAllocateClient={me.canAccess("solicitacoes_alocacao_cliente")} canAllocateStock={me.canAccess("solicitacoes_alocacao_estoque")} canAllocateInternal={me.canAccess("solicitacoes_alocacao_interna")} /></TabsContent>}
+              {me.canAccess("solicitacoes_novas") && <TabsContent value="new"><NewOrder key={search.spendReceipts ?? 'new'} spendReceipts={search.spendReceipts ?? ''} userId={me.id} canImport={canImport} canManageProducts={isAdmin || me.isComprador} canShowCostCenter={me.canAccess("solicitacoes_centro_custo")} canCreateNewItem={me.canAccess("solicitacoes_item_novo")} canAllocateProject={me.canAccess("solicitacoes_alocacao_projeto")} canAllocateClient={me.canAccess("solicitacoes_alocacao_cliente")} canAllocateStock={me.canAccess("solicitacoes_alocacao_estoque")} canAllocateInternal={me.canAccess("solicitacoes_alocacao_interna")} /></TabsContent>}
             </Tabs>
 
           </TabsContent>}
@@ -1250,7 +1253,8 @@ function useAvgUnitPrice(item: PurchasableItem | null) {
   });
 }
 
-function NewOrder({ userId, canImport = false, canManageProducts = false, canShowCostCenter = false, canCreateNewItem = false, canAllocateProject = false, canAllocateClient = false, canAllocateStock = false, canAllocateInternal = false }: { userId: string; canImport?: boolean; canManageProducts?: boolean; canShowCostCenter?: boolean; canCreateNewItem?: boolean; canAllocateProject?: boolean; canAllocateClient?: boolean; canAllocateStock?: boolean; canAllocateInternal?: boolean }) {
+function NewOrder({ userId, spendReceipts = '', canImport = false, canManageProducts = false, canShowCostCenter = false, canCreateNewItem = false, canAllocateProject = false, canAllocateClient = false, canAllocateStock = false, canAllocateInternal = false }: { userId: string; spendReceipts?: string; canImport?: boolean; canManageProducts?: boolean; canShowCostCenter?: boolean; canCreateNewItem?: boolean; canAllocateProject?: boolean; canAllocateClient?: boolean; canAllocateStock?: boolean; canAllocateInternal?: boolean }) {
+  const navigate = Route.useNavigate();
   const { data: projects, isLoading } = useProjects();
   const { data: budgetSummaries } = useProjectBudgetSummaries();
   const qc = useQueryClient();
@@ -1399,6 +1403,29 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
   const [dupCandidates, setDupCandidates] = useState<PurchasableItem[]>([]);
   const [dismissedText, setDismissedText] = useState("");
   const formRef = useRef<HTMLFormElement | null>(null);
+  const [spendDraft, setSpendDraft] = useState<ReimbursementDraft | null>(null);
+  const [spendDraftError, setSpendDraftError] = useState('');
+  const initializedSpend = useRef('');
+  useEffect(() => {
+    if (!spendReceipts || !requestTypes || !me || initializedSpend.current === spendReceipts) return;
+    let cancelled = false;
+    const ids = spendReceipts.split(',');
+    const type = requestTypes.find(t => t.active && t.model_code === 'reembolso' && me.canRequestType(t.code));
+    if (!type) { setSpendDraftError('Seu acesso não permite abrir solicitação de reembolso no Supply.'); return; }
+    if (ids.length > 100 || ids.some(id => !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id))) { setSpendDraftError('Seleção de comprovantes inválida.'); return; }
+    void loadReimbursementDraft(ids).then(draft => {
+      if (cancelled) return;
+      initializedSpend.current = spendReceipts;
+      setSpendDraft(draft); setSpendDraftError(''); setRequestType(type.code); setForStock(false); setIsNewItem(true);
+      setReembolsoLegs(draft.receipts.map(r => ({ description: r.merchant, value: String(r.amount), date: r.date })));
+      setRecipient(me.full_name);
+      setRequesterNotes(draft.receipts.map(r => `${r.merchant}${r.observation ? ': ' + r.observation : ''}`).join('\n'));
+      const projectIds = new Set(draft.receipts.map(r => r.project_id).filter(Boolean));
+      const project = draft.receipts[0]?.project_id;
+      if (projectIds.size === 1 && project && canAllocateProject) { setAllocTarget('projeto'); setProjectId(project); }
+    }).catch((e: unknown) => { if (!cancelled) setSpendDraftError(e instanceof Error ? e.message : 'Não foi possível carregar os comprovantes.'); });
+    return () => { cancelled = true; };
+  }, [spendReceipts, requestTypes, me, canAllocateProject]);
   const [checking, setChecking] = useState(false);
   const [split, setSplit] = useState<{
     values: z.infer<typeof newOrderSchema>;
@@ -1468,6 +1495,8 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
     setRhTipo("");
     setRhRemuneracao("0");
     setSiteSurveyDraft(null);
+    setSpendDraft(null);
+    if (spendReceipts) void navigate({ search: previous => ({ ...previous, spendReceipts: undefined }), replace: true });
     setRequesterNotes("");
 
   };
@@ -1534,8 +1563,10 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
       }
 
       if (buyQty > 0) {
+        const spendAttachments = spendDraft ? await stageReimbursementAttachments(spendDraft, userId) : [];
         const { data, error } = await supabase.from("purchase_orders").insert({
           ...resolvedAllocation,
+          ...(spendDraft ? { spend_receipt_ids: spendDraft.receipts.map(r => r.id), attachments: spendAttachments } : {}),
           request_type: requestType,
           cost_center_id: restrictedCc ? await resolveOperacaoCostCenterId() : (costCenterId || null),
           tag_id: resolveSupplyTag(resolvedAllocation.allocation_type, tagId),
@@ -1576,7 +1607,10 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
             : [],
           requester_id: userId,
         }).select("id,budget_exceeded,budget_snapshot,projected_committed_snapshot").single();
-        if (error) throw error;
+        if (error) {
+          if (spendAttachments.length) await supabase.storage.from('order-attachments').remove(spendAttachments.map(a => a.path));
+          throw error;
+        }
         createdOrder = data;
         if (groupedItems?.length && data?.id) {
           const { error: itemError } = await supabase.from("purchase_order_items").insert(groupedItems.map((row, position) => ({
@@ -1598,7 +1632,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
         }
         if (files.length && data?.id) {
           const uploaded = await uploadOrderAttachments(data.id, files);
-          const { error: ue } = await supabase.from("purchase_orders").update({ attachments: uploaded }).eq("id", data.id);
+          const { error: ue } = await supabase.from("purchase_orders").update({ attachments: [...spendAttachments, ...uploaded] }).eq("id", data.id);
           if (ue) throw ue;
         }
       }
@@ -1612,6 +1646,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
         toast.warning(`Solicitação salva com alerta: o projeto chegará a ${formatBRL(r.projected)} para um orçamento de ${formatBRL(r.budget)}.`);
       }
       qc.invalidateQueries({ queryKey: ["orders"] });
+      qc.invalidateQueries({ queryKey: ["spend"] });
       qc.invalidateQueries({ queryKey: ["myio-orders"] });
       qc.invalidateQueries({ queryKey: ["purchasable-items"] });
       qc.invalidateQueries({ queryKey: ["stock"] });
@@ -1625,6 +1660,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (spendReceipts && (!spendDraft || spendDraftError)) return toast.error(spendDraftError || 'Aguarde o carregamento de todos os comprovantes.');
     const form = e.currentTarget;
     if (baseRequestModel === "viagens" && !travelType) return toast.error("Selecione o que deseja solicitar");
     if ((baseRequestModel === "materiais" || baseRequestModel === "servicos") && subtypeOptions.length > 0 && !requestSubtype) return toast.error("Selecione o que deseja solicitar");
@@ -1761,9 +1797,11 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
 
   const typeSelector = (
     <div className="space-y-2">
+      {spendReceipts && <p className={`text-sm ${spendDraftError ? 'text-destructive' : 'text-muted-foreground'}`}>{spendDraftError || (spendDraft ? `${spendDraft.receipts.length} reembolsos do Spend` : 'Carregando comprovantes do Spend...')}</p>}
       <Label>Tipo de solicitação</Label>
       <Select
         value={requestType}
+        disabled={!!spendReceipts && !!spendDraft}
         onValueChange={(v) => {
           setRequestType(v);
           setTravelType("");
@@ -1930,7 +1968,7 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                   <div key={i} className="rounded-md border p-3 space-y-3">
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-semibold">{selectedTravelSubtype ? `${selectedTravelSubtype.name} ${i + 1}` : `Reembolso ${i + 1}`}</span>
-                      {reembolsoLegs.length > 1 && (
+                      {!spendDraft && reembolsoLegs.length > 1 && (
                         <ConfirmDeleteButton title="Remover reembolso?" description={`Confirma a remoção do reembolso ${i + 1}?`} ariaLabel="Remover reembolso" confirmLabel="Remover" onConfirm={() => setReembolsoLegs((prev) => prev.filter((_, idx) => idx !== i))} trigger={<Button type="button" variant="ghost" size="compactIcon" className="text-destructive hover:text-destructive" title="Remover reembolso" aria-label="Remover reembolso"><Trash2 className="h-3.5 w-3.5" /></Button>} />
                       )}
                     </div>
@@ -1941,18 +1979,18 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor={`reembolso_value_${i}`}>Valor (R$)</Label>
-                        <MoneyInput id={`reembolso_value_${i}`} className="w-32" value={leg.value} onChange={(v) => updateReembolsoLeg(i, { value: v })} />
+                        <MoneyInput id={`reembolso_value_${i}`} disabled={!!spendDraft} className="w-32" value={leg.value} onChange={(v) => updateReembolsoLeg(i, { value: v })} />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor={`reembolso_date_${i}`}>Data da despesa</Label>
-                        <Input id={`reembolso_date_${i}`} type="date" value={leg.date} onChange={(e) => updateReembolsoLeg(i, { date: e.target.value })} />
+                        <Input id={`reembolso_date_${i}`} readOnly={!!spendDraft} type="date" value={leg.date} onChange={(e) => updateReembolsoLeg(i, { date: e.target.value })} />
                       </div>
                     </div>
                   </div>
                 ))}
                 <div className="flex items-center gap-2">
-                  <CdeButton group="plus" screen="routes/_authenticated/dashboard.tsx" type="button" onClick={() => setReembolsoLegs((prev) => [...prev, { description: "", value: "", date: "" }])} aria-label="Adicionar"></CdeButton>
-                  <span className="text-sm text-muted-foreground">Deseja adicionar outro reembolso a esta Solicitação?</span>
+                  {!spendDraft && <><CdeButton group="plus" screen="routes/_authenticated/dashboard.tsx" type="button" onClick={() => setReembolsoLegs((prev) => [...prev, { description: "", value: "", date: "" }])} aria-label="Adicionar"></CdeButton>
+                  <span className="text-sm text-muted-foreground">Deseja adicionar outro reembolso a esta Solicitação?</span></>}
                 </div>
               </div>
             )}
@@ -2383,8 +2421,9 @@ function NewOrder({ userId, canImport = false, canManageProducts = false, canSho
               <Label htmlFor="requester_notes">Observações <span className="text-muted-foreground">(opcional)</span></Label>
               <Textarea id="requester_notes" name="requester_notes" value={requesterNotes} onChange={(event) => setRequesterNotes(event.target.value)} placeholder="Detalhes adicionais para o time de supply" />
             </div>
+            {spendDraft && <ReimbursementAttachments draft={spendDraft} />}
             <FilePicker files={files} setFiles={setFiles} />
-            <Button type="submit" disabled={submit.isPending || checking}>
+            <Button type="submit" disabled={submit.isPending || checking || (!!spendReceipts && !spendDraft)}>
               {checking ? "Verificando estoque..." : submit.isPending ? "Enviando..." : "Salvar"}
             </Button>
           </form>

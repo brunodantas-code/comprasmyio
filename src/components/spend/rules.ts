@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { spendStates } from "./fiscal-location";
+import { isCardReceipt, paymentSourceSchema } from "./payment-source";
 
 export const categories = [
   { key: "alimentacao", name: "Alimentação", icon: "Utensils", account: "Despesas com Refeições e Lanches" },
@@ -19,6 +20,7 @@ export const expenseSchema = z.object({
   id: z.string().uuid(), card_id: z.string().uuid(), date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   merchant: z.string().trim().min(1, "Informe o estabelecimento"), amount: z.number().positive("Informe o valor"),
   category: categoryKey, observation: z.string().trim().max(2000), project_id: z.string().uuid().nullable(),
+  payment_source: paymentSourceSchema,
   city: z.string().trim().max(120).default(""), uf: z.union([z.enum(spendStates), z.literal("")]).default(""), access_key: z.string().regex(/^\d{44}$/).nullable().default(null),
   file_path: z.string().min(1), clear_photo: z.boolean(), myio_cnpj: z.boolean({ message: "Confirme Com ou Sem CNPJ myio" }),
   confirmed: z.literal(true, { message: "Confirme todas as informações antes de salvar" }),
@@ -28,8 +30,9 @@ export const expenseSchema = z.object({
   if (v.category === "ferramentas" && !v.clear_photo) ctx.addIssue({ code: "custom", path: ["clear_photo"], message: "Confirme que a foto da NF/cupom está nítida" });
 });
 export type ExpenseInput = z.infer<typeof expenseSchema>;
-export type MatchItem = { card_id: string; date: string; amount: number; final_cartao: string };
+export type MatchItem = { card_id: string; date: string; amount: number; final_cartao: string; payment_source?: string };
 export function canMatch(a: MatchItem, b: MatchItem) {
+  if (!isCardReceipt({ payment_source: a.payment_source ?? "myio_card" }) || !isCardReceipt({ payment_source: b.payment_source ?? "myio_card" })) return false;
   const days = Math.abs(Date.parse(`${a.date}T00:00:00Z`) - Date.parse(`${b.date}T00:00:00Z`)) / 86400000;
   return a.card_id === b.card_id && /^\d{4}$/.test(a.final_cartao) && a.final_cartao === b.final_cartao && Math.round(a.amount * 100) === Math.round(b.amount * 100) && days <= 2;
 }
