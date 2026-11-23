@@ -13823,6 +13823,7 @@ export type Database = {
       spend_action: { Args: { _action: string; _data: Json }; Returns: Json }
       spend_apply_supplier_allocations: { Args: never; Returns: number }
       spend_card_access: { Args: { _card: string }; Returns: boolean }
+      spend_delete_receipt: { Args: { _receipt_id: string }; Returns: Json }
       spend_project_allowed: { Args: { _project: string }; Returns: boolean }
       spend_reimbursement_receipts: {
         Args: { _ids: string[] }

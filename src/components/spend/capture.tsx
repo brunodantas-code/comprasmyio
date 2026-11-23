@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Camera, Check, Loader2, Save } from "lucide-react";
+import { Camera, Check, Loader2, Save, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +13,10 @@ import { SearchableSelect } from "@/components/ui/searchable-select";
 import { extractSpendDocument } from "@/lib/spend.functions";
 import { configuredCategories, expenseSchema, recurringWarning } from "./rules";
 import { categoryIcons } from "./icons";
-import { spendAction, spendFileUrl, uploadSpend, type SpendData, type Line, type Receipt } from "./data";
+import { deleteSpendReceipt, spendAction, spendFileUrl, uploadSpend, type SpendData, type Line, type Receipt } from "./data";
+import { canDeleteSpendReceipt } from "./receipt-edit";
+import { confirmAction } from "@/components/confirm-dialog";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { formatSpendAmount, parseSpendAmount } from "./amount";
 import { prepareSpendReceipt } from "./receipt-image";
 import { spendFiscalLocation, spendStates } from "./fiscal-location";
@@ -102,6 +105,20 @@ export function SpendCapture({ data, cardId, line, receipt, onDone, onClose }: {
     }
   }
 
+  async function removeReceipt() {
+    if (!receipt || busy) return;
+    if (!await confirmAction(`Excluir o comprovante de ${receipt.merchant}?${linkedReceipt ? ' O lançamento da fatura será mantido e voltará a aguardar comprovante.' : ''}`, { title: receipt.payment_source === 'reimbursement' ? 'Excluir reembolso' : 'Excluir comprovante', confirmLabel: 'Excluir comprovante' })) return;
+    setBusy(true);
+    try {
+      await deleteSpendReceipt(receipt.id);
+      await onDone();
+      toast.success('Comprovante excluído');
+      onClose();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Não foi possível excluir');
+    } finally { setBusy(false); }
+  }
+
   return <Dialog open onOpenChange={open => { if (!open && !busy) onClose(); }}><DialogContent onOpenAutoFocus={event => { if (!receipt) { event.preventDefault(); picker.current?.click(); } }} className="max-h-[90dvh] max-w-xl overflow-y-auto"><DialogHeader className="pr-24"><DialogTitle>{receipt ? "Editar comprovante" : line ? "Anexar Invoice / Comprovante" : "Salvar Comprovante Fiscal"}</DialogTitle></DialogHeader>
     <input ref={picker} type="file" className="hidden" accept={line ? "image/jpeg,image/png,image/webp,application/pdf" : "image/jpeg,image/png,image/webp"} capture={line ? undefined : "environment"} onChange={event => { const file = event.target.files?.[0]; if (file) void filePicked(file); event.target.value = ""; }} />
     <div className="space-y-1"><Label>Forma de pagamento *</Label><RadioGroup aria-label="Forma de pagamento" value={draft.payment_source} disabled={busy || !!line} onValueChange={payment_source => change({ payment_source })} className="gap-1"><label className="flex min-h-11 cursor-pointer items-center gap-2 text-sm"><RadioGroupItem value="myio_card" /><span>Cartão myio · •••• {card?.last_four}</span></label><label className="flex min-h-11 cursor-pointer items-center gap-2 text-sm"><RadioGroupItem value="reimbursement" /><span>Reembolso · dinheiro ou cartão pessoal</span></label></RadioGroup></div>
@@ -119,6 +136,6 @@ export function SpendCapture({ data, cardId, line, receipt, onDone, onClose }: {
     {draft.category === "ferramentas" ? <div className="flex min-h-11 items-center gap-2 text-sm"><Checkbox id={`spend-photo-${draft.id}`} checked={draft.clear_photo} onCheckedChange={value => change({ clear_photo: value === true })} /><Label htmlFor={`spend-photo-${draft.id}`} className="flex min-h-11 flex-1 cursor-pointer items-center font-normal">A foto da NF/cupom está nítida</Label></div> : null}
     {draft.category === "ia" || draft.category === "software" ? <p className="text-xs text-muted-foreground">Recorrência mensal</p> : null}
     {path ? <div className="flex min-h-11 items-center gap-2 text-sm"><Checkbox id={`spend-confirm-${draft.id}`} aria-label="Conferi e confirmo as informações do comprovante" disabled={busy} checked={draft.confirmed} onCheckedChange={value => setDraft(current => ({ ...current, confirmed: value === true }))} /><Label htmlFor={`spend-confirm-${draft.id}`} className="flex min-h-11 flex-1 cursor-pointer items-center py-2 font-normal">Conferi e confirmo forma de pagamento, valor, data, estabelecimento, categoria, CNPJ e demais informações.</Label></div> : null}
-    <div className="flex w-full justify-end"><Button className="ml-auto" variant="ghost" size="icon" title="Salvar Comprovante Fiscal" aria-label="Salvar Comprovante Fiscal" onClick={submit} disabled={busy || !path || !draft.confirmed || draft.myio_cnpj === null || !paymentSourceSchema.safeParse(draft.payment_source).success}><Save /></Button></div>
+    <div className="flex w-full items-center justify-end gap-2">{receipt && canDeleteSpendReceipt(receipt,data.user_id,data.lines.some(item => item.receipt_id === receipt.id && (item.status === 'approved' || !!item.payable_id))) && <TooltipProvider><Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" aria-label={receipt.payment_source === 'reimbursement' ? 'Excluir reembolso' : 'Excluir comprovante'} disabled={busy} onClick={() => void removeReceipt()}><Trash2 /></Button></TooltipTrigger><TooltipContent>{receipt.payment_source === 'reimbursement' ? 'Excluir reembolso' : 'Excluir comprovante'}</TooltipContent></Tooltip></TooltipProvider>}<Button variant="ghost" size="icon" title="Salvar Comprovante Fiscal" aria-label="Salvar Comprovante Fiscal" onClick={submit} disabled={busy || !path || !draft.confirmed || draft.myio_cnpj === null || !paymentSourceSchema.safeParse(draft.payment_source).success}><Save /></Button></div>
   </DialogContent></Dialog>;
 }

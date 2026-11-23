@@ -2038,6 +2038,13 @@
       "when": 1795457956520,
       "tag": "0290_spend_supply_reimbursement_consolidation",
       "breakpoints": true
+    },
+    {
+      "idx": 291,
+      "version": "7",
+      "when": 1795460326860,
+      "tag": "0291_spend_owner_receipt_delete",
+      "breakpoints": true
     }
   ]
 }

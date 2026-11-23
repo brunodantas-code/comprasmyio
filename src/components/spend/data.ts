@@ -29,6 +29,11 @@ export async function saveSpendClassification(data: Json) {
   if (r.error) throw new Error(r.error.message);
   return r.data;
 }
+export async function deleteSpendReceipt(receiptId: string) {
+  const result = await supabase.rpc("spend_delete_receipt", { _receipt_id: receiptId });
+  if (result.error) throw new Error(result.error.message);
+  if (!result.data || typeof result.data !== 'object' || Array.isArray(result.data) || result.data['ok'] !== true) throw new Error("Não foi possível confirmar a exclusão");
+}
 export async function uploadSpend(file: File, card: SpendCard, period: string) {
   if (file.size > 20 * 1024 * 1024) throw new Error("O arquivo deve ter até 20 MB");
   if (!["application/pdf", "image/jpeg", "image/png", "image/webp"].includes(file.type)) throw new Error("Use PDF, JPG, PNG ou WebP");
