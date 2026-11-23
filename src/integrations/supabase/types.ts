@@ -11457,6 +11457,7 @@ export type Database = {
           payable_id: string | null
           project_id: string | null
           receipt_id: string | null
+          receipt_not_applicable: boolean
           statement_id: string
           status: string
         }
@@ -11476,6 +11477,7 @@ export type Database = {
           payable_id?: string | null
           project_id?: string | null
           receipt_id?: string | null
+          receipt_not_applicable?: boolean
           statement_id: string
           status?: string
         }
@@ -11495,6 +11497,7 @@ export type Database = {
           payable_id?: string | null
           project_id?: string | null
           receipt_id?: string | null
+          receipt_not_applicable?: boolean
           statement_id?: string
           status?: string
         }

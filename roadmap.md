@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Spend: checkbox seleciona filtrados editáveis; classificação conjunta confirmada, cancelamento e salvar/reabrir conferidos em dois IOFs temporários. Não se aplica persistido/auditado libera aprovação sem anexo, um único registro no Finance; terceiro movimento intacto. Dados temporários removidos; 19 testes passaram.
 - [x] Spend: categorias adicionáveis/excluíveis no CDE; categoria nova salva/reaberta e disponível na captura, exclusão confirmada e registros preservados; 15 testes passaram.
 - [x] Informado: item 10 — Bordas de classificação dos cards, selecionar Indicadores.
 - [x] Indicadores: OKRs e KRs medidos em 256×192 px; KRs/KPIs compactos, check-in por ícone funcional e sem overflow. Tags padrão transparentes e nove fundos verdes salvos no CDE neutralizados, outras cores preservadas; celular conferido, cinco testes passaram.

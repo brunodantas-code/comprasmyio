@@ -1989,6 +1989,13 @@
       "when": 1795398489976,
       "tag": "0283_spend_dynamic_categories",
       "breakpoints": true
+    },
+    {
+      "idx": 284,
+      "version": "7",
+      "when": 1795400262903,
+      "tag": "0284_spend_bulk_classification_receipt_waiver",
+      "breakpoints": true
     }
   ]
 }

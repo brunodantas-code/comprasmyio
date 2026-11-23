@@ -479,6 +479,16 @@
     ]
   },
   {
+    "id": "components/indicadores/access.tsx|0",
+    "file": "components/indicadores/access.tsx",
+    "line": 81,
+    "context": "Perfis · Indicadores",
+    "headers": [
+      "Usuário",
+      "Perfil"
+    ]
+  },
+  {
     "id": "components/job-titles-tab.tsx|0",
     "file": "components/job-titles-tab.tsx",
     "line": 124,
@@ -759,6 +769,19 @@
     ]
   },
   {
+    "id": "components/spend/workspace.tsx|0",
+    "file": "components/spend/workspace.tsx",
+    "line": 118,
+    "context": "Lançamentos da fatura",
+    "headers": [
+      "(sem título)",
+      "Data / Descrição",
+      "Valor",
+      "Situação",
+      "Ações"
+    ]
+  },
+  {
     "id": "components/stock-destinations-tab.tsx|0",
     "file": "components/stock-destinations-tab.tsx",
     "line": 111,
@@ -1016,16 +1039,6 @@
       "Situação",
       "Revisão",
       "PDF"
-    ]
-  },
-  {
-    "id": "components/indicadores/access.tsx|0",
-    "file": "components/indicadores/access.tsx",
-    "line": 81,
-    "context": "Perfis · Indicadores",
-    "headers": [
-      "Usuário",
-      "Perfil"
     ]
   },
   {
