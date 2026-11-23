@@ -3,17 +3,21 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { useTitleText } from "@/components/cde/title-text";
 import { useCdeBoxStyle } from "@/components/cde/cde-button";
+import { useCardClassificationBorder } from "@/components/cde/card-border";
+import type { CardBorderConfig, CardClassification } from "@/components/cde/card-border-config";
 
-const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, style, ...props }, ref) => {
+const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement> & { classification?: CardClassification; classificationPreview?: CardBorderConfig }>(
+  ({ className, style, classification, classificationPreview, ...props }, ref) => {
     // Box segue ao vivo o padrão escolhido no CDE.
     const box = useCdeBoxStyle();
+    const border = useCardClassificationBorder(classification, classificationPreview);
     return (
       <div
         ref={ref}
-        style={{ ...box.css, ...style }}
+        style={{ ...box.css, ...style, ...border.style }}
         className={cn(box.className || "rounded-xl border bg-card text-card-foreground shadow", box.cls, className)}
         {...props}
+        {...border.attributes}
       />
     );
   },

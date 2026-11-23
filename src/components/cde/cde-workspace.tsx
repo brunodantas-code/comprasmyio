@@ -1,6 +1,7 @@
 import { CdeAppearance } from "./cde-appearance-item";
 import { SpendCategoryConfig } from "@/components/spend/category-config";
 import { AppAppearanceItem } from "./app-appearance-item";
+import { CdeCardBorders } from "./cde-card-borders";
 import { CdeFilterStandard } from "./cde-filter-standard";
 import { NumericMarkerEditor } from "./numeric-marker-editor";
 import { CDE_APPEARANCE_DEFAULT, cdeAppearanceVars, useCdeAppearance } from "./cde-appearance";
@@ -108,7 +109,7 @@ const PARENTS: Record<string, string> = { "1": "Campos para preenchimento", "3":
 const baseTitle = (t: string) => t.split(" ").slice(1).join(" ");
 const groupParent = (t: string) => { const n = t.split(" ")[0].replace(/\.$/, ""); return n.includes(".") ? n.split(".")[0] : null; };
 const CDE_DEFAULT_ORDER: CdeOrder = {
-  cats: ["app_appearance", "cde_appearance", ...[...new Set(GROUPS.map((g) => groupParent(g.title) ? `p:${groupParent(g.title)}` : g.key))], "icons", "nav", "menu", "apps", "table_fonts", "title_texts", "tags", "corporate_messages", "button_library", "deadline_alerts", "project_budget", "project_appearance", "spend_categories"],
+  cats: ["app_appearance", "cde_appearance", ...[...new Set(GROUPS.map((g) => groupParent(g.title) ? `p:${groupParent(g.title)}` : g.key))], "card_borders", "icons", "nav", "menu", "apps", "table_fonts", "title_texts", "tags", "corporate_messages", "button_library", "deadline_alerts", "project_budget", "project_appearance", "spend_categories"],
   subs: Object.fromEntries(Object.keys(PARENTS).map((p) => [p, GROUPS.filter((g) => groupParent(g.title) === p).map((g) => g.key)])),
 };
 const EXTRA_LABELS: Record<string, string> = { spend_categories: "Spend — categorias de despesas", project_appearance: "Cores do Projects", project_budget: "Orçamento do Projects", cde_appearance: "Aparência do CDE", icons: "Ícones dos Apps e menus", nav: "Navegação (UI/UX)", menu: "Menu principal", apps: "Home Page", table_fonts: "Cabeçalhos e Listas", tags: "Tags", title_texts: "Títulos e Subtítulos", corporate_messages: "Mensagens corporativas", button_library: "Biblioteca de botões em uso", deadline_alerts: "Alertas de Prazo" };
@@ -136,7 +137,7 @@ export function CdeWorkspace() {
   const [collapseKey, setCollapseKey] = useState(0);
   const appearance = useCdeAppearance().data ?? CDE_APPEARANCE_DEFAULT;
   const { order: cdeOrder, save: saveCdeOrder } = useCdeOrder(CDE_DEFAULT_ORDER);
-  const catLabel = (c: string) => c === "app_appearance" ? "Aparência" : c.startsWith("p:") ? PARENTS[c.slice(2)] : EXTRA_LABELS[c] ?? baseTitle(GROUPS.find((x) => x.key === c)?.title ?? c);
+  const catLabel = (c: string) => c === "card_borders" ? "Bordas de classificação dos cards" : c === "app_appearance" ? "Aparência" : c.startsWith("p:") ? PARENTS[c.slice(2)] : EXTRA_LABELS[c] ?? baseTitle(GROUPS.find((x) => x.key === c)?.title ?? c);
   const groupTitle = (key: string) => {
     const g = GROUPS.find((x) => x.key === key); if (!g) return "";
     const p = groupParent(g.title);
@@ -464,6 +465,7 @@ export function CdeWorkspace() {
             );
           }
           if (cat === "icons") return <CdeAppIcons key={`CdeAppIcons-${collapseKey}`} number={ci + 1} handle={handle} />;
+          if (cat === "card_borders") return <CdeCardBorders key={`CdeCardBorders-${collapseKey}`} number={ci + 1} handle={handle} />;
           if (cat === "spend_categories") return <SpendCategoryConfig key={`SpendCategories-${collapseKey}`} number={ci + 1} handle={handle} />;
           if (cat === "nav") return <CdeNavigation key={`CdeNavigation-${collapseKey}`} number={ci + 1} handle={handle} />;
           if (cat === "menu") return <CdeMainMenu key={`CdeMainMenu-${collapseKey}`} number={ci + 1} handle={handle} />;

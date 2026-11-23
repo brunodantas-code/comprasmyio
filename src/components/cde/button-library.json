@@ -2327,7 +2327,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|4df33b65fce17228|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 127,
+    "line": 128,
     "tag": "button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -2342,7 +2342,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|231a7abf9009e9c1|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 128,
+    "line": 129,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -2357,7 +2357,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|f857b332789216e5|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 334,
+    "line": 335,
     "tag": "CdeButton",
     "label": "Criar modelo",
     "dynamic": false,
@@ -2372,7 +2372,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|5da02bf919be1fcb|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 335,
+    "line": 336,
     "tag": "button",
     "label": "modelos ·",
     "dynamic": true,
@@ -2387,7 +2387,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|fa8c7d49a4be2739|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 344,
+    "line": 345,
     "tag": "CdeButton",
     "label": "Criar modelo",
     "dynamic": false,
@@ -2402,7 +2402,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|f791d685d80483f8|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 345,
+    "line": 346,
     "tag": "CdeButton",
     "label": "Sem nome fixo",
     "dynamic": false,
@@ -2417,7 +2417,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|bf4bc59b3127d3cb|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 360,
+    "line": 361,
     "tag": "Button",
     "label": "Editar modelo",
     "dynamic": false,
@@ -2432,7 +2432,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|bc74324fa1e657bf|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 361,
+    "line": 362,
     "tag": "Button",
     "label": "Trash2",
     "dynamic": false,
@@ -2447,7 +2447,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|266e760c60109aa6|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 366,
+    "line": 367,
     "tag": "Button",
     "label": "Padrão (remover) / Padrão principal (remover) / Adicionar como padrão / Tornar principal / Escolher como padrão",
     "dynamic": true,
@@ -2462,7 +2462,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|388711b738ca490e|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 370,
+    "line": 371,
     "tag": "Button",
     "label": "s / Padrão secundário por tela",
     "dynamic": true,
@@ -2477,7 +2477,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|ad4583041c4a5fe6|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 381,
+    "line": 382,
     "tag": "CdeButton",
     "label": "Sem nome fixo",
     "dynamic": false,
@@ -2492,7 +2492,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|957651bdfdf19f94|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 398,
+    "line": 399,
     "tag": "CdeButton",
     "label": "Sem nome fixo",
     "dynamic": false,
@@ -2507,7 +2507,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|b621c28901e39486|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 410,
+    "line": 411,
     "tag": "CdeButton",
     "label": "Sem nome fixo",
     "dynamic": false,
@@ -2522,7 +2522,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|fca6be028ea11516|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 420,
+    "line": 421,
     "tag": "CdeButton",
     "label": "Sem nome fixo",
     "dynamic": false,
@@ -2537,7 +2537,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|df7a84e1a6a84f82|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 426,
+    "line": 427,
     "tag": "Button",
     "label": "Restaurar modelo",
     "dynamic": false,
@@ -2552,7 +2552,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|ca37ea1739cd7ac2|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 443,
+    "line": 444,
     "tag": "Button",
     "label": "Recolher tudo",
     "dynamic": false,
@@ -2567,7 +2567,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|d28478a4de1b6b68|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 533,
+    "line": 535,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -2582,7 +2582,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|fd8d2b22c3bed015|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 534,
+    "line": 536,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -2597,7 +2597,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|758d89a80b0968e2|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 553,
+    "line": 555,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -2612,7 +2612,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|5bfeb96807f40237|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 554,
+    "line": 556,
     "tag": "Button",
     "label": "Excluir",
     "dynamic": false,
@@ -2627,7 +2627,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|558b9c4f599890d9|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 576,
+    "line": 578,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -2642,7 +2642,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|3acf816df56366de|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 577,
+    "line": 579,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -2771,6 +2771,36 @@
     "icon": "",
     "variant": "outline",
     "size": "sm",
+    "className": "",
+    "group": ""
+  },
+  {
+    "id": "components/cde/cde-card-borders.tsx|c9a2d2d61cbd31fd|0",
+    "file": "components/cde/cde-card-borders.tsx",
+    "line": 80,
+    "tag": "Button",
+    "label": "Salvar bordas dos cards",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "Save",
+    "variant": "ghost",
+    "size": "icon",
+    "className": "",
+    "group": ""
+  },
+  {
+    "id": "components/cde/cde-card-borders.tsx|2c55d5da786964d9|0",
+    "file": "components/cde/cde-card-borders.tsx",
+    "line": 81,
+    "tag": "Button",
+    "label": "Cancelar alterações das bordas",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "X",
+    "variant": "ghost",
+    "size": "icon",
     "className": "",
     "group": ""
   },
@@ -3857,7 +3887,7 @@
   {
     "id": "components/crm/crm-workspace.tsx|eff1c540e2ea123b|0",
     "file": "components/crm/crm-workspace.tsx",
-    "line": 40,
+    "line": 41,
     "tag": "Button",
     "label": "Plus",
     "dynamic": true,
@@ -3872,7 +3902,7 @@
   {
     "id": "components/crm/crm-workspace.tsx|679e20ab81379a47|0",
     "file": "components/crm/crm-workspace.tsx",
-    "line": 82,
+    "line": 83,
     "tag": "Button",
     "label": "CRM anterior",
     "dynamic": false,
@@ -3887,7 +3917,7 @@
   {
     "id": "components/crm/crm-workspace.tsx|6702d10e35b00cf4|0",
     "file": "components/crm/crm-workspace.tsx",
-    "line": 122,
+    "line": 123,
     "tag": "Button",
     "label": "Importar CSV",
     "dynamic": false,
@@ -3902,7 +3932,7 @@
   {
     "id": "components/crm/crm-workspace.tsx|d5ac3e9830e8164e|0",
     "file": "components/crm/crm-workspace.tsx",
-    "line": 152,
+    "line": 153,
     "tag": "Button",
     "label": "Escolher arquivo",
     "dynamic": false,
@@ -3917,7 +3947,7 @@
   {
     "id": "components/crm/crm-workspace.tsx|37a7ed93258a8466|0",
     "file": "components/crm/crm-workspace.tsx",
-    "line": 154,
+    "line": 155,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -3932,7 +3962,7 @@
   {
     "id": "components/crm/crm-workspace.tsx|cbe4678d4a0444fd|0",
     "file": "components/crm/crm-workspace.tsx",
-    "line": 176,
+    "line": 177,
     "tag": "button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -3947,7 +3977,7 @@
   {
     "id": "components/crm/crm-workspace.tsx|d3e63a9cee029c4d|0",
     "file": "components/crm/crm-workspace.tsx",
-    "line": 177,
+    "line": 178,
     "tag": "button",
     "label": "▲ / ▼",
     "dynamic": true,
@@ -3962,7 +3992,7 @@
   {
     "id": "components/crm/crm-workspace.tsx|ea537393dc33b792|0",
     "file": "components/crm/crm-workspace.tsx",
-    "line": 179,
+    "line": 180,
     "tag": "button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -3977,7 +4007,7 @@
   {
     "id": "components/crm/crm-workspace.tsx|bd6c867f24700f65|0",
     "file": "components/crm/crm-workspace.tsx",
-    "line": 190,
+    "line": 192,
     "tag": "button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -3992,7 +4022,7 @@
   {
     "id": "components/crm/crm-workspace.tsx|ebc1a14c2ffcb1b0|0",
     "file": "components/crm/crm-workspace.tsx",
-    "line": 237,
+    "line": 239,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -4007,7 +4037,7 @@
   {
     "id": "components/crm/crm-workspace.tsx|ae85521702d6b455|0",
     "file": "components/crm/crm-workspace.tsx",
-    "line": 311,
+    "line": 313,
     "tag": "Button",
     "label": "Converter em oportunidade",
     "dynamic": false,
@@ -4997,7 +5027,7 @@
   {
     "id": "components/indicadores/dashboard.tsx|0432d3e046f07afa|0",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 181,
+    "line": 183,
     "tag": "Button",
     "label": "Icon",
     "dynamic": false,
@@ -5012,7 +5042,7 @@
   {
     "id": "components/indicadores/dashboard.tsx|a8dffd5f98a1302d|0",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 221,
+    "line": 223,
     "tag": "Button",
     "label": "Check-in",
     "dynamic": false,
@@ -5027,7 +5057,7 @@
   {
     "id": "components/indicadores/dashboard.tsx|9e77056673298c3b|0",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 228,
+    "line": 230,
     "tag": "Button",
     "label": "Criar OKR",
     "dynamic": false,
@@ -5042,7 +5072,7 @@
   {
     "id": "components/indicadores/dashboard.tsx|186b26e208d5a78a|0",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 277,
+    "line": 279,
     "tag": "CdeButton",
     "label": "Novo Key Result",
     "dynamic": false,
@@ -5057,7 +5087,7 @@
   {
     "id": "components/indicadores/dashboard.tsx|f78efca9e424c46c|0",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 295,
+    "line": 297,
     "tag": "Button",
     "label": "Expandir OKR",
     "dynamic": false,
@@ -5072,7 +5102,7 @@
   {
     "id": "components/indicadores/dashboard.tsx|2466d7a3dce4a979|0",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 343,
+    "line": 345,
     "tag": "CdeButton",
     "label": "Sem nome fixo",
     "dynamic": false,
@@ -5087,7 +5117,7 @@
   {
     "id": "components/indicadores/dashboard.tsx|1b6135276a72b3a5|0",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 405,
+    "line": 407,
     "tag": "Button",
     "label": "v.icon",
     "dynamic": false,
@@ -5102,7 +5132,7 @@
   {
     "id": "components/indicadores/dashboard.tsx|2466d7a3dce4a979|1",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 419,
+    "line": 421,
     "tag": "CdeButton",
     "label": "Sem nome fixo",
     "dynamic": false,
@@ -5117,7 +5147,7 @@
   {
     "id": "components/indicadores/dashboard.tsx|d850325f261cf0df|0",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 582,
+    "line": 584,
     "tag": "CdeButton",
     "label": "Novo Key Result",
     "dynamic": false,
@@ -5132,7 +5162,7 @@
   {
     "id": "components/indicadores/dashboard.tsx|56e0edbf13436716|0",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 582,
+    "line": 584,
     "tag": "Button",
     "label": "Check-in",
     "dynamic": false,
@@ -5147,7 +5177,7 @@
   {
     "id": "components/indicadores/dashboard.tsx|e2c6700f08e432bb|0",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 586,
+    "line": 588,
     "tag": "Button",
     "label": "Icon",
     "dynamic": true,

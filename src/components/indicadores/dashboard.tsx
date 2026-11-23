@@ -190,7 +190,7 @@ export function IndicadoresDashboard() {
     const ownerObjective = data.objectives.find((o) => o.id === m.objective_id);
     const archived = ownerObjective ? isArchived(ownerObjective) : false;
     return (
-      <Card key={m.id} className="flex h-72 min-w-0 flex-col">
+      <Card key={m.id} classification={{ app: "indicadores", department: indicatorDepartment(m.objective_id, data.objectives), status: confidenceName(m.source_metadata && !latest(m.id)?.recorded_by ? null : m.confidence), responsible: m.responsible_id ?? (importedField(m.source_metadata, "responsible_name") || "Sem responsável") }} className="flex h-72 min-w-0 flex-col">
         <CardHeader className="gap-1 space-y-1 p-3 sm:p-3">
           <div className="flex items-start gap-2">
             <CardTitle className="min-w-0 flex-1 text-xs font-normal leading-snug">
@@ -243,7 +243,7 @@ export function IndicadoresDashboard() {
   function objectiveCard(o: Objective, index: number, visibleMetrics = metrics) {
     return (
       <div key={o.id} className="min-w-0 space-y-3">
-        <Card className="flex h-48 min-w-0 flex-col">
+        <Card classification={{ app: "indicadores", department: indicatorDepartment(o.id, data.objectives), status: data.metrics.some(m => m.objective_id === o.id && checkinPending(m)) ? "Check-in pendente" : "Atualizado", responsible: o.responsible_id ?? (importedField(o.source_metadata, "responsible_name") || "Sem responsável") }} className="flex h-48 min-w-0 flex-col">
           <CardHeader className="space-y-1 p-3 sm:p-3">
             <div className="flex items-center gap-2">
               <CdeNumber screen={screen}>{index + 1}</CdeNumber>

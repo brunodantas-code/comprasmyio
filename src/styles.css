@@ -2,6 +2,7 @@
 @import "tw-animate-css";
 @import "@xyflow/react/dist/style.css";
 @import "../node_modules/frappe-gantt/dist/frappe-gantt.css";
+@import "./components/cde/card-border.css";
 @source "../src";
 
 /* Fixed brand references keep the three appearance swatches distinguishable. */

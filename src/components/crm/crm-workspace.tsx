@@ -1,4 +1,5 @@
 import { CrmMessageModels } from "./crm-message-models";
+import { useCardClassificationBorder } from "@/components/cde/card-border";
 import { CrmHistoricalRecords } from "./crm-historical-records";
 import { useTableFilters } from "@/components/use-table-filters";
 import { CrmConfig, crmConfigOptions } from "./crm-config";
@@ -126,7 +127,7 @@ function Leads({ data, refresh, setLead }: Ctx) {
     {view === "lista" ? <Table><TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>Empresa</TableHead><TableHead>Cargo</TableHead><TableHead>Contato</TableHead><TableHead>Origem</TableHead><TableHead>Etapa</TableHead><TableHead>Responsável</TableHead></TableRow></TableHeader>
       <TableBody>{rows.map((l) => { const e = etapaOf(data, leadStage(l)); return <TableRow key={l.id} className="cursor-pointer" onClick={() => setLead(l)}><TableCell className="font-medium">{l.nome}</TableCell><TableCell>{l.empresa_id ? empresaName(data, l.empresa_id) : l.empresa_texto ?? "—"}</TableCell><TableCell>{l.cargo ?? "—"}</TableCell><TableCell className="text-xs">{[l.email, l.telefone].filter(Boolean).join(" · ") || "—"}</TableCell><TableCell>{origemLabel(l.origem)}</TableCell><TableCell><span className="inline-flex items-center gap-2"><Dot color={e?.cor} />{e?.nome ?? l.status}</span></TableCell><TableCell>{userName(data, l.dono_id)}</TableCell></TableRow>; })}
         {!rows.length && <TableRow><TableCell colSpan={7} className="text-muted-foreground">Nenhum lead.</TableCell></TableRow>}</TableBody></Table>
-      : <Board columns={etapas.map((e) => ({ id: e.codigo, title: e.nome, color: e.cor }))} items={rows.map((l) => ({ id: l.id, column: leadStage(l), title: l.nome, subtitle: l.empresa_texto ?? empresaName(data, l.empresa_id) }))} onOpen={(id) => setLead(data.leads.find((l) => l.id === id)!)} onMove={async (id, col) => { const r = await supabase.from("crm_leads").update({ etapa_codigo: col }).eq("id", id).select("id"); if (r.error || !r.data?.length) toast.error("Não foi possível mover o lead."); await refresh(); }} />}
+      : <Board columns={etapas.map((e) => ({ id: e.codigo, title: e.nome, color: e.cor }))} items={rows.map((l) => ({ id: l.id, column: leadStage(l), title: l.nome, subtitle: l.empresa_texto ?? empresaName(data, l.empresa_id), responsible: l.dono_id ?? "Sem responsável" }))} onOpen={(id) => setLead(data.leads.find((l) => l.id === id)!)} onMove={async (id, col) => { const r = await supabase.from("crm_leads").update({ etapa_codigo: col }).eq("id", id).select("id"); if (r.error || !r.data?.length) toast.error("Não foi possível mover o lead."); await refresh(); }} />}
     <ImportDialog open={importOpen} onClose={() => setImportOpen(false)} refresh={refresh} />
   </div>;
 }
@@ -183,10 +184,11 @@ function Empresas({ data, setEmpresa, setContato }: Ctx) {
 }
 
 /* ---------- Funil ---------- */
-type BoardItem = { id: string; column: string; title: string; subtitle?: string; meta?: string };
-function Card({ item, onOpen }: { item: BoardItem; onOpen: (id: string) => void }) {
+type BoardItem = { id: string; column: string; title: string; subtitle?: string; meta?: string; responsible?: string };
+function Card({ item, status, onOpen }: { item: BoardItem; status: string; onOpen: (id: string) => void }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: item.id });
-  return <div ref={setNodeRef} style={{ transform: transform ? `translate(${transform.x}px, ${transform.y}px)` : undefined, opacity: isDragging ? 0.6 : 1 }} className="cursor-grab touch-none rounded-lg border border-border bg-card p-3 text-sm shadow-sm" {...attributes} {...listeners} onDoubleClick={() => onOpen(item.id)}>
+  const border = useCardClassificationBorder({ app: "crm", status, responsible: item.responsible ?? "Sem responsável" });
+  return <div ref={setNodeRef} style={{ transform: transform ? `translate(${transform.x}px, ${transform.y}px)` : undefined, opacity: isDragging ? 0.6 : 1, ...border.style }} className="cursor-grab touch-none rounded-lg border border-border bg-card p-3 text-sm shadow-sm" {...attributes} {...listeners} {...border.attributes} onDoubleClick={() => onOpen(item.id)}>
     <button type="button" className="text-left font-medium hover:text-primary" onPointerDown={(e) => e.stopPropagation()} onClick={() => onOpen(item.id)}>{item.title}</button>
     {item.subtitle && <p className="text-xs text-muted-foreground">{item.subtitle}</p>}{item.meta && <p className="mt-1 text-xs">{item.meta}</p>}
   </div>;
@@ -196,7 +198,7 @@ function Column({ col, items, onOpen }: { col: { id: string; title: string; colo
   return <div ref={setNodeRef} className={`flex w-64 shrink-0 flex-col gap-2 rounded-xl border p-2 ${isOver ? "border-primary bg-primary/5" : "border-border bg-muted/30"}`}>
     <div className="flex items-center gap-2 px-1 text-sm font-medium"><Dot color={col.color} /><span className="truncate">{col.title}</span><span className="ml-auto text-xs text-muted-foreground">{items.length}</span></div>
     {col.footer && <p className="px-1 text-xs text-muted-foreground">{col.footer}</p>}
-    {items.map((i) => <Card key={i.id} item={i} onOpen={onOpen} />)}
+    {items.map((i) => <Card key={i.id} item={i} status={col.title} onOpen={onOpen} />)}
   </div>;
 }
 function Board({ columns, items, onMove, onOpen }: { columns: { id: string; title: string; color?: string | null; footer?: string }[]; items: BoardItem[]; onMove: (id: string, column: string) => void; onOpen: (id: string) => void }) {
@@ -225,7 +227,7 @@ function Funil({ data, refresh, setOp }: Ctx) {
   return <div>
     <SectionTitle title="Funil de oportunidades"><SearchBox value={q} onChange={setQ} placeholder="Buscar oportunidade" />{filters.menu}<AddButton label="Nova oportunidade" onClick={() => setOp({ fase_id: data.fases.find((f) => f.ativa !== false)?.id })} /></SectionTitle>
     {filters.summary}
-    <Board columns={summary.map((s) => ({ id: s.fase.id, title: s.fase.nome, color: s.fase.cor, footer: `${brl(s.setup)} · MRR ${brl(s.mrr)}` }))} items={ops.map((o) => ({ id: o.id, column: o.fase_id, title: o.titulo, subtitle: empresaName(data, o.empresa_id), meta: `${brl(o.valor_setup)} · MRR ${brl(o.valor_mrr)}` }))} onOpen={(id) => setOp(data.ops.find((o) => o.id === id)!)} onMove={(id, col) => void move(id, col)} />
+    <Board columns={summary.map((s) => ({ id: s.fase.id, title: s.fase.nome, color: s.fase.cor, footer: `${brl(s.setup)} · MRR ${brl(s.mrr)}` }))} items={ops.map((o) => ({ id: o.id, column: o.fase_id, title: o.titulo, subtitle: empresaName(data, o.empresa_id), responsible: o.dono_id ?? "Sem responsável", meta: `${brl(o.valor_setup)} · MRR ${brl(o.valor_mrr)}` }))} onOpen={(id) => setOp(data.ops.find((o) => o.id === id)!)} onMove={(id, col) => void move(id, col)} />
     <ReasonDialog value={reason} onClose={() => setReason(null)} onConfirm={async (m) => { if (reason) await move(reason.id, reason.fase.id, m); setReason(null); }} />
   </div>;
 }
