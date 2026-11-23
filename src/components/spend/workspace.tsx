@@ -32,6 +32,7 @@ import { categories, canMatch } from "./rules";
 import { approvalShortcut } from "./shortcut";
 import { spendDescription } from "./text-case";
 import { SpendTextCaseToggle } from "./text-case-toggle";
+import { statementTotal } from "./statement-total";
 const statusNames: Record<string,string> = { pending: "Pendente fatura", matched: "Conciliado", approved: "Enviado ao Finance", adjustment: "Ajuste solicitado" };
 function ReceiptPreview({ path }: { path: string }) {
   const url = useQuery({ queryKey: ["spend-file", path], queryFn: () => spendFileUrl(path), staleTime: 300000 });
@@ -97,6 +98,7 @@ export function SpendWorkspace() {
     {card&&finance&&tab==='reconcile'&&<><div className="flex flex-wrap items-center justify-between gap-4"><div className="w-72 max-w-full space-y-1"><p className="text-right text-xs tabular-nums">{pct}% Conciliado · {BRL.format(matched)} / {BRL.format(total)}</p><Progress value={pct} className="h-1.5 bg-muted" aria-label="Conciliação da fatura" /></div><div className="flex flex-wrap gap-2"><Button disabled={busy} onClick={()=>setImporting(true)}><FileUp />Upload PDF Fatura</Button><Button title="Exportar para contabilidade" aria-label="Exportar ZIP" variant="ghost" size="icon" disabled={busy} onClick={exportZip}><Download /></Button>{statement&&<Button title="Conciliar automaticamente" aria-label="Conciliar automaticamente" variant="ghost" size="icon" disabled={busy} onClick={()=>action('automatch',{statement_id:statement.id})}><WandSparkles /></Button>}</div></div><div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
       {statement?<SpendStatementPreview key={statement.id} path={statement.file_path}/>:<p className="py-10 text-sm text-muted-foreground">Nenhuma fatura importada neste mês.</p>}
       <section className="min-w-0 space-y-4" aria-label="Lançamentos da fatura">
+        <div className="flex flex-wrap items-end justify-between gap-2" aria-label="Total da fatura"><div><p className="text-xs text-muted-foreground">Total da fatura</p><strong className="text-xl tabular-nums">{BRL.format(statementTotal(lines.map(l => l.amount)))}</strong></div><span className="text-xs text-muted-foreground">{lines.length} movimentos importados</span></div>
         <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3"><h2 className="min-w-0 text-sm text-muted-foreground">Lançamentos da fatura</h2><div className="flex shrink-0 items-center gap-2">{filters.menu}<SpendTextCaseToggle active={sentenceCase} onChange={setSentenceCase}/>{selected.size>0&&<Button disabled={busy} onClick={batch}><CheckCheck/>Aprovar lote ({selected.size})</Button>}</div></header>
         {filters.summary}
         <Table><TableHeader><TableRow><TableHead className="w-10"/><TableHead>Data / Descrição</TableHead><TableHead>Valor</TableHead><TableHead>Situação</TableHead><TableHead className="w-10">Ações</TableHead></TableRow></TableHeader><TableBody>
