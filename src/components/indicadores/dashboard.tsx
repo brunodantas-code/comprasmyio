@@ -2,7 +2,6 @@ import { useMemo, useState } from "react";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import {
   Archive,
-  BarChart3,
   CalendarDays,
   CheckCheck,
   ChevronDown,
@@ -18,8 +17,6 @@ import {
   Trash2,
 } from "lucide-react";
 import {
-  Bar,
-  BarChart,
   CartesianGrid,
   Line,
   LineChart,
@@ -398,7 +395,6 @@ export function IndicadoresDashboard() {
                 {[
                   { value: "cards", label: "Cards", icon: LayoutGrid },
                   { value: "list", label: "Lista por responsável", icon: List },
-                  { value: "chart", label: "Gráfico", icon: BarChart3 },
                   ...(tab === "okrs"
                     ? [{ value: "tree", label: "Árvore de alinhamento", icon: GitBranch }]
                     : []),
@@ -483,23 +479,6 @@ export function IndicadoresDashboard() {
             </section>
             {view === "tree" && tab === "okrs" ? (
               <div className="space-y-3">{tree(null)}</div>
-            ) : view === "chart" ? (
-              <div className="h-80 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={metrics.map((m) => ({
-                      name: m.title,
-                      progresso: metricProgress(m.initial_value, m.target_value, m.current_value),
-                    }))}
-                  >
-                    <CartesianGrid stroke="var(--border)" />
-                    <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-                    <YAxis domain={[0, 100]} />
-                    <Tooltip />
-                    <Bar dataKey="progresso" fill="var(--primary)" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
             ) : view === "list" ? (
               <div className="space-y-3">
                 {[...new Set(metrics.map((m) => m.responsible_id))].map((id) => (
