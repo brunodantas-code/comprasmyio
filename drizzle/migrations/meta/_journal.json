@@ -2017,6 +2017,13 @@
       "when": 1795454412541,
       "tag": "0287_spend_receipt_owner_edit",
       "breakpoints": true
+    },
+    {
+      "idx": 288,
+      "version": "7",
+      "when": 1795455855217,
+      "tag": "0288_spend_receipt_city_state",
+      "breakpoints": true
     }
   ]
 }

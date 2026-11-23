@@ -1,6 +1,8 @@
 - Spend uses identity-scoped RPCs and private card-keyed storage so holders cannot access another holder's receipts or finance decisions.
 - Receipt edits reuse capture and the owner-guarded locked RPC; approved records remain immutable and previous file paths stay audited.
 - Receipt cleanup is deterministic browser image processing, never generative reconstruction, to preserve fiscal text.
+- Receipt location is reviewable and nullable; derive UF only from a validated NF-e/NFC-e key and city only from printed merchant address, preserving approved records.
+- Capture confirmation labels explicitly target unique checkbox IDs with mobile-sized label touch areas; all data edits invalidate confirmation before saving.
 - Aa choices persist through the shared presentation hook without changing stored bank descriptions.
 - Capture uses a scoped mobile touch-target stylesheet and a separate desktop shared ghost Button so field ergonomics do not alter other CDE actions.
 - Supplier De-Para is finance-RLS-managed; exact normalized names fill only empty line accounts via an audited trigger, never bypassing receipt/approval guards or replacing manual classifications.

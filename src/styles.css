@@ -39,6 +39,17 @@ input[data-search-field="true"] {
 }
 .erp-search-row input[data-search-field="true"] { width: 100% !important; }
 
+/* Date controls with an explicit calendar action must not also show the browser icon. */
+input[data-custom-calendar="true"] { padding-right: 2.75rem !important; }
+input[data-custom-calendar="true"]::-webkit-calendar-picker-indicator {
+  display: none !important;
+  opacity: 0 !important;
+  width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  pointer-events: none;
+}
+
 .pm-gantt {
   --g-arrow-color: var(--foreground);
   --g-bar-color: var(--myio-green-tint);

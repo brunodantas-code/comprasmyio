@@ -2008,9 +2008,9 @@ function DateTimeInput({ name, label, defaultValue = "", required = false }: { n
   };
   return <div className="min-w-0 space-y-2">
     <Label htmlFor={`${name}-date`}>{label}</Label>
-    <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_7rem] gap-2 overflow-hidden">
+    <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_7rem] gap-4 overflow-hidden">
       <div className="relative min-w-0">
-        <Input ref={dateInputRef} id={`${name}-date`} className="w-full min-w-0 appearance-none [&::-webkit-calendar-picker-indicator]:hidden" type="date" value={date} onChange={(event) => setDate(event.target.value)} required={required} aria-label={`${label}: data`} />
+        <Input ref={dateInputRef} id={`${name}-date`} data-custom-calendar="true" className="w-full min-w-0 appearance-none" type="date" value={date} onChange={(event) => setDate(event.target.value)} required={required} aria-label={`${label}: data`} />
         <Button type="button" variant="ghost" size="compactIcon" className="absolute right-1 top-1/2 -translate-y-1/2" onClick={openCalendar} actionKind="standard" aria-label={`Abrir calendário de ${label.toLocaleLowerCase("pt-BR")}`} title="Abrir calendário">
           <CalendarDays className="h-4 w-4" />
         </Button>

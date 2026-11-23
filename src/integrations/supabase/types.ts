@@ -11625,9 +11625,11 @@ export type Database = {
       }
       spend_receipts: {
         Row: {
+          access_key: string | null
           amount: number
           card_id: string
           category: string
+          city: string | null
           clear_photo: boolean
           created_at: string
           date: string
@@ -11639,11 +11641,14 @@ export type Database = {
           observation: string
           project_id: string | null
           status: string
+          uf: string | null
         }
         Insert: {
+          access_key?: string | null
           amount: number
           card_id: string
           category: string
+          city?: string | null
           clear_photo?: boolean
           created_at?: string
           date: string
@@ -11655,11 +11660,14 @@ export type Database = {
           observation?: string
           project_id?: string | null
           status?: string
+          uf?: string | null
         }
         Update: {
+          access_key?: string | null
           amount?: number
           card_id?: string
           category?: string
+          city?: string | null
           clear_photo?: boolean
           created_at?: string
           date?: string
@@ -11671,6 +11679,7 @@ export type Database = {
           observation?: string
           project_id?: string | null
           status?: string
+          uf?: string | null
         }
         Relationships: [
           {

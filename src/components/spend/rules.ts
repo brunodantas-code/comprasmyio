@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { spendStates } from "./fiscal-location";
 
 export const categories = [
   { key: "alimentacao", name: "Alimentação", icon: "Utensils", account: "Despesas com Refeições e Lanches" },
@@ -18,6 +19,7 @@ export const expenseSchema = z.object({
   id: z.string().uuid(), card_id: z.string().uuid(), date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   merchant: z.string().trim().min(1, "Informe o estabelecimento"), amount: z.number().positive("Informe o valor"),
   category: categoryKey, observation: z.string().trim().max(2000), project_id: z.string().uuid().nullable(),
+  city: z.string().trim().max(120).default(""), uf: z.union([z.enum(spendStates), z.literal("")]).default(""), access_key: z.string().regex(/^\d{44}$/).nullable().default(null),
   file_path: z.string().min(1), clear_photo: z.boolean(), myio_cnpj: z.boolean({ message: "Confirme Com ou Sem CNPJ myio" }),
   confirmed: z.literal(true, { message: "Confirme todas as informações antes de salvar" }),
 }).superRefine((v, ctx) => {
@@ -35,12 +37,13 @@ export const extractionSchema = z.object({ lancamentos: z.array(z.object({
   data: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), estabelecimento: z.string().min(1), valor: z.number(),
   parcela: z.string().nullable(), final_cartao: z.string().regex(/^\d{4}$/).nullable(),
   categoria_sugerida: z.string().nullable(), myio_cnpj: z.boolean().nullable(),
+  cidade: z.string().nullable().optional(), uf: z.string().nullable().optional(), chave_acesso: z.string().nullable().optional(),
 })).max(1000) });
 export type Extracted = z.infer<typeof extractionSchema>;
 export const extractedJsonSchema = { type: "object", additionalProperties: false, properties: {
   lancamentos: { type: "array", items: { type: "object", additionalProperties: false,
-    properties: { data: { type: "string" }, estabelecimento: { type: "string" }, valor: { type: "number" }, parcela: { type: ["string", "null"] }, final_cartao: { type: ["string", "null"] }, categoria_sugerida: { type: ["string", "null"] }, myio_cnpj: { type: ["boolean", "null"] } },
-    required: ["data", "estabelecimento", "valor", "parcela", "final_cartao", "categoria_sugerida", "myio_cnpj"] } },
+    properties: { data: { type: "string" }, estabelecimento: { type: "string" }, valor: { type: "number" }, parcela: { type: ["string", "null"] }, final_cartao: { type: ["string", "null"] }, categoria_sugerida: { type: ["string", "null"] }, myio_cnpj: { type: ["boolean", "null"] }, cidade: { type: ["string", "null"] }, uf: { type: ["string", "null"] }, chave_acesso: { type: ["string", "null"] } },
+    required: ["data", "estabelecimento", "valor", "parcela", "final_cartao", "categoria_sugerida", "myio_cnpj", "cidade", "uf", "chave_acesso"] } },
 }, required: ["lancamentos"] };
 export type CategorySetting = { name: string; icon: string; account_id: string; cost_center_id: string; active: boolean; deleted?: boolean };
 export function configuredCategories(settings: Record<string, CategorySetting>, includeInactive = false) {
