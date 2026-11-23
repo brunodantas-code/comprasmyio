@@ -2010,6 +2010,13 @@
       "when": 1795449878770,
       "tag": "0286_spend_receipt_cnpj_confirmation_fuel",
       "breakpoints": true
+    },
+    {
+      "idx": 287,
+      "version": "7",
+      "when": 1795454412541,
+      "tag": "0287_spend_receipt_owner_edit",
+      "breakpoints": true
     }
   ]
 }

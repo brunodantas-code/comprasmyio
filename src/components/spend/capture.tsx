@@ -13,24 +13,33 @@ import { SearchableSelect } from "@/components/ui/searchable-select";
 import { extractSpendDocument } from "@/lib/spend.functions";
 import { configuredCategories, expenseSchema, recurringWarning } from "./rules";
 import { categoryIcons } from "./icons";
-import { spendAction, uploadSpend, type SpendData, type Line } from "./data";
+import { spendAction, spendFileUrl, uploadSpend, type SpendData, type Line, type Receipt } from "./data";
 import { formatSpendAmount, parseSpendAmount } from "./amount";
 import { prepareSpendReceipt } from "./receipt-image";
 
 const today = () => new Date().toLocaleDateString("en-CA");
 
-export function SpendCapture({ data, cardId, line, onDone, onClose }: { data: SpendData; cardId: string; line?: Line; onDone: () => Promise<void>; onClose: () => void }) {
+export function SpendCapture({ data, cardId, line, receipt, onDone, onClose }: { data: SpendData; cardId: string; line?: Line; receipt?: Receipt; onDone: () => Promise<void>; onClose: () => void }) {
   const card = data.cards.find(c => c.id === cardId);
   const extract = useServerFn(extractSpendDocument);
   const availableCategories = configuredCategories(data.settings);
   const picker = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [reading, setReading] = useState(false);
-  const [path, setPath] = useState("");
+  const linkedReceipt = !!receipt && data.lines.some(item => item.receipt_id === receipt.id);
+  const fixedAmountDate = !!line || linkedReceipt;
+  const [path, setPath] = useState(receipt?.file_path ?? "");
   const [preview, setPreview] = useState("");
-  const [pdf, setPdf] = useState(false);
-  const [amountText, setAmountText] = useState(line?.amount ? formatSpendAmount(line.amount) : "");
-  const [draft, setDraft] = useState({ id: crypto.randomUUID(), card_id: cardId, date: line?.date ?? today(), merchant: line?.merchant ?? "", amount: line?.amount ?? 0, category: availableCategories[0]?.key ?? "", observation: "", project_id: null as string | null, file_path: "", clear_photo: false, myio_cnpj: null as boolean | null, confirmed: false });
+  const [pdf, setPdf] = useState(receipt?.file_path.toLowerCase().endsWith(".pdf") ?? false);
+  const [amountText, setAmountText] = useState(receipt ? formatSpendAmount(receipt.amount) : line?.amount ? formatSpendAmount(line.amount) : "");
+  const [draft, setDraft] = useState({ id: receipt?.id ?? crypto.randomUUID(), card_id: cardId, date: receipt?.date ?? line?.date ?? today(), merchant: receipt?.merchant ?? line?.merchant ?? "", amount: receipt?.amount ?? line?.amount ?? 0, category: receipt?.category ?? availableCategories[0]?.key ?? "", observation: receipt?.observation ?? "", project_id: receipt?.project_id ?? null as string | null, file_path: receipt?.file_path ?? "", clear_photo: receipt?.clear_photo ?? false, myio_cnpj: receipt?.myio_cnpj ?? null as boolean | null, confirmed: false });
+
+  useEffect(() => {
+    if (!receipt) return;
+    let active = true;
+    void spendFileUrl(receipt.file_path).then(url => { if (active) setPreview(url); }).catch(() => { if (active) toast.error("Não foi possível abrir a foto atual"); });
+    return () => { active = false; };
+  }, [receipt?.id, receipt?.file_path]);
 
   useEffect(() => () => { if (preview) URL.revokeObjectURL(preview); }, [preview]);
 
@@ -54,8 +63,8 @@ export function SpendCapture({ data, cardId, line, onDone, onClose }: { data: Sp
         const item = result.lancamentos[0];
         if (item) {
           const category = item.categoria_sugerida && availableCategories.some(c => c.key === item.categoria_sugerida) ? item.categoria_sugerida : null;
-          setDraft(d => ({ ...d, date: line ? d.date : item.data, merchant: line ? d.merchant : item.estabelecimento, amount: line ? d.amount : item.valor, category: category ?? d.category, myio_cnpj: item.myio_cnpj, confirmed: false }));
-          if (!line) setAmountText(formatSpendAmount(item.valor));
+          setDraft(d => ({ ...d, date: fixedAmountDate ? d.date : item.data, merchant: line ? d.merchant : item.estabelecimento, amount: fixedAmountDate ? d.amount : item.valor, category: category ?? d.category, myio_cnpj: item.myio_cnpj, confirmed: false }));
+          if (!fixedAmountDate) setAmountText(formatSpendAmount(item.valor));
         }
       } catch (error) {
         toast.error(error instanceof Error ? error.message : "Confira os dados manualmente");
@@ -78,9 +87,9 @@ export function SpendCapture({ data, cardId, line, onDone, onClose }: { data: Sp
     try {
       await spendAction("receipt", parsed.data);
       if (line) await spendAction("link", { line_id: line.id, receipt_id: draft.id });
-      if (recurringWarning(draft.category, draft.merchant, draft.date, data.receipts)) toast.warning("IA: há outra despesa deste estabelecimento no mesmo mês");
+      if (recurringWarning(draft.category, draft.merchant, draft.date, data.receipts.filter(item => item.id !== draft.id))) toast.warning("IA: há outra despesa deste estabelecimento no mesmo mês");
       await onDone();
-      toast.success("Comprovante enviado");
+      toast.success(receipt ? "Comprovante atualizado" : "Comprovante enviado");
       onClose();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Não foi possível salvar");
@@ -89,13 +98,13 @@ export function SpendCapture({ data, cardId, line, onDone, onClose }: { data: Sp
     }
   }
 
-  return <Dialog open onOpenChange={open => { if (!open && !busy) onClose(); }}><DialogContent onOpenAutoFocus={event => { event.preventDefault(); picker.current?.click(); }} className="max-h-[90dvh] max-w-xl overflow-y-auto"><DialogHeader className="pr-24"><DialogTitle>{line ? "Anexar Invoice / Comprovante" : "Salvar Comprovante Fiscal"}</DialogTitle></DialogHeader>
+  return <Dialog open onOpenChange={open => { if (!open && !busy) onClose(); }}><DialogContent onOpenAutoFocus={event => { if (!receipt) { event.preventDefault(); picker.current?.click(); } }} className="max-h-[90dvh] max-w-xl overflow-y-auto"><DialogHeader className="pr-24"><DialogTitle>{receipt ? "Editar comprovante" : line ? "Anexar Invoice / Comprovante" : "Salvar Comprovante Fiscal"}</DialogTitle></DialogHeader>
     <input ref={picker} type="file" className="hidden" accept={line ? "image/jpeg,image/png,image/webp,application/pdf" : "image/jpeg,image/png,image/webp"} capture={line ? undefined : "environment"} onChange={event => { const file = event.target.files?.[0]; if (file) void filePicked(file); event.target.value = ""; }} />
     <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3"><span className="min-w-0 truncate text-sm text-muted-foreground">{card?.name} · •••• {card?.last_four}</span><Button className="shrink-0" onClick={() => picker.current?.click()} disabled={busy} aria-label="Fotografar ou selecionar comprovante"><Camera />{path ? "Substituir foto" : "Fotografar"}</Button></div>
     {busy && !path && !reading ? <p role="status" className="flex items-center gap-2 text-sm"><Loader2 className="size-4 animate-spin" />Preparando comprovante em P&B e removendo o fundo…</p> : null}
     {reading ? <p role="status" className="flex items-center gap-2 text-sm"><Loader2 className="size-4 animate-spin" />Lendo valor, categoria e CNPJ…</p> : null}
     {preview && !pdf ? <img src={preview} alt="Comprovante do gasto em P&B, sem o fundo" className="h-40 w-full rounded-md object-contain" /> : pdf ? <p className="text-sm">Invoice PDF anexada</p> : null}
-    <div className="grid grid-cols-2 items-end gap-4"><label className="flex min-w-0 flex-col gap-1"><Label>Valor (R$)</Label><Input className="h-9" type="text" inputMode="decimal" aria-label="Valor do gasto" value={amountText} onChange={event => { const text = event.target.value; setAmountText(text); change({ amount: parseSpendAmount(text) ?? 0 }); }} onBlur={() => { const value = parseSpendAmount(amountText); if (value !== null) setAmountText(formatSpendAmount(value)); }} disabled={!!line} /></label><label className="flex min-w-0 flex-col gap-1"><Label>Data</Label><Input className="h-9" type="date" aria-label="Data do gasto" value={draft.date} onChange={event => change({ date: event.target.value })} disabled={!!line} /></label></div>
+    <div className="grid grid-cols-2 items-end gap-4"><label className="flex min-w-0 flex-col gap-1"><Label>Valor (R$)</Label><Input className="h-9" type="text" inputMode="decimal" aria-label="Valor do gasto" value={amountText} onChange={event => { const text = event.target.value; setAmountText(text); change({ amount: parseSpendAmount(text) ?? 0 }); }} onBlur={() => { const value = parseSpendAmount(amountText); if (value !== null) setAmountText(formatSpendAmount(value)); }} disabled={fixedAmountDate} /></label><label className="flex min-w-0 flex-col gap-1"><Label>Data</Label><Input className="h-9" type="date" aria-label="Data do gasto" value={draft.date} onChange={event => change({ date: event.target.value })} disabled={fixedAmountDate} /></label></div>
     <label className="space-y-1"><Label>Estabelecimento</Label><Input aria-label="Estabelecimento" value={draft.merchant} onChange={event => change({ merchant: event.target.value })} /></label>
     <div role="group" aria-label="Categoria da despesa" className="grid grid-cols-2 gap-2">{availableCategories.map(category => { const Icon = categoryIcons[category.icon] ?? categoryIcons["Ellipsis"]; return <Button key={category.key} variant={draft.category === category.key ? "secondary" : "outline"} className="min-h-11 whitespace-normal text-left" aria-pressed={draft.category === category.key} onClick={() => change({ category: category.key })}>{Icon ? <Icon /> : null}<span className="min-w-0 flex-1 text-xs">{category.name}</span>{draft.category === category.key ? <Check /> : null}</Button>; })}</div>
     {path ? <div className="space-y-2"><Label>CNPJ da myio no comprovante</Label><RadioGroup aria-label="CNPJ da myio no comprovante" value={draft.myio_cnpj === null ? "" : draft.myio_cnpj ? "com" : "sem"} onValueChange={value => change({ myio_cnpj: value === "com" })} className="flex flex-wrap gap-4">{[["com", "Com CNPJ myio"], ["sem", "Sem CNPJ myio"]].map(([value, label]) => <label key={value} className="flex items-center gap-2 text-sm"><RadioGroupItem value={value ?? ""} /><span>{label}</span></label>)}</RadioGroup><p className="text-xs text-muted-foreground">A leitura sugere esta marcação; confirme antes de salvar.</p></div> : null}

@@ -6,45 +6,52 @@ export function detectReceiptCrop(pixels: Uint8ClampedArray, width: number, heig
   const count = width * height;
   const gray = new Uint8Array(count);
   const histogram = new Uint32Array(256);
-  let borderSum = 0;
-  let borderCount = 0;
   for (let y = 0; y < height; y += 1) {
     for (let x = 0; x < width; x += 1) {
       const index = y * width + x;
       const offset = index * 4;
-      const value = Math.round(pixels[offset]! * 0.299 + pixels[offset + 1]! * 0.587 + pixels[offset + 2]! * 0.114);
+      const value = Math.round((pixels[offset] ?? 0) * 0.299 + (pixels[offset + 1] ?? 0) * 0.587 + (pixels[offset + 2] ?? 0) * 0.114);
       gray[index] = value;
-      histogram[value]! += 1;
-      if (x < 2 || y < 2 || x >= width - 2 || y >= height - 2) {
-        borderSum += value;
-        borderCount += 1;
-      }
+      histogram[value] = (histogram[value] ?? 0) + 1;
     }
   }
+  // A continuous dark outline is a stronger boundary than a bright tabletop.
+  const darkColumns = Array.from({ length: width }, (_, x) => {
+    let dark = 0;
+    for (let y = 0; y < height; y++) if ((gray[y * width + x] ?? 255) < 80) dark++;
+    return dark / height;
+  });
+  const leftEdge = darkColumns.findIndex((ratio, x) => x < width * 0.35 && ratio > 0.6);
+  let rightEdge = -1;
+  for (let x = width - 1; x >= width * 0.5; x--) if ((darkColumns[x] ?? 0) > 0.6) { rightEdge = x; break; }
+  if (leftEdge >= 0 && rightEdge - leftEdge > width * 0.35 && rightEdge - leftEdge < width * 0.96) {
+    return { x: leftEdge, y: 0, width: rightEdge - leftEdge + 1, height };
+  }
   let sum = 0;
-  for (let value = 0; value < 256; value += 1) sum += value * histogram[value]!;
+  for (let value = 0; value < 256; value += 1) sum += value * (histogram[value] ?? 0);
   let background = 0;
   let weight = 0;
   let variance = 0;
   let otsu = 180;
   for (let value = 0; value < 256; value += 1) {
-    weight += histogram[value]!;
+    weight += (histogram[value] ?? 0);
     if (!weight) continue;
     const foreground = count - weight;
     if (!foreground) break;
-    background += value * histogram[value]!;
+    background += value * (histogram[value] ?? 0);
     const meanBackground = background / weight;
     const meanForeground = (sum - background) / foreground;
     const between = weight * foreground * (meanBackground - meanForeground) ** 2;
     if (between > variance) { variance = between; otsu = value; }
   }
-  const borderMean = borderCount ? borderSum / borderCount : 0;
-  const threshold = Math.max(otsu, Math.min(245, borderMean + 14));
+  // Paper remains a connected surface even when the surrounding table is bright.
+  const threshold = Math.max(110, Math.min(200, otsu));
   const mask = new Uint8Array(count);
-  for (let index = 0; index < count; index += 1) if (gray[index]! > threshold) mask[index] = 1;
+  for (let index = 0; index < count; index += 1) if ((gray[index] ?? 0) > threshold) mask[index] = 1;
 
   const stack = new Int32Array(count);
   let largest = 0;
+  let bestScore = 0;
   let best = fullCrop(width, height);
   for (let start = 0; start < count; start += 1) {
     if (mask[start] !== 1) continue;
@@ -57,7 +64,7 @@ export function detectReceiptCrop(pixels: Uint8ClampedArray, width: number, heig
     stack[top++] = start;
     mask[start] = 2;
     while (top) {
-      const index = stack[--top]!;
+      const index = (stack[--top] ?? 0);
       const x = index % width;
       const y = Math.floor(index / width);
       size += 1;
@@ -68,14 +75,21 @@ export function detectReceiptCrop(pixels: Uint8ClampedArray, width: number, heig
       if (y > 0 && mask[index - width] === 1) { mask[index - width] = 2; stack[top++] = index - width; }
       if (y + 1 < height && mask[index + width] === 1) { mask[index + width] = 2; stack[top++] = index + width; }
     }
-    if (size > largest) {
+    const boxWidth = maxX - minX + 1;
+    const boxHeight = maxY - minY + 1;
+    const density = size / (boxWidth * boxHeight);
+    const edges = Number(minX === 0) + Number(minY === 0) + Number(maxX === width - 1) + Number(maxY === height - 1);
+    // Avoid picking scattered wood grain or the bright background around a dark paper edge.
+    const score = size * density ** 3 * (edges >= 3 ? 0.08 : edges === 2 ? 0.3 : 1);
+    if (boxWidth >= width * 0.15 && boxHeight >= height * 0.15 && score > bestScore) {
+      bestScore = score;
       largest = size;
-      best = { x: minX, y: minY, width: maxX - minX + 1, height: maxY - minY + 1 };
+      best = { x: minX, y: minY, width: boxWidth, height: boxHeight };
     }
   }
   if (largest < count * 0.08 || best.width < width * 0.15 || best.height < height * 0.15) return fullCrop(width, height);
-  const padX = Math.round(best.width * 0.025);
-  const padY = Math.round(best.height * 0.025);
+  const padX = Math.round(best.width * 0.006);
+  const padY = Math.round(best.height * 0.006);
   const x = Math.max(0, best.x - padX);
   const y = Math.max(0, best.y - padY);
   const right = Math.min(width, best.x + best.width + padX);
@@ -142,13 +156,14 @@ export async function prepareSpendReceipt(file: File): Promise<File> {
       for (let x = 0; x < width; x += 1) {
         const index = y * width + x;
         const offset = index * 4;
-        const value = pixels[offset]! * 0.299 + pixels[offset + 1]! * 0.587 + pixels[offset + 2]! * 0.114;
+        const value = (pixels[offset] ?? 0) * 0.299 + (pixels[offset + 1] ?? 0) * 0.587 + (pixels[offset + 2] ?? 0) * 0.114;
         gray[index] = Math.round(value);
         rowSum += value;
-        integral[(y + 1) * (width + 1) + x + 1] = integral[y * (width + 1) + x + 1]! + rowSum;
+        integral[(y + 1) * (width + 1) + x + 1] = (integral[y * (width + 1) + x + 1] ?? 0) + rowSum;
       }
     }
     const radius = Math.max(12, Math.min(36, Math.round(Math.min(width, height) * 0.025)));
+    const cleanDigital = gray.reduce((count, value) => count + Number(value >= 240), 0) / gray.length > 0.8;
     for (let y = 0; y < height; y += 1) {
       const top = Math.max(0, y - radius);
       const bottom = Math.min(height - 1, y + radius);
@@ -156,10 +171,13 @@ export async function prepareSpendReceipt(file: File): Promise<File> {
         const left = Math.max(0, x - radius);
         const right = Math.min(width - 1, x + radius);
         const stride = width + 1;
-        const sum = integral[(bottom + 1) * stride + right + 1]! - integral[top * stride + right + 1]! - integral[(bottom + 1) * stride + left]! + integral[top * stride + left]!;
+        const sum = (integral[(bottom + 1) * stride + right + 1] ?? 0) - (integral[top * stride + right + 1] ?? 0) - (integral[(bottom + 1) * stride + left] ?? 0) + (integral[top * stride + left] ?? 0);
         const mean = sum / ((bottom - top + 1) * (right - left + 1));
         const index = y * width + x;
-        const value = gray[index]! < mean - 8 ? 0 : 255;
+        // Lift the paper/shadows to white, suppress low-contrast grain, but retain
+        // grayscale strokes instead of destroying faint thermal-print characters.
+        const contrast = mean - (gray[index] ?? 0);
+        const value = cleanDigital ? (gray[index] ?? 255) : contrast <= 12 ? 255 : Math.max(0, Math.round(255 - (contrast - 12) * 4));
         const offset = index * 4;
         pixels[offset] = value; pixels[offset + 1] = value; pixels[offset + 2] = value; pixels[offset + 3] = 255;
       }

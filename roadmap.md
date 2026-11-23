@@ -1,3 +1,8 @@
+- [x] Site Survey: ordenação, totalizadores, fotos e botões PDF movidos abaixo das escolhas iniciais; relatório real aberto e posição antes dos dados do Cliente conferida.
+- [x] Spend: recorte prioriza bordas do papel e contraste preserva tons dos caracteres; exemplos conferidos no navegador. Imagens já degradadas não recuperam detalhes perdidos; novas fotos recebem tratamento atualizado, sem reconstrução fiscal.
+- [x] Spend: lápis abre captura existente para editar classificação/substituir foto; edição salva e relida na conta Leonardo, observação original restaurada, auditoria e bloqueio de aprovados. Controle de substituição conferido; substituição OCR com gravação não exercitada.
+- [x] Spend: menu no padrão Site Survey; celular e computador conferidos, opções e escolhas CDE preservadas.
+- [x] Aa: Meus comprovantes, conciliação/importação e Site Survey usam escolha persistida; atualização de tela conferida na conta Leonardo, preferência original restaurada.
 - [x] Spend mobile: nome/perfil abaixo do logo; grade Todos os apps imediatamente à esquerda do menu de três barras, coordenadas conferidas.
 - [x] Spend: seletor Mês da fatura removido de Meus comprovantes; data da despesa determina o período e o histórico não fica limitado a um mês.
 - [x] Spend: Meus comprovantes mostra somente o cartão do usuário logado, sem droplist de outros cartões, inclusive Admin; conciliação preserva a seleção do Financeiro.
