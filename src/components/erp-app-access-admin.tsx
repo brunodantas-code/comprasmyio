@@ -85,9 +85,9 @@ export function ErpAppAccessAdmin() {
             return (
             <div key={user.id} className={user.is_active ? "" : "opacity-60"}>
               <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 py-2 sm:flex">
-                <button type="button" onClick={() => toggle(user.id)} className="flex min-w-0 flex-1 flex-wrap items-center gap-2 text-left">
-                  <span className="break-words font-semibold">{user.full_name || "Sem nome"}</span>
-                  <span className="break-all text-xs text-muted-foreground">{user.email}</span>
+                <button type="button" onClick={() => toggle(user.id)} className="flex min-w-0 flex-1 flex-col items-start gap-1 text-left sm:flex-row sm:flex-wrap sm:items-center sm:gap-2">
+                  <span className="min-w-0 max-w-full break-words font-semibold">{user.full_name || "Sem nome"}</span>
+                  <span className="min-w-0 max-w-full break-all text-xs text-muted-foreground">{user.email}</span>
                 </button>
                 {adminSet.has(user.id) ? <Badge variant="outline" className="col-start-1 row-start-2 w-fit">Admin do ERP</Badge> : null}
                 <label className="col-start-1 flex items-center gap-2 text-xs sm:ml-auto">
