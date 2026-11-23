@@ -1,3 +1,5 @@
+- [x] Mensagens múltiplas: avisos expandidos abaixo do anterior; dois avisos reais do componente conferidos com 14 px de intervalo e sem sobreposição.
+- [x] Relatório Vila Velha: Cliente/Interno com guardas compartilhadas na prévia/PDF; cliente sem planejamento/tempos/chamados internos, Aa por visita preserva LUC e nomes manuais, Subi normalizado/agregado apenas na apresentação, atalhos de equipamento/observações explícitos. PDFs reais amostrais Garage/Cobasi (2/3 páginas) conferidos sem cortes; 22 testes passaram; dados originais preservados, não publicado.
 - [x] Revisados execução/autosave, Histórico, cards, confirmação manual, importação, troca de checklist, relatórios e funções/acionadores ativos: gravações diretas verificam retorno, exclusão preserva resposta da linha correta e autosave mantém confirmações; 38 testes e fluxo real conferidos, sem alterar registros concluídos ou permissões.
 - [x] Títulos dos pontos no relatório em preto; prévia conferida.
 - [x] Orientado Realizar Visita → Concluir visita → Concluir com pendências; data anterior só nas visitas manuais atualmente, sem alterar datas reais.

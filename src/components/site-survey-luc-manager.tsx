@@ -1,4 +1,5 @@
 import { checklistElectricalLocation } from "@/lib/site-survey-checklist-location";
+import { useSurveyNameCase } from "@/hooks/use-survey-name-case";
 import { surveyNameCase as displaySentenceCase } from "@/lib/site-survey-name-case";
 import { SpendTextCaseToggle } from "@/components/spend/text-case-toggle";
 import { TableSortMenu } from "@/components/table-sort-menu";
@@ -175,7 +176,7 @@ export function SiteSurveyLucManager({ checklistData, visitTemplateId: visitTemp
   const [draftMeter, setDraftMeter] = useState("");
   const [saving, setSaving] = useState(false);
   const [listOpen, setListOpen] = useState(true);
-  const [sentenceCase, setSentenceCase] = useState(false);
+  const [sentenceCase, setSentenceCase] = useSurveyNameCase(visitId);
   const [editMode, setEditMode] = useState<"correction" | "name_change">("correction");
   const [sortBy, setSortBy] = useState<"luc_number" | "shop_name" | "location" | "pending">("luc_number");
   const [sortAscending, setSortAscending] = useState(true);

@@ -1,3 +1,4 @@
 - Site Survey focused history saves target the stored question independently of current/skipped sections and verify returned rows; customer text edits preserve manual confirmation instead of clearing pending fields.
 - Site Survey customer-question editors keep responses paired by row on deletion and all direct conversation writes verify returned IDs before reporting success; repeated autosaves preserve existing manual confirmations.
 - Site Survey registration displays checklist electrical location separately from physical location; client confirmation tables derive questions/final notes by point from fresh responses, never from generated interventions.
+- Complete survey report editions share audience guards for preview/PDF; visit-scoped presentation state shares Aa with registration, and display-only spelling normalization preserves stored records.
