@@ -1,5 +1,9 @@
 import { expect, it } from "vitest";
-import { classificationAccess } from "./classification";
+import { classificationAccess, showReceiptCnpj } from "./classification";
+it("CNPJ aparece somente com comprovante anexado", () => {
+  expect(showReceiptCnpj(null)).toBe(false);
+  expect(showReceiptCnpj("comprovante")).toBe(true);
+});
 it("salva classificação parcial sem comprovante", () => {
   expect(classificationAccess(false, false, false, "", "").canSave).toBe(true);
 });

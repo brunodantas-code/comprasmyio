@@ -4,3 +4,4 @@
 - Multimodal extraction runs only in authenticated server functions; normalized results remain reviewable before statement persistence.
 - Approval keyboard eligibility is a pure tested helper; the audit view ignores repeats and editing contexts before dispatching the same guarded approval action.
 - Description case conversion is display-only and shared by reconciliation/import preview; retain bank originals in writes, exports and audit.
+- Reconciliation keeps line editors mounted while collapsed, limits Enter approval to the expanded line, and renders private statement PDFs with browser-loaded PDF.js to preserve drafts and support scrolling on mobile.

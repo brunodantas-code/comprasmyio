@@ -339,8 +339,7 @@ export function IndicadoresDashboard() {
                   : "Ciclos e períodos"}
           </h1>
           <div className="flex items-center gap-2">
-            {tab !== "cycles" && <>{filters.menu}<TableSortMenu iconOnly columns={sortColumns} {...(cardSorts[tab] ? {value:cardSorts[tab]} : {})} onChange={value=>setCardSorts(current=>({...current,[tab]:value}))} /></>}
-            {canEdit && tab !== "checkins" && (
+            {canEdit && tab === "cycles" && (
               <CdeButton
                 group="plus"
                 screen={screen}
@@ -393,7 +392,7 @@ export function IndicadoresDashboard() {
                   />
                 </div>
               )}
-              <div className="flex flex-wrap items-center gap-1">
+              <div className="flex flex-wrap items-center gap-1 [&_button]:!h-8 [&_button]:!w-8 [&_button]:!min-w-8 [&_button]:!px-0 [&_svg]:!size-5">
                 {[
                   { value: "cards", label: "Cards", icon: LayoutGrid },
                   { value: "list", label: "Lista por responsável", icon: List },
@@ -415,6 +414,28 @@ export function IndicadoresDashboard() {
                     <v.icon className="size-5" />
                   </Button>
                 ))}
+                {filters.menu}<TableSortMenu iconOnly columns={sortColumns} {...(cardSorts[tab] ? {value:cardSorts[tab]} : {})} onChange={value=>setCardSorts(current=>({...current,[tab]:value}))} />
+            {canEdit && tab !== "checkins" && tab !== "cycles" && (
+              <CdeButton
+                group="plus"
+                screen={screen}
+                aria-label={
+                  tab === "cycles" ? "Novo ciclo" : tab === "kpis" ? "Novo KPI" : "Novo objetivo"
+                }
+                title={
+                  tab === "cycles" ? "Novo ciclo" : tab === "kpis" ? "Novo KPI" : "Novo objetivo"
+                }
+                onClick={() =>
+                  setEdit(
+                    tab === "cycles"
+                      ? { type: "cycle" }
+                      : tab === "kpis"
+                        ? { type: "metric", kind: "kpi" }
+                        : { type: "objective" },
+                  )
+                }
+              />
+            )}
               </div>
             </div>
             {filters.summary}

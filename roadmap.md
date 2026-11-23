@@ -1,4 +1,6 @@
 # Roadmap
+- [x] Indicadores: filtro, ordenação e adição reunidos com visualizações ao lado de Visibilidade/Ciclo; botões 32×32 px e ícones 20 px. Desktop/mobile conferidos, menu de ordenação funcional e sem overflow.
+- [x] Spend: PDF real renderizado à esquerda e tabela expansível à direita com larguras iguais; campos preservados ao recolher, títulos redundantes/Furo de Caixa removidos, Sem comprovante vermelho e CNPJ oculto sem anexo. Desktop/mobile conferidos sem overflow; aprovação preservada; sem alteração dos dados.
 - [x] Spend: site publicado conferido com sessão: barra 288×6 px e botão Aa disponíveis; print estava desatualizado, conversão opcional exige acionar Aa.
 - [x] Spend: disquete salva classificação parcial sem comprovante, sem liberar aprovação nem criar Finance; identificação opcional Com CNPJ myio / Sem CNPJ myio persistida. Conferidos salvamento e recarga com sessão; campos de teste restaurados; 19 testes passaram. Novos controles aguardam publicação.
 - [x] Spend: barra de conciliação reduzida a 288 px, limitada à largura disponível, altura de 6 px e texto compacto como OKRs; percentuais/valores preservados.
