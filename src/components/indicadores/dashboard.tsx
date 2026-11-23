@@ -187,8 +187,8 @@ export function IndicadoresDashboard() {
     const ownerObjective = data.objectives.find((o) => o.id === m.objective_id);
     const archived = ownerObjective ? isArchived(ownerObjective) : false;
     return (
-      <Card key={m.id} classification={{ app: "indicadores", department: indicatorDepartment(m.objective_id, data.objectives), status: confidenceName(m.source_metadata && !latest(m.id)?.recorded_by ? null : m.confidence), responsible: m.responsible_id ?? (importedField(m.source_metadata, "responsible_name") || "Sem responsável") }} className="flex h-72 min-w-0 flex-col">
-        <CardHeader className="gap-1 space-y-1 p-3 sm:p-3">
+      <Card key={m.id} classification={{ app: "indicadores", department: indicatorDepartment(m.objective_id, data.objectives), status: confidenceName(m.source_metadata && !latest(m.id)?.recorded_by ? null : m.confidence), responsible: m.responsible_id ?? (importedField(m.source_metadata, "responsible_name") || "Sem responsável") }} className="flex h-48 min-w-0 flex-col">
+        <CardHeader className="gap-0.5 space-y-0.5 p-3 pb-1 sm:p-3 sm:pb-1">
           <div className="flex items-start gap-2">
             <CardTitle className="min-w-0 flex-1 text-xs font-normal leading-snug">
               <TruncatedText text={m.title} />
@@ -196,14 +196,14 @@ export function IndicadoresDashboard() {
           </div>
           <CardDescription className="min-w-0 text-xs"><TruncatedText text={importedField(m.source_metadata, "responsible_name") || userName(m.responsible_id)} /></CardDescription>
         </CardHeader>
-        <CardContent className="flex flex-1 flex-col gap-2 p-3 pt-0 sm:p-3 sm:pt-0">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <Badge>{confidenceName(m.source_metadata && !latest(m.id)?.recorded_by ? null : m.confidence)}</Badge>
-            <span className="text-xs">{m.kind === "kpi" ? "KPI" : "Key Result"}</span>
+        <CardContent className="flex min-h-0 flex-1 flex-col gap-1 p-3 pt-0 sm:p-3 sm:pt-0">
+          <div className="flex min-w-0 items-center justify-between gap-2">
+            <Badge className="min-w-0 truncate px-0 py-0 font-normal" title={confidenceName(m.source_metadata && !latest(m.id)?.recorded_by ? null : m.confidence)}>{confidenceName(m.source_metadata && !latest(m.id)?.recorded_by ? null : m.confidence)}</Badge>
+            <span className="shrink-0 text-xs">{m.kind === "kpi" ? "KPI" : "Key Result"}</span>
           </div>
-          <div className="flex flex-wrap justify-between gap-2 text-xs">
-            <span>{metricValue(m.current_value, m.measure, m.unit)}</span>
-            <span className="text-muted-foreground">
+          <div className="flex min-w-0 justify-between gap-2 text-xs">
+            <span className="min-w-0 truncate" title={metricValue(m.current_value, m.measure, m.unit)}>{metricValue(m.current_value, m.measure, m.unit)}</span>
+            <span className="min-w-0 truncate text-muted-foreground" title={`Meta: ${metricValue(m.target_value, m.measure, m.unit)}`}>
               Meta: {metricValue(m.target_value, m.measure, m.unit)}
             </span>
           </div>
@@ -213,20 +213,18 @@ export function IndicadoresDashboard() {
               Prazo: {new Date(`${m.due_on}T12:00:00`).toLocaleDateString("pt-BR")}
             </p>
           )}
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="mt-auto flex shrink-0 items-center gap-2">
             {canEdit && !archived && iconButton(`Editar ${m.title}`, Pencil, () => setEdit({ type: "metric", row: m, kind: m.kind === "kr" ? "kr" : "kpi" }))}
             {canEdit && iconButton(`Excluir ${m.title}`, Trash2, async () => { if (await confirmAction(`Excluir o indicador “${m.title}”?`)) mutation.mutate({ type: "metric", id: m.id }); })}
             {!archived && (m.responsible_id === data.userId || data.role === "admin") && (
-              <Button variant="outline" onClick={() => setEdit({ type: "checkin", row: m })}>
+              <Button variant="ghost" size="compactIcon" aria-label={`Check-in de ${m.title}`} title="Check-in" onClick={() => setEdit({ type: "checkin", row: m })}>
                 <CheckCheck className="size-4" />
-                Check-in
               </Button>
             )}
             {iconButton(`Histórico de ${m.title}`, History, () => setHistory(m))}
             {m.kind === "kpi" && canEdit && (
-              <Button variant="ghost" onClick={() => setEdit({ type: "convert", row: m })}>
+              <Button variant="ghost" size="compactIcon" aria-label={`Criar OKR de ${m.title}`} title="Criar OKR" onClick={() => setEdit({ type: "convert", row: m })}>
                 <Target className="size-4" />
-                Criar OKR
               </Button>
             )}
           </div>

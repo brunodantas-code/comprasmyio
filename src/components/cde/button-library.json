@@ -5049,15 +5049,15 @@
     "visualCustom": false,
     "autoCdeSafe": true,
     "icon": "CheckCheck",
-    "variant": "outline",
-    "size": "",
+    "variant": "ghost",
+    "size": "compactIcon",
     "className": "",
     "group": ""
   },
   {
     "id": "components/indicadores/dashboard.tsx|9e77056673298c3b|0",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 227,
+    "line": 226,
     "tag": "Button",
     "label": "Criar OKR",
     "dynamic": false,
@@ -5065,14 +5065,14 @@
     "autoCdeSafe": true,
     "icon": "Target",
     "variant": "ghost",
-    "size": "",
+    "size": "compactIcon",
     "className": "",
     "group": ""
   },
   {
     "id": "components/indicadores/dashboard.tsx|186b26e208d5a78a|0",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 276,
+    "line": 274,
     "tag": "CdeButton",
     "label": "Novo Key Result",
     "dynamic": false,
@@ -5087,7 +5087,7 @@
   {
     "id": "components/indicadores/dashboard.tsx|f78efca9e424c46c|0",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 294,
+    "line": 292,
     "tag": "Button",
     "label": "Expandir OKR",
     "dynamic": false,
@@ -5102,7 +5102,7 @@
   {
     "id": "components/indicadores/dashboard.tsx|2466d7a3dce4a979|0",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 342,
+    "line": 340,
     "tag": "CdeButton",
     "label": "Sem nome fixo",
     "dynamic": false,
@@ -5117,7 +5117,7 @@
   {
     "id": "components/indicadores/dashboard.tsx|1b6135276a72b3a5|0",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 403,
+    "line": 401,
     "tag": "Button",
     "label": "v.icon",
     "dynamic": false,
@@ -5132,7 +5132,7 @@
   {
     "id": "components/indicadores/dashboard.tsx|2466d7a3dce4a979|1",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 417,
+    "line": 415,
     "tag": "CdeButton",
     "label": "Sem nome fixo",
     "dynamic": false,
@@ -5147,7 +5147,7 @@
   {
     "id": "components/indicadores/dashboard.tsx|d850325f261cf0df|0",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 563,
+    "line": 561,
     "tag": "CdeButton",
     "label": "Novo Key Result",
     "dynamic": false,
@@ -5162,7 +5162,7 @@
   {
     "id": "components/indicadores/dashboard.tsx|56e0edbf13436716|0",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 563,
+    "line": 561,
     "tag": "Button",
     "label": "Check-in",
     "dynamic": false,
@@ -5177,7 +5177,7 @@
   {
     "id": "components/indicadores/dashboard.tsx|e2c6700f08e432bb|0",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 567,
+    "line": 565,
     "tag": "Button",
     "label": "Icon",
     "dynamic": true,

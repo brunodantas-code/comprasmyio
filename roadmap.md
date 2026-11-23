@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Indicadores: OKRs e KRs medidos em 256×192 px; KRs/KPIs compactos, check-in por ícone funcional e sem overflow. Tags padrão transparentes e nove fundos verdes salvos no CDE neutralizados, outras cores preservadas; celular conferido, cinco testes passaram.
 - [x] Indicadores: gráfico de barras de avanço e botão Gráfico retirados; resumo por usuário e histórico preservados. Conta Leonardo conferida com 88 cards, alternância Lista/Cards funcional; seis testes passaram.
 - [x] CDE: Bordas de classificação dos cards com critério, cores da marca por valor, posição superior/contorno, espessura e prévia. Indicadores por setor/status/responsável; CRM por status/responsável (sem setor cadastrado). Salvamento/recarga e cards reais conferidos: Comercial/Financeiro e 33 Propostas; celular sem overflow, configurações originais restauradas, 14 testes passaram.
 - [x] Indicadores: filtro e ordenação com fonte 12 px conferida na conta Leonardo; Departamento/Setor explícito nos OKRs/KPIs, Comercial filtrado e Financeiro disponível. Métricas vinculadas seguem o objetivo; independentes ficam Sem departamento/setor. Doze testes passaram; sem alterar cadastros.

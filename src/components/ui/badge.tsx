@@ -9,13 +9,13 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
-        default: "border-transparent bg-primary text-primary-foreground shadow hover:bg-primary/80",
+        default: "border-transparent bg-transparent text-foreground",
         secondary:
           "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
         destructive:
           "border-transparent bg-destructive text-destructive-foreground shadow hover:bg-destructive/80",
         outline: "text-foreground",
-        status: "border-status-border bg-status text-status-foreground shadow-sm hover:bg-status",
+        status: "border-status-border bg-transparent text-status-foreground",
       },
     },
     defaultVariants: {
@@ -37,7 +37,9 @@ function Badge({ className, variant, style, children, cdeLook, ...props }: Badge
   const cfg = useTagConfig();
   const plain = textOf(children);
   const r = plain ? resolveTag(cfg, plain) : null;
-  const look = cdeLook ?? r?.look;
+  const savedLook = cdeLook ?? r?.look;
+  const greenBase = !variant || variant === "default" || variant === "status" || /\bbg-(?:primary|myio-green|code-attended|status|green|emerald)(?:\b|\/)/.test(className ?? "");
+  const look = greenBase ? { bg: "transparente", text: "preto", ...savedLook } : savedLook;
   const shown = r && cdeLook === undefined && r.text !== plain && (typeof children === "string" || typeof children === "number" || Array.isArray(children)) ? r.text : children;
   return <div className={cn(badgeVariants({ variant }), className)} style={look ? { ...style, ...tagCss(look) } : style} {...props}>{shown}</div>;
 }
