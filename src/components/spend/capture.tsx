@@ -10,15 +10,16 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { SearchableSelect } from "@/components/ui/searchable-select";
 import { extractSpendDocument } from "@/lib/spend.functions";
-import { categories, expenseSchema, recurringWarning } from "./rules";
+import { configuredCategories, expenseSchema, recurringWarning } from "./rules";
 import { categoryIcons } from "./icons";
 import { spendAction, uploadSpend, type SpendData, type Line } from "./data";
 const today = () => new Date().toLocaleDateString("en-CA");
 export function SpendCapture({ data, cardId, line, onDone, onClose }: { data: SpendData; cardId: string; line?: Line; onDone: () => Promise<void>; onClose: () => void }) {
   const card = data.cards.find(c => c.id === cardId); const extract = useServerFn(extractSpendDocument);
+  const availableCategories = configuredCategories(data.settings);
   const picker = useRef<HTMLInputElement>(null); const [busy, setBusy] = useState(false); const [reading, setReading] = useState(false);
   const [path, setPath] = useState(""); const [preview, setPreview] = useState(""); const [pdf, setPdf] = useState(false);
-  const [draft, setDraft] = useState({ id: crypto.randomUUID(), card_id: cardId, date: line?.date ?? today(), merchant: line?.merchant ?? "", amount: line?.amount ?? 0, category: "alimentacao", observation: "", project_id: null as string | null, file_path: "", clear_photo: false });
+  const [draft, setDraft] = useState({ id: crypto.randomUUID(), card_id: cardId, date: line?.date ?? today(), merchant: line?.merchant ?? "", amount: line?.amount ?? 0, category: availableCategories[0]?.key ?? "", observation: "", project_id: null as string | null, file_path: "", clear_photo: false });
   useEffect(() => () => { if (preview) URL.revokeObjectURL(preview); }, [preview]);
   async function filePicked(file: File) {
     if (!card) return; setBusy(true);
@@ -30,6 +31,7 @@ export function SpendCapture({ data, cardId, line, onDone, onClose }: { data: Sp
     finally { setBusy(false); setReading(false); }
   }
   async function submit() {
+    if (!availableCategories.some(c => c.key === draft.category)) { toast.error("Selecione uma categoria disponível"); return; }
     const parsed = expenseSchema.safeParse(draft); if (!parsed.success) { toast.error(parsed.error.issues[0]?.message ?? "Confira os dados"); return; }
     setBusy(true); try { await spendAction("receipt", parsed.data); if (line) await spendAction("link", { line_id: line.id, receipt_id: draft.id });
       if (recurringWarning(draft.category, draft.merchant, draft.date, data.receipts)) toast.warning("IA: há outra despesa deste estabelecimento no mesmo mês");
@@ -43,7 +45,7 @@ export function SpendCapture({ data, cardId, line, onDone, onClose }: { data: Sp
     {preview && !pdf ? <img src={preview} alt="Comprovante do gasto" className="h-40 w-full rounded-md object-contain" /> : pdf ? <p className="text-sm">Invoice PDF anexada</p> : null}
     <div className="grid grid-cols-2 gap-4"><label className="space-y-1"><Label>Valor (R$)</Label><Input type="number" aria-label="Valor do gasto" min="0.01" step="0.01" value={draft.amount || ""} onChange={e => setDraft({ ...draft, amount: Number(e.target.value) })} disabled={!!line} /></label><label className="space-y-1"><Label>Data</Label><Input type="date" aria-label="Data do gasto" value={draft.date} onChange={e => setDraft({ ...draft, date: e.target.value })} disabled={!!line} /></label></div>
     <label className="space-y-1"><Label>Estabelecimento</Label><Input aria-label="Estabelecimento" value={draft.merchant} onChange={e => setDraft({ ...draft, merchant: e.target.value })} /></label>
-    <div role="group" aria-label="Categoria da despesa" className="grid grid-cols-2 gap-2">{categories.filter(c => data.settings[c.key]?.active !== false).map(c => { const setting = data.settings[c.key]; const Icon = categoryIcons[setting?.icon ?? c.icon] ?? categoryIcons["Ellipsis"]; return <Button key={c.key} variant={draft.category === c.key ? "secondary" : "outline"} className="min-h-11 whitespace-normal text-left" aria-pressed={draft.category === c.key} onClick={() => setDraft({ ...draft, category: c.key })}>{Icon ? <Icon /> : null}<span className="min-w-0 flex-1 text-xs">{setting?.name || c.name}</span>{draft.category === c.key ? <Check /> : null}</Button>; })}</div>
+    <div role="group" aria-label="Categoria da despesa" className="grid grid-cols-2 gap-2">{availableCategories.map(c => { const Icon = categoryIcons[c.icon] ?? categoryIcons["Ellipsis"]; return <Button key={c.key} variant={draft.category === c.key ? "secondary" : "outline"} className="min-h-11 whitespace-normal text-left" aria-pressed={draft.category === c.key} onClick={() => setDraft({ ...draft, category: c.key })}>{Icon ? <Icon /> : null}<span className="min-w-0 flex-1 text-xs">{c.name}</span>{draft.category === c.key ? <Check /> : null}</Button>; })}</div>
     <label className="space-y-1"><Label>Projeto {draft.category === "insumos" ? "*" : "(opcional)"}</Label><SearchableSelect aria-label="Projeto do gasto" value={draft.project_id ?? ""} onChange={project_id => setDraft({ ...draft, project_id: project_id || null })} options={data.projects.map(p => ({ value: p.id, label: p.name }))} placeholder="Selecionar Projeto" /></label>
     <label className="space-y-1"><Label>{draft.category === "outros" ? "Especifique a despesa *" : `Observação ${draft.category === "servicos" ? "*" : "(opcional)"}`}</Label><Textarea aria-label="Observação do gasto" value={draft.observation} onChange={e => setDraft({ ...draft, observation: e.target.value })} /></label>
     {draft.category === "ferramentas" && <label className="flex items-center gap-2 text-sm"><Checkbox checked={draft.clear_photo} onCheckedChange={v => setDraft({ ...draft, clear_photo: v === true })} />A foto da NF/cupom está nítida</label>}

@@ -1,4 +1,6 @@
 # Roadmap
+- [x] Spend: categorias adicionáveis/excluíveis no CDE; categoria nova salva/reaberta e disponível na captura, exclusão confirmada e registros preservados; 15 testes passaram.
+- [x] Informado: item 10 — Bordas de classificação dos cards, selecionar Indicadores.
 - [x] Indicadores: OKRs e KRs medidos em 256×192 px; KRs/KPIs compactos, check-in por ícone funcional e sem overflow. Tags padrão transparentes e nove fundos verdes salvos no CDE neutralizados, outras cores preservadas; celular conferido, cinco testes passaram.
 - [x] Indicadores: gráfico de barras de avanço e botão Gráfico retirados; resumo por usuário e histórico preservados. Conta Leonardo conferida com 88 cards, alternância Lista/Cards funcional; seis testes passaram.
 - [x] CDE: Bordas de classificação dos cards com critério, cores da marca por valor, posição superior/contorno, espessura e prévia. Indicadores por setor/status/responsável; CRM por status/responsável (sem setor cadastrado). Salvamento/recarga e cards reais conferidos: Comercial/Financeiro e 33 Propostas; celular sem overflow, configurações originais restauradas, 14 testes passaram.

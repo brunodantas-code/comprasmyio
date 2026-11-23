@@ -1,6 +1,6 @@
 - Spend uses identity-scoped RPCs and private card-keyed storage so holders cannot access another holder's receipts or finance decisions.
 - Approvals lock statement rows and create one uniquely linked Finance payable atomically to prevent duplicate posting.
-- Category keys and server validation remain stable when CDE changes names/icons/default classifications, preserving historical receipts.
+- Category keys and original validations stay stable; custom categories use immutable IDs and CDE deletion tombstones, shared by capture and authenticated receipt validation to preserve history.
 - Multimodal extraction runs only in authenticated server functions; normalized results remain reviewable before statement persistence.
 - Approval keyboard eligibility is a pure tested helper; the audit view ignores repeats and editing contexts before dispatching the same guarded approval action.
 - Description case conversion is display-only and shared by reconciliation/import preview; retain bank originals in writes, exports and audit.

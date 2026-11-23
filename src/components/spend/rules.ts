@@ -12,7 +12,7 @@ export const categories = [
   { key: "software", name: "Licenças e Assinaturas", icon: "AppWindow", account: "Assinaturas e Licenças de Software SaaS" },
   { key: "outros", name: "Outros", icon: "Ellipsis", account: "Outras Despesas Operacionais" },
 ] as const;
-export const categoryKey = z.enum(["alimentacao", "transporte", "estacionamento", "pedagio", "ferramentas", "insumos", "servicos", "ia", "software", "outros"]);
+export const categoryKey = z.string().regex(/^(alimentacao|transporte|estacionamento|pedagio|ferramentas|insumos|servicos|ia|software|outros|custom_[0-9a-f-]{36})$/, "Categoria inválida");
 export const expenseSchema = z.object({
   id: z.string().uuid(), card_id: z.string().uuid(), date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   merchant: z.string().trim().min(1, "Informe o estabelecimento"), amount: z.number().positive("Informe o valor"),
@@ -39,7 +39,18 @@ export const extractedJsonSchema = { type: "object", additionalProperties: false
     properties: { data: { type: "string" }, estabelecimento: { type: "string" }, valor: { type: "number" }, parcela: { type: ["string", "null"] }, final_cartao: { type: ["string", "null"] } },
     required: ["data", "estabelecimento", "valor", "parcela", "final_cartao"] } },
 }, required: ["lancamentos"] };
-export type CategorySetting = { name: string; icon: string; account_id: string; cost_center_id: string; active: boolean };
+export type CategorySetting = { name: string; icon: string; account_id: string; cost_center_id: string; active: boolean; deleted?: boolean };
+export function configuredCategories(settings: Record<string, CategorySetting>, includeInactive = false) {
+  const rows = [...categories.map(c => ({ ...c, ...settings[c.key] })), ...Object.entries(settings)
+    .filter(([key]) => key.startsWith("custom_") && categoryKey.safeParse(key).success)
+    .map(([key, s]) => ({ key, account: "Conta contábil padrão", ...s }))];
+  return rows.filter(c => !settings[c.key]?.deleted && (includeInactive || settings[c.key]?.active !== false));
+}
+export function removeCategory(settings: Record<string, CategorySetting>, key: string): Record<string, CategorySetting> {
+  const base = categories.find(c => c.key === key);
+  const setting = settings[key] ?? (base ? { name: base.name, icon: base.icon, account_id: "", cost_center_id: "", active: true } : null);
+  return setting ? { ...settings, [key]: { ...setting, active: false, deleted: true } } : settings;
+}
 export function recurringWarning(category: string, merchant: string, date: string, previous: { category: string; merchant: string; date: string }[]) {
   return category === "ia" && previous.some(p => p.category === "ia" && p.merchant.toLocaleLowerCase().trim() === merchant.toLocaleLowerCase().trim() && p.date.slice(0, 7) === date.slice(0, 7));
 }
