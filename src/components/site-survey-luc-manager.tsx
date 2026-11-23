@@ -1,4 +1,4 @@
-import { spendDescription as displaySentenceCase } from "@/components/spend/text-case";
+import { surveyNameCase as displaySentenceCase } from "@/lib/site-survey-name-case";
 import { SpendTextCaseToggle } from "@/components/spend/text-case-toggle";
 import { TableSortMenu } from "@/components/table-sort-menu";
 import { surveyContractName } from "@/lib/site-survey-contract-name";
