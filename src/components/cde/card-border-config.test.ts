@@ -11,11 +11,21 @@ it("diferencia Comercial e Financeiro com as cores escolhidas", () => {
   expect(resolveCardBorder(config, { app: "indicadores", department: "Comercial" })).toEqual({ color: "verde", edge: "top", width: 2 });
   expect(resolveCardBorder(config, { app: "indicadores", department: "Financeiro" })?.color).toBe("roxo");
 });
-it("rejeita cores fora do Manual da Marca", () => {
+it("rejeita cores fora da paleta permitida", () => {
   const config = parseCardBorders(JSON.stringify({ crm: { mode: "status", colors: { status: { Reunião: "#ff0000", Survey: "laranja", Proposta: "roxo" } } } }));
   expect(resolveCardBorder(config, { app: "crm", status: "Reunião" })).toBeNull();
   expect(resolveCardBorder(config, { app: "crm", status: "Survey" })).toBeNull();
   expect(resolveCardBorder(config, { app: "crm", status: "Proposta" })?.color).toBe("roxo");
+});
+it("aceita Vermelho nas bordas", () => {
+  const config = parseCardBorders(JSON.stringify({ indicadores: { mode: "department", colors: { department: { Comercial: "vermelho" } } } }));
+  expect(resolveCardBorder(config, { app: "indicadores", department: "Comercial" })?.color).toBe("vermelho");
+});
+it("aceita a escala P&B completa", () => {
+  for (const color of ["preto", "cinza_escuro", "cinza", "cinza_claro", "cinza_muito_claro", "branco"]) {
+    const config = parseCardBorders(JSON.stringify({ crm: { mode: "status", colors: { status: { Proposta: color } } } }));
+    expect(resolveCardBorder(config, { app: "crm", status: "Proposta" })?.color).toBe(color);
+  }
 });
 it("isola aplicativos e usa somente o critério selecionado", () => {
   const config = parseCardBorders(raw);

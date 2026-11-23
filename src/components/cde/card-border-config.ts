@@ -4,7 +4,10 @@ export const CARD_BORDER_MODES = [{ key: "none", label: "Padrão atual" }, { key
 export const CARD_BORDER_COLORS = [
   { key: "verde", label: "Verde myio" }, { key: "verde_claro", label: "Verde claro myio" },
   { key: "roxo", label: "Roxo myio" }, { key: "lilas", label: "Lilás myio" },
-  { key: "escuro", label: "Escuro myio" }, { key: "branco", label: "Branco" },
+  { key: "escuro", label: "Escuro myio" }, { key: "vermelho", label: "Vermelho" },
+  { key: "preto", label: "Preto" }, { key: "cinza_escuro", label: "Cinza escuro" },
+  { key: "cinza", label: "Cinza médio" }, { key: "cinza_claro", label: "Cinza claro" },
+  { key: "cinza_muito_claro", label: "Cinza muito claro" }, { key: "branco", label: "Branco" },
 ] as const;
 export type CardBorderApp = typeof CARD_BORDER_APPS[number]["key"];
 export type CardBorderMode = typeof CARD_BORDER_MODES[number]["key"];

@@ -4,6 +4,12 @@
 [data-card-border-color="lilas"] { --classification-border-color: var(--myio-lilac); }
 [data-card-border-color="escuro"] { --classification-border-color: var(--myio-dark); }
 [data-card-border-color="branco"] { --classification-border-color: var(--myio-white); }
+[data-card-border-color="vermelho"] { --classification-border-color: var(--card-classification-red); }
+[data-card-border-color="preto"] { --classification-border-color: var(--card-classification-black); }
+[data-card-border-color="cinza_escuro"] { --classification-border-color: var(--card-classification-gray-dark); }
+[data-card-border-color="cinza"] { --classification-border-color: var(--card-classification-gray); }
+[data-card-border-color="cinza_claro"] { --classification-border-color: var(--card-classification-gray-light); }
+[data-card-border-color="cinza_muito_claro"] { --classification-border-color: var(--card-classification-gray-pale); }
 [data-card-border-edge="top"] {
   border-top-color: var(--classification-border-color) !important;
   border-top-width: var(--classification-border-width) !important;

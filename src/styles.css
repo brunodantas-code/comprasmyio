@@ -220,6 +220,12 @@ input[data-search-field="true"] {
   --myio-dark: #0b0023;
   /* Tons derivados da marca para o fundo da página principal (CDE app_tile) */
   --myio-white: #ffffff;
+  --card-classification-red: oklch(0.58 0.22 27);
+  --card-classification-black: oklch(0 0 0);
+  --card-classification-gray-dark: oklch(0.35 0 0);
+  --card-classification-gray: oklch(0.55 0 0);
+  --card-classification-gray-light: oklch(0.75 0 0);
+  --card-classification-gray-pale: oklch(0.9 0 0);
   --myio-green-tint: color-mix(in oklab, var(--myio-green) 8%, white);
   --myio-lilac: color-mix(in oklab, var(--myio-purple) 12%, white);
   /* Paleta do Mytosis: só tons das cores da marca */
