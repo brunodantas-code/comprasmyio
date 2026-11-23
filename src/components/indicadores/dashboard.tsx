@@ -182,7 +182,13 @@ export function IndicadoresDashboard() {
     </Button>
   );
   const latest = (id: string) => data.checkins.find((c) => c.metric_id === id);
+  function metricRow(m: Metric, i: number) {
+    const owner = data.objectives.find(o => o.id === m.objective_id);
+    const archived = owner ? isArchived(owner) : false;
+    return (<div key={m.id} className="grid items-center gap-4 py-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)_auto]"><div className="min-w-0"><div className="flex items-start gap-2"><CdeNumber screen={screen} subcategory>{i+1}</CdeNumber><p className="text-sm">{m.title}</p></div><p className="mt-1 text-xs text-muted-foreground">{importedField(m.source_metadata,'responsible_name') || userName(m.responsible_id)}</p></div><div className="space-y-1 text-xs"><p>{metricValue(m.current_value,m.measure,m.unit)} · Meta: {metricValue(m.target_value,m.measure,m.unit)}</p>{m.due_on && <p className="text-muted-foreground">Prazo: {new Date(`${m.due_on}T12:00:00`).toLocaleDateString('pt-BR')}</p>}</div><Advance value={metricProgress(m.initial_value,m.target_value,m.current_value)} /><div className="flex items-center gap-2">{canEdit && !archived && iconButton(`Editar ${m.title}`,Pencil,()=>setEdit({type:'metric',row:m,kind:m.kind === 'kpi' ? 'kpi' : 'kr'}))}{canEdit && iconButton(`Excluir ${m.title}`,Trash2,async()=>{if(await confirmAction(`Excluir o indicador “${m.title}”?`))mutation.mutate({type:'metric',id:m.id});})}{!archived && (m.responsible_id===data.userId || data.role==='admin') && <Button onClick={()=>setEdit({type:'checkin',row:m})}><CheckCheck />Check-in</Button>}{iconButton(`Histórico de ${m.title}`,History,()=>setHistory(m))}</div></div>);
+  }
   function metricCard(m: Metric) {
+    if (m.kind === "kr") return metricRow(m, metrics.findIndex(row => row.id === m.id));
     const pct = metricProgress(m.initial_value, m.target_value, m.current_value);
     const ownerObjective = data.objectives.find((o) => o.id === m.objective_id);
     const archived = ownerObjective ? isArchived(ownerObjective) : false;
@@ -479,35 +485,33 @@ export function IndicadoresDashboard() {
               <div className="space-y-3">{tree(null)}</div>
             ) : view === "list" ? (
               <div className="space-y-3">
-                {[...new Set(metrics.map((m) => m.responsible_id))].map((id) => (
-                  <details key={id}>
-                    <summary className="cursor-pointer py-3">
-                      {userName(id)} · {metrics.filter((m) => m.responsible_id === id).length}
-                    </summary>
-                    <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,16rem),16rem))] items-start gap-3">
-                      {metrics.filter((m) => m.responsible_id === id).map(metricCard)}
+                {tab === "okrs" ? [...new Set(objectives.map(objectiveOwner))].map(name => {
+                  const rows = objectives.filter(o => objectiveOwner(o) === name);
+                  return <details key={name}><summary className="cursor-pointer py-3">{name} · {rows.length}</summary><div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,16rem),16rem))] items-start gap-3">{rows.map((o,i) => objectiveCard(o,i))}</div></details>;
+                }) : [...new Set(metrics.map(m => m.responsible_id))].map(id => (
+                  <details key={id}><summary className="cursor-pointer py-3">{userName(id)} · {metrics.filter(m => m.responsible_id === id).length}</summary>
+                    <div className={tab === "kpis" ? "grid grid-cols-[repeat(auto-fill,minmax(min(100%,16rem),16rem))] items-start gap-3" : "divide-y divide-border"}>
+                      {metrics.filter(m => m.responsible_id === id).map((m,i) => tab === "kpis" ? metricCard(m) : metricRow(m,i))}
                     </div>
                   </details>
                 ))}
               </div>
             ) : view === "calendar" ? (
               <div className="space-y-4">
-                {[...new Set(metrics.map((m) => m.due_on ?? "Sem prazo"))].sort().map((date) => (
-                  <section key={date} className="space-y-2">
-                    <h2 className="text-sm font-medium">
-                      {date === "Sem prazo"
-                        ? date
-                        : new Date(`${date}T12:00:00`).toLocaleDateString("pt-BR")}
-                    </h2>
-                    <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,16rem),16rem))] items-start gap-3">
-                      {metrics.filter((m) => (m.due_on ?? "Sem prazo") === date).map(metricCard)}
+                {tab === "okrs" ? [...new Set(objectives.map(o => o.cycle_id))].map(id => {
+                  const cycle = data.cycles.find(c => c.id === id);
+                  return <section key={id} className="space-y-2"><h2 className="text-sm font-medium">{cycle ? `${cycle.name} · ${new Date(`${cycle.starts_on}T12:00:00`).toLocaleDateString("pt-BR")} — ${new Date(`${cycle.ends_on}T12:00:00`).toLocaleDateString("pt-BR")}` : "Sem ciclo"}</h2><div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,16rem),16rem))] items-start gap-3">{objectives.filter(o => o.cycle_id === id).map((o,i) => objectiveCard(o,i))}</div></section>;
+                }) : [...new Set(metrics.map(m => m.due_on ?? "Sem prazo"))].sort().map(date => (
+                  <section key={date} className="space-y-2"><h2 className="text-sm font-medium">{date === "Sem prazo" ? date : new Date(`${date}T12:00:00`).toLocaleDateString("pt-BR")}</h2>
+                    <div className={tab === "kpis" ? "grid grid-cols-[repeat(auto-fill,minmax(min(100%,16rem),16rem))] items-start gap-3" : "divide-y divide-border"}>
+                      {metrics.filter(m => (m.due_on ?? "Sem prazo") === date).map((m,i) => tab === "kpis" ? metricCard(m) : metricRow(m,i))}
                     </div>
                   </section>
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,16rem),16rem))] items-start gap-3">
-                {tab === "okrs" ? objectives.map((o, index) => objectiveCard(o, index)) : metrics.map(metricCard)}
+              <div className={tab === "checkins" ? "divide-y divide-border" : "grid grid-cols-[repeat(auto-fill,minmax(min(100%,16rem),16rem))] items-start gap-3"}>
+                {tab === "okrs" ? objectives.map((o, index) => objectiveCard(o, index)) : metrics.map((m,i) => tab === "checkins" ? metricRow(m,i) : metricCard(m))}
               </div>
             )}
             {(tab === "okrs" ? objectives.length === 0 : metrics.length === 0) && (
@@ -558,7 +562,7 @@ export function IndicadoresDashboard() {
           </div>
         )}
       </main>
-      {focusedObjective && (() => { const o = data.objectives.find(x => x.id === focusedObjective.id); if (!o) return null; const rows = data.metrics.filter(m => m.objective_id === o.id && focusedObjective.metricIds.includes(m.id)); return <Dialog open onOpenChange={open => { if (!open) setFocusedObjective(null); }}><DialogContent defaultExpanded className="content-start"><DialogHeader><DialogTitle>{o.title}</DialogTitle></DialogHeader><p className="text-sm text-muted-foreground">{importedField(o.source_metadata,'responsible_name') || userName(o.responsible_id)} · {data.cycles.find(c => c.id === o.cycle_id)?.name ?? 'Sem ciclo'}</p>{o.description && <p className="whitespace-pre-wrap text-sm">{o.description}</p>}<div className="max-w-xl"><Advance value={progress.get(o.id) ?? 0} /></div><header className="flex items-center justify-between gap-3"><h2 className="text-base">Key Results · {rows.length}</h2>{canEdit && !isArchived(o) && <CdeButton group="plus" screen={screen} title="Novo Key Result" aria-label={`Novo KR em ${o.title}`} onClick={() => setEdit({ type:'metric',kind:'kr',objective:o })} />}</header><div className="divide-y divide-border">{rows.map((m,i) => <div key={m.id} className="grid items-center gap-4 py-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)_auto]"><div className="min-w-0"><div className="flex items-start gap-2"><CdeNumber screen={screen} subcategory>{i+1}</CdeNumber><p className="text-sm">{m.title}</p></div><p className="mt-1 text-xs text-muted-foreground">{importedField(m.source_metadata,'responsible_name') || userName(m.responsible_id)}</p></div><div className="space-y-1 text-xs"><p>{metricValue(m.current_value,m.measure,m.unit)} · Meta: {metricValue(m.target_value,m.measure,m.unit)}</p>{m.due_on && <p className="text-muted-foreground">Prazo: {new Date(`${m.due_on}T12:00:00`).toLocaleDateString('pt-BR')}</p>}</div><Advance value={metricProgress(m.initial_value,m.target_value,m.current_value)} /><div className="flex items-center gap-2">{canEdit && !isArchived(o) && iconButton(`Editar ${m.title}`,Pencil,()=>setEdit({type:'metric',row:m,kind:'kr'}))}{canEdit && iconButton(`Excluir ${m.title}`,Trash2,async()=>{if(await confirmAction(`Excluir o indicador “${m.title}”?`))mutation.mutate({type:'metric',id:m.id});})}{!isArchived(o) && (m.responsible_id===data.userId || data.role==='admin') && <Button onClick={()=>setEdit({type:'checkin',row:m})}><CheckCheck />Check-in</Button>}{iconButton(`Histórico de ${m.title}`,History,()=>setHistory(m))}</div></div>)}{!rows.length && <p className="py-6 text-sm text-muted-foreground">Nenhum Key Result neste objetivo.</p>}</div></DialogContent></Dialog>; })()}
+      {focusedObjective && (() => { const o = data.objectives.find(x => x.id === focusedObjective.id); if (!o) return null; const rows = data.metrics.filter(m => m.objective_id === o.id && focusedObjective.metricIds.includes(m.id)); return <Dialog open onOpenChange={open => { if (!open) setFocusedObjective(null); }}><DialogContent defaultExpanded className="content-start"><DialogHeader><DialogTitle>{o.title}</DialogTitle></DialogHeader><p className="text-sm text-muted-foreground">{importedField(o.source_metadata,'responsible_name') || userName(o.responsible_id)} · {data.cycles.find(c => c.id === o.cycle_id)?.name ?? 'Sem ciclo'}</p>{o.description && <p className="whitespace-pre-wrap text-sm">{o.description}</p>}<div className="max-w-xl"><Advance value={progress.get(o.id) ?? 0} /></div><header className="flex items-center justify-between gap-3"><h2 className="text-base">Key Results · {rows.length}</h2>{canEdit && !isArchived(o) && <CdeButton group="plus" screen={screen} title="Novo Key Result" aria-label={`Novo KR em ${o.title}`} onClick={() => setEdit({ type:'metric',kind:'kr',objective:o })} />}</header><div className="divide-y divide-border">{rows.map(metricRow)}{!rows.length && <p className="py-6 text-sm text-muted-foreground">Nenhum Key Result neste objetivo.</p>}</div></DialogContent></Dialog>; })()}
       <AppNavigation className={ml.nav} aria-label="Navegação de Indicadores">
         <div className={`mx-auto grid max-w-2xl grid-cols-4 items-stretch rounded-[1.75rem] border border-border bg-card/95 p-1.5 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-card/90 ${ml.grid}`}>
           {tabs.map(({ value, label, icon: Icon }) => (
