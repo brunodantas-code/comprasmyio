@@ -13969,6 +13969,10 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      spend_resolve_missing_receipt: {
+        Args: { _line_id: string; _reason: string; _requested_at: string }
+        Returns: Json
+      }
       spend_review_project: {
         Args: { _finance_project: string; _line_id: string; _review: Json }
         Returns: string

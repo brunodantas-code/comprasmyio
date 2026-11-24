@@ -1,3 +1,7 @@
+import { SpendNoticeHistory } from "./notice-history";
+import { MissingReceiptDialog } from "./missing-receipt-dialog";
+import { canDeclareMissingReceipt, missingReceiptLabels, missingReceiptReason } from "./missing-receipt";
+import type { SpendAdjustment } from "./pending";
 import "./workspace.css";
 import { usePendingActions } from "@/hooks/use-pending-actions";
 import { useTextCaseChoice } from "@/hooks/use-text-case-choice";
@@ -79,6 +83,7 @@ function Audit({ line, data, busy, expanded, approve, save, notify, attach, link
   useEffect(() => { setProject(line.project_id ?? ''); }, [line.project_id]);
   useEffect(() => { setCnpj(line.myio_cnpj ?? receipt?.myio_cnpj ?? null); }, [line.myio_cnpj,line.receipt_id,receipt?.myio_cnpj]);
   const locked = line.status === 'approved';
+  const sent=(kind:string)=>data.logs.some(log=>log.action===kind&&log.details&&typeof log.details==='object'&&!Array.isArray(log.details)&&log.details['line_id']===line.id);
   const access = classificationAccess(busy,locked,!!receipt,account,center,notApplicable && line.receipt_not_applicable);
   useEffect(() => {
     function keydown(e: KeyboardEvent) {
@@ -91,11 +96,13 @@ function Audit({ line, data, busy, expanded, approve, save, notify, attach, link
   return <section aria-label={`Classificação de ${line.merchant}`} className="min-w-0 space-y-3 py-2 text-left" tabIndex={0}>
     <h3 className="text-sm text-muted-foreground">Classificação financeira</h3>
     <div className="grid grid-cols-1 items-end gap-3 sm:grid-cols-3"><label className="block min-w-0 space-y-1"><Label>Plano de Contas</Label><SearchableSelect aria-label="Plano de Contas do lançamento" disabled={locked} value={account} onChange={setAccount} options={data.accounts.map(a=>({value:a.id,label:a.name}))} placeholder="Selecionar conta contábil" /></label><label className="block min-w-0 space-y-1"><Label>Centro de Custo</Label><SearchableSelect aria-label="Centro de Custo do lançamento" disabled={locked} value={center} onChange={setCenter} options={data.centers.map(a=>({value:a.id,label:a.name}))} placeholder="Selecionar Centro de Custo" /></label><label className="block min-w-0 space-y-1"><Label>Projeto</Label><SearchableSelect aria-label="Projeto do lançamento" disabled={locked} value={project} onChange={setProject} options={data.projects.map(a=>({value:a.id,label:a.name}))} placeholder="Projeto (opcional)" /></label></div>
+    {(()=>{const response=data.logs.find(log=>log.action==='receipt_missing_response'&&log.details&&typeof log.details==='object'&&!Array.isArray(log.details)&&log.details['line_id']===line.id);if(!response||!response.details||typeof response.details!=='object'||Array.isArray(response.details))return null;const reason=missingReceiptReason.safeParse(response.details['reason']);return reason.success?<p className="text-sm text-muted-foreground">Portador informou: {missingReceiptLabels[reason.data]}</p>:null;})()}
     {!receipt && <label className="flex items-center gap-2 text-xs"><Checkbox aria-label="Comprovante não se aplica" checked={notApplicable} disabled={busy || locked} onCheckedChange={v=>setNotApplicable(v===true)} /><span>Comprovante: Não se aplica</span></label>}
     <div className="flex items-center gap-2" aria-label="Ações do lançamento">
       {!receipt && <TooltipProvider><Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" aria-label="Anexar comprovante" title={notApplicable ? "Anexar comprovante" : "Sem comprovante"} className={notApplicable ? "shrink-0" : "shrink-0 !text-destructive"} disabled={busy || locked} onClick={attach}><Paperclip className={notApplicable ? undefined : "!text-destructive"} /></Button></TooltipTrigger><TooltipContent>{notApplicable ? "Anexar comprovante" : "Sem comprovante"}</TooltipContent></Tooltip></TooltipProvider>}
-      {!receipt && !notApplicable && <Button variant="ghost" size="icon" title="Notificar Portador" aria-label="Notificar Portador" disabled={busy || locked} onClick={() => notify('notify')}><Bell /></Button>}
-      <Button variant="ghost" size="icon" title="Rejeitar / Pedir ajuste" aria-label="Rejeitar / Pedir ajuste" disabled={busy || locked} onClick={() => notify('adjustment')}><MessageSquareWarning /></Button>
+      {!receipt && !notApplicable && <Button variant="ghost" size="icon" title="Notificar Portador" aria-label="Notificar Portador" disabled={busy || locked} className="relative" onClick={() => notify('notify')}><Bell />{sent('notify')&&<Check className="absolute -right-1 -top-1 size-3 text-primary"/>}</Button>}
+      <Button variant="ghost" size="icon" title="Rejeitar / Pedir ajuste" aria-label="Rejeitar / Pedir ajuste" disabled={busy || locked} className="relative" onClick={() => notify('adjustment')}><MessageSquareWarning />{sent('adjustment')&&<Check className="absolute -right-1 -top-1 size-3 text-primary"/>}</Button>
+      <SpendNoticeHistory data={data} lineId={line.id}/>
       <Button variant="ghost" size="icon" aria-label="Salvar classificação" title="Salvar classificação" disabled={!access.canSave} onClick={() => save(line,account,center,project,cnpj,notApplicable)}><Save /></Button>
       <Button className="ml-0 shrink-0 sm:ml-auto" disabled={!access.canApprove} onClick={() => approve(line,account,center,project)}><Check />{locked ? 'Enviado ao Finance' : 'Aprovar'}</Button>
     </div>
@@ -114,6 +121,7 @@ export function SpendWorkspace() {
   const {data}=useSuspenseQuery(spendOptions); const qc=useQueryClient(); const ml=useAppMenuLayout('Spend'); const orders=useMenuOrders().data;
   const [sentenceCase,setSentenceCase]=useTextCaseChoice(`spend:${data.user_id}`);
   const finance=canClassifySpend(data.role); const [tab,setTab]=useState(finance?'reconcile':'receipts'); const [cardId,setCardId]=useState(''); const [period,setPeriod]=useState(new Date().toLocaleDateString('en-CA').slice(0,7)); const [lineId,setLineId]=useState(''); const [selected,setSelected]=useState<Set<string>>(new Set()); const [busy,setBusy]=useState(false); const [capture,setCapture]=useState<{line?:Line;receipt?:Receipt}|null>(null); const [importing,setImporting]=useState(false); const [notice,setNotice]=useState<string|null>(null); const [message,setMessage]=useState('');
+  const [missingRequest,setMissingRequest]=useState<SpendAdjustment|null>(null);
   const [openedAdjustment,setOpenedAdjustment]=useState('');
   useEffect(()=>{
     if(!search.adjustment || openedAdjustment===search.adjustment)return;
@@ -121,10 +129,11 @@ export function SpendWorkspace() {
     const notice=data.notices.find(n=>n.line_id===search.adjustment);
     const request=pending?.spendItems.find(r=>r.line_id===search.adjustment);
     const targetCard=line ? data.statements.find(s=>s.id===line.statement_id)?.card_id : request?.card_id ?? notice?.card_id;
-    if(!targetCard || (!finance && !pending))return;
+    if(!targetCard || !pending)return;
     setTab('receipts');setCardId(targetCard);
     const receipt=data.receipts.find(r=>r.id===(line?.receipt_id ?? request?.receipt_id));
     if(receipt)setCapture({receipt});
+    else if(request && canDeclareMissingReceipt(request.holder_id,data.user_id,request.receipt_id,request.status))setMissingRequest(request);
     setOpenedAdjustment(search.adjustment);
   },[search.adjustment,openedAdjustment,data,pending,finance]);
   const projectReview=useSpendProjectReview(data.projects);
@@ -230,7 +239,7 @@ export function SpendWorkspace() {
     </div>}</header>
     {!data.cards.length&&tab!=='cards'&&tab!=='allocations'?<div className="py-12 text-center"><CreditCard className="mx-auto mb-3 size-10 text-muted-foreground" /><h2 className="text-lg">Nenhum cartão cadastrado</h2>{finance?<Button className="mt-4" onClick={()=>setTab('cards')}>Cadastrar cartão</Button>:<p className="mt-2 text-sm text-muted-foreground">Aguardando vínculo do cartão pelo Financeiro.</p>}</div>:null}
     {card&&tab==='receipts'&&<>
-      {data.notices.filter(n=>n.card_id===card.id).slice(0,5).map(n=><p key={n.id} className="flex items-center gap-2 text-sm"><Bell className="size-4 text-primary" />{n.message}</p>)}
+      {data.notices.filter(n=>n.card_id===card.id).slice(0,5).map(n=>{const request=pending?.spendItems.find(r=>r.line_id===n.line_id);return <div key={n.id} className="flex min-w-0 items-center gap-2 text-sm"><Bell className="size-4 shrink-0 text-primary" /><span className="min-w-0 break-words">{n.message}</span>{n.line_id&&<SpendNoticeHistory data={data} lineId={n.line_id}/>}{request&&canDeclareMissingReceipt(request.holder_id,data.user_id,request.receipt_id,request.status)&&<Button variant="ghost" size="icon" className="shrink-0" title="Responder sobre comprovante ausente" aria-label={`Responder sobre comprovante ausente de ${request.merchant}`} onClick={()=>setMissingRequest(request)}><MessageSquareWarning/></Button>}</div>;})}
       {receiptFilters.summary}
       <section aria-label="Lista de comprovantes" className="divide-y divide-border">{visibleReceipts.map(r=><div key={r.id} className="grid h-[5.25rem] grid-cols-[minmax(0,1fr)_auto] items-center gap-2 py-2">
         <div className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-start gap-2">
@@ -258,8 +267,9 @@ export function SpendWorkspace() {
         {!filters.filtered.length&&<p className="py-10 text-center text-sm text-muted-foreground">Nenhum gasto encontrado para os filtros selecionados.</p>}
       </section>
     </div></>}
-    {finance&&tab==='allocations'&&<SpendSupplierAllocations data={data} refresh={refresh}/>} {finance&&tab==='cards'&&<SpendCards data={data} refresh={refresh}/>} {tab==='logs'&&<section className="divide-y divide-border">{data.logs.filter(l=>l.card_id===card?.id).map(l=><div key={l.id} className="flex flex-wrap justify-between gap-3 py-3 text-sm"><span>{l.action} · {data.users.find(u=>u.id===l.actor_id)?.name??'—'}</span><span className="text-muted-foreground">{new Date(l.created_at).toLocaleString('pt-BR')}</span></div>)}</section>}
+    {finance&&tab==='allocations'&&<SpendSupplierAllocations data={data} refresh={refresh}/>} {finance&&tab==='cards'&&<SpendCards data={data} refresh={refresh}/>} {tab==='logs'&&<section className="divide-y divide-border">{[...new Set(data.notices.filter(n=>n.card_id===card?.id).map(n=>n.line_id))].filter((id):id is string=>!!id).map(id=><div key={id} className="flex items-center gap-2 py-2 text-sm"><span className="min-w-0 break-words">{data.lines.find(l=>l.id===id)?.merchant??'Envios ao portador'}</span><SpendNoticeHistory data={data} lineId={id}/></div>)}{data.logs.filter(l=>l.card_id===card?.id).map(l=><div key={l.id} className="flex flex-wrap justify-between gap-3 py-3 text-sm"><span>{l.action} · {data.users.find(u=>u.id===l.actor_id)?.name??'—'}</span><span className="text-muted-foreground">{new Date(l.created_at).toLocaleString('pt-BR')}</span></div>)}</section>}
   </main><AppNavigation className={ml.nav} aria-label="Navegação Spend"><div className={`mx-auto grid max-w-2xl grid-flow-col auto-cols-fr items-stretch ${ml.grid} rounded-[1.75rem] border border-border bg-card/95 p-1.5 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-card/90`}>{tabs.map(({value,label,icon:Icon})=><Button key={value} variant="ghost" className={`h-auto min-w-0 rounded-[1.35rem] p-0 shadow-none ${tab===value ? "!bg-primary/15 !text-primary hover:!bg-primary/20 hover:!text-primary" : "!bg-transparent !text-muted-foreground hover:!bg-muted hover:!text-foreground"}`} aria-current={tab===value?'page':undefined} onClick={()=>setTab(value)}><span className="flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 px-1"><span className="menu-icon"><Icon className="h-5 w-5 shrink-0" /></span><span className="max-w-full text-[10px] font-semibold leading-tight whitespace-normal">{label}</span></span></Button>)}</div></AppNavigation>
+    {missingRequest&&<MissingReceiptDialog key={missingRequest.line_id} request={missingRequest} onClose={()=>setMissingRequest(null)} refresh={refresh}/>}
     {projectReview.dialog}
     {capture&&card&&<SpendCapture data={data} cardId={card.id} {...(capture.line?{line:capture.line}:{})} {...(capture.receipt?{receipt:capture.receipt}:{})} onDone={refresh} onClose={()=>setCapture(null)} />}{importing&&card&&<SpendStatementImport card={card} period={period} sentenceCase={sentenceCase} onSentenceCaseChange={setSentenceCase} onDone={refresh} onImported={setPeriod} onClose={()=>setImporting(false)}/>}
     <Dialog open={!!notice} onOpenChange={o=>{if(!o)setNotice(null);}}><DialogContent><DialogHeader><DialogTitle>{notice==='notify'?'Notificar Portador':'Pedir ajuste'}</DialogTitle></DialogHeader><Textarea aria-label="Mensagem ao portador" value={message} onChange={e=>setMessage(e.target.value)}/><Button disabled={busy||!message.trim()} onClick={async()=>{if(!active||!notice)return;await action(notice,{line_id:active.id,message});setNotice(null);}}>Enviar aviso no app</Button></DialogContent></Dialog>

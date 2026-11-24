@@ -2122,6 +2122,20 @@
       "when": 1795561444049,
       "tag": "0302_spend_adjustment_notice_identity",
       "breakpoints": true
+    },
+    {
+      "idx": 303,
+      "version": "7",
+      "when": 1795562648322,
+      "tag": "0303_spend_missing_receipt_response",
+      "breakpoints": true
+    },
+    {
+      "idx": 304,
+      "version": "7",
+      "when": 1795562895186,
+      "tag": "0304_spend_notify_pending",
+      "breakpoints": true
     }
   ]
 }

@@ -2,6 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { spendPendingAdjustments, type SpendAdjustment } from './pending';
 const request: SpendAdjustment = { line_id:'line', receipt_id:'receipt', card_id:'card', holder_id:'portador', merchant:'Hotel', amount:139.90, date:'2026-10-08', status:'adjustment', message:'Confira o comprovante', requested_at:'2026-11-24T23:00:00Z', corrected_at:null, requester_name:'Financeiro' };
 describe('Spend adjustment pendencies', () => {
+  it('includes a holder notification, including self-notification', () => {
+    expect(spendPendingAdjustments([{...request,receipt_id:null,kind:'notify'}],'portador')).toHaveLength(1);
+  });
   it('assigns the adjustment to the holder, not another user', () => {
     expect(spendPendingAdjustments([request], 'portador')).toHaveLength(1);
     expect(spendPendingAdjustments([request], 'financeiro')).toHaveLength(0);

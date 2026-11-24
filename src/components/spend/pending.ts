@@ -5,6 +5,7 @@ const adjustmentSchema = z.object({
   holder_id: z.string(), merchant: z.string(), amount: z.number(), date: z.string(),
   status: z.string(), message: z.string(), requested_at: z.string(),
   corrected_at: z.string().nullable(), requester_name: z.string().nullable(),
+  kind: z.enum(['notify','adjustment']).optional(),
 });
 export type SpendAdjustment = z.infer<typeof adjustmentSchema>;
 export function spendPendingAdjustments(value: unknown, userId?: string): SpendAdjustment[] {

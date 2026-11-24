@@ -21,3 +21,6 @@
 - Due-date filtering uses separate month and year droplists that recompose the stored YYYY-MM period, so the two lists never diverge from the invoice the reconciliation shows.
 - Project review is shared by save, Enter and batch approval; guarded RPCs recheck receipt/project snapshots under lock and audit both sources, while line-ID editor keys preserve unsaved finance drafts across receipt links and cancellations never post unreviewed lines.
 - Receipt evidence is server-written and bound to immutable storage object/hash; shared verification gates capture, manual/automatic matching and individual/Enter/batch approvals, so client-supplied bank values cannot conceal a wrong image and approved history stays intact.- Temporary card authorizations are holder-granted, dated (≤90 days) and revocable; delegates may only create new card receipts on that card and see only their own uploads, never statements or other receipts, preserving submitter identity in submitted_by.
+
+- Missing-receipt responses use a holder-only locked RPC tied to the exact adjustment timestamp; they resolve personal/Admin alerts through audit, never set finance waiver or approve lines.
+- Notification and adjustment sends are evidenced from audited line-scoped logs and rendered with the shared MilestoneTimeline; send indicators never imply read or approval.
