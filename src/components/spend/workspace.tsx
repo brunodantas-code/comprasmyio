@@ -13,6 +13,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { SpendStatementPreview } from "./statement-preview";
+import { SpendReceiptPdfPreview } from "./receipt-pdf-preview";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { classificationAccess, showReceiptCnpj, classificationTargets, toggleFilteredSelection } from "./classification";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -58,7 +59,7 @@ function ReceiptPreview({ path, fullSize = false }: { path: string; fullSize?: b
   const url = useQuery({ queryKey: ["spend-file", path], queryFn: () => spendFileUrl(path), staleTime: 300000 });
   if (url.isPending) return <Loader2 className="size-5 animate-spin" />;
   if (url.error) return <p className="text-sm text-destructive">Comprovante indisponível</p>;
-  if (path.endsWith('.pdf')) return <a href={url.data} target="_blank" rel="noreferrer" className="text-sm underline hover:text-primary">Abrir comprovante PDF</a>;
+  if (path.toLowerCase().endsWith('.pdf')) return <SpendReceiptPdfPreview src={url.data} fullSize={fullSize} />;
   if (fullSize) return <img src={url.data} alt="Imagem do comprovante fiscal" className="mx-auto h-auto max-w-full object-contain" />;
   return <a href={url.data} target="_blank" rel="noreferrer" className="group block overflow-hidden"><img src={url.data} alt="Comprovante do lançamento" className="h-64 w-full rounded-md object-contain transition-transform group-hover:scale-125 motion-reduce:transition-none" /></a>;
 }
