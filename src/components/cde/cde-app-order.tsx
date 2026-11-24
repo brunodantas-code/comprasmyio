@@ -20,6 +20,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { CdeMobileDockStyle } from "./mobile-dock-style";
+import { CdeCodeApps } from "./cde-code-apps";
 
 function Row({ id, index, displayName }: { id: string; index: number; displayName: string }) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
@@ -111,6 +112,7 @@ export function CdeAppOrder({ number, handle }: { number: number; handle?: impor
     <CdeCategoryHeader handle={handle} number={number} title="Home Page" hint="Faixa superior, apps, espaçamento e cores" open={open} onToggle={() => setOpen(!open)} />
     {open && <div className="w-full min-w-0 py-4"><p className="mb-3 text-sm font-medium">Ordenação dos Apps na Home Page</p><DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={move}><SortableContext items={order} strategy={verticalListSortingStrategy}>{order.map((id, i) => <Row key={id} id={id} index={i} displayName={appDisplay(tile, id).name} />)}</SortableContext></DndContext>
       <Button variant="action" className="mt-3" onClick={save} disabled={saving || !draft}><Save className="h-4 w-4" />Salvar</Button>
+      <CdeCodeApps />
       <div className="mt-6 space-y-4 border-t border-border pt-4">
         <p className="text-sm font-medium">Nomes e fontes dos apps</p>
         <div role="group" aria-label="Nomes e fontes dos apps" className="grid gap-4 xl:grid-cols-2">
