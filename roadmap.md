@@ -1,3 +1,4 @@
+- [ ] Spend: corrigir portador do cartão 9055 para André Abadesso; bloqueado porque não existe conta com esse nome no cadastro consultado. Não alterar comprovantes/histórico existentes.
 - [x] Spend: localizar autorização temporária: Meus comprovantes → Autorizar uso, junto ao cartão do portador; disponível fora do formulário de captura.
 - [x] Spend: Notificar Portador na Central e bolinha do app, com baixa auditada; TRANCASA + Madero somam 2 na Home e Central autenticadas.
 - [x] Spend: Notificar/Pedir ajuste com check de envio e histórico compartilhado MilestoneTimeline por lançamento em Conciliação, avisos de Meus comprovantes e Histórico; autor/data/mensagem por logs auditados, conferido em tela.
