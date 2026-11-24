@@ -668,3 +668,4 @@
 - [x] Legal: só usuários do ERP aparecem para assinar a ata; convidados externos ficam só como participantes
 - [x] Legal: "Aguardando assinatura" em texto vermelho no lugar da bolinha
 - [x] Legal: esconder Deliberações e Ações vazias na leitura da ata
+- [x] Spend: Financeiro registra comprovantes em qualquer cartão e vê todos os cartões/reembolsos

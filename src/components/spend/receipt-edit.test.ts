@@ -32,3 +32,11 @@ describe("exclusão pessoal de comprovantes e reembolsos", () => {
     expect(canDeleteSpendReceipt({ holder_id: "holder", status: "pending", reimbursement_order_id: "order" }, "holder")).toBe(false);
   });
 });
+describe("Financeiro edita comprovantes de qualquer cartão", () => {
+  it("permite ao Financeiro editar comprovante de outro portador", () => {
+    expect(canEditSpendReceipt({ holder_id: "other", status: "pending" }, "finance-user", false, true)).toBe(true);
+  });
+  it("mantém aprovados bloqueados mesmo para o Financeiro", () => {
+    expect(canEditSpendReceipt({ holder_id: "other", status: "approved" }, "finance-user", false, true)).toBe(false);
+  });
+});
