@@ -1,3 +1,4 @@
+- [x] Spend: Competência compacta à direita do total, ações reunidas abaixo e lançamentos elevados; conferido com fatura real em 1073/1280/390px, filtro funcional e sem excesso lateral ou erros. Nenhum dado alterado.
 - [x] Spend: autorização temporária do portador para outro usuário enviar comprovantes no seu cartão
 - [x] Spend: categoria do portador indicada como informativa; classificação financeira separada. Divergência, projeto herdado e ausência de projeto confirmados em pop-up ao salvar, Enter, aprovação individual/lote, com histórico. Testado em tela: cancelamento sem gravação, escolhas salvas/relidas, anexo preserva projeto digitado, lote cancelado sem envio, Finance mostrando Taboão/Vila Velha/Interna; bloqueios de confirmação inválida conferidos. Dados e anexos temporários removidos; 72 testes passaram.
 - [x] Spend: avaliada explicação ao Alexandre; comparação atual usa valor exato, data ±2 dias e cartão, sem estabelecimento.
