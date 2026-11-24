@@ -679,3 +679,5 @@
 - [x] Legal: esconder Deliberações e Ações vazias na leitura da ata
 - [x] Spend: Financeiro registra comprovantes em qualquer cartão e vê todos os cartões/reembolsos
 - [x] Spend: Conciliação usa dois droplists, mês e ano do vencimento, no lugar do campo único mês/ano; meses com nome, anos das faturas mais anterior e seguinte. 88 testes passaram; tela autenticada conferida em 1280px (Cartão, Mês, Ano e Vencimento com linhas verdes na mesma altura) e 390px (campos empilhados, sem rolagem lateral). Nenhum registro alterado; falta publicar.
+- [x] Spend: barra de "% Conciliado · R$ x / R$ y" levada para a linha das ações, à direita dos botões (filtro, Aa, PDF Fatura, download, varinha). Conferido em 1280px (mesma linha, à direita) e 390px (quebra para a linha seguinte, à direita), sem rolagem lateral.
+- [x] Nome salvo do app ("OKRs e KPIs") propagado a todas as telas: Acessos, abas de Acessos, menu principal, editor do menu, lista do Code no CDE, dropdown "Aplicativo" do Code, cabeçalho e aba do próprio app, links de uso do CDE e prévia de telas. Chaves internas, permissões e rotas preservadas; 21 testes novos/reatualizados em app-order-config.test.ts.

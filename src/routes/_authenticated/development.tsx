@@ -1,4 +1,5 @@
 import { codeAppName, codeApps, useCodeAppExclusions } from "@/components/cde/code-apps-config";
+import { useAppDisplayName } from "@/components/cde/app-order-config";
 import { NumericMarker } from "@/components/cde/numeric-markers";
 import { DependencyEditor } from "@/components/central/dependency-editor";
 import { ImageAttachmentField } from "@/components/image-attachment-field";
@@ -137,6 +138,7 @@ export const Route = createFileRoute("/_authenticated/development")({
 });
 
 function DevelopmentPage() {
+  const nameOf = useAppDisplayName();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const routeSearch = Route.useSearch();
@@ -176,7 +178,7 @@ function DevelopmentPage() {
   const ticketColumns: FilterColumn<Ticket>[] = [
     { key: "number", label: "Nº", kind: "number", value: (t) => t.ticket_number },
     { key: "reporter", label: "Solicitante", value: (t) => profileNames.get(t.reporter_id) ?? "Usuário" },
-    { key: "app", label: "Aplicativo", value: (t) => codeAppName(t.app_key) },
+    { key: "app", label: "Aplicativo", value: (t) => codeAppName(t.app_key, nameOf) },
     { key: "type", label: "Tipo", value: (t) => t.ticket_type === "bug" ? "Bug" : "Melhoria" },
     { key: "title", label: "Título", value: (t) => t.title },
     { key: "priority", label: "Prioridade", value: (t) => PRIORITY_NAMES[t.priority] },
@@ -199,7 +201,7 @@ function DevelopmentPage() {
                   <TableRow key={ticket.id} className="md:h-12 cursor-pointer [&>td]:py-2" onClick={() => setSelectedTicketId(ticket.id)}>
                     <TableCell className="font-semibold"><NumericMarker>{ticket.ticket_number}</NumericMarker></TableCell>
                      <TableCell>{profileNames.get(ticket.reporter_id) ?? "Usuário"}</TableCell>
-                    <TableCell>{codeAppName(ticket.app_key)}</TableCell>
+                    <TableCell>{codeAppName(ticket.app_key, nameOf)}</TableCell>
                     <TableCell><Badge variant="outline" className="font-normal">{ticket.ticket_type === "bug" ? "Bug" : "Melhoria"}</Badge></TableCell>
                     <TableCell className="md:max-w-[20rem] md:truncate font-medium">{ticket.title}</TableCell>
                     <TableCell>{PRIORITY_NAMES[ticket.priority]}</TableCell>
@@ -284,6 +286,7 @@ function FilterSelect({ value, onChange, placeholder, options, firstOption = { v
 }
 
 function NewTicketDialog({ open, onOpenChange, userId, onCreated }: { open: boolean; onOpenChange: (open: boolean) => void; userId?: string; onCreated: () => void }) {
+  const nameOf = useAppDisplayName();
    const [files, setFiles] = useState<File[]>([]);
    const [fileInputKey, setFileInputKey] = useState(0);
   const [appKey, setAppKey] = useState("supply");
@@ -332,7 +335,7 @@ function NewTicketDialog({ open, onOpenChange, userId, onCreated }: { open: bool
       <form onSubmit={(event) => { event.preventDefault(); createTicket.mutate(event.currentTarget); }} className="space-y-4">
         <DialogHeader><DialogTitle>Novo ticket</DialogTitle><DialogDescription>Registre uma melhoria ou um problema encontrado.</DialogDescription></DialogHeader>
         <div className="grid gap-4 sm:grid-cols-2">
-           <FormSelect name="app_key" label="Aplicativo" value={appKey} onChange={(value) => { setAppKey(value); setMenuName("none"); setSubmenuName("none"); }} options={codeApps(codeExclusions.data ?? []).map((a) => ({ value: a.key, label: a.name }))} />
+           <FormSelect name="app_key" label="Aplicativo" value={appKey} onChange={(value) => { setAppKey(value); setMenuName("none"); setSubmenuName("none"); }} options={codeApps(codeExclusions.data ?? [], nameOf).map((a) => ({ value: a.key, label: a.name }))} />
            <OptionalFormSelect label="Menu (opcional)" value={menuName} onChange={(value) => { setMenuName(value); setSubmenuName("none"); }} placeholder={menuOptions.length ? "Selecione" : "Sem menus disponíveis"} disabled={!menuOptions.length} options={menuOptions.map((menu) => menu.label)} />
            <OptionalFormSelect label="Submenu (opcional)" value={submenuName} onChange={setSubmenuName} placeholder={menuName === "none" ? "Selecione o menu" : submenuOptions.length ? "Selecione" : "Sem submenus disponíveis"} disabled={menuName === "none" || !submenuOptions.length} options={submenuOptions} />
           <FormSelect name="ticket_type" label="Tipo" options={[{ value: "melhoria", label: "Melhoria" }, { value: "bug", label: "Bug" }]} />
@@ -369,6 +372,7 @@ function CodeSaveButton({ label, ...props }: Omit<ButtonProps, "children"> & { l
 }
 
 function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | null; onClose: () => void; data?: TicketPageData; onUpdated: () => Promise<void> }) {
+  const nameOf = useAppDisplayName();
   const queryClient = useQueryClient();
   const [status, setStatus] = useState<TicketStatus>("aberto");
   const [assignee, setAssignee] = useState("none");
@@ -616,7 +620,7 @@ function TicketDetails({ ticket, onClose, data, onUpdated }: { ticket: Ticket | 
     <Dialog open={Boolean(ticket)} onOpenChange={(open) => { if (!open) onClose(); }}>
       <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
         {ticket ? <div className="space-y-5">
-        <DialogHeader><DialogTitle className="flex items-center gap-1">{editingTitle !== null ? <span className="flex flex-1 items-center gap-2"><span><NumericMarker>{ticket.ticket_number}</NumericMarker> —</span><Input value={editingTitle} onChange={(event) => setEditingTitle(event.target.value)} minLength={3} maxLength={120} className="h-8 flex-1" autoFocus /><Button variant="outline" size="sm" onClick={() => setEditingTitle(null)}>Cancelar</Button><CodeSaveButton label="Salvar" onClick={() => editTitle.mutate()} disabled={editTitle.isPending || editingTitle.trim().length < 3} /></span> : <><NumericMarker>{ticket.ticket_number}</NumericMarker> — {ticket.title}{isReporter && <Button variant="ghost" size="compactIcon" title="Editar título" aria-label="Editar título" onClick={() => setEditingTitle(ticket.title)}><Pencil className="h-3.5 w-3.5" /></Button>}</>}</DialogTitle><DialogDescription>{codeAppName(ticket.app_key)} · {ticket.ticket_type === "bug" ? "Bug" : "Melhoria"} · Solicitante: {data?.profiles.find((profile) => profile.id === ticket.reporter_id)?.full_name || data?.profiles.find((profile) => profile.id === ticket.reporter_id)?.email || "Usuário"} · {new Date(ticket.created_at).toLocaleString("pt-BR")}</DialogDescription></DialogHeader>
+        <DialogHeader><DialogTitle className="flex items-center gap-1">{editingTitle !== null ? <span className="flex flex-1 items-center gap-2"><span><NumericMarker>{ticket.ticket_number}</NumericMarker> —</span><Input value={editingTitle} onChange={(event) => setEditingTitle(event.target.value)} minLength={3} maxLength={120} className="h-8 flex-1" autoFocus /><Button variant="outline" size="sm" onClick={() => setEditingTitle(null)}>Cancelar</Button><CodeSaveButton label="Salvar" onClick={() => editTitle.mutate()} disabled={editTitle.isPending || editingTitle.trim().length < 3} /></span> : <><NumericMarker>{ticket.ticket_number}</NumericMarker> — {ticket.title}{isReporter && <Button variant="ghost" size="compactIcon" title="Editar título" aria-label="Editar título" onClick={() => setEditingTitle(ticket.title)}><Pencil className="h-3.5 w-3.5" /></Button>}</>}</DialogTitle><DialogDescription>{codeAppName(ticket.app_key, nameOf)} · {ticket.ticket_type === "bug" ? "Bug" : "Melhoria"} · Solicitante: {data?.profiles.find((profile) => profile.id === ticket.reporter_id)?.full_name || data?.profiles.find((profile) => profile.id === ticket.reporter_id)?.email || "Usuário"} · {new Date(ticket.created_at).toLocaleString("pt-BR")}</DialogDescription></DialogHeader>
         <div className="flex items-center gap-2"><span className="text-xs text-muted-foreground">Dependências</span><DependencyEditor kind="code" sourceId={ticket.id} /></div>
         {ticket.menu_name || ticket.submenu_name ? <div className="flex flex-wrap gap-2">{ticket.menu_name ? <Badge variant="outline">Menu: {ticket.menu_name}</Badge> : null}{ticket.submenu_name ? <Badge variant="outline">Submenu: {ticket.submenu_name}</Badge> : null}</div> : null}
         <div className="grid gap-4 sm:grid-cols-2"><div><p className="text-xs font-semibold text-muted-foreground">Descrição</p><p className="mt-1 whitespace-pre-wrap text-sm">{ticket.description}</p></div><div><p className="text-xs font-semibold text-muted-foreground">Resultado esperado</p><p className="mt-1 whitespace-pre-wrap text-sm">{ticket.expected_result}</p></div></div>

@@ -5,6 +5,7 @@ import { CdeButton } from "@/components/cde/cde-button";
 import { useState } from "react";
 import { Choice } from "./editors";
 import { SearchableSelect } from "@/components/ui/searchable-select";
+import { useAppDisplayName } from "@/components/cde/app-order-config";
 import {
   Table,
   TableHeader,
@@ -19,6 +20,7 @@ const roles = [
   { value: "admin", label: "Administrador" },
 ];
 export function IndicadoresAccess() {
+  const nameOf = useAppDisplayName();
   const qc = useQueryClient();
   const [user, setUser] = useState("");
   const [role, setRole] = useState("viewer");
@@ -56,11 +58,11 @@ export function IndicadoresAccess() {
     return <p className="text-destructive">Não foi possível carregar os perfis.</p>;
   return (
     <section className="space-y-4">
-      <h2 className="text-lg">Perfis · Indicadores</h2>
+      <h2 className="text-lg">Perfis · {nameOf("indicadores")}</h2>
       <div className="flex flex-wrap items-end gap-3">
         <div className="min-w-48 flex-1">
           <SearchableSelect
-            aria-label="Usuário de Indicadores"
+            aria-label={`Usuário de ${nameOf("indicadores")}`}
             value={user}
             onChange={setUser}
             options={query.data.users.map((u) => ({ value: u.id, label: u.full_name }))}

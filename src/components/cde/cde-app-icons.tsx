@@ -10,6 +10,7 @@ import { MytosisIcon } from "@/components/mytosis-icon";
 import { CdeIcon } from "@/components/cde-icon";
 import { SpendIcon } from "@/components/spend/icons";
 import { CdeToggleIcon } from "./cde-button";
+import { useAppDisplayName } from "./app-order-config";
 import { CdeCategoryHeader } from "./cde-category-header";
 import { CdeSortableIcons } from "./cde-sortable-icons";
 import { CdeMenuType } from "./cde-menu-type";
@@ -83,6 +84,7 @@ function Tile({ it }: { it: Item }) {
 }
 
 export function CdeAppIcons({ number, handle }: { number: number; handle?: import("react").ReactNode }) {
+  const nameOf = useAppDisplayName();
   const [open, setOpen] = useState(false);
   const [topOpen, setTopOpen] = useState(false);
   const menuConfig = useMainMenuConfig().data ?? parseMenuConfig();
@@ -96,7 +98,7 @@ export function CdeAppIcons({ number, handle }: { number: number; handle?: impor
       {APPS.map((a) => { const AppIcon = a.icon; const isOpen = openApps.has(a.name); return <div key={a.name} className="space-y-2">
         <button type="button" aria-expanded={isOpen} onClick={() => setOpenApps((p) => { const n = new Set(p); if (n.has(a.name)) n.delete(a.name); else n.add(a.name); return n; })} className="flex w-full items-center gap-3 text-left">
           <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary"><AppIcon className="h-5 w-5" /></span>
-          <span className="text-sm font-semibold">{a.name}</span><span className="text-[0.6rem] text-muted-foreground/70">{a.iconName}</span>
+          <span className="text-sm font-semibold">{nameOf(a.name)}</span><span className="text-[0.6rem] text-muted-foreground/70">{a.iconName}</span>
           <CdeToggleIcon open={isOpen} />
         </button>
         {isOpen ? <div className="space-y-2 rounded-lg border border-border p-3">{a.groups.filter((g) => !(g.title === "Submenus" && SUB_PARENT[a.name])).map((g) => <div key={g.title}><div className="mb-1 text-xs text-muted-foreground">{g.title === "Barra inferior" ? "Menu principal do app" : g.title}</div>{g.title === "Barra inferior" ? <div className="mb-2"><CdeMenuType app={a.name} items={g.items} /></div> : null}

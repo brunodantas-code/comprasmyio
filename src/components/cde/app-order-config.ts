@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -123,9 +124,21 @@ export function appTileColor(kind: AppTileColorKind, key: string) {
   const list = APP_TILE_COLORS[kind] as readonly { key: string; label: string; value: string; dark: boolean }[];
   return list.find((o) => o.key === key) ?? list[0];
 }
-export function appKeyForName(name: string): string {
-  if (name.trim().toLowerCase() === "cash flow") return "cash_flow";
-  return PORTAL_APPS.find(app => app.name.toLowerCase() === name.trim().toLowerCase())?.key ?? name;
+/** Portal key of an app shown by name; names saved in the CDE are recognised when the config is supplied. */
+export function appKeyForName(name: string, tile?: AppTileConfig): string {
+  const wanted = name.trim().toLowerCase();
+  if (wanted === "cash flow") return "cash_flow";
+  const saved = tile?.apps ? Object.entries(tile.apps).find(([, option]) => option?.name?.trim().toLowerCase() === wanted)?.[0] : undefined;
+  if (saved && PORTAL_APPS.some(app => app.key === saved)) return saved;
+  return PORTAL_APPS.find(app => app.name.toLowerCase() === wanted)?.key ?? name;
+}
+/**
+ * Display name of an app written by key ("indicadores") or by any of its labels ("Indicadores").
+ * The name saved in CDE → Home Page always wins, so every screen follows the same choice.
+ */
+export function useAppDisplayName() {
+  const tile = useAppTile().data ?? APP_TILE_DEFAULT;
+  return useCallback((keyOrLabel: string) => appDisplay(tile, appKeyForName(keyOrLabel, tile)).name, [tile]);
 }
 /** Logo height used by every app header; defaults to the Home logo (40 px). */
 export const APP_LOGO_DEFAULT_PX = 40;

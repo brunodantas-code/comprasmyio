@@ -31,6 +31,10 @@ export const MENU_ITEMS = [
 /** Optional entries start hidden until an admin enables them in the CDE. */
 const OPTIONAL_IDS = MENU_ITEMS.filter((i) => "optional" in i).map((i) => i.id);
 export type MenuId = typeof MENU_ITEMS[number]["id"];
+/** Portal app key behind a menu entry, when the entry is an app shortcut ("app_indicadores" → "indicadores"). */
+export function menuAppKey(id: MenuId): string | null {
+  return id.startsWith("app_") ? id.slice("app_".length) : null;
+}
 export const USER_INFO_OPTIONS = [
   { key: "name", label: "Somente o nome" },
   { key: "job", label: "Nome e cargo" },

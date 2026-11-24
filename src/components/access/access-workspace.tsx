@@ -10,6 +10,7 @@ import { SiteSurveyProfilesAdmin } from "@/components/site-survey-profiles-admin
 import { UsersTab } from "@/components/mytosis/users-tab";
 import { CodeAttendantsPanel } from "@/components/code-app-attendants";
 import { AppSymbol } from "@/components/cde/app-tile";
+import { useAppDisplayName } from "@/components/cde/app-order-config";
 import { accessProfileApps, type AccessCapabilities } from "@/lib/access-management";
 import { UsersAdmin } from "./users-admin";
 import { SurveyUsersAdmin } from "./survey-users-admin";
@@ -31,6 +32,7 @@ function MytosisAccess() {
 }
 
 function CodeAccess() {
+  const nameOf = useAppDisplayName();
   const query = useQuery({ queryKey: ["code-access-admins"], queryFn: async () => {
     const [profiles, admins, accesses] = await Promise.all([supabase.rpc("code_conversation_users"), supabase.from("erp_admins").select("user_id"), supabase.from("user_app_access").select("user_id").eq("app_key", "development")]);
     for (const result of [profiles, admins, accesses]) if (result.error) throw result.error;
@@ -38,10 +40,11 @@ function CodeAccess() {
     const ids = new Set((admins.data ?? []).filter(a => allowed.has(a.user_id)).map(a => a.user_id));
     return (profiles.data ?? []).filter(p => ids.has(p.id));
   } });
-  return query.isPending ? <p className="text-sm text-muted-foreground">Carregando responsáveis...</p> : query.isError ? <p className="text-sm text-destructive">Não foi possível carregar os responsáveis.</p> : <section className="space-y-5"><h2 className="text-lg font-medium">Responsáveis pelos chamados · Code</h2><CodeAttendantsPanel admins={query.data} appNames={APP_NAMES} /></section>;
+  return query.isPending ? <p className="text-sm text-muted-foreground">Carregando responsáveis...</p> : query.isError ? <p className="text-sm text-destructive">Não foi possível carregar os responsáveis.</p> : <section className="space-y-5"><h2 className="text-lg font-medium">Responsáveis pelos chamados · Code</h2><CodeAttendantsPanel admins={query.data} appNames={Object.fromEntries(Object.entries(APP_NAMES).map(([key, label]) => [key, nameOf(key) || label]))} /></section>;
 }
 
 export function AccessWorkspace({ capabilities, section, app, onChange }: { capabilities: AccessCapabilities; section?: AccessSection; app?: string; onChange: (change: { section: AccessSection; app?: string }) => void }) {
+  const nameOf = useAppDisplayName();
   const apps = accessProfileApps(capabilities);
   const sections = [
     ...(capabilities.erpAdmin ? [{ value: "usuarios" as const, label: "Usuários e aplicativos", icon: UsersRound }] : []),
@@ -55,7 +58,7 @@ export function AccessWorkspace({ capabilities, section, app, onChange }: { capa
     {active === "usuarios" && capabilities.erpAdmin ? <ErpAppAccessAdmin /> : null}
     {active === "cadastro" && capabilities.supplyAdmin ? <UsersAdmin /> : null}
     {active === "perfis" ? <Tabs value={selectedApp} onValueChange={value => onChange({ section: "perfis", app: value })}>
-      <nav aria-label="Aplicativos em Acessos" className="mb-5 flex flex-wrap gap-2">{apps.map(key => <Button key={key} variant="ghost" aria-pressed={selectedApp === key} className={selectedApp === key ? "font-semibold underline underline-offset-4" : "font-normal"} onClick={() => onChange({ section: "perfis", app: key })}><AppSymbol name={APP_NAMES[key] ?? key} className="size-4 shrink-0" />{APP_NAMES[key] ?? key}</Button>)}</nav>
+      <nav aria-label="Aplicativos em Acessos" className="mb-5 flex flex-wrap gap-2">{apps.map(key => <Button key={key} variant="ghost" aria-pressed={selectedApp === key} className={selectedApp === key ? "font-semibold underline underline-offset-4" : "font-normal"} onClick={() => onChange({ section: "perfis", app: key })}><AppSymbol name={nameOf(key)} className="size-4 shrink-0" />{nameOf(key)}</Button>)}</nav>
       {capabilities.supplyAdmin ? <TabsContent value="supply"><div className="space-y-6"><AccessProfileDefinitionsTab /><AccessProfilesTab /></div></TabsContent> : null}
       {capabilities.surveyUsers || capabilities.surveyProfiles ? <TabsContent value="site_survey"><div className="space-y-6">{capabilities.surveyUsers ? <SurveyUsersAdmin /> : null}{capabilities.surveyProfiles ? <SiteSurveyProfilesAdmin /> : null}</div></TabsContent> : null}
       {capabilities.mytosisAdmin ? <TabsContent value="mytosis"><MytosisAccess /></TabsContent> : null}

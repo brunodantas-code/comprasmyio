@@ -15,8 +15,10 @@ import { CONFIDENCES } from "@/lib/indicadores";
 import { CdeCategoryHeader } from "./cde-category-header";
 import { useCdeStandards, useCdeSwatchStyle } from "./cde-button";
 import { CARD_BORDER_APPS, CARD_BORDER_COLORS, CARD_BORDER_GROUP, CARD_BORDER_MODES, DEFAULT_CARD_BORDER, parseCardBorders, type CardBorderApp, type CardBorderConfig, type CardBorderRule } from "./card-border-config";
+import { useAppDisplayName } from "./app-order-config";
 
 export function CdeCardBorders({ number, handle }: { number: number; handle?: React.ReactNode }) {
+  const nameOf = useAppDisplayName();
   const [open, setOpen] = useState(false);
   const [app, setApp] = useState<CardBorderApp>("indicadores");
   const [draft, setDraft] = useState<CardBorderConfig | null>(null);
@@ -81,7 +83,7 @@ export function CdeCardBorders({ number, handle }: { number: number; handle?: Re
         {draft && <Button variant="ghost" size="icon" title="Cancelar alterações das bordas" aria-label="Cancelar alterações das bordas" disabled={saving} onClick={() => setDraft(null)}><X /></Button>}
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div><Label>Aplicativo</Label><Select value={app} onValueChange={v => { const choice = CARD_BORDER_APPS.find(a => a.key === v); if (choice) setApp(choice.key); }} disabled={saving}><SelectTrigger aria-label="Aplicativo das bordas"><SelectValue /></SelectTrigger><SelectContent>{CARD_BORDER_APPS.map(a => <SelectItem key={a.key} value={a.key}>{a.label}</SelectItem>)}</SelectContent></Select></div>
+        <div><Label>Aplicativo</Label><Select value={app} onValueChange={v => { const choice = CARD_BORDER_APPS.find(a => a.key === v); if (choice) setApp(choice.key); }} disabled={saving}><SelectTrigger aria-label="Aplicativo das bordas"><SelectValue /></SelectTrigger><SelectContent>{CARD_BORDER_APPS.map(a => <SelectItem key={a.key} value={a.key}>{nameOf(a.key) || a.label}</SelectItem>)}</SelectContent></Select></div>
         <div><Label>Classificação</Label><Select value={rule.mode} onValueChange={v => { const choice = CARD_BORDER_MODES.find(m => m.key === v); if (choice) change({ mode: choice.key }); }} disabled={saving}><SelectTrigger aria-label="Classificação das bordas"><SelectValue /></SelectTrigger><SelectContent>{CARD_BORDER_MODES.map(m => <SelectItem key={m.key} value={m.key} disabled={app === "crm" && m.key === "department"}>{m.label}</SelectItem>)}</SelectContent></Select></div>
         <div><Label>Posição da borda</Label><Select value={rule.edge} onValueChange={v => change({ edge: v === "all" ? "all" : "top" })} disabled={saving || rule.mode === "none"}><SelectTrigger aria-label="Posição da borda"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="top">Superior</SelectItem><SelectItem value="all">Contorno completo</SelectItem></SelectContent></Select></div>
         <div><Label>Espessura</Label><Select value={String(rule.width)} onValueChange={v => change({ width: Number(v) })} disabled={saving || rule.mode === "none"}><SelectTrigger aria-label="Espessura da borda"><SelectValue /></SelectTrigger><SelectContent>{[1, 2, 3, 4].map(n => <SelectItem key={n} value={String(n)}>{n} px</SelectItem>)}</SelectContent></Select></div>

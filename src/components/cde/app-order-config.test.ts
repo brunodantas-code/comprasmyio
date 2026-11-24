@@ -103,3 +103,21 @@ describe("configuração de legendas por app", () => {
     expect(config.apps?.crm?.name).toBe("Vendas");
   });
 });
+
+describe("app display names saved in the CDE", () => {
+  const tile = parseAppTile('{"labelPx":13,"apps":{"indicadores":{"name":"OKRs e KPIs"}}}');
+  it("shows the saved name when the app is written by key", () => {
+    expect(appDisplay(tile, "indicadores").name).toBe("OKRs e KPIs");
+  });
+  it("resolves the saved name back to the portal key", () => {
+    expect(appKeyForName("OKRs e KPIs", tile)).toBe("indicadores");
+  });
+  it("keeps the original name when nothing was saved", () => {
+    expect(appDisplay(parseAppTile(""), "indicadores").name).toBe("Indicadores");
+    expect(appKeyForName("Indicadores")).toBe("indicadores");
+  });
+  it("leaves labels that are not apps untouched", () => {
+    expect(appKeyForName("Acessos", tile)).toBe("Acessos");
+    expect(appDisplay(tile, appKeyForName("Acessos", tile)).name).toBe("Acessos");
+  });
+});

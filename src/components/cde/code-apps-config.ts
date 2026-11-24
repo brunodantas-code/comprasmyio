@@ -12,11 +12,12 @@ const LEGACY_CODE_APPS: Record<string, string> = { rh: "RH" };
 export function parseCodeAppExclusions(raw?: string | null): string[] {
   try { const parsed = JSON.parse(raw ?? "{}"); return Array.isArray(parsed?.excluded) ? parsed.excluded.filter((k: unknown): k is string => typeof k === "string") : []; } catch { return []; }
 }
-export function codeApps(excluded: string[]) {
-  return PORTAL_APPS.filter((a) => !excluded.includes(a.key)).map((a) => ({ key: a.key as string, name: a.name as string }));
+export function codeApps(excluded: string[], nameOf?: (key: string) => string) {
+  return PORTAL_APPS.filter((a) => !excluded.includes(a.key)).map((a) => ({ key: a.key as string, name: nameOf?.(a.key) ?? a.name }));
 }
-export function codeAppName(key: string) {
-  return PORTAL_APPS.find((a) => a.key === key)?.name ?? LEGACY_CODE_APPS[key] ?? key;
+export function codeAppName(key: string, nameOf?: (key: string) => string) {
+  const original = PORTAL_APPS.find((a) => a.key === key)?.name ?? LEGACY_CODE_APPS[key];
+  return original ? (nameOf?.(key) ?? original) : key;
 }
 export function useCodeAppExclusions() {
   return useQuery({ queryKey: ["cde-code-apps"], queryFn: async () => {

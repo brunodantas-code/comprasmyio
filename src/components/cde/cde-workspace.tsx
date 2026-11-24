@@ -2,6 +2,7 @@ import { CdeAppearance } from "./cde-appearance-item";
 import { SpendCategoryConfig } from "@/components/spend/category-config";
 import { AppAppearanceItem } from "./app-appearance-item";
 import { CdeCardBorders } from "./cde-card-borders";
+import { useAppDisplayName } from "./app-order-config";
 import { CdeFilterStandard } from "./cde-filter-standard";
 import { NumericMarkerEditor } from "./numeric-marker-editor";
 import { CDE_APPEARANCE_DEFAULT, cdeAppearanceVars, useCdeAppearance } from "./cde-appearance";
@@ -132,6 +133,7 @@ function Preview({ v }: { v: Pick<Variant, "tag" | "variant" | "size" | "classNa
 const emptyDraft = { name: "", tag: "Button", variant: "outline", size: "", className: "", icon: "", iconClass: "", label: "", style: {} as CdeStyle };
 
 export function CdeWorkspace() {
+  const nameOf = useAppDisplayName();
   const qc = useQueryClient();
   const [open, setOpen] = useState<Set<string>>(new Set());
   const [collapseKey, setCollapseKey] = useState(0);
@@ -563,12 +565,12 @@ export function CdeWorkspace() {
           <p className="text-sm text-muted-foreground">Escolha as telas que usarão este modelo para contraste ou diferenciação. As demais telas continuam no padrão principal.</p>
           <Input value={screenSearch} onChange={(e) => setScreenSearch(e.target.value)} placeholder="Buscar tela ou app..." />
           <div className="max-h-72 space-y-1 overflow-y-auto rounded-md border border-border p-2">
-            {SCREENS.filter((f) => `${screenApp(f)} ${f}`.toLowerCase().includes(screenSearch.toLowerCase())).map((f) => {
+            {SCREENS.filter((f) => { const app = screenApp(f); return `${app} ${nameOf(app)} ${f}`.toLowerCase().includes(screenSearch.toLowerCase()); }).map((f) => {
               const on = secondary?.screens.includes(f) ?? false;
               return (
                 <label key={f} className={cn("flex cursor-pointer items-start gap-2 rounded px-2 py-1 text-xs hover:bg-accent", on && "bg-accent")}>
                   <input type="checkbox" className="mt-0.5 accent-[var(--myio-green)]" checked={on} onChange={() => secondary && setSecondary({ ...secondary, screens: on ? secondary.screens.filter((x) => x !== f) : [...secondary.screens, f] })} />
-                  <span><b>{screenApp(f)}</b> <span className="text-muted-foreground">· {f}</span></span>
+                  <span><b>{nameOf(screenApp(f))}</b> <span className="text-muted-foreground">· {f}</span></span>
                 </label>
               );
             })}

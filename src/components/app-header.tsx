@@ -20,7 +20,8 @@ import { ChangePasswordDialog } from "@/components/change-password-dialog";
 import { AppManualDialog } from "@/components/app-manual-dialog";
 import { PersonalSignature } from "@/components/personal-signature";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { MENU_ITEMS, menuOrderForContext, parseMenuConfig, useMainMenuConfig, userInfoLine } from "@/components/cde/main-menu-config";
+import { MENU_ITEMS, menuAppKey, menuOrderForContext, parseMenuConfig, useMainMenuConfig, userInfoLine } from "@/components/cde/main-menu-config";
+import { useAppDisplayName } from "@/components/cde/app-order-config";
 import { accessManagementOptions } from "@/components/access/access-context";
 import { canOpenAccessManagement } from "@/lib/access-management";
 
@@ -103,6 +104,7 @@ type HeaderMenuProps = MenuExtras & { userName: string; onSignOut: () => void; o
 
 function MainMenuEntries({ onSignOut, onChangePassword, supplyManual, homePage, itemClass, manualApp, onOpenManual, onOpenSignature, menuActions }: MenuExtras & Pick<HeaderMenuProps, "onSignOut" | "onChangePassword" | "supplyManual" | "homePage"> & { itemClass: string }) {
   const { data } = useMainMenuConfig();
+  const nameOf = useAppDisplayName();
   const config = data ?? parseMenuConfig();
   const pendingTotal = usePendingActions().data?.total ?? 0;
   const { data: accessCapabilities } = useQuery(accessManagementOptions);
@@ -110,14 +112,16 @@ function MainMenuEntries({ onSignOut, onChangePassword, supplyManual, homePage, 
     const item = MENU_ITEMS.find((i) => i.id === id);
     if (!item) return null;
     const Icon = item.icon;
-    if ("to" in item) return <Button key={id} asChild variant="ghost" className={itemClass}><Link to={item.to}><Icon className="h-5 w-5" />{item.label}{id === "pendentes" ? <CountBadge count={pendingTotal} className="ml-auto" /> : null}</Link></Button>;
-    if (id === "manual" && supplyManual) return <Button key={id} asChild variant="ghost" className={itemClass}><Link to="/supply-manual"><Icon className="h-5 w-5" />{item.label}</Link></Button>;
-    if (id === "manual") return <Button key={id} variant="ghost" className={itemClass} onClick={onOpenManual}><Icon className="h-5 w-5" />{item.label}</Button>;
-    if (id === "signature") return <Button key={id} variant="ghost" className={itemClass} onClick={onOpenSignature}><Icon className="h-5 w-5" />{item.label}</Button>;
+    const appKey = menuAppKey(id);
+    const label = appKey ? nameOf(appKey) : item.label;
+    if ("to" in item) return <Button key={id} asChild variant="ghost" className={itemClass}><Link to={item.to}><Icon className="h-5 w-5" />{label}{id === "pendentes" ? <CountBadge count={pendingTotal} className="ml-auto" /> : null}</Link></Button>;
+    if (id === "manual" && supplyManual) return <Button key={id} asChild variant="ghost" className={itemClass}><Link to="/supply-manual"><Icon className="h-5 w-5" />{label}</Link></Button>;
+    if (id === "manual") return <Button key={id} variant="ghost" className={itemClass} onClick={onOpenManual}><Icon className="h-5 w-5" />{label}</Button>;
+    if (id === "signature") return <Button key={id} variant="ghost" className={itemClass} onClick={onOpenSignature}><Icon className="h-5 w-5" />{label}</Button>;
     if (id === "access") return <Button key={id} asChild variant="ghost" className={itemClass}><Link to="/acessos"><Icon className="h-5 w-5" />Acessos</Link></Button>;
     if (id === "theme") return <ThemeEntry key={id} className={itemClass} />;
-    if (id === "favorites") return <Button key={id} variant="ghost" className={itemClass} onClick={() => window.dispatchEvent(new Event("open-mobile-favorites"))}><Icon className="h-5 w-5" />{item.label}</Button>;
-    return <Button key={id} variant="ghost" className={`${itemClass}`} onClick={id === "logout" ? onSignOut : id === "password" ? onChangePassword : () => window.history.back()}><Icon className="h-5 w-5" />{item.label}</Button>;
+    if (id === "favorites") return <Button key={id} variant="ghost" className={itemClass} onClick={() => window.dispatchEvent(new Event("open-mobile-favorites"))}><Icon className="h-5 w-5" />{label}</Button>;
+    return <Button key={id} variant="ghost" className={`${itemClass}`} onClick={id === "logout" ? onSignOut : id === "password" ? onChangePassword : () => window.history.back()}><Icon className="h-5 w-5" />{label}</Button>;
   })}</>;
 }
 

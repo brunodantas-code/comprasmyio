@@ -14,7 +14,7 @@ type Props = {
 /** Official myio logo, separator and configurable app name shared by every app header. */
 export function MyioAppLogo({ appName, className, tone = "auto", display, logoPx }: Props) {
   const saved = useAppTile().data ?? APP_TILE_DEFAULT;
-  const current = display ?? appDisplay(saved, appKeyForName(appName), 16, appName);
+  const current = display ?? appDisplay(saved, appKeyForName(appName, saved), 16, appName);
   const px = logoPx ?? appLogoPx(saved);
   const imgStyle = { height: `${px}px` };
   const toneClass = tone === "light" ? "text-[var(--myio-white)]" : tone === "auto" ? "text-foreground" : "text-[var(--myio-dark)]";

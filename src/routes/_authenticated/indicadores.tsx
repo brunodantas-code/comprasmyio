@@ -12,13 +12,13 @@ export const Route = createFileRoute("/_authenticated/indicadores")({
   component: IndicadoresDashboard,
   head: () => ({
     meta: [
-      { title: "myio Indicadores | OKRs, KPIs e check-ins" },
+      { title: "myio OKRs e KPIs | Objetivos, indicadores e check-ins" },
       {
         name: "description",
         content:
           "Objetivos alinhados em cascata, indicadores contínuos, ciclos e acompanhamento semanal de resultados.",
       },
-      { property: "og:title", content: "myio Indicadores | OKRs, KPIs e check-ins" },
+      { property: "og:title", content: "myio OKRs e KPIs | Objetivos, indicadores e check-ins" },
       {
         property: "og:description",
         content:

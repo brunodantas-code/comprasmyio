@@ -11,6 +11,7 @@ import { getErpUsersAndAccess, setErpAppAccess, setErpUserActive } from "@/lib/e
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { useAppDisplayName } from "@/components/cde/app-order-config";
 
 const APPS = [
   { key: "spend", label: "Spend" },
@@ -58,13 +59,14 @@ export function ErpAppAccessAdmin() {
     },
     onError: (error: Error) => toast.error(error.message),
   });
+  const nameOf = useAppDisplayName();
   const users = [...(data?.users ?? [])].sort((a, b) => Number(b.is_active) - Number(a.is_active));
   const accessSet = new Set((data?.accesses ?? []).map((access) => `${access.user_id}:${access.app_key}`));
   const userFilters = useTableFilters(users, [
     { key: "name", label: "Nome", value: (u) => u.full_name ?? "" },
     { key: "email", label: "E-mail", value: (u) => u.email ?? "" },
     { key: "status", label: "Situação", value: (u) => (u.is_active ? "Ativo" : "Inativo") },
-    ...APPS.map((app) => ({ key: `app_${app.key}`, label: app.label, value: (u: (typeof users)[number]) => (accessSet.has(`${u.id}:${app.key}`) ? "Com acesso" : "Sem acesso") })),
+    ...APPS.map((app) => ({ key: `app_${app.key}`, label: nameOf(app.key), value: (u: (typeof users)[number]) => (accessSet.has(`${u.id}:${app.key}`) ? "Com acesso" : "Sem acesso") })),
   ]);
   const filtered = userFilters.filtered;
   const adminSet = new Set(data?.adminIds ?? []);
@@ -105,9 +107,9 @@ export function ErpAppAccessAdmin() {
                         checked={checked}
                         disabled={update.isPending || !user.is_active}
                         onCheckedChange={(allowed) => update.mutate({ data: { userId: user.id, appKey: app.key, allowed } })}
-                        aria-label={`${app.label} para ${user.full_name || user.email || "usuário"}`}
+                        aria-label={`${nameOf(app.key)} para ${user.full_name || user.email || "usuário"}`}
                       />
-                      <span className="min-w-0 whitespace-nowrap">{app.label}</span>
+                      <span className="min-w-0 whitespace-nowrap">{nameOf(app.key)}</span>
                     </label>
                   );
                 })}

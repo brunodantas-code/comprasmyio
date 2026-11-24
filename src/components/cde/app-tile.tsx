@@ -4,7 +4,7 @@ import { CrmFunnelIcon } from "@/components/crm-funnel-icon";
 import { MytosisIcon } from "@/components/mytosis-icon";
 import { CdeIcon } from "@/components/cde-icon";
 import { SpendIcon } from "@/components/spend/icons";
-import { APP_ICON_OPTICAL, APP_NAME_COLORS, appDisplay, type AppTileConfig } from "./app-order-config";
+import { APP_ICON_OPTICAL, APP_NAME_COLORS, APP_TILE_DEFAULT, appDisplay, appKeyForName, useAppTile, type AppTileConfig } from "./app-order-config";
 
 const APP_ICONS: Record<string, [React.ComponentType<{ className?: string; style?: React.CSSProperties }>, number]> = {
   spend: [SpendIcon, 2],
@@ -53,8 +53,10 @@ const APP_NAME_KEYS: Record<string, string> = { Spend: "spend", Supply: "supply"
 
 /** Small app symbol for lists (e.g. pending groups), keyed by the app display name. */
 export function AppSymbol({ name, className }: { name: string; className?: string }) {
-  const key = APP_NAME_KEYS[name];
-  if (!key) return null;
-  const [Icon] = APP_ICONS[key];
+  const tile = useAppTile().data ?? APP_TILE_DEFAULT;
+  const key = APP_NAME_KEYS[name] ?? appKeyForName(name, tile);
+  const entry = APP_ICONS[key];
+  if (!entry) return null;
+  const [Icon] = entry;
   return <Icon className={className} aria-hidden="true" />;
 }

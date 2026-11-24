@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useAppDisplayName } from "@/components/cde/app-order-config";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import {
   Archive,
@@ -72,6 +73,9 @@ function Advance({ value }: { value: number }) {
 }
 export function IndicadoresDashboard() {
   const { data } = useSuspenseQuery(indicadoresOptions);
+  const nameOf = useAppDisplayName();
+  const appName = nameOf("indicadores");
+  useEffect(() => { document.title = `myio ${appName}`; }, [appName]);
   const ml = useAppMenuLayout("Indicadores");
   const { data: menuOrders } = useMenuOrders();
   const [tab, setTab] = useState("okrs");
@@ -329,7 +333,7 @@ export function IndicadoresDashboard() {
   );
   return (
     <div className="min-h-screen bg-background">
-      <AppHeader logo={<MyioAppLogo appName="Indicadores" />} />
+      <AppHeader logo={<MyioAppLogo appName={appName} />} />
       <main className={`mx-auto max-w-[1500px] space-y-5 px-4 pb-28 pt-6 sm:px-6 ${ml.main}`}>
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:flex sm:justify-between">
           <h1 className="min-w-0 text-xl font-normal">
@@ -563,7 +567,7 @@ export function IndicadoresDashboard() {
         )}
       </main>
       {focusedObjective && (() => { const o = data.objectives.find(x => x.id === focusedObjective.id); if (!o) return null; const rows = data.metrics.filter(m => m.objective_id === o.id && focusedObjective.metricIds.includes(m.id)); return <Dialog open onOpenChange={open => { if (!open) setFocusedObjective(null); }}><DialogContent defaultExpanded className="content-start"><DialogHeader><DialogTitle>{o.title}</DialogTitle></DialogHeader><p className="text-sm text-muted-foreground">{importedField(o.source_metadata,'responsible_name') || userName(o.responsible_id)} · {data.cycles.find(c => c.id === o.cycle_id)?.name ?? 'Sem ciclo'}</p>{o.description && <p className="whitespace-pre-wrap text-sm">{o.description}</p>}<div className="max-w-xl"><Advance value={progress.get(o.id) ?? 0} /></div><header className="flex items-center justify-between gap-3"><h2 className="text-base">Key Results · {rows.length}</h2>{canEdit && !isArchived(o) && <CdeButton group="plus" screen={screen} title="Novo Key Result" aria-label={`Novo KR em ${o.title}`} onClick={() => setEdit({ type:'metric',kind:'kr',objective:o })} />}</header><div className="divide-y divide-border">{rows.map(metricRow)}{!rows.length && <p className="py-6 text-sm text-muted-foreground">Nenhum Key Result neste objetivo.</p>}</div></DialogContent></Dialog>; })()}
-      <AppNavigation className={ml.nav} aria-label="Navegação de Indicadores">
+      <AppNavigation className={ml.nav} aria-label={`Navegação de ${appName}`}>
         <div className={`mx-auto grid max-w-2xl grid-cols-4 items-stretch rounded-[1.75rem] border border-border bg-card/95 p-1.5 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-card/90 ${ml.grid}`}>
           {tabs.map(({ value, label, icon: Icon }) => (
             <Button
