@@ -2136,6 +2136,13 @@
       "when": 1795562895186,
       "tag": "0304_spend_notify_pending",
       "breakpoints": true
+    },
+    {
+      "idx": 305,
+      "version": "7",
+      "when": 1795563241201,
+      "tag": "0305_spend_missing_receipt_lost_only",
+      "breakpoints": true
     }
   ]
 }
