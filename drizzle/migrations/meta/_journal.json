@@ -2059,6 +2059,20 @@
       "when": 1795545909951,
       "tag": "0293_spend_statement_due_period",
       "breakpoints": true
+    },
+    {
+      "idx": 294,
+      "version": "7",
+      "when": 1795548950833,
+      "tag": "0294_spend_confirm_project_classification",
+      "breakpoints": true
+    },
+    {
+      "idx": 295,
+      "version": "7",
+      "when": 1795549071031,
+      "tag": "0295_spend_project_review_explicit_choice",
+      "breakpoints": true
     }
   ]
 }

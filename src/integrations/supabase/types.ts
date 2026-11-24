@@ -13855,6 +13855,10 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      spend_review_project: {
+        Args: { _finance_project: string; _line_id: string; _review: Json }
+        Returns: string
+      }
       spend_role: { Args: never; Returns: string }
       spend_save_classification: { Args: { _data: Json }; Returns: Json }
       spend_set_statement_due: {

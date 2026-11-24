@@ -1,0 +1,50 @@
+CREATE OR REPLACE FUNCTION public.spend_review_project(_line_id uuid, _finance_project uuid, _review jsonb) RETURNS uuid LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $fn$
+DECLARE l public.spend_lines; s public.spend_statements; receipt public.spend_receipts; holder_project uuid; resolved uuid; kind text; choice text;
+BEGIN
+ IF auth.uid() IS NULL OR public.spend_role() IS DISTINCT FROM 'finance' THEN RAISE EXCEPTION 'Somente Financeiro'; END IF;
+ SELECT * INTO l FROM public.spend_lines WHERE id=_line_id;
+ SELECT * INTO s FROM public.spend_statements WHERE id=l.statement_id;
+ IF l.id IS NULL OR s.id IS NULL OR NOT public.spend_card_access(s.card_id) THEN RAISE EXCEPTION 'Lançamento não autorizado'; END IF;
+ SELECT * INTO receipt FROM public.spend_receipts WHERE id=l.receipt_id FOR UPDATE;
+ holder_project:=receipt.project_id;
+ kind:=CASE WHEN holder_project IS NOT NULL AND _finance_project IS NOT NULL AND holder_project<>_finance_project THEN 'conflict' WHEN _finance_project IS NULL AND holder_project IS NOT NULL THEN 'holder' WHEN _finance_project IS NULL THEN 'none' ELSE 'finance' END;
+ IF _review IS NULL OR jsonb_typeof(_review)<>'object' THEN RAISE EXCEPTION 'Confirme o projeto antes de salvar ou aprovar'; END IF;
+ IF NOT (_review ? 'receipt_id' AND _review ? 'holder_project_id' AND _review ? 'finance_project_id' AND _review ? 'choice') THEN RAISE EXCEPTION 'Confirmação de projeto incompleta'; END IF;
+ IF nullif(_review->>'receipt_id','')::uuid IS DISTINCT FROM l.receipt_id OR nullif(_review->>'holder_project_id','')::uuid IS DISTINCT FROM holder_project OR nullif(_review->>'finance_project_id','')::uuid IS DISTINCT FROM _finance_project THEN RAISE EXCEPTION 'O projeto ou comprovante mudou. Atualize a classificação e confirme novamente'; END IF;
+ choice:=_review->>'choice';
+ IF kind='conflict' AND choice NOT IN ('holder','finance') THEN RAISE EXCEPTION 'Escolha o projeto correto para resolver a divergência'; END IF;
+ IF kind='holder' AND choice IS DISTINCT FROM 'holder' THEN RAISE EXCEPTION 'Confirme o projeto informado pelo portador'; END IF;
+ IF kind='none' AND choice IS DISTINCT FROM 'none' THEN RAISE EXCEPTION 'Confirme que a despesa não se refere a nenhum projeto'; END IF;
+ IF kind='finance' AND choice IS DISTINCT FROM 'finance' THEN RAISE EXCEPTION 'Confirme o projeto informado pelo Financeiro'; END IF;
+ resolved:=CASE choice WHEN 'holder' THEN holder_project WHEN 'finance' THEN _finance_project ELSE NULL END;
+ IF resolved IS NOT NULL AND NOT EXISTS(SELECT 1 FROM public.projects WHERE id=resolved AND status='active' AND public.spend_project_allowed(id)) THEN RAISE EXCEPTION 'Projeto não autorizado ou inativo'; END IF;
+ INSERT INTO public.spend_logs(card_id,actor_id,action,details) VALUES(s.card_id,auth.uid(),'project_confirmed',jsonb_build_object('line_id',l.id,'receipt_id',l.receipt_id,'holder_project_id',holder_project,'finance_project_id',_finance_project,'resolved_project_id',resolved,'choice',choice,'kind',kind));
+ RETURN resolved;
+END $fn$;
+REVOKE ALL ON FUNCTION public.spend_review_project(uuid,uuid,jsonb) FROM PUBLIC,anon,authenticated;
+DO $migration$
+DECLARE d text; anchor text;
+BEGIN
+ SELECT pg_get_functiondef('public.spend_save_classification(jsonb)'::regprocedure) INTO d;
+ anchor:='result jsonb:=''[]'';';
+ IF strpos(d,anchor)=0 THEN RAISE EXCEPTION 'Classification declaration missing'; END IF;
+ d:=replace(d,anchor,'result jsonb:=''[]''; resolved uuid;');
+ anchor:='UPDATE public.spend_lines SET account_id=a,cost_center_id=c,project_id=p,';
+ IF strpos(d,anchor)=0 THEN RAISE EXCEPTION 'Classification update missing'; END IF;
+ d:=replace(d,anchor,$patch$resolved:=public.spend_review_project(l.id,p,_data->'project_reviews'->(l.id::text));
+  UPDATE public.spend_lines SET account_id=a,cost_center_id=c,project_id=resolved,$patch$);
+ d:=replace(d,'''project_id'',p,','''project_id'',resolved,');
+ EXECUTE d;
+ SELECT pg_get_functiondef('public.spend_action(text,jsonb)'::regprocedure) INTO d;
+ anchor:='pid:=nullif(_data->>''project_id'','''')::uuid; SELECT * INTO receipt FROM public.spend_receipts WHERE id=l.receipt_id;';
+ IF strpos(d,anchor)=0 THEN RAISE EXCEPTION 'Approval project anchor missing'; END IF;
+ d:=replace(d,anchor,$patch$pid:=public.spend_review_project(l.id,nullif(_data->>'project_id','')::uuid,_data->'project_review'); SELECT * INTO receipt FROM public.spend_receipts WHERE id=l.receipt_id;$patch$);
+ IF strpos(d,'project_id=receipt.project_id,')=0 THEN RAISE EXCEPTION 'Matching project anchor missing'; END IF;
+ d:=replace(d,'project_id=receipt.project_id,','');
+ d:=replace(d,'account_id=nullif(cfg->>''account_id'','''')::uuid,cost_center_id=nullif(cfg->>''cost_center_id'','''')::uuid','account_id=coalesce(l.account_id,nullif(cfg->>''account_id'','''')::uuid),cost_center_id=coalesce(l.cost_center_id,nullif(cfg->>''cost_center_id'','''')::uuid)');
+ EXECUTE d;
+END $migration$;
+REVOKE ALL ON FUNCTION public.spend_action(text,jsonb) FROM PUBLIC,anon;
+GRANT EXECUTE ON FUNCTION public.spend_action(text,jsonb) TO authenticated;
+REVOKE ALL ON FUNCTION public.spend_save_classification(jsonb) FROM PUBLIC,anon;
+GRANT EXECUTE ON FUNCTION public.spend_save_classification(jsonb) TO authenticated;

@@ -17,3 +17,4 @@
 - Payment source is independent of private card storage scope; matching helpers and locked RPCs exclude reimbursements, while pre-approval source corrections detach statement links with audit to prevent card posting.
 - Reimbursements hand off owner-verified IDs to Supply; photos stage privately before the existing request insert atomically locks and links receipts, preserving canonical values and blocking duplicate submission without changing approval chains.
 - Due-month PDF selection and card-scoped competence filters stay independent; cross-statement viewing preserves stored dates and statement-scoped bulk classification guards.
+- Project review is shared by save, Enter and batch approval; guarded RPCs recheck receipt/project snapshots under lock and audit both sources, while line-ID editor keys preserve unsaved finance drafts across receipt links and cancellations never post unreviewed lines.
