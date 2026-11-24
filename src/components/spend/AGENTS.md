@@ -23,4 +23,5 @@
 - Receipt evidence is server-written and bound to immutable storage object/hash; shared verification gates capture, manual/automatic matching and individual/Enter/batch approvals, so client-supplied bank values cannot conceal a wrong image and approved history stays intact.- Temporary card authorizations are holder-granted, dated (≤90 days) and revocable; delegates may only create new card receipts on that card and see only their own uploads, never statements or other receipts, preserving submitter identity in submitted_by.
 
 - Missing-receipt responses use a holder-only locked RPC tied to the exact adjustment timestamp; they resolve personal/Admin alerts through audit, never set finance waiver or approve lines.
+- The holder may only declare that the receipt was lost or not saved; "Não se aplica" stays a Finance classification recorded in Conciliação, so stored answers of that older kind remain readable but can no longer be submitted.
 - Notification and adjustment sends are evidenced from audited line-scoped logs and rendered with the shared MilestoneTimeline; send indicators never imply read or approval.
