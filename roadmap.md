@@ -677,3 +677,4 @@
 - [x] Legal: "Aguardando assinatura" em texto vermelho no lugar da bolinha
 - [x] Legal: esconder Deliberações e Ações vazias na leitura da ata
 - [x] Spend: Financeiro registra comprovantes em qualquer cartão e vê todos os cartões/reembolsos
+- [x] Spend: Conciliação usa dois droplists, mês e ano do vencimento, no lugar do campo único mês/ano; meses com nome, anos das faturas mais anterior e seguinte. 88 testes passaram; tela autenticada conferida em 1280px (Cartão, Mês, Ano e Vencimento com linhas verdes na mesma altura) e 390px (campos empilhados, sem rolagem lateral). Nenhum registro alterado; falta publicar.

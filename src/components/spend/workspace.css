@@ -62,6 +62,7 @@
 @media (min-width: 1024px) {
   .spend-expense-toolbar {
     display: flex;
+    flex-wrap: wrap;
     justify-content: flex-start;
     align-items: end;
   }
@@ -70,6 +71,10 @@
   }
   .spend-expense-toolbar > div.spend-card-summary {
     flex: 0 0 auto;
+  }
+  /* Month and year are short lists: keep both droplists narrow so the due-date field still fits the same row. */
+  .spend-expense-toolbar > div.spend-period-field {
+    flex: 0 1 8.5rem;
   }
   .spend-mobile-register-slot { display: none; }
 }
