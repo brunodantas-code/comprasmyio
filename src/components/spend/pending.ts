@@ -8,6 +8,10 @@ const adjustmentSchema = z.object({
   kind: z.enum(['notify','adjustment']).optional(),
 });
 export type SpendAdjustment = z.infer<typeof adjustmentSchema>;
+export function activeSpendNotices<T extends { line_id: string | null }>(notices: readonly T[], pending: readonly SpendAdjustment[]): T[] {
+  const activeLines = new Set(pending.map(item => item.line_id));
+  return notices.filter(notice => !notice.line_id || activeLines.has(notice.line_id));
+}
 export function spendPendingAdjustments(value: unknown, userId?: string): SpendAdjustment[] {
   const rows = z.array(adjustmentSchema).parse(value);
   const pending = new Map<string, SpendAdjustment>();

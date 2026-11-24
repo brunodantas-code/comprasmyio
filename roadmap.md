@@ -1,3 +1,5 @@
+- [x] Spend: avisos com baixa saem de Meus comprovantes pela mesma pendência da Central; avisos ativos permanecem. Trancasa e Madero baixados sumiram em desktop/mobile, sem ícones de histórico nessa lista; regra coberta por testes.
+- [x] Spend: histórico de notificações, ajustes e respostas exibido dentro do lançamento expandido na Conciliação, sem janela separada; Trancasa mostrou envio, resposta, autor e datas em desktop/mobile, sem overflow ou erros. 101 testes Spend e build OK; nenhum registro alterado.
 - [x] Spend: esclarecer baixa sem comprovante pelo botão Responder sobre comprovante ausente em Meus comprovantes; declaração Não salvei/perdi e disquete, sem aprovação financeira.
 - [x] Spend: somente 8891 exibido como cartão pessoal de Leonardo; seleção e captura conferidas em 390/1073px, baixa de pendência aberta sem salvar. Conciliação preserva 9055 e nenhum cadastro/histórico foi alterado; nove testes passaram e build OK.
 - [ ] Spend: corrigir portador do cartão 9055 para André Abadesso; bloqueado porque não existe conta com esse nome no cadastro consultado. Não alterar comprovantes/histórico existentes.
