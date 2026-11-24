@@ -11626,6 +11626,60 @@ export type Database = {
           },
         ]
       }
+      spend_receipt_analyses: {
+        Row: {
+          amount: number
+          analyzed_at: string
+          analyzed_by: string
+          card_id: string
+          content_hash: string
+          document_date: string
+          file_path: string
+          merchant: string
+          object_id: string
+          result: Json
+        }
+        Insert: {
+          amount: number
+          analyzed_at?: string
+          analyzed_by: string
+          card_id: string
+          content_hash: string
+          document_date: string
+          file_path: string
+          merchant: string
+          object_id: string
+          result: Json
+        }
+        Update: {
+          amount?: number
+          analyzed_at?: string
+          analyzed_by?: string
+          card_id?: string
+          content_hash?: string
+          document_date?: string
+          file_path?: string
+          merchant?: string
+          object_id?: string
+          result?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spend_receipt_analyses_analyzed_by_fkey"
+            columns: ["analyzed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spend_receipt_analyses_card_id_fkey"
+            columns: ["card_id"]
+            isOneToOne: false
+            referencedRelation: "spend_cards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       spend_receipts: {
         Row: {
           access_key: string | null
@@ -13822,9 +13876,18 @@ export type Database = {
       }
       spend_action: { Args: { _action: string; _data: Json }; Returns: Json }
       spend_apply_supplier_allocations: { Args: never; Returns: number }
+      spend_assert_receipt_analysis: {
+        Args: { _amount: number; _date: string; _path: string }
+        Returns: undefined
+      }
       spend_card_access: { Args: { _card: string }; Returns: boolean }
       spend_delete_receipt: { Args: { _receipt_id: string }; Returns: Json }
       spend_project_allowed: { Args: { _project: string }; Returns: boolean }
+      spend_receipt_analysis_matches: {
+        Args: { _amount: number; _date: string; _path: string }
+        Returns: boolean
+      }
+      spend_receipt_file_version: { Args: { _path: string }; Returns: string }
       spend_reimbursement_receipts: {
         Args: { _ids: string[] }
         Returns: {

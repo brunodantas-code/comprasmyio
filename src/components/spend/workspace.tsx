@@ -2,6 +2,7 @@ import "./workspace.css";
 import { useTextCaseChoice } from "@/hooks/use-text-case-choice";
 import { useEffect, useState } from "react";
 import { Link } from '@tanstack/react-router';
+import { useServerFn } from '@tanstack/react-start';
 import { useSuspenseQuery, useQueryClient, useQuery } from "@tanstack/react-query";
 import { Camera, Check, CheckCheck, CreditCard, DollarSign, FileUp, Download, Bell, Paperclip, History, ReceiptText, WandSparkles, Loader2, Save, MessageSquareWarning, ChevronDown, ChevronUp, Pencil } from "lucide-react";
 import { toast } from "sonner";
@@ -46,6 +47,8 @@ import { ReimbursementDialog } from './reimbursement-dialog';
 import { competenceLines, monthOptions, statementMonth } from './period-filters';
 import { useSpendProjectReview } from './project-review-dialog';
 import { canClassifySpend, type ProjectReview } from './project-review';
+import { extractSpendDocument } from '@/lib/spend.functions';
+import { prepareSpendMatches, receiptReading, receiptVerification } from './receipt-verification';
 const statusNames: Record<string,string> = { pending: "Pendente conciliação com fatura", matched: "Conciliado", approved: "Enviado ao Finance", adjustment: "Ajuste solicitado" };
 function ReceiptPreview({ path, fullSize = false }: { path: string; fullSize?: boolean }) {
   const url = useQuery({ queryKey: ["spend-file", path], queryFn: () => spendFileUrl(path), staleTime: 300000 });
@@ -104,6 +107,18 @@ export function SpendWorkspace() {
   const [sentenceCase,setSentenceCase]=useTextCaseChoice(`spend:${data.user_id}`);
   const finance=canClassifySpend(data.role); const [tab,setTab]=useState(finance?'reconcile':'receipts'); const [cardId,setCardId]=useState(''); const [period,setPeriod]=useState(new Date().toLocaleDateString('en-CA').slice(0,7)); const [lineId,setLineId]=useState(''); const [selected,setSelected]=useState<Set<string>>(new Set()); const [busy,setBusy]=useState(false); const [capture,setCapture]=useState<{line?:Line;receipt?:Receipt}|null>(null); const [importing,setImporting]=useState(false); const [notice,setNotice]=useState<string|null>(null); const [message,setMessage]=useState('');
   const projectReview=useSpendProjectReview(data.projects);
+  const extract=useServerFn(extractSpendDocument);
+  async function verifyReceipt(line: Line, receipt: Receipt | undefined) {
+    if(!receipt)return;
+    const reading=receiptReading(await extract({data:{path:receipt.file_path,kind:'receipt'}}));
+    const check=receiptVerification(reading,line);
+    if(!check.ok){
+      if(check.amountMismatch&&reading)throw new Error(`${line.merchant}: comprovante ${BRL.format(reading.amount)}, lançamento ${BRL.format(line.amount)}. Selecione o comprovante correto.`);
+      if(check.dateMismatch&&reading)throw new Error(`${line.merchant}: data do comprovante ${formatDate(reading.date)}, lançamento ${formatDate(line.date)}. A tolerância é de 2 dias.`);
+      throw new Error(`${line.merchant}: não foi possível conferir o comprovante. Selecione um arquivo legível.`);
+    }
+    if(!receiptVerification(reading,receipt).ok)throw new Error(`${receipt.merchant}: corrija valor/data do comprovante pelo lápis antes de conciliar.`);
+  }
   async function reviewProject(line: Line, project: string) {
     const receipt=data.receipts.find(r=>r.id===line.receipt_id);
     return projectReview.confirmProject(line.merchant,line.receipt_id,receipt?.project_id??null,project||null);
@@ -135,8 +150,24 @@ export function SpendWorkspace() {
   const selectedVisible=selectable.filter(l=>selected.has(l.id)).length;
   const refresh=async()=>{ await Promise.all([qc.invalidateQueries({queryKey:['spend']}),qc.invalidateQueries({queryKey:['cash-flow-payables']})]); };
   useEffect(()=>{setLineId('');setSelected(new Set());},[card?.id,period,competence]); const [dueDraft,setDueDraft]=useState(''); useEffect(()=>{setDueDraft(statement?.due_date??'');},[statement?.id,statement?.due_date]); async function saveDue(){if(!statement||!dueDraft)return;setBusy(true);try{const {error}=await supabase.rpc('spend_set_statement_due',{_statement_id:statement.id,_due_date:dueDraft});if(error)throw error;await refresh();setPeriod(dueDraft.slice(0,7));toast.success(`Fatura movida para ${dueDraft.slice(5,7)}/${dueDraft.slice(0,4)}`);}catch(e){toast.error(e instanceof Error?e.message:'Não foi possível salvar o vencimento');}finally{setBusy(false);}}
-  async function action(type:string,payload: Parameters<typeof spendAction>[1]) {setBusy(true);try{await spendAction(type,payload);await refresh();}catch(e){toast.error(e instanceof Error?e.message:'Não foi possível concluir');}finally{setBusy(false);}}
-  async function approve(line:Line,account:string,center:string,project:string) {setBusy(true);try{const review=await reviewProject(line,project);if(!review)return;await spendAction('approve',{line_id:line.id,account_id:account,cost_center_id:center,project_id:project||null,project_review:review});await refresh();setLineId(lines.find(l=>l.id!==line.id && l.status!=='approved')?.id??'');toast.success('Lançamento enviado ao Finance');}catch(e){toast.error(e instanceof Error?e.message:'Não foi possível aprovar');}finally{setBusy(false);}}
+  async function action(type:string,payload: Parameters<typeof spendAction>[1]) {
+    setBusy(true);
+    try{
+      if(payload&&typeof payload==='object'&&!Array.isArray(payload)){
+        if(type==='link'){
+          const line=data.lines.find(l=>l.id===payload['line_id']);const receipt=data.receipts.find(r=>r.id===payload['receipt_id']);
+          if(!line||!receipt)throw new Error('Comprovante ou lançamento não encontrado');
+          await verifyReceipt(line,receipt);
+        }
+        if(type==='automatch'&&typeof payload['statement_id']==='string'){
+          const skipped=await prepareSpendMatches(data,payload['statement_id'],path=>extract({data:{path,kind:'receipt'}}));
+          if(skipped)toast.warning(`${skipped} comprovante(s) permanecerão pendentes por divergência ou leitura indisponível.`);
+        }
+      }
+      await spendAction(type,payload);await refresh();
+    }catch(e){toast.error(e instanceof Error?e.message:'Não foi possível concluir');}finally{setBusy(false);}
+  }
+  async function approve(line:Line,account:string,center:string,project:string) {setBusy(true);try{await verifyReceipt(line,data.receipts.find(r=>r.id===line.receipt_id));const review=await reviewProject(line,project);if(!review)return;await spendAction('approve',{line_id:line.id,account_id:account,cost_center_id:center,project_id:project||null,project_review:review});await refresh();setLineId(lines.find(l=>l.id!==line.id && l.status!=='approved')?.id??'');toast.success('Lançamento enviado ao Finance');}catch(e){toast.error(e instanceof Error?e.message:'Não foi possível aprovar');}finally{setBusy(false);}}
   async function save(line:Line,account:string,center:string,project:string,cnpj:boolean|null,notApplicable:boolean) {
     const ids=classificationTargets(lines,selected,line.id);
     setBusy(true);
@@ -158,6 +189,7 @@ export function SpendWorkspace() {
       for(const l of targets){
         const r=data.receipts.find(r=>r.id===l.receipt_id);const s=data.settings[r?.category??''];const a=l.account_id||s?.account_id;const c=l.cost_center_id||s?.cost_center_id;
         if((!r&&!l.receipt_not_applicable)||!a||!c)throw new Error(`${l.merchant}: confira comprovante, conta e centro de custo`);
+        await verifyReceipt(l,r);
         const review=await reviewProject(l,l.project_id??'');if(!review)return;
         approvals.push({line:l,account:a,center:c,review});
       }

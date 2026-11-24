@@ -18,3 +18,4 @@
 - Reimbursements hand off owner-verified IDs to Supply; photos stage privately before the existing request insert atomically locks and links receipts, preserving canonical values and blocking duplicate submission without changing approval chains.
 - Due-month PDF selection and card-scoped competence filters stay independent; cross-statement viewing preserves stored dates and statement-scoped bulk classification guards.
 - Project review is shared by save, Enter and batch approval; guarded RPCs recheck receipt/project snapshots under lock and audit both sources, while line-ID editor keys preserve unsaved finance drafts across receipt links and cancellations never post unreviewed lines.
+- Receipt evidence is server-written and bound to immutable storage object/hash; shared verification gates capture, manual/automatic matching and individual/Enter/batch approvals, so client-supplied bank values cannot conceal a wrong image and approved history stays intact.

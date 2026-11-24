@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
+import { useQueryClient } from '@tanstack/react-query';
 import { FileUp, Loader2, Save } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -8,19 +9,21 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { extractSpendDocument } from "@/lib/spend.functions";
 import { extractionSchema, type Extracted } from "./rules";
-import { uploadSpend, spendAction, type SpendCard } from "./data";
+import { uploadSpend, spendAction, spendOptions, type SpendCard } from "./data";
+import { prepareSpendMatches } from './receipt-verification';
 import { spendDescription } from "./text-case";
 import { SpendTextCaseToggle } from "./text-case-toggle";
 import { BRL } from "@/components/cash-flow/shared";
 import { statementTotal } from "./statement-total";
 import { formatSpendAmount, parseSpendAmount } from "./amount";
 export function SpendStatementImport({ card, period, onDone, onClose, sentenceCase, onSentenceCaseChange, onImported }: { onImported?: (period: string) => void; card: SpendCard; period: string; onDone: () => Promise<void>; onClose: () => void; sentenceCase: boolean; onSentenceCaseChange: (active: boolean) => void }) {
+  const qc=useQueryClient();
   const extract = useServerFn(extractSpendDocument); const picker = useRef<HTMLInputElement>(null); const [busy, setBusy] = useState(false); const [path, setPath] = useState("");
   const [rows, setRows] = useState<Extracted['lancamentos']>([]); const [due, setDue] = useState(`${period}-${String(Math.min(card.due_day, new Date(Number(period.slice(0,4)),Number(period.slice(5,7)),0).getDate())).padStart(2,'0')}`);
   const [id] = useState(() => crypto.randomUUID()); const [error, setError] = useState("");
   async function read(pathToRead: string) { setBusy(true); setError(""); try { const r = await extract({ data: { path: pathToRead, kind: "statement" } }); setRows(r.lancamentos); if (r.vencimento) setDue(r.vencimento); if (!r.lancamentos.length) setError("Nenhum lançamento identificado. Confira a fatura."); } catch(e) { const m = e instanceof Error ? e.message : "Não foi possível ler a fatura"; setError(m); toast.error(m); } finally { setBusy(false); } }
   async function pick(file: File) { setBusy(true); try { const p = await uploadSpend(file,card,period); setPath(p); await read(p); } catch(e) { toast.error(e instanceof Error ? e.message : "Não foi possível enviar"); } finally { setBusy(false); } }
-  async function save() { const parsed = extractionSchema.safeParse({ lancamentos: rows }); if (!parsed.success || !rows.length) { toast.error("Confira os lançamentos"); return; } setBusy(true); try { await spendAction("statement", { id, card_id: card.id, period: `${due.slice(0,7)}-01`, due_date: due, file_path: path, lancamentos: rows }); await spendAction("automatch", { statement_id: id }); await onDone(); toast.success(`Fatura importada em ${due.slice(5,7)}/${due.slice(0,4)}`); onImported?.(due.slice(0,7)); onClose(); } catch(e) { toast.error(e instanceof Error ? e.message : "Não foi possível salvar"); } finally { setBusy(false); } }
+  async function save() { const parsed = extractionSchema.safeParse({ lancamentos: rows }); if (!parsed.success || !rows.length) { toast.error("Confira os lançamentos"); return; } setBusy(true); try { await spendAction("statement", { id, card_id: card.id, period: `${due.slice(0,7)}-01`, due_date: due, file_path: path, lancamentos: rows }); const current=await qc.fetchQuery(spendOptions); const skipped=await prepareSpendMatches(current,id,path=>extract({data:{path,kind:'receipt'}})); if(skipped)toast.warning(`${skipped} comprovante(s) permanecerão pendentes por divergência ou leitura indisponível.`); await spendAction("automatch", { statement_id: id }); await onDone(); toast.success(`Fatura importada em ${due.slice(5,7)}/${due.slice(0,4)}`); onImported?.(due.slice(0,7)); onClose(); } catch(e) { toast.error(e instanceof Error ? e.message : "Não foi possível salvar"); } finally { setBusy(false); } }
   return <Dialog open onOpenChange={o => { if (!o && !busy) onClose(); }}><DialogContent className="max-h-[90dvh] max-w-4xl overflow-y-auto"><DialogHeader><DialogTitle>Importar fatura · {card.name}</DialogTitle></DialogHeader><input ref={picker} type="file" className="hidden" accept="application/pdf" onChange={e => { const f = e.target.files?.[0]; if (f) void pick(f); e.target.value = ""; }} /><div className="flex flex-wrap items-end gap-4"><Button onClick={() => picker.current?.click()} disabled={busy}><FileUp />{path ? "Substituir PDF" : "Upload PDF da fatura"}</Button><label><Label>Vencimento</Label><Input type="date" aria-label="Vencimento da fatura" value={due} onChange={e => setDue(e.target.value)} /></label><p className="text-sm text-muted-foreground">Mês da fatura: {due.slice(5,7)}/{due.slice(0,4)} (pelo vencimento)</p></div>{busy ? <p role="status" className="flex items-center gap-2"><Loader2 className="size-4 animate-spin" />Lendo fatura…</p> : null}{error ? <div><p className="text-sm text-destructive">{error}</p><Button disabled={!path || busy} onClick={() => read(path)}>Tentar leitura novamente</Button></div> : null}
   <div className="flex flex-wrap items-end justify-between gap-2" aria-label="Total da fatura"><div><p className="text-xs text-muted-foreground">Total da fatura</p><strong className="text-xl tabular-nums">{BRL.format(statementTotal(rows.map(r => r.valor)))}</strong></div><span className="text-xs text-muted-foreground">{rows.length} movimentos importados</span></div>
   <div className="space-y-3">

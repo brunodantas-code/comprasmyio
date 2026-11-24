@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Camera, Check, Loader2, Save, Trash2 } from "lucide-react";
+import { Camera, Check, Loader2, Save, Trash2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +22,8 @@ import { prepareSpendReceipt } from "./receipt-image";
 import { spendFiscalLocation, spendStates } from "./fiscal-location";
 import { SpendCityField } from "./city-field";
 import { paymentSourceSchema } from "./payment-source";
+import { receiptReading, receiptVerification, type ReceiptReading } from './receipt-verification';
+import { BRL, formatDate } from '@/components/cash-flow/shared';
 
 const today = () => new Date().toLocaleDateString("en-CA");
 
@@ -32,6 +34,9 @@ export function SpendCapture({ data, cardId, line, receipt, onDone, onClose }: {
   const picker = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [reading, setReading] = useState(false);
+  const [analysis, setAnalysis] = useState<ReceiptReading | null>(null);
+  const [readError, setReadError] = useState('');
+  const analysisRequest = useRef(0);
   const linkedReceipt = !!receipt && data.lines.some(item => item.receipt_id === receipt.id);
   const fixedAmountDate = !!line || linkedReceipt;
   const [path, setPath] = useState(receipt?.file_path ?? "");
@@ -44,13 +49,38 @@ export function SpendCapture({ data, cardId, line, receipt, onDone, onClose }: {
     if (!receipt) return;
     let active = true;
     void spendFileUrl(receipt.file_path).then(url => { if (active) setPreview(url); }).catch(() => { if (active) toast.error("Não foi possível abrir a foto atual"); });
-    return () => { active = false; };
+    void readFile(receipt.file_path, false);
+    return () => { active = false; analysisRequest.current++; };
   }, [receipt?.id, receipt?.file_path]);
 
   useEffect(() => () => { if (preview) URL.revokeObjectURL(preview); }, [preview]);
 
   function change(patch: Partial<typeof draft>) {
     setDraft(current => ({ ...current, ...patch, confirmed: false }));
+  }
+
+  const verification = receiptVerification(analysis, line ?? draft);
+
+  async function readFile(filePath: string, applySuggestions: boolean) {
+    const request = ++analysisRequest.current;
+    setReading(true); setAnalysis(null); setReadError('');
+    try {
+      const result = await extract({ data: { path: filePath, kind: 'receipt' } });
+      if (request !== analysisRequest.current) return;
+      const identified = receiptReading(result);
+      if (!identified) throw new Error('Selecione um comprovante legível de uma única compra.');
+      setAnalysis(identified);
+      const item = result.lancamentos[0];
+      if (applySuggestions && item) {
+        const category = item.categoria_sugerida && availableCategories.some(c => c.key === item.categoria_sugerida) ? item.categoria_sugerida : null;
+        setDraft(d => ({ ...d, ...spendFiscalLocation(item), date: fixedAmountDate ? d.date : item.data, merchant: line ? d.merchant : item.estabelecimento, amount: fixedAmountDate ? d.amount : item.valor, category: category ?? d.category, myio_cnpj: item.myio_cnpj, confirmed: false }));
+        if (!fixedAmountDate) setAmountText(formatSpendAmount(item.valor));
+      }
+    } catch (error) {
+      if (request !== analysisRequest.current) return;
+      const message = error instanceof Error ? error.message : 'Não foi possível conferir o comprovante. Tente novamente ou substitua o arquivo.';
+      setReadError(message); toast.error(message);
+    } finally { if (request === analysisRequest.current) setReading(false); }
   }
 
   async function filePicked(file: File) {
@@ -63,18 +93,7 @@ export function SpendCapture({ data, cardId, line, receipt, onDone, onClose }: {
       setDraft(d => ({ ...d, file_path: p, confirmed: false }));
       setPreview(URL.createObjectURL(prepared));
       setPdf(prepared.type === "application/pdf");
-      setReading(true);
-      try {
-        const result = await extract({ data: { path: p, kind: "receipt" } });
-        const item = result.lancamentos[0];
-        if (item) {
-          const category = item.categoria_sugerida && availableCategories.some(c => c.key === item.categoria_sugerida) ? item.categoria_sugerida : null;
-          setDraft(d => ({ ...d, ...spendFiscalLocation(item), date: fixedAmountDate ? d.date : item.data, merchant: line ? d.merchant : item.estabelecimento, amount: fixedAmountDate ? d.amount : item.valor, category: category ?? d.category, myio_cnpj: item.myio_cnpj, confirmed: false }));
-          if (!fixedAmountDate) setAmountText(formatSpendAmount(item.valor));
-        }
-      } catch (error) {
-        toast.error(error instanceof Error ? error.message : "Confira os dados manualmente");
-      }
+      await readFile(p, true);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Não foi possível preparar o comprovante em P&B");
     } finally {
@@ -84,6 +103,7 @@ export function SpendCapture({ data, cardId, line, receipt, onDone, onClose }: {
   }
 
   async function submit() {
+    if (reading || !verification.ok) { toast.error('O comprovante precisa ter valor correspondente e data dentro de 2 dias. Confira ou substitua o arquivo.'); return; }
     if (!paymentSourceSchema.safeParse(draft.payment_source).success) { toast.error("Informe Cartão myio ou Reembolso"); return; }
     if (!draft.confirmed) { toast.error("Confirme todas as informações antes de salvar"); return; }
     if (draft.myio_cnpj === null) { toast.error("Confirme Com ou Sem CNPJ myio"); return; }
@@ -124,7 +144,9 @@ export function SpendCapture({ data, cardId, line, receipt, onDone, onClose }: {
     <div className="space-y-1"><Label>Forma de pagamento *</Label><RadioGroup aria-label="Forma de pagamento" value={draft.payment_source} disabled={busy || !!line} onValueChange={payment_source => change({ payment_source })} className="gap-1"><label className="flex min-h-11 cursor-pointer items-center gap-2 text-sm"><RadioGroupItem value="myio_card" /><span>Cartão myio · •••• {card?.last_four}</span></label><label className="flex min-h-11 cursor-pointer items-center gap-2 text-sm"><RadioGroupItem value="reimbursement" /><span>Reembolso · dinheiro ou cartão pessoal</span></label></RadioGroup></div>
     <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3"><span className="min-w-0 truncate text-sm text-muted-foreground">{draft.payment_source === "reimbursement" ? "Reembolso" : `${card?.name} · •••• ${card?.last_four}`}</span><Button className="shrink-0" onClick={() => picker.current?.click()} disabled={busy} aria-label="Fotografar ou selecionar comprovante"><Camera />{path ? "Substituir foto" : "Fotografar"}</Button></div>
     {busy && !path && !reading ? <p role="status" className="flex items-center gap-2 text-sm"><Loader2 className="size-4 animate-spin" />Preparando comprovante em P&B e removendo o fundo…</p> : null}
-    {reading ? <p role="status" className="flex items-center gap-2 text-sm"><Loader2 className="size-4 animate-spin" />Lendo valor, categoria e CNPJ…</p> : null}
+    {reading ? <p role="status" className="flex items-center gap-2 text-sm"><Loader2 className="size-4 animate-spin" />Conferindo o comprovante…</p> : null}
+    {readError && <div role="alert" className="space-y-2 text-sm text-destructive"><p>{readError}</p><TooltipProvider><Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" aria-label="Tentar leitura do comprovante novamente" disabled={reading || busy || !path} onClick={() => void readFile(path, false)}><RefreshCw/></Button></TooltipTrigger><TooltipContent>Tentar leitura novamente</TooltipContent></Tooltip></TooltipProvider></div>}
+    {analysis && !verification.ok && <div role="alert" className="space-y-1 text-sm text-destructive"><p>Comprovante divergente — salvamento bloqueado</p>{verification.amountMismatch && <p>Valor lido: {BRL.format(analysis.amount)} · {line ? 'Lançamento' : 'Valor informado'}: {BRL.format((line ?? draft).amount)}</p>}{verification.dateMismatch && <p>Data lida: {formatDate(analysis.date)} · {line ? 'Lançamento' : 'Data informada'}: {formatDate((line ?? draft).date)} · Tolerância: 2 dias</p>}</div>}
     {preview && !pdf ? <img src={preview} alt="Comprovante do gasto em P&B, sem o fundo" className="h-40 w-full rounded-md object-contain" /> : pdf ? <p className="text-sm">Invoice PDF anexada</p> : null}
     <div className="grid grid-cols-2 items-end gap-4"><label className="flex min-w-0 flex-col gap-1"><Label>Valor (R$)</Label><Input className="h-9" type="text" inputMode="decimal" aria-label="Valor do gasto" value={amountText} onChange={event => { const text = event.target.value; setAmountText(text); change({ amount: parseSpendAmount(text) ?? 0 }); }} onBlur={() => { const value = parseSpendAmount(amountText); if (value !== null) setAmountText(formatSpendAmount(value)); }} disabled={fixedAmountDate} /></label><label className="flex min-w-0 flex-col gap-1"><Label>Data</Label><Input className="h-9" type="date" aria-label="Data do gasto" value={draft.date} onChange={event => change({ date: event.target.value })} disabled={fixedAmountDate} /></label></div>
     <label className="space-y-1"><Label>Estabelecimento</Label><Input aria-label="Estabelecimento" value={draft.merchant} onChange={event => change({ merchant: event.target.value })} /></label>
@@ -137,6 +159,6 @@ export function SpendCapture({ data, cardId, line, receipt, onDone, onClose }: {
     {draft.category === "ferramentas" ? <div className="flex min-h-11 items-center gap-2 text-sm"><Checkbox id={`spend-photo-${draft.id}`} checked={draft.clear_photo} onCheckedChange={value => change({ clear_photo: value === true })} /><Label htmlFor={`spend-photo-${draft.id}`} className="flex min-h-11 flex-1 cursor-pointer items-center font-normal">A foto da NF/cupom está nítida</Label></div> : null}
     {draft.category === "ia" || draft.category === "software" ? <p className="text-xs text-muted-foreground">Recorrência mensal</p> : null}
     {path ? <div className="flex min-h-11 items-center gap-2 text-sm"><Checkbox id={`spend-confirm-${draft.id}`} aria-label="Conferi e confirmo as informações do comprovante" disabled={busy} checked={draft.confirmed} onCheckedChange={value => setDraft(current => ({ ...current, confirmed: value === true }))} /><Label htmlFor={`spend-confirm-${draft.id}`} className="flex min-h-11 flex-1 cursor-pointer items-center py-2 font-normal">Conferi e confirmo forma de pagamento, valor, data, estabelecimento, categoria, CNPJ e demais informações.</Label></div> : null}
-    <div className="flex w-full items-center justify-end gap-2">{receipt && canDeleteSpendReceipt(receipt,data.user_id,data.lines.some(item => item.receipt_id === receipt.id && (item.status === 'approved' || !!item.payable_id))) && <TooltipProvider><Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" aria-label={receipt.payment_source === 'reimbursement' ? 'Excluir reembolso' : 'Excluir comprovante'} disabled={busy} onClick={() => void removeReceipt()}><Trash2 /></Button></TooltipTrigger><TooltipContent>{receipt.payment_source === 'reimbursement' ? 'Excluir reembolso' : 'Excluir comprovante'}</TooltipContent></Tooltip></TooltipProvider>}<Button variant="ghost" size="icon" title="Salvar Comprovante Fiscal" aria-label="Salvar Comprovante Fiscal" onClick={submit} disabled={busy || !path || !draft.confirmed || draft.myio_cnpj === null || !paymentSourceSchema.safeParse(draft.payment_source).success}><Save /></Button></div>
+    <div className="flex w-full items-center justify-end gap-2">{receipt && canDeleteSpendReceipt(receipt,data.user_id,data.lines.some(item => item.receipt_id === receipt.id && (item.status === 'approved' || !!item.payable_id))) && <TooltipProvider><Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" aria-label={receipt.payment_source === 'reimbursement' ? 'Excluir reembolso' : 'Excluir comprovante'} disabled={busy} onClick={() => void removeReceipt()}><Trash2 /></Button></TooltipTrigger><TooltipContent>{receipt.payment_source === 'reimbursement' ? 'Excluir reembolso' : 'Excluir comprovante'}</TooltipContent></Tooltip></TooltipProvider>}<Button variant="ghost" size="icon" title="Salvar Comprovante Fiscal" aria-label="Salvar Comprovante Fiscal" onClick={submit} disabled={busy || reading || !verification.ok || !path || !draft.confirmed || draft.myio_cnpj === null || !paymentSourceSchema.safeParse(draft.payment_source).success}><Save /></Button></div>
   </DialogContent></Dialog>;
 }

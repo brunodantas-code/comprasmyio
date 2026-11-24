@@ -2073,6 +2073,27 @@
       "when": 1795549071031,
       "tag": "0295_spend_project_review_explicit_choice",
       "breakpoints": true
+    },
+    {
+      "idx": 296,
+      "version": "7",
+      "when": 1795549763451,
+      "tag": "0296_spend_trusted_receipt_analysis",
+      "breakpoints": true
+    },
+    {
+      "idx": 297,
+      "version": "7",
+      "when": 1795549976498,
+      "tag": "0297_spend_analysis_read_only_clients",
+      "breakpoints": true
+    },
+    {
+      "idx": 298,
+      "version": "7",
+      "when": 1795550220683,
+      "tag": "0298_spend_analysis_auth_only_grants",
+      "breakpoints": true
     }
   ]
 }
