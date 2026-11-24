@@ -1,3 +1,5 @@
+- [x] Spend: esclarecer baixa sem comprovante pelo botão Responder sobre comprovante ausente em Meus comprovantes; declaração Não salvei/perdi e disquete, sem aprovação financeira.
+- [x] Spend: somente 8891 exibido como cartão pessoal de Leonardo; seleção e captura conferidas em 390/1073px, baixa de pendência aberta sem salvar. Conciliação preserva 9055 e nenhum cadastro/histórico foi alterado; nove testes passaram e build OK.
 - [ ] Spend: corrigir portador do cartão 9055 para André Abadesso; bloqueado porque não existe conta com esse nome no cadastro consultado. Não alterar comprovantes/histórico existentes.
 - [x] Spend: localizar autorização temporária: Meus comprovantes → Autorizar uso, junto ao cartão do portador; disponível fora do formulário de captura.
 - [x] Spend: Notificar Portador na Central e bolinha do app, com baixa auditada; TRANCASA + Madero somam 2 na Home e Central autenticadas.

@@ -25,3 +25,4 @@
 - Missing-receipt responses use a holder-only locked RPC tied to the exact adjustment timestamp; they resolve personal/Admin alerts through audit, never set finance waiver or approve lines.
 - The holder may only declare that the receipt was lost or not saved; "Não se aplica" stays a Finance classification recorded in Conciliação, so stored answers of that older kind remain readable but can no longer be submitted.
 - Notification and adjustment sends are evidenced from audited line-scoped logs and rendered with the shared MilestoneTimeline; send indicators never imply read or approval.
+- Receipt-card presentation exceptions stay in the shared display helper; finance reconciliation retains canonical cards and existing records/permissions remain untouched.
