@@ -13857,6 +13857,10 @@ export type Database = {
       }
       spend_role: { Args: never; Returns: string }
       spend_save_classification: { Args: { _data: Json }; Returns: Json }
+      spend_set_statement_due: {
+        Args: { _due_date: string; _statement_id: string }
+        Returns: Json
+      }
       spend_storage_access: { Args: { _name: string }; Returns: boolean }
       spend_supplier_key: { Args: { _name: string }; Returns: string }
       spend_workspace: { Args: never; Returns: Json }

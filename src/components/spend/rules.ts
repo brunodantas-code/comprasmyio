@@ -41,13 +41,14 @@ export const extractionSchema = z.object({ lancamentos: z.array(z.object({
   parcela: z.string().nullable(), final_cartao: z.string().regex(/^\d{4}$/).nullable(),
   categoria_sugerida: z.string().nullable(), myio_cnpj: z.boolean().nullable(),
   cidade: z.string().nullable().optional(), uf: z.string().nullable().optional(), chave_acesso: z.string().nullable().optional(),
-})).max(1000) });
+})).max(1000), vencimento: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional() });
 export type Extracted = z.infer<typeof extractionSchema>;
 export const extractedJsonSchema = { type: "object", additionalProperties: false, properties: {
   lancamentos: { type: "array", items: { type: "object", additionalProperties: false,
     properties: { data: { type: "string" }, estabelecimento: { type: "string" }, valor: { type: "number" }, parcela: { type: ["string", "null"] }, final_cartao: { type: ["string", "null"] }, categoria_sugerida: { type: ["string", "null"] }, myio_cnpj: { type: ["boolean", "null"] }, cidade: { type: ["string", "null"] }, uf: { type: ["string", "null"] }, chave_acesso: { type: ["string", "null"] } },
     required: ["data", "estabelecimento", "valor", "parcela", "final_cartao", "categoria_sugerida", "myio_cnpj", "cidade", "uf", "chave_acesso"] } },
-}, required: ["lancamentos"] };
+  vencimento: { type: ["string", "null"] },
+}, required: ["lancamentos", "vencimento"] };
 export type CategorySetting = { name: string; icon: string; account_id: string; cost_center_id: string; active: boolean; deleted?: boolean };
 export function configuredCategories(settings: Record<string, CategorySetting>, includeInactive = false) {
   const rows = [...categories.map(c => ({ ...c, ...settings[c.key] })), ...Object.entries(settings)
