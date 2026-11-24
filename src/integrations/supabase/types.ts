@@ -11396,6 +11396,47 @@ export type Database = {
         }
         Relationships: []
       }
+      spend_card_delegations: {
+        Row: {
+          card_id: string
+          created_at: string
+          delegate_id: string
+          expires_at: string
+          granted_by: string
+          id: string
+          revoked_at: string | null
+          revoked_by: string | null
+        }
+        Insert: {
+          card_id: string
+          created_at?: string
+          delegate_id: string
+          expires_at: string
+          granted_by: string
+          id?: string
+          revoked_at?: string | null
+          revoked_by?: string | null
+        }
+        Update: {
+          card_id?: string
+          created_at?: string
+          delegate_id?: string
+          expires_at?: string
+          granted_by?: string
+          id?: string
+          revoked_at?: string | null
+          revoked_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spend_card_delegations_card_id_fkey"
+            columns: ["card_id"]
+            isOneToOne: false
+            referencedRelation: "spend_cards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       spend_cards: {
         Row: {
           active: boolean
@@ -11700,6 +11741,7 @@ export type Database = {
           project_id: string | null
           reimbursement_order_id: string | null
           status: string
+          submitted_by: string | null
           uf: string | null
         }
         Insert: {
@@ -11721,6 +11763,7 @@ export type Database = {
           project_id?: string | null
           reimbursement_order_id?: string | null
           status?: string
+          submitted_by?: string | null
           uf?: string | null
         }
         Update: {
@@ -11742,6 +11785,7 @@ export type Database = {
           project_id?: string | null
           reimbursement_order_id?: string | null
           status?: string
+          submitted_by?: string | null
           uf?: string | null
         }
         Relationships: [
@@ -13881,6 +13925,11 @@ export type Database = {
         Returns: undefined
       }
       spend_card_access: { Args: { _card: string }; Returns: boolean }
+      spend_card_delegate: { Args: { _card: string }; Returns: boolean }
+      spend_delegation: {
+        Args: { _action: string; _data: Json }
+        Returns: Json
+      }
       spend_delete_receipt: { Args: { _receipt_id: string }; Returns: Json }
       spend_project_allowed: { Args: { _project: string }; Returns: boolean }
       spend_receipt_analysis_matches: {
@@ -13909,6 +13958,7 @@ export type Database = {
           project_id: string | null
           reimbursement_order_id: string | null
           status: string
+          submitted_by: string | null
           uf: string | null
         }[]
         SetofOptions: {

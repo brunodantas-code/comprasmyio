@@ -2094,6 +2094,13 @@
       "when": 1795550220683,
       "tag": "0298_spend_analysis_auth_only_grants",
       "breakpoints": true
+    },
+    {
+      "idx": 299,
+      "version": "7",
+      "when": 1795557971500,
+      "tag": "0299_spend_temporary_card_delegation",
+      "breakpoints": true
     }
   ]
 }

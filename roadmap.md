@@ -1,3 +1,4 @@
+- [x] Spend: autorização temporária do portador para outro usuário enviar comprovantes no seu cartão
 - [x] Spend: categoria do portador indicada como informativa; classificação financeira separada. Divergência, projeto herdado e ausência de projeto confirmados em pop-up ao salvar, Enter, aprovação individual/lote, com histórico. Testado em tela: cancelamento sem gravação, escolhas salvas/relidas, anexo preserva projeto digitado, lote cancelado sem envio, Finance mostrando Taboão/Vila Velha/Interna; bloqueios de confirmação inválida conferidos. Dados e anexos temporários removidos; 72 testes passaram.
 - [x] Spend: avaliada explicação ao Alexandre; comparação atual usa valor exato, data ±2 dias e cartão, sem estabelecimento.
 - [x] Spend: esclarecido que o lápis corrige valor digitado errado; anexos diretos passam pela leitura, mas valor/data lidos ainda não são comparados ao lançamento e a aprovação não reanalisa a imagem. Nenhuma regra de leitura alterada.
