@@ -23,6 +23,7 @@ import { spendFiscalLocation, spendStates } from "./fiscal-location";
 import { SpendCityField } from "./city-field";
 import { paymentSourceSchema } from "./payment-source";
 import { isDelegatedCard } from "./delegation";
+import { categoryChangeMessage, categoryChangeNeedsConfirmation } from "./category-check";
 import { receiptReading, receiptVerification, type ReceiptReading } from './receipt-verification';
 import { BRL, formatDate } from '@/components/cash-flow/shared';
 
@@ -38,6 +39,8 @@ export function SpendCapture({ data, cardId, line, receipt, onDone, onClose }: {
   const [analysis, setAnalysis] = useState<ReceiptReading | null>(null);
   const [readError, setReadError] = useState('');
   const analysisRequest = useRef(0);
+  const [suggestedCategory, setSuggestedCategory] = useState<string | null>(null);
+  const observationRef = useRef<HTMLTextAreaElement>(null);
   const linkedReceipt = !!receipt && data.lines.some(item => item.receipt_id === receipt.id);
   const fixedAmountDate = !!line || linkedReceipt;
   const [path, setPath] = useState(receipt?.file_path ?? "");
@@ -74,6 +77,7 @@ export function SpendCapture({ data, cardId, line, receipt, onDone, onClose }: {
       const item = result.lancamentos[0];
       if (applySuggestions && item) {
         const category = item.categoria_sugerida && availableCategories.some(c => c.key === item.categoria_sugerida) ? item.categoria_sugerida : null;
+        setSuggestedCategory(category);
         setDraft(d => ({ ...d, ...spendFiscalLocation(item), date: fixedAmountDate ? d.date : item.data, merchant: line ? d.merchant : item.estabelecimento, amount: fixedAmountDate ? d.amount : item.valor, category: category ?? d.category, myio_cnpj: item.myio_cnpj, confirmed: false }));
         if (!fixedAmountDate) setAmountText(formatSpendAmount(item.valor));
       }
@@ -111,9 +115,15 @@ export function SpendCapture({ data, cardId, line, receipt, onDone, onClose }: {
     if (!availableCategories.some(c => c.key === draft.category)) { toast.error("Selecione uma categoria disponível"); return; }
     const parsed = expenseSchema.safeParse(draft);
     if (!parsed.success) { toast.error(parsed.error.issues[0]?.message ?? "Confira os dados"); return; }
+    const changed = categoryChangeNeedsConfirmation(suggestedCategory, draft.category);
+    if (changed) {
+      const nameOf = (key: string) => availableCategories.find(c => c.key === key)?.name ?? key;
+      const ok = await confirmAction(categoryChangeMessage(nameOf(suggestedCategory!), nameOf(draft.category), !!draft.observation.trim()), { title: "Confirmar categoria", confirmLabel: "Confirmar categoria", cancelLabel: "Revisar" });
+      if (!ok) { observationRef.current?.focus(); return; }
+    }
     setBusy(true);
     try {
-      await spendAction("receipt", parsed.data);
+      await spendAction("receipt", { ...parsed.data, suggested_category: suggestedCategory, category_change_confirmed: changed });
       if (line) await spendAction("link", { line_id: line.id, receipt_id: draft.id });
       if (recurringWarning(draft.category, draft.merchant, draft.date, data.receipts.filter(item => item.id !== draft.id))) toast.warning("IA: há outra despesa deste estabelecimento no mesmo mês");
       await onDone();
@@ -156,7 +166,7 @@ export function SpendCapture({ data, cardId, line, receipt, onDone, onClose }: {
     <div role="group" aria-label="Categoria da despesa" className="grid grid-cols-2 gap-2">{availableCategories.map(category => { const Icon = categoryIcons[category.icon] ?? categoryIcons["Ellipsis"]; return <Button key={category.key} variant={draft.category === category.key ? "secondary" : "outline"} className="min-h-11 whitespace-normal text-left" aria-pressed={draft.category === category.key} onClick={() => change({ category: category.key })}>{Icon ? <Icon /> : null}<span className="min-w-0 flex-1 text-xs">{category.name}</span>{draft.category === category.key ? <Check /> : null}</Button>; })}</div>
     {path ? <div className="space-y-2"><Label>CNPJ da myio no comprovante</Label><RadioGroup aria-label="CNPJ da myio no comprovante" value={draft.myio_cnpj === null ? "" : draft.myio_cnpj ? "com" : "sem"} onValueChange={value => change({ myio_cnpj: value === "com" })} className="flex flex-wrap gap-4">{[["com", "Com CNPJ myio"], ["sem", "Sem CNPJ myio"]].map(([value, label]) => <label key={value} className="flex items-center gap-2 text-sm"><RadioGroupItem value={value ?? ""} /><span>{label}</span></label>)}</RadioGroup><p className="text-xs text-muted-foreground">A leitura sugere esta marcação; confirme antes de salvar.</p></div> : null}
     <label className="space-y-1"><Label>Projeto {draft.category === "insumos" ? "*" : "(opcional)"}</Label><SearchableSelect aria-label="Projeto do gasto" value={draft.project_id ?? ""} onChange={project_id => change({ project_id: project_id || null })} options={data.projects.map(project => ({ value: project.id, label: project.name }))} placeholder="Selecionar Projeto" /></label>
-    <label className="space-y-1"><Label>{draft.category === "outros" ? "Especifique a despesa *" : `Observação ${draft.category === "servicos" ? "*" : "(opcional)"}`}</Label><Textarea aria-label="Observação do gasto" value={draft.observation} onChange={event => change({ observation: event.target.value })} /></label>
+    <label className="space-y-1"><Label>{draft.category === "outros" ? "Especifique a despesa *" : `Observação ${draft.category === "servicos" ? "*" : "(opcional)"}`}</Label><Textarea ref={observationRef} aria-label="Observação do gasto" value={draft.observation} onChange={event => change({ observation: event.target.value })} /></label>
     {draft.category === "ferramentas" ? <div className="flex min-h-11 items-center gap-2 text-sm"><Checkbox id={`spend-photo-${draft.id}`} checked={draft.clear_photo} onCheckedChange={value => change({ clear_photo: value === true })} /><Label htmlFor={`spend-photo-${draft.id}`} className="flex min-h-11 flex-1 cursor-pointer items-center font-normal">A foto da NF/cupom está nítida</Label></div> : null}
     {draft.category === "ia" || draft.category === "software" ? <p className="text-xs text-muted-foreground">Recorrência mensal</p> : null}
     {path ? <div className="flex min-h-11 items-center gap-2 text-sm"><Checkbox id={`spend-confirm-${draft.id}`} aria-label="Conferi e confirmo as informações do comprovante" disabled={busy} checked={draft.confirmed} onCheckedChange={value => setDraft(current => ({ ...current, confirmed: value === true }))} /><Label htmlFor={`spend-confirm-${draft.id}`} className="flex min-h-11 flex-1 cursor-pointer items-center py-2 font-normal">Conferi e confirmo forma de pagamento, valor, data, estabelecimento, categoria, CNPJ e demais informações.</Label></div> : null}

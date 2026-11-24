@@ -2101,6 +2101,13 @@
       "when": 1795557971500,
       "tag": "0299_spend_temporary_card_delegation",
       "breakpoints": true
+    },
+    {
+      "idx": 300,
+      "version": "7",
+      "when": 1795558222965,
+      "tag": "0300_spend_receipt_category_suggestion_log",
+      "breakpoints": true
     }
   ]
 }
