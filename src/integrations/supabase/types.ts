@@ -13931,6 +13931,7 @@ export type Database = {
         Returns: Json
       }
       spend_delete_receipt: { Args: { _receipt_id: string }; Returns: Json }
+      spend_pending_adjustments: { Args: { _all?: boolean }; Returns: Json }
       spend_project_allowed: { Args: { _project: string }; Returns: boolean }
       spend_receipt_analysis_matches: {
         Args: { _amount: number; _date: string; _path: string }

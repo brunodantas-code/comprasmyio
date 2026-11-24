@@ -1,7 +1,8 @@
 import "./workspace.css";
+import { usePendingActions } from "@/hooks/use-pending-actions";
 import { useTextCaseChoice } from "@/hooks/use-text-case-choice";
 import { useEffect, useState } from "react";
-import { Link } from '@tanstack/react-router';
+import { useSearch, Link } from '@tanstack/react-router';
 import { useServerFn } from '@tanstack/react-start';
 import { useSuspenseQuery, useQueryClient, useQuery } from "@tanstack/react-query";
 import { Camera, Check, CheckCheck, CreditCard, DollarSign, Upload, Download, Bell, Paperclip, History, ReceiptText, WandSparkles, Loader2, Save, MessageSquareWarning, ChevronDown, ChevronUp, Pencil } from "lucide-react";
@@ -54,7 +55,7 @@ import { useSpendProjectReview } from './project-review-dialog';
 import { canClassifySpend, type ProjectReview } from './project-review';
 import { extractSpendDocument } from '@/lib/spend.functions';
 import { prepareSpendMatches, receiptReading, receiptVerification } from './receipt-verification';
-const statusNames: Record<string,string> = { pending: "Pendente conciliação com fatura", matched: "Conciliado", approved: "Enviado ao Finance", adjustment: "Ajuste solicitado" };
+const statusNames: Record<string,string> = { pending: "Pendente conciliação com fatura", matched: "Vinculado · aguardando aprovação", approved: "Enviado ao Finance", adjustment: "Ajuste solicitado" };
 function ReceiptPreview({ path, fullSize = false }: { path: string; fullSize?: boolean }) {
   const url = useQuery({ queryKey: ["spend-file", path], queryFn: () => spendFileUrl(path), staleTime: 300000 });
   if (url.isPending) return <Loader2 className="size-5 animate-spin" />;
@@ -98,7 +99,7 @@ function Audit({ line, data, busy, expanded, approve, save, notify, attach, link
       <Button variant="ghost" size="icon" aria-label="Salvar classificação" title="Salvar classificação" disabled={!access.canSave} onClick={() => save(line,account,center,project,cnpj,notApplicable)}><Save /></Button>
       <Button className="ml-0 shrink-0 sm:ml-auto" disabled={!access.canApprove} onClick={() => approve(line,account,center,project)}><Check />{locked ? 'Enviado ao Finance' : 'Aprovar'}</Button>
     </div>
-    {receipt ? <><div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2"><span className="min-w-0 text-sm">Comprovante</span><Badge><Check />Conciliado</Badge></div><ReceiptPreview path={receipt.file_path} /><p className="text-sm">Portador: {data.users.find(u => u.id === receipt.holder_id)?.name ?? '—'}</p><p className="break-words text-sm">Projeto informado pelo portador: {data.projects.find(p => p.id === receipt.project_id)?.name ?? (receipt.project_id ? 'Projeto indisponível' : 'Não informado')}</p>{receipt.observation && <p className="whitespace-pre-wrap text-sm text-muted-foreground">{receipt.observation}</p>}<div className="flex flex-wrap items-center gap-2"><span className="text-xs text-muted-foreground">Categoria informada pelo portador</span><Badge>{data.settings[receipt.category]?.name || categories.find(c => c.key === receipt.category)?.name || receipt.category}</Badge>{(()=>{const o=receiptCategoryOverride(data.logs,receipt.id,receipt.category);return o&&<span className="text-xs text-muted-foreground">Categoria alterada pelo usuário · sugestão do app: {data.settings[o.suggested]?.name || categories.find(c => c.key === o.suggested)?.name || o.suggested}</span>;})()}</div></> : candidates.length > 0 && <SearchableSelect aria-label="Vincular comprovante" value="" placeholder="Selecionar comprovante correspondente" onChange={link} options={candidates.map(r => ({value:r.id,label:`${formatDate(r.date)} · ${r.merchant} · ${BRL.format(r.amount)}`}))} />}
+    {receipt ? <><div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-2"><span className="min-w-0 text-sm">Comprovante</span><Badge className="max-w-full whitespace-normal text-right">{locked ? <Check /> : <Paperclip />}{locked ? "Enviado ao Finance" : line.status === "adjustment" ? "Ajuste solicitado" : "Vinculado · aguardando aprovação"}</Badge></div><ReceiptPreview path={receipt.file_path} /><p className="text-sm">Portador: {data.users.find(u => u.id === receipt.holder_id)?.name ?? '—'}</p><p className="break-words text-sm">Projeto informado pelo portador: {data.projects.find(p => p.id === receipt.project_id)?.name ?? (receipt.project_id ? 'Projeto indisponível' : 'Não informado')}</p>{receipt.observation && <p className="whitespace-pre-wrap text-sm text-muted-foreground">{receipt.observation}</p>}<div className="flex flex-wrap items-center gap-2"><span className="text-xs text-muted-foreground">Categoria informada pelo portador</span><Badge>{data.settings[receipt.category]?.name || categories.find(c => c.key === receipt.category)?.name || receipt.category}</Badge>{(()=>{const o=receiptCategoryOverride(data.logs,receipt.id,receipt.category);return o&&<span className="text-xs text-muted-foreground">Categoria alterada pelo usuário · sugestão do app: {data.settings[o.suggested]?.name || categories.find(c => c.key === o.suggested)?.name || o.suggested}</span>;})()}</div></> : candidates.length > 0 && <SearchableSelect aria-label="Vincular comprovante" value="" placeholder="Selecionar comprovante correspondente" onChange={link} options={candidates.map(r => ({value:r.id,label:`${formatDate(r.date)} · ${r.merchant} · ${BRL.format(r.amount)}`}))} />}
     {showReceiptCnpj(receipt?.id ?? null) && <RadioGroup aria-label="CNPJ no comprovante" value={cnpj === null ? "" : cnpj ? "com" : "sem"} onValueChange={v => setCnpj(v === "com")} disabled={locked || busy} className="flex flex-wrap gap-4">{[["com","Com CNPJ myio"],["sem","Sem CNPJ myio"]].map(([value,label]) => <label key={value} className="flex items-center gap-2 text-sm"><RadioGroupItem value={value ?? ""} /><span>{label}</span></label>)}</RadioGroup>}
 
   </section>;
@@ -108,9 +109,24 @@ function LineRows(props: React.ComponentProps<typeof Audit> & { sentenceCase:boo
   return <><TableRow className="spend-line-row"><TableCell className="spend-line-select"><Checkbox aria-label={`Selecionar ${l.merchant}`} checked={props.selected} disabled={l.status==='approved'} onCheckedChange={v=>props.select(v===true)}/></TableCell><TableCell className="spend-line-detail max-w-56"><span className="spend-line-date block text-xs text-muted-foreground"><span className="spend-line-date-label">Data</span><span>{formatDate(l.date)}{l.installment?` · Parcela ${l.installment}`:''}</span></span><span className="spend-line-merchant block min-w-0 truncate" title={l.merchant}><span className="spend-line-merchant-label">Descrição</span><span className="spend-line-merchant-text">{spendDescription(l.merchant,props.sentenceCase)}</span></span></TableCell><TableCell className="spend-line-amount whitespace-nowrap tabular-nums">{BRL.format(l.amount)}</TableCell><TableCell className="spend-line-status">{l.receipt_id || l.receipt_not_applicable?<><Badge>{statusNames[l.status]}</Badge>{l.receipt_not_applicable && <span className="block text-xs text-muted-foreground">Comprovante: Não se aplica</span>}</>:!expanded&&<span className="text-xs text-destructive">Sem comprovante</span>}{l.receipt_id&&l.myio_cnpj!==null&&<Badge>{l.myio_cnpj?'Com CNPJ myio':'Sem CNPJ myio'}</Badge>}</TableCell><TableCell className="spend-line-actions"><Button variant="ghost" size="icon" title={expanded?'Recolher classificação':'Exibir classificação'} aria-label={`${expanded?'Recolher':'Exibir'} classificação de ${l.merchant}`} aria-expanded={expanded} onClick={props.toggle}>{expanded?<ChevronUp/>:<ChevronDown/>}</Button></TableCell></TableRow><TableRow className="spend-audit-row" hidden={!expanded}><TableCell colSpan={5}><Audit {...props}/></TableCell></TableRow></>;
 }
 export function SpendWorkspace() {
+  const search=useSearch({from:"/_authenticated/spend"});
+  const pending=usePendingActions().data;
   const {data}=useSuspenseQuery(spendOptions); const qc=useQueryClient(); const ml=useAppMenuLayout('Spend'); const orders=useMenuOrders().data;
   const [sentenceCase,setSentenceCase]=useTextCaseChoice(`spend:${data.user_id}`);
   const finance=canClassifySpend(data.role); const [tab,setTab]=useState(finance?'reconcile':'receipts'); const [cardId,setCardId]=useState(''); const [period,setPeriod]=useState(new Date().toLocaleDateString('en-CA').slice(0,7)); const [lineId,setLineId]=useState(''); const [selected,setSelected]=useState<Set<string>>(new Set()); const [busy,setBusy]=useState(false); const [capture,setCapture]=useState<{line?:Line;receipt?:Receipt}|null>(null); const [importing,setImporting]=useState(false); const [notice,setNotice]=useState<string|null>(null); const [message,setMessage]=useState('');
+  const [openedAdjustment,setOpenedAdjustment]=useState('');
+  useEffect(()=>{
+    if(!search.adjustment || openedAdjustment===search.adjustment)return;
+    const line=data.lines.find(l=>l.id===search.adjustment);
+    const notice=data.notices.find(n=>n.line_id===search.adjustment);
+    const request=pending?.spendItems.find(r=>r.line_id===search.adjustment);
+    const targetCard=line ? data.statements.find(s=>s.id===line.statement_id)?.card_id : request?.card_id ?? notice?.card_id;
+    if(!targetCard || (!finance && !pending))return;
+    setTab('receipts');setCardId(targetCard);
+    const receipt=data.receipts.find(r=>r.id===(line?.receipt_id ?? request?.receipt_id));
+    if(receipt)setCapture({receipt});
+    setOpenedAdjustment(search.adjustment);
+  },[search.adjustment,openedAdjustment,data,pending,finance]);
   const projectReview=useSpendProjectReview(data.projects);
   const extract=useServerFn(extractSpendDocument);
   async function verifyReceipt(line: Line, receipt: Receipt | undefined) {
@@ -154,7 +170,7 @@ export function SpendWorkspace() {
   const filters=useTableFilters(lines,[{key:'merchant',label:'Estabelecimento',value:l=>l.merchant},{key:'status',label:'Situação',value:l=>l.receipt_not_applicable?'Comprovante não se aplica':l.status==='pending'?'Sem comprovante':statusNames[l.status] ?? l.status},{key:'amount',label:'Valor',kind:'number',value:l=>l.amount},{key:'date',label:'Data',value:l=>l.date}]);
   const selectable=filters.filtered.filter(l=>l.status!=='approved');
   const selectedVisible=selectable.filter(l=>selected.has(l.id)).length;
-  const refresh=async()=>{ await Promise.all([qc.invalidateQueries({queryKey:['spend']}),qc.invalidateQueries({queryKey:['cash-flow-payables']})]); };
+  const refresh=async()=>{ await Promise.all([qc.invalidateQueries({queryKey:['spend']}),qc.invalidateQueries({queryKey:['cash-flow-payables']}),qc.invalidateQueries({queryKey:['pending-actions']}),qc.invalidateQueries({queryKey:['central-admin']})]); };
   useEffect(()=>{setLineId('');setSelected(new Set());},[card?.id,period,competence]); const [dueDraft,setDueDraft]=useState(''); useEffect(()=>{setDueDraft(statement?.due_date??'');},[statement?.id,statement?.due_date]); async function saveDue(){if(!statement||!dueDraft)return;setBusy(true);try{const {error}=await supabase.rpc('spend_set_statement_due',{_statement_id:statement.id,_due_date:dueDraft});if(error)throw error;await refresh();setPeriod(dueDraft.slice(0,7));toast.success(`Fatura movida para ${dueDraft.slice(5,7)}/${dueDraft.slice(0,4)}`);}catch(e){toast.error(e instanceof Error?e.message:'Não foi possível salvar o vencimento');}finally{setBusy(false);}}
   async function action(type:string,payload: Parameters<typeof spendAction>[1]) {
     setBusy(true);

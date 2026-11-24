@@ -1,3 +1,5 @@
+- [x] Spend: Pedir ajuste na Central pessoal/Admin e bolinha do app; deduplicação por lançamento e resolução por correção auditada. Pedido real temporário conferido em tela desktop/mobile e removido, DANFE e vínculo originais preservados.
+- [x] Spend: indicar Vinculado · aguardando aprovação antes da aprovação, com clipe em vez de check; conferido no DANFE de R$139,90.
 - [x] Spend: Pedir ajuste registra aviso e status no Spend; fonte de pendências e badges Home não incluem Spend, portanto não há pendência Central nem bolinha no app. Respondido sem alterar regras.
 - [x] Spend: prévia PDF compartilhada na captura/edição e visualização de comprovantes, com páginas roláveis; DANFE salvo conferido em 1073/390px sem alterar dados.
 - [x] Spend: Competência compacta à direita do total, ações reunidas abaixo e lançamentos elevados; conferido com fatura real em 1073/1280/390px, filtro funcional e sem excesso lateral ou erros. Nenhum dado alterado.

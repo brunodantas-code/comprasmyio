@@ -59,3 +59,14 @@ describe('conferência de recebimento na Central Admin', () => {
    for (const milestone of ['completed', 'purchased', 'received']) expect(milestoneDone(row, milestone)).toBe(true);
  });
 });
+
+describe('ajustes do Spend na Central Admin', () => {
+ it('atribui uma única pendência de ajuste ao portador', () => {
+  const s=snapshot();s.orders=[];s.steps=[];
+  s.spendAdjustments=[{line_id:'danfe',receipt_id:'receipt',card_id:'card',holder_id:'Leonardo',merchant:'Hotel Mogi Mirim',amount:139.90,date:'2026-10-08',status:'adjustment',message:'Confira o comprovante',requested_at:'2026-11-24T23:00:00Z',corrected_at:null,requester_name:'Alexandre'}];
+  const rows=centralPendingItems(centralItems(s));
+  expect(rows).toHaveLength(1);expect(rows[0]?.users).toEqual(['Leonardo']);expect(rows[0]?.app).toBe('Spend');expect(rows[0]?.recordId).toBe('danfe');
+  s.spendAdjustments=[{...s.spendAdjustments[0],line_id:'danfe',receipt_id:'receipt',card_id:'card',holder_id:'Leonardo',merchant:'Hotel Mogi Mirim',amount:139.90,date:'2026-10-08',status:'adjustment',message:'Confira o comprovante',requested_at:'2026-11-24T23:00:00Z',corrected_at:'2026-11-24T23:02:00Z',requester_name:'Alexandre'}];
+  expect(centralPendingItems(centralItems(s))).toEqual([]);
+ });
+});

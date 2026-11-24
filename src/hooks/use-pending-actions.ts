@@ -1,3 +1,4 @@
+import { spendPendingAdjustments } from "@/components/spend/pending";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -29,6 +30,9 @@ export function usePendingActions() {
       const { data: authData, error: authError } = await supabase.auth.getUser();
       if (authError || !authData.user) throw authError ?? new Error("Sessão não encontrada");
       const userId = authData.user.id;
+      const spendResult = await supabase.rpc("spend_pending_adjustments");
+      if (spendResult.error) throw spendResult.error;
+      const spendItems = spendPendingAdjustments(spendResult.data, userId);
       const inventoryResult = await supabase.from('stock_inventory_signatures').select('inventory_id,user_id,signed_at,stock_inventories(name)').eq('user_id', userId).is('signed_at', null);
       if (inventoryResult.error) throw inventoryResult.error;
       const inventorySignatures = pendingInventorySignatures(inventoryResult.data ?? [], userId).map(s => inventoryResult.data?.find(row => row.inventory_id === s.inventory_id)).filter((row): row is NonNullable<typeof row> => !!row);
@@ -123,6 +127,8 @@ export function usePendingActions() {
       const supportCalls = supportCallItems.length;
 
       return {
+        spendItems,
+        spend: spendItems.length,
         inventorySignatures,
         projectsItems:projectsMessagesResult.data??[],
         projectsCount:projectsMessagesResult.data?.length??0,
@@ -143,7 +149,7 @@ export function usePendingActions() {
         supportCallItems,
         isCustomerSupportAnalyst: currentUser?.isCustomerSupportAnalyst ?? false,
         supply: inventorySignatures.length + pendingApprovals + pendingUserDeletions + pendingSupplyQueue + supplyQuestionCount + supplyReceipts.length,
-        total: inventorySignatures.length + (projectsMessagesResult.data?.length??0) + todos.length + legalCount + pendingApprovals + pendingUserDeletions + pendingCodeTickets + pendingSupplyQueue + supportCalls + supplyQuestionCount + supplyReceipts.length + (mytosisResult.data?.length ?? 0),
+        total: spendItems.length + inventorySignatures.length + (projectsMessagesResult.data?.length??0) + todos.length + legalCount + pendingApprovals + pendingUserDeletions + pendingCodeTickets + pendingSupplyQueue + supportCalls + supplyQuestionCount + supplyReceipts.length + (mytosisResult.data?.length ?? 0),
       };
     },
     staleTime: 30_000,

@@ -2108,6 +2108,20 @@
       "when": 1795558222965,
       "tag": "0300_spend_receipt_category_suggestion_log",
       "breakpoints": true
+    },
+    {
+      "idx": 301,
+      "version": "7",
+      "when": 1795561300553,
+      "tag": "0301_spend_adjustment_pending",
+      "breakpoints": true
+    },
+    {
+      "idx": 302,
+      "version": "7",
+      "when": 1795561444049,
+      "tag": "0302_spend_adjustment_notice_identity",
+      "breakpoints": true
     }
   ]
 }

@@ -1,3 +1,4 @@
+import { spendPendingItems } from "@/components/spend/pending-items";
 import { NumericMarker, AlertMarker } from "@/components/cde/numeric-markers";
 import { CriticalGroup } from "@/components/central/critical-group";
 import { Suspense } from "react";
@@ -52,6 +53,7 @@ function PendentesPage() {
           <div className="space-y-6">
             {(
               <PendingGroups leading={<CriticalGroup />} items={[
+      ...spendPendingItems(data?.spendItems ?? []),
       ...projectPendingItems(data?.projectsItems??[]),
       ...inventoryPendingItems(data?.inventorySignatures ?? []),
       ...((data?.approvals ?? 0) > 0 ? [{ key: "approvals", app: "Supply", requester: "Você", count: data?.approvals ?? 0, row: <PendingLink icon={CheckCircle2} label="Aguardando minha aprovação" count={data?.approvals ?? 0} to="/pendentes" /> }] : []),
