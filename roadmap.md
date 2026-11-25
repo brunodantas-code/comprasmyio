@@ -712,3 +712,5 @@
 - [x] Spend: link "Registrar despesa sem comprovante" menor, abaixo da câmera (câmera centralizada)
 - [x] Spend: "Autorizar uso" e "Solicitar reembolso" na mesma linha, abaixo do seletor de cartão no mobile
 - [x] Spend: valores da lista de comprovantes com a borda direita alinhada em todas as linhas (slot fixo do lápis quando a edição não está liberada)
+
+- [x] Spend: veículo em Aluguel de Veículos e nome sem repetição no seletor de cartão.
