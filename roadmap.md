@@ -697,3 +697,5 @@
 - [x] Spend: "Não se aplica" retirado do diálogo do portador, que fica só com "Não salvei ou perdi o comprovante"; a caixa "Comprovante: Não se aplica" permanece na Conciliação, para o Financeiro. Resposta do portador no banco aceita somente o novo motivo; 98 testes do Spend passaram.
 - [x] Spend: histórico de envios ao portador conferido na tela — botão "Histórico de envios ao portador" presente na linha da Conciliação e nos avisos de "Meus comprovantes"; a captura do usuário era de uma aba aberta antes da atualização (recarregar mostra os botões).
 - [x] Spend: baixa sem comprovante — botão "Responder sobre comprovante ausente" no aviso de "Meus comprovantes" (e o item da Central) abre "Comprovante não disponível" com "Não salvei ou perdi o comprovante"; salvar encerra a pendência sem aprovar o gasto.
+
+- [ ] Spend: aviso na Central ao vencer prestação com saldo em aberto; adiantamento independente de cartão para envio de comprovantes.
