@@ -80,7 +80,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { takeSiteSurveyPurchaseDraft, type SiteSurveyPurchaseDraft } from "@/lib/site-survey-purchase-draft";
 import { SupplyAllocationSelector, InheritedProjectClient } from "@/components/supply-allocation-selector";
 import { ReimbursementAllocationFields } from "@/components/reimbursement-allocation-fields";
-import { emptyReimbursementAllocation, groupReimbursementsByAllocation, type ReimbursementAllocation } from "@/lib/reimbursement-allocation";
+import { emptyReimbursementAllocation, resolveReimbursementOrderAllocations, type ReimbursementAllocation } from "@/lib/reimbursement-allocation";
 import { resolveRhSupplyAllocation, resolveSupplyAllocation, type SupplyAllocationType } from "@/lib/supply-allocation";
 import { invalidSupplyRequestValueIndex } from "@/lib/supply-request-value";
 import { SupplyConsolidation } from "@/components/supply-consolidation";
@@ -1509,9 +1509,6 @@ function NewOrder({ userId, spendReceipts = '', canImport = false, canManageProd
       const invalidValueIndex = invalidSupplyRequestValueIndex(requestModel, groupedItems ? groupedItems.map((row) => row.estimatedValue) : [values.estimated_value]);
       if (invalidValueIndex !== -1) throw new Error(groupedItems ? `Material ${invalidValueIndex + 1}: informe o valor unitário estimado maior que zero.` : "Informe o valor unitário estimado maior que zero.");
       let createdOrder: { budget_exceeded: boolean; budget_snapshot: number | null; projected_committed_snapshot: number | null } | null = null;
-      const resolvedAllocation = requestModel === "rh"
-        ? resolveRhSupplyAllocation(clientId)
-        : { ...resolveSupplyAllocation(forStock ? "estoque" : allocTarget, values.project_id ?? "", clientId, clientUnitId, projects ?? []), for_stock: forStock, allocation_type: forStock ? "estoque" as const : allocTarget };
       let ids = {
         material_id: isNewItem ? null : (item?.material_id ?? null),
         terceiros_material_id: isNewItem ? null : (item?.terceiros_material_id ?? null),
@@ -1528,13 +1525,12 @@ function NewOrder({ userId, spendReceipts = '', canImport = false, canManageProd
       const requestGroupId = crypto.randomUUID();
       if (requestModel === "reembolso") {
         // Cada classificação (Alocação, Centro de Custo, Projeto/Cliente/Etiqueta) vira uma solicitação no mesmo grupo.
-        const groups = groupReimbursementsByAllocation(reembolsoLegs);
+        const groups = resolveReimbursementOrderAllocations(reembolsoLegs, projects ?? []);
         const operacaoCc = restrictedCc ? await resolveOperacaoCostCenterId() : null;
         let first = true;
-        for (const indexes of groups) {
+        for (const { indexes, allocation } of groups) {
           const legs = indexes.map((i) => reembolsoLegs[i]!);
           const a = legs[0]!;
-          const allocation = { ...resolveSupplyAllocation(a.alloc, a.projectId, a.clientId, a.clientUnitId, projects ?? []), for_stock: false, allocation_type: a.alloc };
           const subDraft = spendDraft ? { receipts: indexes.map((i) => spendDraft.receipts[i]!), files: indexes.map((i) => spendDraft.files[i]!) } : null;
           const spendAttachments = subDraft ? await stageReimbursementAttachments(subDraft, userId) : [];
           const total = Number(legs.reduce((sum, l) => sum + Number(l.value), 0).toFixed(2));
@@ -1575,6 +1571,9 @@ function NewOrder({ userId, spendReceipts = '', canImport = false, canManageProd
         }
         return { buyQty: 1, shipQty: 0, budgetExceeded: Boolean(createdOrder?.budget_exceeded), budget: createdOrder?.budget_snapshot, projected: createdOrder?.projected_committed_snapshot, orders: groups.length };
       }
+      const resolvedAllocation = requestModel === "rh"
+        ? resolveRhSupplyAllocation(clientId)
+        : { ...resolveSupplyAllocation(forStock ? "estoque" : allocTarget, values.project_id ?? "", clientId, clientUnitId, projects ?? []), for_stock: forStock, allocation_type: forStock ? "estoque" as const : allocTarget };
       const deviceItems = groupedItems?.filter((row) => row.item?.fulfillment_type === "myio_device") ?? [];
       if (deviceItems.length > 0) {
 
