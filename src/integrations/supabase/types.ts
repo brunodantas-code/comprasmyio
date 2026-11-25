@@ -11396,6 +11396,72 @@ export type Database = {
         }
         Relationships: []
       }
+      spend_advances: {
+        Row: {
+          amount: number
+          close_kind: string | null
+          close_note: string
+          closed_at: string | null
+          closed_by: string | null
+          created_at: string
+          created_by: string
+          due_at: string | null
+          holder_id: string
+          id: string
+          paid_at: string
+          project_id: string | null
+          purpose: string
+          status: string
+        }
+        Insert: {
+          amount: number
+          close_kind?: string | null
+          close_note?: string
+          closed_at?: string | null
+          closed_by?: string | null
+          created_at?: string
+          created_by: string
+          due_at?: string | null
+          holder_id: string
+          id?: string
+          paid_at: string
+          project_id?: string | null
+          purpose?: string
+          status?: string
+        }
+        Update: {
+          amount?: number
+          close_kind?: string | null
+          close_note?: string
+          closed_at?: string | null
+          closed_by?: string | null
+          created_at?: string
+          created_by?: string
+          due_at?: string | null
+          holder_id?: string
+          id?: string
+          paid_at?: string
+          project_id?: string | null
+          purpose?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spend_advances_holder_id_fkey"
+            columns: ["holder_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spend_advances_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       spend_card_delegations: {
         Row: {
           card_id: string
@@ -11724,6 +11790,7 @@ export type Database = {
       spend_receipts: {
         Row: {
           access_key: string | null
+          advance_id: string | null
           amount: number
           card_id: string
           category: string
@@ -11732,6 +11799,8 @@ export type Database = {
           created_at: string
           date: string
           file_path: string
+          finance_account_id: string | null
+          finance_cost_center_id: string | null
           holder_id: string
           id: string
           merchant: string
@@ -11746,6 +11815,7 @@ export type Database = {
         }
         Insert: {
           access_key?: string | null
+          advance_id?: string | null
           amount: number
           card_id: string
           category: string
@@ -11754,6 +11824,8 @@ export type Database = {
           created_at?: string
           date: string
           file_path: string
+          finance_account_id?: string | null
+          finance_cost_center_id?: string | null
           holder_id: string
           id: string
           merchant: string
@@ -11768,6 +11840,7 @@ export type Database = {
         }
         Update: {
           access_key?: string | null
+          advance_id?: string | null
           amount?: number
           card_id?: string
           category?: string
@@ -11776,6 +11849,8 @@ export type Database = {
           created_at?: string
           date?: string
           file_path?: string
+          finance_account_id?: string | null
+          finance_cost_center_id?: string | null
           holder_id?: string
           id?: string
           merchant?: string
@@ -11789,6 +11864,13 @@ export type Database = {
           uf?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "spend_receipts_advance_id_fkey"
+            columns: ["advance_id"]
+            isOneToOne: false
+            referencedRelation: "spend_advances"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "spend_receipts_card_id_fkey"
             columns: ["card_id"]
@@ -13919,6 +14001,7 @@ export type Database = {
         Returns: undefined
       }
       spend_action: { Args: { _action: string; _data: Json }; Returns: Json }
+      spend_advance: { Args: { _action: string; _data: Json }; Returns: Json }
       spend_apply_supplier_allocations: { Args: never; Returns: number }
       spend_assert_receipt_analysis: {
         Args: { _amount: number; _date: string; _path: string }
@@ -13942,6 +14025,7 @@ export type Database = {
         Args: { _ids: string[] }
         Returns: {
           access_key: string | null
+          advance_id: string | null
           amount: number
           card_id: string
           category: string
@@ -13950,6 +14034,8 @@ export type Database = {
           created_at: string
           date: string
           file_path: string
+          finance_account_id: string | null
+          finance_cost_center_id: string | null
           holder_id: string
           id: string
           merchant: string

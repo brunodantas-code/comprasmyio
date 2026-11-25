@@ -10,16 +10,17 @@ export type Statement = Row<"spend_statements">;
 export type Line = Row<"spend_lines">;
 export type Lookup = { id: string; name: string };
 export type SupplierAllocation = Row<"spend_supplier_allocations">;
-export type SpendData = { role: string; user_id: string; cards: SpendCard[]; receipts: Receipt[]; statements: Statement[]; lines: Line[]; notices: Row<"spend_notices">[]; logs: Row<"spend_logs">[]; users: Lookup[]; projects: Lookup[]; accounts: Lookup[]; centers: Lookup[]; settings: Record<string, CategorySetting>; allocations: SupplierAllocation[]; delegations: Delegation[] };
+export type SpendData = { role: string; user_id: string; cards: SpendCard[]; receipts: Receipt[]; statements: Statement[]; lines: Line[]; notices: Row<"spend_notices">[]; logs: Row<"spend_logs">[]; users: Lookup[]; projects: Lookup[]; accounts: Lookup[]; centers: Lookup[]; settings: Record<string, CategorySetting>; allocations: SupplierAllocation[]; delegations: Delegation[]; advances: SpendAdvance[] };
+export type SpendAdvance = Row<"spend_advances">;
 export type Delegation = Row<"spend_card_delegations">;
 const lookup = z.object({ id: z.string(), name: z.string() });
-const workspaceSchema = z.object({ role: z.string(), user_id: z.string(), cards: z.array(z.object({ id: z.string() }).passthrough()), receipts: z.array(z.object({ id: z.string() }).passthrough()), statements: z.array(z.object({ id: z.string() }).passthrough()), lines: z.array(z.object({ id: z.string() }).passthrough()), notices: z.array(z.object({ id: z.string() }).passthrough()), logs: z.array(z.object({ id: z.string() }).passthrough()), users: z.array(lookup), projects: z.array(lookup), accounts: z.array(lookup), centers: z.array(lookup), settings: z.record(z.unknown()), delegations: z.array(z.object({ id: z.string() }).passthrough()).default([]) });
+const workspaceSchema = z.object({ role: z.string(), user_id: z.string(), cards: z.array(z.object({ id: z.string() }).passthrough()), receipts: z.array(z.object({ id: z.string() }).passthrough()), statements: z.array(z.object({ id: z.string() }).passthrough()), lines: z.array(z.object({ id: z.string() }).passthrough()), notices: z.array(z.object({ id: z.string() }).passthrough()), logs: z.array(z.object({ id: z.string() }).passthrough()), users: z.array(lookup), projects: z.array(lookup), accounts: z.array(lookup), centers: z.array(lookup), settings: z.record(z.unknown()), delegations: z.array(z.object({ id: z.string() }).passthrough()).default([]), advances: z.array(z.object({ id: z.string() }).passthrough()).default([]) });
 export const spendOptions = queryOptions({ queryKey: ["spend"], queryFn: async (): Promise<SpendData> => {
   const r = await supabase.rpc("spend_workspace"); if (r.error) throw r.error;
   const parsed = workspaceSchema.parse(r.data);
   const allocations = parsed.role === 'finance' ? await supabase.from('spend_supplier_allocations').select('*').order('supplier') : { data: [], error: null };
   if (allocations.error) throw allocations.error;
-  return { ...(r.data as unknown as SpendData), delegations: parsed.delegations as unknown as Delegation[], allocations: allocations.data ?? [] };
+  return { ...(r.data as unknown as SpendData), delegations: parsed.delegations as unknown as Delegation[], advances: parsed.advances as unknown as SpendAdvance[], allocations: allocations.data ?? [] };
 } });
 export async function spendAction(action: string, data: Json) {
   const r = await supabase.rpc("spend_action", { _action: action, _data: data });
@@ -47,5 +48,10 @@ export async function spendFileUrl(path: string) {
   const r = await supabase.storage.from("spend-files").createSignedUrl(path, 600); if (r.error) throw r.error; return r.data.signedUrl;
 }export async function spendDelegation(action: "grant" | "revoke", data: Json) {
   const r = await supabase.rpc("spend_delegation", { _action: action, _data: data });
+  if (r.error) throw new Error(r.error.message); return r.data;
+}
+
+export async function spendAdvance(action: "create" | "approve_receipt" | "reopen_receipt" | "close", data: Json) {
+  const r = await supabase.rpc("spend_advance", { _action: action, _data: data });
   if (r.error) throw new Error(r.error.message); return r.data;
 }

@@ -2143,6 +2143,13 @@
       "when": 1795563241201,
       "tag": "0305_spend_missing_receipt_lost_only",
       "breakpoints": true
+    },
+    {
+      "idx": 306,
+      "version": "7",
+      "when": 1795617270428,
+      "tag": "0306_spend_expense_advances",
+      "breakpoints": true
     }
   ]
 }
