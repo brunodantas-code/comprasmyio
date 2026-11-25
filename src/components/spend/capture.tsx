@@ -48,6 +48,8 @@ export function SpendCapture({ data, cardId, line, receipt, onDone, onClose }: {
   const fixedAmountDate = !!line || linkedReceipt;
   const [path, setPath] = useState(receipt?.file_path ?? "");
   const [preview, setPreview] = useState("");
+  const [staged, setStaged] = useState<File | null>(null);
+  const photoFirst = !receipt && !line;
   const [pdf, setPdf] = useState(receipt?.file_path.toLowerCase().endsWith(".pdf") ?? false);
   const [amountText, setAmountText] = useState(receipt ? formatSpendAmount(receipt.amount) : line?.amount ? formatSpendAmount(line.amount) : "");
   const holderId = receipt?.holder_id ?? (data.role === 'finance' ? card?.holder_id ?? data.user_id : data.user_id);
@@ -71,7 +73,7 @@ export function SpendCapture({ data, cardId, line, receipt, onDone, onClose }: {
   }
   function resetEvidence() {
     analysisRequest.current++;
-    setAnalysis(null); setReadError(''); setSuggestedCategory(null); setPath(''); setPreview(''); setPdf(false);
+    setAnalysis(null); setReadError(''); setSuggestedCategory(null); setPath(''); if (!staged) { setPreview(''); setPdf(false); }
   }
   function changePaymentSource(payment_source: string) {
     if (payment_source === draft.payment_source) return;
@@ -109,22 +111,44 @@ export function SpendCapture({ data, cardId, line, receipt, onDone, onClose }: {
     } finally { if (request === analysisRequest.current) setReading(false); }
   }
 
+  const sourceReady = paymentSourceSchema.safeParse(draft.payment_source).success && (draft.payment_source === 'advance' ? !!selectedAdvance : !paymentSourceNeedsCard(draft.payment_source) || !!card);
+
+  useEffect(() => {
+    if (staged && !path && !busy && sourceReady) void uploadPrepared(staged);
+  }, [staged, path, sourceReady, draft.payment_source, draft.advance_id]);
+
   async function filePicked(file: File) {
-    if (draft.payment_source === 'advance' && !selectedAdvance) { toast.error('Selecione o adiantamento antes de fotografar'); return; }
-    if (paymentSourceNeedsCard(draft.payment_source) && !card) { toast.error('Selecione o cartão myio'); return; }
+    if (!photoFirst) {
+      if (draft.payment_source === 'advance' && !selectedAdvance) { toast.error('Selecione o adiantamento antes de fotografar'); return; }
+      if (paymentSourceNeedsCard(draft.payment_source) && !card) { toast.error('Selecione o cartão myio'); return; }
+    }
     setBusy(true);
     try {
       const prepared = await prepareSpendReceipt(file);
+      if (photoFirst) {
+        analysisRequest.current++; setAnalysis(null); setReadError(''); setPath('');
+        setStaged(prepared); setPreview(URL.createObjectURL(prepared)); setPdf(prepared.type === "application/pdf");
+        setDraft(d => ({ ...d, file_path: '', confirmed: false }));
+        return;
+      }
+      await uploadPrepared(prepared, true);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Não foi possível preparar o comprovante em P&B");
+    } finally { setBusy(false); }
+  }
+
+  async function uploadPrepared(prepared: File, inner = false) {
+    if (!inner) setBusy(true);
+    try {
       const p = draft.payment_source === 'advance' && selectedAdvance ? await uploadSpendAdvance(prepared, selectedAdvance.id, draft.date.slice(0, 7)) : !card && draft.payment_source === 'reimbursement' ? await uploadSpendReimbursement(prepared, data.user_id, draft.date.slice(0, 7)) : await uploadSpend(prepared, card!, draft.date.slice(0, 7));
       setPath(p);
       setDraft(d => ({ ...d, file_path: p, confirmed: false }));
-      setPreview(URL.createObjectURL(prepared));
-      setPdf(prepared.type === "application/pdf");
+      if (!staged) { setPreview(URL.createObjectURL(prepared)); setPdf(prepared.type === "application/pdf"); }
       await readFile(p, true);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Não foi possível preparar o comprovante em P&B");
+      toast.error(error instanceof Error ? error.message : "Não foi possível enviar o comprovante");
     } finally {
-      setBusy(false);
+      if (!inner) setBusy(false);
       setReading(false);
     }
   }
@@ -174,11 +198,13 @@ export function SpendCapture({ data, cardId, line, receipt, onDone, onClose }: {
     } finally { setBusy(false); }
   }
 
-  return <Dialog open onOpenChange={open => { if (!open && !busy) onClose(); }}><DialogContent onOpenAutoFocus={event => { if (!receipt) { event.preventDefault(); if (draft.payment_source === 'advance' ? !!selectedAdvance : (!!card || draft.payment_source === 'reimbursement') && !!draft.payment_source) picker.current?.click(); } }} className="max-h-[90dvh] max-w-xl overflow-y-auto"><DialogHeader className="pr-24"><DialogTitle>{receipt ? "Editar comprovante" : line ? "Anexar Invoice / Comprovante" : "Salvar Comprovante Fiscal"}</DialogTitle></DialogHeader>
+  return <Dialog open onOpenChange={open => { if (!open && !busy) onClose(); }}><DialogContent onOpenAutoFocus={event => { if (!receipt) { event.preventDefault(); if (photoFirst || sourceReady) picker.current?.click(); } }} className="max-h-[90dvh] max-w-xl overflow-y-auto"><DialogHeader className="pr-24"><DialogTitle>{receipt ? "Editar comprovante" : line ? "Anexar Invoice / Comprovante" : "Salvar Comprovante Fiscal"}</DialogTitle></DialogHeader>
     <input ref={picker} type="file" className="hidden" accept={line ? "image/jpeg,image/png,image/webp,application/pdf" : "image/jpeg,image/png,image/webp"} capture={line ? undefined : "environment"} onChange={event => { const file = event.target.files?.[0]; if (file) void filePicked(file); event.target.value = ""; }} />
+    {photoFirst && !staged ? <div className="space-y-3 py-6 text-center text-sm text-muted-foreground">{busy ? <p role="status" className="flex items-center justify-center gap-2"><Loader2 className="size-4 animate-spin" />Preparando comprovante…</p> : <><p>Fotografe o comprovante para continuar.</p><Button variant="ghost" onClick={() => picker.current?.click()} aria-label="Abrir câmera"><Camera />Abrir câmera</Button></>}</div> : <>
     <div className="space-y-1"><Label>Forma de pagamento *</Label><RadioGroup aria-label="Forma de pagamento" value={draft.payment_source} disabled={busy || !!line || isDelegatedCard(card, data.user_id, data.role === "finance")} onValueChange={changePaymentSource} className="gap-1">{card && <label className="flex min-h-11 cursor-pointer items-center gap-2 text-sm"><RadioGroupItem value="myio_card" /><span>Cartão myio · •••• {card.last_four}</span></label>}<label className="flex min-h-11 cursor-pointer items-center gap-2 text-sm"><RadioGroupItem value="reimbursement" /><span>Reembolso · dinheiro ou cartão pessoal</span></label>{(openAdvances.length > 0 || draft.payment_source === "advance") && <label className="flex min-h-11 cursor-pointer items-center gap-2 text-sm"><RadioGroupItem value="advance" /><AdvanceIcon className="size-4 text-primary" /><span>Adiantamento · prestação de contas</span></label>}</RadioGroup></div>
     {draft.payment_source === "advance" && <label className="space-y-1"><Label>Adiantamento *</Label><SearchableSelect aria-label="Adiantamento da prestação de contas" value={draft.advance_id} clearable={false} onChange={changeAdvance} options={openAdvances.map(a => ({ value: a.id, label: `${a.purpose || "Adiantamento"} · ${formatDate(a.paid_at)} · saldo ${BRL.format(advanceBalance(a, data.receipts.filter(r => r.id !== receipt?.id)).remaining)}` }))} placeholder="Selecionar adiantamento" />{selectedAdvance && !advanceOk && <p role="alert" className="text-xs text-destructive">Valor acima do saldo do adiantamento. Envie o excedente como Reembolso.</p>}</label>}
-    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3"><span className="min-w-0 truncate text-sm text-muted-foreground">{draft.payment_source === "reimbursement" ? (card ? "Reembolso" : "Reembolso · dinheiro ou cartão pessoal") : draft.payment_source === "advance" ? "Adiantamento" : card ? `${card.name} · •••• ${card.last_four}` : "Adiantamento em conta"}</span><Button className="shrink-0" onClick={() => picker.current?.click()} disabled={busy} aria-label="Fotografar ou selecionar comprovante"><Camera />{path ? "Substituir foto" : "Fotografar"}</Button></div>
+    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3"><span className="min-w-0 truncate text-sm text-muted-foreground">{draft.payment_source === "reimbursement" ? (card ? "Reembolso" : "Reembolso · dinheiro ou cartão pessoal") : draft.payment_source === "advance" ? "Adiantamento" : card ? `${card.name} · •••• ${card.last_four}` : "Adiantamento em conta"}</span>{photoFirst ? <Button variant="ghost" className="shrink-0" onClick={() => picker.current?.click()} disabled={busy || reading} aria-label="Substituir foto do comprovante"><Camera />Substituir foto</Button> : <Button className="shrink-0" onClick={() => picker.current?.click()} disabled={busy} aria-label="Fotografar ou selecionar comprovante"><Camera />{path ? "Substituir foto" : "Fotografar"}</Button>}</div>
+    {photoFirst && staged && !sourceReady ? <p role="status" className="text-sm text-muted-foreground">Informe a forma de pagamento para ler o comprovante.</p> : null}
     {busy && !path && !reading ? <p role="status" className="flex items-center gap-2 text-sm"><Loader2 className="size-4 animate-spin" />Preparando comprovante em P&B e removendo o fundo…</p> : null}
     {reading ? <p role="status" className="flex items-center gap-2 text-sm"><Loader2 className="size-4 animate-spin" />Conferindo o comprovante…</p> : null}
     {readError && <div role="alert" className="space-y-2 text-sm text-destructive"><p>{readError}</p><TooltipProvider><Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" aria-label="Tentar leitura do comprovante novamente" disabled={reading || busy || !path} onClick={() => void readFile(path, false)}><RefreshCw/></Button></TooltipTrigger><TooltipContent>Tentar leitura novamente</TooltipContent></Tooltip></TooltipProvider></div>}
@@ -195,6 +221,7 @@ export function SpendCapture({ data, cardId, line, receipt, onDone, onClose }: {
     {draft.category === "ferramentas" ? <div className="flex min-h-11 items-center gap-2 text-sm"><Checkbox id={`spend-photo-${draft.id}`} checked={draft.clear_photo} onCheckedChange={value => change({ clear_photo: value === true })} /><Label htmlFor={`spend-photo-${draft.id}`} className="flex min-h-11 flex-1 cursor-pointer items-center font-normal">A foto da NF/cupom está nítida</Label></div> : null}
     {draft.category === "ia" || draft.category === "software" ? <p className="text-xs text-muted-foreground">Recorrência mensal</p> : null}
     {path ? <div className="flex min-h-11 items-center gap-2 text-sm"><Checkbox id={`spend-confirm-${draft.id}`} aria-label="Conferi e confirmo as informações do comprovante" disabled={busy} checked={draft.confirmed} onCheckedChange={value => setDraft(current => ({ ...current, confirmed: value === true }))} /><Label htmlFor={`spend-confirm-${draft.id}`} className="flex min-h-11 flex-1 cursor-pointer items-center py-2 font-normal">Conferi e confirmo forma de pagamento, valor, data, estabelecimento, categoria, CNPJ e demais informações.</Label></div> : null}
+    </>}
     <div className="flex w-full items-center justify-end gap-2">{receipt && canDeleteSpendReceipt(receipt,data.user_id,data.lines.some(item => item.receipt_id === receipt.id && (item.status === 'approved' || !!item.payable_id))) && <TooltipProvider><Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" aria-label={receipt.payment_source === 'reimbursement' ? 'Excluir reembolso' : 'Excluir comprovante'} disabled={busy} onClick={() => void removeReceipt()}><Trash2 /></Button></TooltipTrigger><TooltipContent>{receipt.payment_source === 'reimbursement' ? 'Excluir reembolso' : 'Excluir comprovante'}</TooltipContent></Tooltip></TooltipProvider>}<Button variant="ghost" size="icon" title="Salvar Comprovante Fiscal" aria-label="Salvar Comprovante Fiscal" onClick={submit} disabled={busy || reading || !verification.ok || !path || !draft.confirmed || draft.myio_cnpj === null || !paymentSourceSchema.safeParse(draft.payment_source).success || !advanceOk}><Save /></Button></div>
   </DialogContent></Dialog>;
 }
