@@ -7,6 +7,9 @@
 
 .spend-mobile-register-slot {
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
   justify-content: center;
   padding-block: 0.75rem;
 }

@@ -709,3 +709,4 @@
 - [x] Indicadores na Central: prazo vencido e check-in semanal atrasado
 - [x] Spend: reembolsos continuam visíveis com cartão inativo
 - [x] Spend: João consegue salvar comprovantes novos
+- [x] Spend: link "Registrar despesa sem comprovante" menor, abaixo da câmera (câmera centralizada)

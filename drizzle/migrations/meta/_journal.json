@@ -2220,6 +2220,20 @@
       "when": 1795642384253,
       "tag": "0316_spend_reimbursement_card_optional",
       "breakpoints": true
+    },
+    {
+      "idx": 317,
+      "version": "7",
+      "when": 1795643434524,
+      "tag": "0317_spend_without_receipt",
+      "breakpoints": true
+    },
+    {
+      "idx": 318,
+      "version": "7",
+      "when": 1795643453982,
+      "tag": "0318_spend_reimbursement_order_without_receipt",
+      "breakpoints": true
     }
   ]
 }

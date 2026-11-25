@@ -11822,6 +11822,7 @@ export type Database = {
           status: string
           submitted_by: string | null
           uf: string | null
+          without_receipt: boolean
         }
         Insert: {
           access_key?: string | null
@@ -11847,6 +11848,7 @@ export type Database = {
           status?: string
           submitted_by?: string | null
           uf?: string | null
+          without_receipt?: boolean
         }
         Update: {
           access_key?: string | null
@@ -11872,6 +11874,7 @@ export type Database = {
           status?: string
           submitted_by?: string | null
           uf?: string | null
+          without_receipt?: boolean
         }
         Relationships: [
           {
@@ -14060,6 +14063,7 @@ export type Database = {
           status: string
           submitted_by: string | null
           uf: string | null
+          without_receipt: boolean
         }[]
         SetofOptions: {
           from: "*"

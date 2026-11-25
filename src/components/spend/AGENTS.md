@@ -30,3 +30,4 @@
 - Receipt rows keep a fixed action slot (invisible placeholder when edit is unavailable) so amounts stay right-aligned.
 - Personal reimbursements stay listed for their holder in Meus comprovantes even when their storage card is inactive or not selected; card filtering never hides them.
 - Reimbursement receipts may carry no card at all: files live under reimbursement/<user>/<YYYY-MM>/..., extraction evidence stores no card, and the table check allows reimbursement with or without card while myio_card always keeps one.
+- Expenses without a fiscal receipt set spend_receipts.without_receipt with a no-receipt/<id> placeholder path; only Reembolso/Adiantamento, reason required in observation, OCR/evidence guards skipped and Supply orders need no attachment for them.

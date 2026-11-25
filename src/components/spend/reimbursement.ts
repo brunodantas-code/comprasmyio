@@ -7,14 +7,15 @@ export function availableReimbursements<T extends { payment_source: string; hold
 export function reimbursementTotal(receipts: { amount: number }[]) {
   return receipts.reduce((sum, r) => sum + Math.round(r.amount * 100), 0) / 100;
 }
-export type ReimbursementDraft = { receipts: Receipt[]; files: File[] };
+export type ReimbursementDraft = { receipts: Receipt[]; files: (File | null)[] };
 export async function loadReimbursementDraft(ids: string[]): Promise<ReimbursementDraft> {
   const response = await supabase.rpc('spend_reimbursement_receipts', { _ids: ids });
   if (response.error) throw new Error(response.error.message);
   const receipts = response.data;
   if (receipts.length !== ids.length) throw new Error('Não foi possível carregar todos os comprovantes.');
-  const files: File[] = [];
+  const files: (File | null)[] = [];
   for (const r of receipts) {
+    if (r.without_receipt) { files.push(null); continue; }
     const download = await supabase.storage.from('spend-files').download(r.file_path);
     if (download.error) throw new Error(`Não foi possível carregar a foto de ${r.merchant}.`);
     const extension = r.file_path.split('.').pop() ?? 'jpg';
@@ -27,6 +28,7 @@ export async function stageReimbursementAttachments(draft: ReimbursementDraft, u
   try {
     for (let i = 0; i < draft.receipts.length; i++) {
       const receipt = draft.receipts[i]; const file = draft.files[i];
+      if (receipt?.without_receipt) continue;
       if (!receipt || !file) throw new Error('Todos os comprovantes devem estar anexados.');
       const path = `${userId}/spend/${receipt.id}/${crypto.randomUUID()}.${receipt.file_path.split('.').pop() ?? 'jpg'}`;
       const result = await supabase.storage.from('order-attachments').upload(path, file, { contentType: file.type || 'application/octet-stream' });
