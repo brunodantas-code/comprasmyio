@@ -27,3 +27,4 @@
 - Notification and adjustment sends are evidenced from audited line-scoped logs and rendered with the shared MilestoneTimeline; send indicators never imply read or approval.
 - Receipt-card presentation exceptions stay in the shared display helper; finance reconciliation retains canonical cards and existing records/permissions remain untouched.
 - Expense advances are Finance/Admin-created via the guarded spend_advance RPC; advance receipts (payment_source='advance') have no card link, use advance-keyed private storage, are balance-locked by trigger, never reach Supply or card statements, and closing requires approved receipts plus an audited balance resolution. Overdue open balances create holder pendencies in personal/Admin Central and the Spend badge.
+- Receipt rows keep a fixed action slot (invisible placeholder when edit is unavailable) so amounts stay right-aligned.
