@@ -1,8 +1,8 @@
 import type { Delegation, SpendCard } from "./data";
 
-/** Temporary presentation exception while the disputed holder registration is corrected. */
-export function receiptDisplayCardsFor(userId: string, cards: SpendCard[]) {
-  return cards.filter(c => !(userId === "6ca0eff8-7393-47bc-9054-9001138bcbc2" && c.id === "25a95170-6998-4109-a020-ab102531dff9"));
+/** Cards shown in a holder's receipt views; registered holders are authoritative. */
+export function receiptDisplayCardsFor(_userId: string, cards: SpendCard[]) {
+  return cards;
 }
 
 /** Cards a holder may submit receipts to: own card first, then active temporary authorizations. */

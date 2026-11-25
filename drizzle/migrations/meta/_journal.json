@@ -2178,6 +2178,13 @@
       "when": 1795619343746,
       "tag": "0310_spend_installment_reuse_insert_linked",
       "breakpoints": true
+    },
+    {
+      "idx": 311,
+      "version": "7",
+      "when": 1795640694590,
+      "tag": "0311_link_andre_card_and_indicators",
+      "breakpoints": true
     }
   ]
 }

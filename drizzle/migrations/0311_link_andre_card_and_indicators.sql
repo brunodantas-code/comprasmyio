@@ -1,0 +1,2 @@
+UPDATE public.spend_cards SET holder_id='24315331-119e-4500-9b4f-2220d18b3428' WHERE id='25a95170-6998-4109-a020-ab102531dff9';
+UPDATE public.indicadores_metrics SET responsible_id='24315331-119e-4500-9b4f-2220d18b3428' WHERE id='a22eb350-f000-4382-9800-cfcfabc3932b' AND responsible_id IS NULL;
