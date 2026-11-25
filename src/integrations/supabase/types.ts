@@ -11560,6 +11560,7 @@ export type Database = {
           date: string
           id: string
           installment: string | null
+          installment_source_line_id: string | null
           last_four: string | null
           merchant: string
           myio_cnpj: boolean | null
@@ -11580,6 +11581,7 @@ export type Database = {
           date: string
           id?: string
           installment?: string | null
+          installment_source_line_id?: string | null
           last_four?: string | null
           merchant: string
           myio_cnpj?: boolean | null
@@ -11600,6 +11602,7 @@ export type Database = {
           date?: string
           id?: string
           installment?: string | null
+          installment_source_line_id?: string | null
           last_four?: string | null
           merchant?: string
           myio_cnpj?: boolean | null
@@ -11627,6 +11630,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "spend_lines_installment_source_line_id_fkey"
+            columns: ["installment_source_line_id"]
+            isOneToOne: false
+            referencedRelation: "spend_lines"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "spend_lines_payable_id_fkey"
             columns: ["payable_id"]
             isOneToOne: true
@@ -11643,7 +11653,7 @@ export type Database = {
           {
             foreignKeyName: "spend_lines_receipt_id_fkey"
             columns: ["receipt_id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "spend_receipts"
             referencedColumns: ["id"]
           },
@@ -14014,6 +14024,7 @@ export type Database = {
         Returns: Json
       }
       spend_delete_receipt: { Args: { _receipt_id: string }; Returns: Json }
+      spend_installment_parts: { Args: { _t: string }; Returns: number[] }
       spend_pending_adjustments: { Args: { _all?: boolean }; Returns: Json }
       spend_pending_advances: { Args: { _all?: boolean }; Returns: Json }
       spend_project_allowed: { Args: { _project: string }; Returns: boolean }
@@ -14065,6 +14076,13 @@ export type Database = {
         Returns: string
       }
       spend_role: { Args: never; Returns: string }
+      spend_same_purchase: {
+        Args: {
+          a: Database["public"]["Tables"]["spend_lines"]["Row"]
+          b: Database["public"]["Tables"]["spend_lines"]["Row"]
+        }
+        Returns: boolean
+      }
       spend_save_classification: { Args: { _data: Json }; Returns: Json }
       spend_set_statement_due: {
         Args: { _due_date: string; _statement_id: string }

@@ -702,3 +702,4 @@
 
 - [x] Spend: confirmar para Leonardo o significado real de Meus comprovantes para colaborador e Financeiro/Admin.
 - [x] Spend: responder a Alexandre se comprovante de compra parcelada concilia automaticamente as próximas parcelas.
+- [x] Spend: reaproveitar comprovante/classificação nas parcelas seguintes; exclusão de comprovante de adiantamento conferida.
