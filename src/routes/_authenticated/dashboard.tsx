@@ -79,6 +79,8 @@ import { AppHeader } from "@/components/app-header";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { takeSiteSurveyPurchaseDraft, type SiteSurveyPurchaseDraft } from "@/lib/site-survey-purchase-draft";
 import { SupplyAllocationSelector, InheritedProjectClient } from "@/components/supply-allocation-selector";
+import { ReimbursementAllocationFields } from "@/components/reimbursement-allocation-fields";
+import { emptyReimbursementAllocation, groupReimbursementsByAllocation, type ReimbursementAllocation } from "@/lib/reimbursement-allocation";
 import { resolveRhSupplyAllocation, resolveSupplyAllocation, type SupplyAllocationType } from "@/lib/supply-allocation";
 import { invalidSupplyRequestValueIndex } from "@/lib/supply-request-value";
 import { SupplyConsolidation } from "@/components/supply-consolidation";
@@ -1331,9 +1333,11 @@ function NewOrder({ userId, spendReceipts = '', canImport = false, canManageProd
   const travelDestination = travelLegs[0]?.destination ?? "";
   const travelDeparture = travelLegs[0]?.departure ?? "";
   const travelReturn = travelLegs[0]?.oneWay ? "" : travelLegs[0]?.return ?? "";
-  type ReembolsoLeg = { description: string; value: string; date: string };
+  type ReembolsoLeg = { description: string; value: string; date: string } & ReimbursementAllocation;
+  const defaultReimbursementTarget = canAllocateProject ? "projeto" as const : canAllocateClient ? "cliente" as const : "interna" as const;
+  const newReembolsoLeg = (projectFromReceipt = ""): ReembolsoLeg => ({ description: "", value: "", date: "", ...emptyReimbursementAllocation(projectFromReceipt && canAllocateProject ? "projeto" : defaultReimbursementTarget, projectFromReceipt) });
   const [reimbursementAccountId, setReimbursementAccountId] = useState("");
-  const [reembolsoLegs, setReembolsoLegs] = useState<ReembolsoLeg[]>([{ description: "", value: "", date: "" }]);
+  const [reembolsoLegs, setReembolsoLegs] = useState<ReembolsoLeg[]>(() => [newReembolsoLeg()]);
   const updateReembolsoLeg = (i: number, patch: Partial<ReembolsoLeg>) =>
     setReembolsoLegs((prev) => prev.map((l, idx) => (idx === i ? { ...l, ...patch } : l)));
   const reembolsoTotal = reembolsoLegs.reduce((acc, l) => acc + (Number(l.value) || 0), 0);
@@ -1417,12 +1421,9 @@ function NewOrder({ userId, spendReceipts = '', canImport = false, canManageProd
       if (cancelled) return;
       initializedSpend.current = spendReceipts;
       setSpendDraft(draft); setSpendDraftError(''); setRequestType(type.code); setForStock(false); setIsNewItem(true);
-      setReembolsoLegs(draft.receipts.map(r => ({ description: r.merchant, value: String(r.amount), date: r.date })));
+      setReembolsoLegs(draft.receipts.map(r => ({ ...newReembolsoLeg(r.project_id ?? ""), description: r.merchant, value: String(r.amount), date: r.date })));
       setRecipient(me.full_name);
       setRequesterNotes(draft.receipts.map(r => `${r.merchant}${r.observation ? ': ' + r.observation : ''}`).join('\n'));
-      const projectIds = new Set(draft.receipts.map(r => r.project_id).filter(Boolean));
-      const project = draft.receipts[0]?.project_id;
-      if (projectIds.size === 1 && project && canAllocateProject) { setAllocTarget('projeto'); setProjectId(project); }
     }).catch((e: unknown) => { if (!cancelled) setSpendDraftError(e instanceof Error ? e.message : 'Não foi possível carregar os comprovantes.'); });
     return () => { cancelled = true; };
   }, [spendReceipts, requestTypes, me, canAllocateProject]);
@@ -1471,7 +1472,7 @@ function NewOrder({ userId, spendReceipts = '', canImport = false, canManageProd
     setDeadlineDate("");
     setTravelType("");
     setTravelLegs([{ destination: "", departure: "", return: "" }]);
-    setReembolsoLegs([{ description: "", value: "", date: "" }]);
+    setReembolsoLegs([newReembolsoLeg()]);
     setReimbursementAccountId("");
     setPaymentDescription("");
     setPaymentValue("0");
@@ -1525,6 +1526,55 @@ function NewOrder({ userId, spendReceipts = '', canImport = false, canManageProd
       }
 
       const requestGroupId = crypto.randomUUID();
+      if (requestModel === "reembolso") {
+        // Cada classificação (Alocação, Centro de Custo, Projeto/Cliente/Etiqueta) vira uma solicitação no mesmo grupo.
+        const groups = groupReimbursementsByAllocation(reembolsoLegs);
+        const operacaoCc = restrictedCc ? await resolveOperacaoCostCenterId() : null;
+        let first = true;
+        for (const indexes of groups) {
+          const legs = indexes.map((i) => reembolsoLegs[i]!);
+          const a = legs[0]!;
+          const allocation = { ...resolveSupplyAllocation(a.alloc, a.projectId, a.clientId, a.clientUnitId, projects ?? []), for_stock: false, allocation_type: a.alloc };
+          const subDraft = spendDraft ? { receipts: indexes.map((i) => spendDraft.receipts[i]!), files: indexes.map((i) => spendDraft.files[i]!) } : null;
+          const spendAttachments = subDraft ? await stageReimbursementAttachments(subDraft, userId) : [];
+          const total = Number(legs.reduce((sum, l) => sum + Number(l.value), 0).toFixed(2));
+          const { data, error } = await supabase.from("purchase_orders").insert({
+            ...allocation,
+            ...(subDraft ? { spend_receipt_ids: subDraft.receipts.map(r => r.id), attachments: spendAttachments } : {}),
+            request_type: requestType,
+            cost_center_id: operacaoCc ?? (a.costCenterId || null),
+            tag_id: resolveSupplyTag(a.alloc, a.tagId),
+            parent_order_id: null,
+            reimbursement_account_id: reimbursementAccountId || null,
+            item_name: values.item_name,
+            request_group_id: requestGroupId,
+            quantity: 1,
+            estimated_value: total,
+            recipient: values.recipient,
+            requester_notes: values.requester_notes ?? null,
+            delivery_point: values.delivery_point ?? null,
+            delivery_mode: values.delivery_mode,
+            deadline_type: values.deadline_type,
+            deadline_date: values.deadline_type === "customizado" ? (values.deadline_date ?? null) : null,
+            travel_type: baseRequestModel === "viagens" ? travelType : null,
+            request_subtype: baseRequestModel === "viagens" ? travelType : (requestSubtype || null),
+            travel_legs: legs.map((l) => ({ description: l.description.trim(), value: Number(l.value), date: l.date })),
+            requester_id: userId,
+          }).select("id,budget_exceeded,budget_snapshot,projected_committed_snapshot").single();
+          if (error) {
+            if (spendAttachments.length) await supabase.storage.from('order-attachments').remove(spendAttachments.map(x => x.path));
+            throw error;
+          }
+          if (data.budget_exceeded) createdOrder = data;
+          if (first && files.length) {
+            const uploaded = await uploadOrderAttachments(data.id, files);
+            const { error: ue } = await supabase.from("purchase_orders").update({ attachments: [...spendAttachments, ...uploaded] }).eq("id", data.id);
+            if (ue) throw ue;
+          }
+          first = false;
+        }
+        return { buyQty: 1, shipQty: 0, budgetExceeded: Boolean(createdOrder?.budget_exceeded), budget: createdOrder?.budget_snapshot, projected: createdOrder?.projected_committed_snapshot, orders: groups.length };
+      }
       const deviceItems = groupedItems?.filter((row) => row.item?.fulfillment_type === "myio_device") ?? [];
       if (deviceItems.length > 0) {
 
@@ -1641,6 +1691,7 @@ function NewOrder({ userId, spendReceipts = '', canImport = false, canManageProd
     onSuccess: (r) => {
       if (r.shipQty > 0 && r.buyQty > 0) toast.success(`Ordem de expedição (${r.shipQty}) e ordem de compra (${r.buyQty}) criadas.`);
       else if (r.shipQty > 0) toast.success(`Atendido pelo estoque: ordem de expedição de ${r.shipQty} criada.`);
+      else if ("orders" in r && (r.orders ?? 0) > 1) toast.success(`${r.orders} solicitações criadas, uma por classificação.`);
       else toast.success("Pedido criado!");
       if (r.budgetExceeded) {
         toast.warning(`Solicitação salva com alerta: o projeto chegará a ${formatBRL(r.projected)} para um orçamento de ${formatBRL(r.budget)}.`);
@@ -1680,8 +1731,8 @@ function NewOrder({ userId, spendReceipts = '', canImport = false, canManageProd
     if (!isRh && !isPagamento && forStock && !canAllocateStock) return toast.error("Alocação em Estoque não permitida para este perfil.");
     if (!isMateriais) {
       if (!isReembolso && !isRh && !isPagamento && newItemName.trim().length < 2) return toast.error("Descreva o serviço ou a viagem solicitada.");
-      if (!isRh && !isPagamento && allocTarget === "projeto" && !projectId) return toast.error("Selecione o projeto");
-      if (!isRh && !isPagamento && allocTarget === "cliente" && !clientId) return toast.error("Selecione o cliente");
+      if (!isRh && !isPagamento && !isReembolso && allocTarget === "projeto" && !projectId) return toast.error("Selecione o projeto");
+      if (!isRh && !isPagamento && !isReembolso && allocTarget === "cliente" && !clientId) return toast.error("Selecione o cliente");
       if (isRh) {
         if (!rhCargo) return toast.error("Selecione o cargo");
         if (!rhGestor) return toast.error("Selecione o gestor");
@@ -1714,6 +1765,13 @@ function NewOrder({ userId, spendReceipts = '', canImport = false, canManageProd
           if (leg.description.trim().length < 2) return toast.error(`Reembolso ${n}: informe a descrição da despesa`);
           if (!(Number(leg.value) > 0)) return toast.error(`Reembolso ${n}: informe um valor válido`);
           if (!leg.date) return toast.error(`Reembolso ${n}: informe a data da despesa`);
+          if (leg.alloc === "projeto" && !canAllocateProject) return toast.error(`Reembolso ${n}: alocação em Projeto não permitida para este perfil.`);
+          if (leg.alloc === "cliente" && !canAllocateClient) return toast.error(`Reembolso ${n}: alocação em Cliente não permitida para este perfil.`);
+          if (leg.alloc === "projeto" && !leg.projectId) return toast.error(`Reembolso ${n}: selecione o projeto`);
+          if (leg.alloc === "cliente" && !leg.clientId) return toast.error(`Reembolso ${n}: selecione o cliente`);
+          if (!restrictedCc && !leg.costCenterId) return toast.error(`Reembolso ${n}: selecione o Centro de Custo`);
+          try { resolveSupplyAllocation(leg.alloc, leg.projectId, leg.clientId, leg.clientUnitId, projects ?? []); }
+          catch (error) { return toast.error(`Reembolso ${n}: ${error instanceof Error ? error.message : "alocação inválida."}`); }
         }
       }
       if (isPagamento) {
@@ -1748,13 +1806,13 @@ function NewOrder({ userId, spendReceipts = '', canImport = false, canManageProd
       return toast.error("Selecione o destinatário");
     }
 
-    if (!isRh) {
+    if (!isRh && !isReembolso) {
       try { resolveSupplyAllocation(forStock ? "estoque" : allocTarget, projectId, clientId, clientUnitId, projects ?? []); }
       catch (error) { return toast.error(error instanceof Error ? error.message : "Alocação inválida."); }
     }
     const fd = new FormData(form);
     const parsed = newOrderSchema.safeParse({
-      project_id: isRh ? (projectId || undefined) : (allocTarget === "projeto" && !forStock ? projectId : undefined),
+      project_id: isReembolso ? undefined : isRh ? (projectId || undefined) : (allocTarget === "projeto" && !forStock ? projectId : undefined),
       item_name: isReembolso
         ? (selectedTravelSubtype ? selectedTravelSubtype.name : "Reembolso de Despesas")
         : isPagamento
@@ -1986,12 +2044,11 @@ function NewOrder({ userId, spendReceipts = '', canImport = false, canManageProd
                         <Input id={`reembolso_date_${i}`} readOnly={!!spendDraft} type="date" value={leg.date} onChange={(e) => updateReembolsoLeg(i, { date: e.target.value })} />
                       </div>
                     </div>
+                    <ReimbursementAllocationFields value={leg} onChange={(patch) => updateReembolsoLeg(i, patch)} options={allocationOptions} projects={projects ?? []} showCostCenter={!restrictedCc} />
+                    {i === reembolsoLegs.length - 1 && !spendDraft && <div className="flex items-center gap-2 border-t pt-3"><CdeButton group="plus" screen="routes/_authenticated/dashboard.tsx" type="button" onClick={() => setReembolsoLegs((prev) => [...prev, newReembolsoLeg()])} aria-label="Adicionar"></CdeButton>
+                  <span className="text-sm text-muted-foreground">Deseja adicionar outro reembolso a esta Solicitação?</span></div>}
                   </div>
                 ))}
-                <div className="flex items-center gap-2">
-                  {!spendDraft && <><CdeButton group="plus" screen="routes/_authenticated/dashboard.tsx" type="button" onClick={() => setReembolsoLegs((prev) => [...prev, { description: "", value: "", date: "" }])} aria-label="Adicionar"></CdeButton>
-                  <span className="text-sm text-muted-foreground">Deseja adicionar outro reembolso a esta Solicitação?</span></>}
-                </div>
               </div>
             )}
 
@@ -2139,7 +2196,7 @@ function NewOrder({ userId, spendReceipts = '', canImport = false, canManageProd
                   </div>
                 )}
               </>
-            ) : (
+            ) : requestModel === "reembolso" ? null : (
               <>
                 <div className="space-y-2">
                   <Label>Alocação</Label>
