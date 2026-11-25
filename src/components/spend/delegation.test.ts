@@ -13,4 +13,8 @@ describe("autorização temporária", () => {
     const source = [card("x", "andre"), card("y", "leo")];
     expect(receiptCardsFor("leo", source, [], "2026-11-24").map(c => c.id)).toEqual(["y"]);
   });
+  it("Meus comprovantes lista todos os cartões ativos do portador e oculta inativos", () => {
+    const source = [card("a1", "leo"), card("a2", "leo"), { ...card("a3", "leo"), active: false }];
+    expect(receiptCardsFor("leo", source, [], "2026-11-25").map(c => c.id)).toEqual(["a1", "a2"]);
+  });
 });

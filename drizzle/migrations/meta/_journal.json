@@ -2185,6 +2185,13 @@
       "when": 1795640694590,
       "tag": "0311_link_andre_card_and_indicators",
       "breakpoints": true
+    },
+    {
+      "idx": 312,
+      "version": "7",
+      "when": 1795640917428,
+      "tag": "0312_spend_card_active_toggle",
+      "breakpoints": true
     }
   ]
 }

@@ -704,3 +704,5 @@
 - [x] Spend: responder a Alexandre se comprovante de compra parcelada concilia automaticamente as próximas parcelas.
 - [x] Spend: reaproveitar comprovante/classificação nas parcelas seguintes; exclusão de comprovante de adiantamento conferida.
 - [x] Anexos/comprovantes: fundo verde escuro removido do botão link compartilhado; chips de comprovante do Spend agora com o padrão dos Anexos do Supply (nome sublinhado, texto preto, verde só no cursor). Regra gravada em src/components/ui/AGENTS.md. Medidas no navegador: fundo transparente, texto rgb(11,0,35), sublinhado, verde rgb(15,196,130) no hover — iguais ao anexo real do Supply.
+- [x] Spend: lista de cartões ativos em Meus comprovantes e chave Ativo/Inativo em Cartões
+- [ ] Indicadores na Central — aguarda definição do que conta como pendência

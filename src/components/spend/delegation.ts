@@ -2,7 +2,7 @@ import type { Delegation, SpendCard } from "./data";
 
 /** Cards shown in a holder's receipt views; registered holders are authoritative. */
 export function receiptDisplayCardsFor(_userId: string, cards: SpendCard[]) {
-  return cards;
+  return cards.filter(c => c.active !== false);
 }
 
 /** Cards a holder may submit receipts to: own card first, then active temporary authorizations. */

@@ -14084,6 +14084,10 @@ export type Database = {
         Returns: boolean
       }
       spend_save_classification: { Args: { _data: Json }; Returns: Json }
+      spend_set_card_active: {
+        Args: { _active: boolean; _card_id: string }
+        Returns: undefined
+      }
       spend_set_statement_due: {
         Args: { _due_date: string; _statement_id: string }
         Returns: Json
