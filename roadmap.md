@@ -710,3 +710,5 @@
 - [x] Spend: reembolsos continuam visíveis com cartão inativo
 - [x] Spend: João consegue salvar comprovantes novos
 - [x] Spend: link "Registrar despesa sem comprovante" menor, abaixo da câmera (câmera centralizada)
+- [x] Spend: "Autorizar uso" e "Solicitar reembolso" na mesma linha, abaixo do seletor de cartão no mobile
+- [x] Spend: valores da lista de comprovantes com a borda direita alinhada em todas as linhas (slot fixo do lápis quando a edição não está liberada)
