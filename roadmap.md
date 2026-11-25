@@ -707,3 +707,4 @@
 - [x] Spend: lista de cartões ativos em Meus comprovantes e chave Ativo/Inativo em Cartões
 - [x] Indicadores na Central: prazo vencido e check-in semanal atrasado
 - [x] Spend: reembolsos continuam visíveis com cartão inativo
+- [x] Spend: João consegue salvar comprovantes novos

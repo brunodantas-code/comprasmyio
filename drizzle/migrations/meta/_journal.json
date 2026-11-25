@@ -2199,6 +2199,13 @@
       "when": 1795641137310,
       "tag": "0313_indicadores_pending_krs",
       "breakpoints": true
+    },
+    {
+      "idx": 314,
+      "version": "7",
+      "when": 1795641796226,
+      "tag": "0314_spend_edit_receipts_on_inactive_cards",
+      "breakpoints": true
     }
   ]
 }
