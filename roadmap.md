@@ -698,4 +698,7 @@
 - [x] Spend: histórico de envios ao portador conferido na tela — botão "Histórico de envios ao portador" presente na linha da Conciliação e nos avisos de "Meus comprovantes"; a captura do usuário era de uma aba aberta antes da atualização (recarregar mostra os botões).
 - [x] Spend: baixa sem comprovante — botão "Responder sobre comprovante ausente" no aviso de "Meus comprovantes" (e o item da Central) abre "Comprovante não disponível" com "Não salvei ou perdi o comprovante"; salvar encerra a pendência sem aprovar o gasto.
 
-- [ ] Spend: aviso na Central ao vencer prestação com saldo em aberto; adiantamento independente de cartão para envio de comprovantes.
+- [x] Spend: aviso na Central ao vencer prestação com saldo em aberto; adiantamento independente de cartão para envio de comprovantes.
+
+- [x] Spend: confirmar para Leonardo o significado real de Meus comprovantes para colaborador e Financeiro/Admin.
+- [x] Spend: responder a Alexandre se comprovante de compra parcelada concilia automaticamente as próximas parcelas.

@@ -13,7 +13,7 @@ import { SearchableSelect } from "@/components/ui/searchable-select";
 import { extractSpendDocument } from "@/lib/spend.functions";
 import { configuredCategories, expenseSchema, recurringWarning } from "./rules";
 import { categoryIcons } from "./icons";
-import { deleteSpendReceipt, spendAction, spendFileUrl, uploadSpend, type SpendData, type Line, type Receipt } from "./data";
+import { deleteSpendReceipt, spendAction, spendFileUrl, uploadSpend, uploadSpendAdvance, type SpendData, type Line, type Receipt } from "./data";
 import { canDeleteSpendReceipt } from "./receipt-edit";
 import { confirmAction } from "@/components/confirm-dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -33,7 +33,7 @@ import { SpendReceiptPdfPreview } from './receipt-pdf-preview';
 const today = () => new Date().toLocaleDateString("en-CA");
 
 export function SpendCapture({ data, cardId, line, receipt, onDone, onClose }: { data: SpendData; cardId: string; line?: Line; receipt?: Receipt; onDone: () => Promise<void>; onClose: () => void }) {
-  const card = data.cards.find(c => c.id === cardId);
+  const card = receipt?.payment_source === 'advance' ? undefined : data.cards.find(c => c.id === cardId);
   const extract = useServerFn(extractSpendDocument);
   const availableCategories = configuredCategories(data.settings);
   const picker = useRef<HTMLInputElement>(null);
@@ -50,8 +50,9 @@ export function SpendCapture({ data, cardId, line, receipt, onDone, onClose }: {
   const [preview, setPreview] = useState("");
   const [pdf, setPdf] = useState(receipt?.file_path.toLowerCase().endsWith(".pdf") ?? false);
   const [amountText, setAmountText] = useState(receipt ? formatSpendAmount(receipt.amount) : line?.amount ? formatSpendAmount(line.amount) : "");
-  const [draft, setDraft] = useState({ id: receipt?.id ?? crypto.randomUUID(), card_id: cardId, payment_source: receipt?.payment_source ?? (line || isDelegatedCard(data.cards.find(c => c.id === cardId), data.user_id, data.role === "finance") ? "myio_card" : ""), date: receipt?.date ?? line?.date ?? today(), merchant: receipt?.merchant ?? line?.merchant ?? "", amount: receipt?.amount ?? line?.amount ?? 0, category: receipt?.category ?? availableCategories[0]?.key ?? "", observation: receipt?.observation ?? "", project_id: receipt?.project_id ?? null as string | null, file_path: receipt?.file_path ?? "", clear_photo: receipt?.clear_photo ?? false, myio_cnpj: receipt?.myio_cnpj ?? null as boolean | null, city: receipt?.city ?? "", uf: receipt?.uf ?? "", access_key: receipt?.access_key ?? null as string | null, advance_id: receipt?.advance_id ?? "", confirmed: false });
-  const openAdvances = data.advances.filter(a => a.holder_id === card?.holder_id && (a.status === "open" || a.id === receipt?.advance_id));
+  const holderId = receipt?.holder_id ?? (data.role === 'finance' ? card?.holder_id ?? data.user_id : data.user_id);
+  const openAdvances = data.advances.filter(a => a.holder_id === holderId && (a.status === "open" || a.id === receipt?.advance_id));
+  const [draft, setDraft] = useState({ id: receipt?.id ?? crypto.randomUUID(), card_id: receipt ? receipt.card_id : cardId || null, payment_source: receipt?.payment_source ?? (line || isDelegatedCard(card, data.user_id, data.role === "finance") ? "myio_card" : !card && openAdvances.length ? "advance" : ""), date: receipt?.date ?? line?.date ?? today(), merchant: receipt?.merchant ?? line?.merchant ?? "", amount: receipt?.amount ?? line?.amount ?? 0, category: receipt?.category ?? availableCategories[0]?.key ?? "", observation: receipt?.observation ?? "", project_id: receipt?.project_id ?? null as string | null, file_path: receipt?.file_path ?? "", clear_photo: receipt?.clear_photo ?? false, myio_cnpj: receipt?.myio_cnpj ?? null as boolean | null, city: receipt?.city ?? "", uf: receipt?.uf ?? "", access_key: receipt?.access_key ?? null as string | null, advance_id: receipt?.advance_id ?? (!card && openAdvances.length === 1 ? openAdvances[0]?.id ?? "" : ""), confirmed: false });
   const selectedAdvance = openAdvances.find(a => a.id === draft.advance_id);
   const advanceOk = draft.payment_source !== "advance" || (!!selectedAdvance && advanceAcceptsAmount(selectedAdvance, data.receipts, draft.amount, receipt ? { advance_id: receipt.advance_id, amount: receipt.amount } : undefined));
 
@@ -67,6 +68,20 @@ export function SpendCapture({ data, cardId, line, receipt, onDone, onClose }: {
 
   function change(patch: Partial<typeof draft>) {
     setDraft(current => ({ ...current, ...patch, confirmed: false }));
+  }
+  function resetEvidence() {
+    analysisRequest.current++;
+    setAnalysis(null); setReadError(''); setSuggestedCategory(null); setPath(''); setPreview(''); setPdf(false);
+  }
+  function changePaymentSource(payment_source: string) {
+    if (payment_source === draft.payment_source) return;
+    resetEvidence();
+    setDraft(current => ({ ...current, payment_source, card_id: payment_source === 'advance' ? null : card?.id ?? null, advance_id: payment_source === 'advance' ? current.advance_id : '', file_path: '', confirmed: false }));
+  }
+  function changeAdvance(advance_id: string) {
+    if (advance_id === draft.advance_id) return;
+    resetEvidence();
+    setDraft(current => ({ ...current, advance_id, file_path: '', confirmed: false }));
   }
 
   const verification = receiptVerification(analysis, line ?? draft);
@@ -95,11 +110,12 @@ export function SpendCapture({ data, cardId, line, receipt, onDone, onClose }: {
   }
 
   async function filePicked(file: File) {
-    if (!card) return;
+    if (draft.payment_source === 'advance' && !selectedAdvance) { toast.error('Selecione o adiantamento antes de fotografar'); return; }
+    if (draft.payment_source !== 'advance' && !card) { toast.error('Selecione Adiantamento para enviar sem cartão'); return; }
     setBusy(true);
     try {
       const prepared = await prepareSpendReceipt(file);
-      const p = await uploadSpend(prepared, card, draft.date.slice(0, 7));
+      const p = draft.payment_source === 'advance' && selectedAdvance ? await uploadSpendAdvance(prepared, selectedAdvance.id, draft.date.slice(0, 7)) : await uploadSpend(prepared, card!, draft.date.slice(0, 7));
       setPath(p);
       setDraft(d => ({ ...d, file_path: p, confirmed: false }));
       setPreview(URL.createObjectURL(prepared));
@@ -115,7 +131,7 @@ export function SpendCapture({ data, cardId, line, receipt, onDone, onClose }: {
 
   async function submit() {
     if (reading || !verification.ok) { toast.error('O comprovante precisa ter valor correspondente e data dentro de 2 dias. Confira ou substitua o arquivo.'); return; }
-    if (!paymentSourceSchema.safeParse(draft.payment_source).success) { toast.error("Informe Cartão myio ou Reembolso"); return; }
+    if (!paymentSourceSchema.safeParse(draft.payment_source).success) { toast.error("Informe Cartão myio, Reembolso ou Adiantamento"); return; }
     if (draft.payment_source === "advance" && !selectedAdvance) { toast.error("Selecione o adiantamento da prestação de contas"); return; }
     if (!advanceOk) { toast.error("O valor ultrapassa o saldo do adiantamento. Envie o excedente como Reembolso"); return; }
     if (!draft.confirmed) { toast.error("Confirme todas as informações antes de salvar"); return; }
@@ -158,11 +174,11 @@ export function SpendCapture({ data, cardId, line, receipt, onDone, onClose }: {
     } finally { setBusy(false); }
   }
 
-  return <Dialog open onOpenChange={open => { if (!open && !busy) onClose(); }}><DialogContent onOpenAutoFocus={event => { if (!receipt) { event.preventDefault(); picker.current?.click(); } }} className="max-h-[90dvh] max-w-xl overflow-y-auto"><DialogHeader className="pr-24"><DialogTitle>{receipt ? "Editar comprovante" : line ? "Anexar Invoice / Comprovante" : "Salvar Comprovante Fiscal"}</DialogTitle></DialogHeader>
+  return <Dialog open onOpenChange={open => { if (!open && !busy) onClose(); }}><DialogContent onOpenAutoFocus={event => { if (!receipt) { event.preventDefault(); if (draft.payment_source === 'advance' ? !!selectedAdvance : !!card && !!draft.payment_source) picker.current?.click(); } }} className="max-h-[90dvh] max-w-xl overflow-y-auto"><DialogHeader className="pr-24"><DialogTitle>{receipt ? "Editar comprovante" : line ? "Anexar Invoice / Comprovante" : "Salvar Comprovante Fiscal"}</DialogTitle></DialogHeader>
     <input ref={picker} type="file" className="hidden" accept={line ? "image/jpeg,image/png,image/webp,application/pdf" : "image/jpeg,image/png,image/webp"} capture={line ? undefined : "environment"} onChange={event => { const file = event.target.files?.[0]; if (file) void filePicked(file); event.target.value = ""; }} />
-    <div className="space-y-1"><Label>Forma de pagamento *</Label><RadioGroup aria-label="Forma de pagamento" value={draft.payment_source} disabled={busy || !!line || isDelegatedCard(card, data.user_id, data.role === "finance")} onValueChange={payment_source => change({ payment_source })} className="gap-1"><label className="flex min-h-11 cursor-pointer items-center gap-2 text-sm"><RadioGroupItem value="myio_card" /><span>Cartão myio · •••• {card?.last_four}</span></label><label className="flex min-h-11 cursor-pointer items-center gap-2 text-sm"><RadioGroupItem value="reimbursement" /><span>Reembolso · dinheiro ou cartão pessoal</span></label>{(openAdvances.length > 0 || draft.payment_source === "advance") && <label className="flex min-h-11 cursor-pointer items-center gap-2 text-sm"><RadioGroupItem value="advance" /><AdvanceIcon className="size-4 text-primary" /><span>Adiantamento · prestação de contas</span></label>}</RadioGroup></div>
-    {draft.payment_source === "advance" && <label className="space-y-1"><Label>Adiantamento *</Label><SearchableSelect aria-label="Adiantamento da prestação de contas" value={draft.advance_id} clearable={false} onChange={advance_id => change({ advance_id })} options={openAdvances.map(a => ({ value: a.id, label: `${a.purpose || "Adiantamento"} · ${formatDate(a.paid_at)} · saldo ${BRL.format(advanceBalance(a, data.receipts.filter(r => r.id !== receipt?.id)).remaining)}` }))} placeholder="Selecionar adiantamento" />{selectedAdvance && !advanceOk && <p role="alert" className="text-xs text-destructive">Valor acima do saldo do adiantamento. Envie o excedente como Reembolso.</p>}</label>}
-    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3"><span className="min-w-0 truncate text-sm text-muted-foreground">{draft.payment_source === "reimbursement" ? "Reembolso" : draft.payment_source === "advance" ? "Adiantamento" : `${card?.name} · •••• ${card?.last_four}`}</span><Button className="shrink-0" onClick={() => picker.current?.click()} disabled={busy} aria-label="Fotografar ou selecionar comprovante"><Camera />{path ? "Substituir foto" : "Fotografar"}</Button></div>
+    <div className="space-y-1"><Label>Forma de pagamento *</Label><RadioGroup aria-label="Forma de pagamento" value={draft.payment_source} disabled={busy || !!line || isDelegatedCard(card, data.user_id, data.role === "finance")} onValueChange={changePaymentSource} className="gap-1">{card && <label className="flex min-h-11 cursor-pointer items-center gap-2 text-sm"><RadioGroupItem value="myio_card" /><span>Cartão myio · •••• {card.last_four}</span></label>}{card && <label className="flex min-h-11 cursor-pointer items-center gap-2 text-sm"><RadioGroupItem value="reimbursement" /><span>Reembolso · dinheiro ou cartão pessoal</span></label>}{(openAdvances.length > 0 || draft.payment_source === "advance") && <label className="flex min-h-11 cursor-pointer items-center gap-2 text-sm"><RadioGroupItem value="advance" /><AdvanceIcon className="size-4 text-primary" /><span>Adiantamento · prestação de contas</span></label>}</RadioGroup></div>
+    {draft.payment_source === "advance" && <label className="space-y-1"><Label>Adiantamento *</Label><SearchableSelect aria-label="Adiantamento da prestação de contas" value={draft.advance_id} clearable={false} onChange={changeAdvance} options={openAdvances.map(a => ({ value: a.id, label: `${a.purpose || "Adiantamento"} · ${formatDate(a.paid_at)} · saldo ${BRL.format(advanceBalance(a, data.receipts.filter(r => r.id !== receipt?.id)).remaining)}` }))} placeholder="Selecionar adiantamento" />{selectedAdvance && !advanceOk && <p role="alert" className="text-xs text-destructive">Valor acima do saldo do adiantamento. Envie o excedente como Reembolso.</p>}</label>}
+    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3"><span className="min-w-0 truncate text-sm text-muted-foreground">{draft.payment_source === "reimbursement" ? "Reembolso" : draft.payment_source === "advance" ? "Adiantamento" : card ? `${card.name} · •••• ${card.last_four}` : "Adiantamento em conta"}</span><Button className="shrink-0" onClick={() => picker.current?.click()} disabled={busy} aria-label="Fotografar ou selecionar comprovante"><Camera />{path ? "Substituir foto" : "Fotografar"}</Button></div>
     {busy && !path && !reading ? <p role="status" className="flex items-center gap-2 text-sm"><Loader2 className="size-4 animate-spin" />Preparando comprovante em P&B e removendo o fundo…</p> : null}
     {reading ? <p role="status" className="flex items-center gap-2 text-sm"><Loader2 className="size-4 animate-spin" />Conferindo o comprovante…</p> : null}
     {readError && <div role="alert" className="space-y-2 text-sm text-destructive"><p>{readError}</p><TooltipProvider><Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" aria-label="Tentar leitura do comprovante novamente" disabled={reading || busy || !path} onClick={() => void readFile(path, false)}><RefreshCw/></Button></TooltipTrigger><TooltipContent>Tentar leitura novamente</TooltipContent></Tooltip></TooltipProvider></div>}

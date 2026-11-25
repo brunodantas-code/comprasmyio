@@ -39,7 +39,7 @@ export function SpendAdvanceAccountability({ data, holderId, receiptActions }: {
   if (!advances.length) return null;
   return <section aria-label="Prestação de contas de adiantamentos" className="space-y-3 rounded-md border border-border p-3">
     <h2 className="flex items-center gap-2 text-sm"><AdvanceIcon className="size-4 text-primary" />Prestação de contas · Adiantamentos</h2>
-    {advances.map(a => { const linked = data.receipts.filter(r => r.advance_id === a.id); return <div key={a.id} className="space-y-2 border-t border-border pt-2 first:border-t-0 first:pt-0">
+    {advances.map(a => { const linked = data.receipts.filter(r => r.advance_id === a.id); return <div key={a.id} id={`spend-advance-${a.id}`} className="space-y-2 scroll-mt-24 border-t border-border pt-2 first:border-t-0 first:pt-0">
       <p className="text-sm">{a.purpose || "Adiantamento"} <span className="text-xs text-muted-foreground">· pago em {formatDate(a.paid_at)}{a.due_at ? ` · prestar contas até ${formatDate(a.due_at)}` : ""}</span></p>
       <BalanceBar advance={a} receipts={data.receipts} />
       <div className="divide-y divide-border">{linked.map(r => <AdvanceReceiptRow key={r.id} receipt={r} data={data} actions={receiptActions(r)} />)}{!linked.length && <p className="py-2 text-xs text-muted-foreground">Nenhum comprovante enviado. Use Salvar Comprovante Fiscal e escolha Adiantamento.</p>}</div>

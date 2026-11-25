@@ -60,6 +60,17 @@ describe('conferência de recebimento na Central Admin', () => {
  });
 });
 
+describe('adiantamentos vencidos na Central Admin', () => {
+ it('atribui a prestação com saldo ao colaborador e preserva o prazo', () => {
+  const s=snapshot();s.orders=[];s.steps=[];
+  s.spendAdvances=[{advance_id:'advance',holder_id:'Leonardo',due_at:'2026-11-24',purpose:'Viagem',amount:1000,remaining:250,requester_name:'Alexandre'}];
+  const rows=centralPendingItems(centralItems(s));
+  expect(rows).toHaveLength(1);
+  expect(rows[0]).toMatchObject({kind:'spend_advance',app:'Spend',recordId:'advance',due:'2026-11-24',users:['Leonardo'],status:'Prestação vencida'});
+  expect(rows[0]?.reasons['Leonardo']).toBe('Enviar comprovantes do adiantamento');
+ });
+});
+
 describe('ajustes do Spend na Central Admin', () => {
  it('atribui uma única pendência de ajuste ao portador', () => {
   const s=snapshot();s.orders=[];s.steps=[];

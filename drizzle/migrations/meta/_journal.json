@@ -2150,6 +2150,13 @@
       "when": 1795617270428,
       "tag": "0306_spend_expense_advances",
       "breakpoints": true
+    },
+    {
+      "idx": 307,
+      "version": "7",
+      "when": 1795618568128,
+      "tag": "0307_spend_advance_without_card_due_pending",
+      "breakpoints": true
     }
   ]
 }

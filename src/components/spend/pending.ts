@@ -8,6 +8,16 @@ const adjustmentSchema = z.object({
   kind: z.enum(['notify','adjustment']).optional(),
 });
 export type SpendAdjustment = z.infer<typeof adjustmentSchema>;
+
+const advancePendingSchema = z.object({
+  advance_id: z.string(), holder_id: z.string(), due_at: z.string(), purpose: z.string(),
+  amount: z.number(), remaining: z.number(), requester_name: z.string().nullable(),
+});
+export type SpendAdvancePending = z.infer<typeof advancePendingSchema>;
+export function spendPendingAdvances(value: unknown, userId?: string, today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' })): SpendAdvancePending[] {
+  return z.array(advancePendingSchema).parse(value).filter(row => (!userId || row.holder_id === userId) && row.due_at < today && row.remaining > 0);
+}
+
 export function activeSpendNotices<T extends { line_id: string | null }>(notices: readonly T[], pending: readonly SpendAdjustment[]): T[] {
   const activeLines = new Set(pending.map(item => item.line_id));
   return notices.filter(notice => !notice.line_id || activeLines.has(notice.line_id));

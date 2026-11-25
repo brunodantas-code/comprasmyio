@@ -16,6 +16,11 @@ describe("Spend regras", () => {
     expect(expenseSchema.safeParse({ ...draft, payment_source: "reimbursement" }).success).toBe(true);
     expect(expenseSchema.safeParse(draft).success).toBe(true);
   });
+  it("permite adiantamento sem cartão e impede vínculo de cartão à prestação", () => {
+    expect(expenseSchema.safeParse({ ...draft, payment_source: "advance", card_id: null, file_path: `advances/${id}/2026-11/recibo.jpg` }).success).toBe(true);
+    expect(expenseSchema.safeParse({ ...draft, payment_source: "advance", card_id: id }).success).toBe(false);
+    expect(expenseSchema.safeParse({ ...draft, card_id: null }).success).toBe(false);
+  });
   it("exige final de cartão e cartão do portador", () => { expect(canMatch(a, { ...a, final_cartao: "5678" })).toBe(false); expect(canMatch(a, { ...a, card_id: "outro" })).toBe(false); });
   it("Insumos exige projeto", () => { expect(expenseSchema.safeParse({ ...draft, category: "insumos" }).success).toBe(false); expect(expenseSchema.safeParse({ ...draft, category: "insumos", project_id: id }).success).toBe(true); });
   it("Serviços exige observação", () => { expect(expenseSchema.safeParse({ ...draft, category: "servicos" }).success).toBe(false); expect(expenseSchema.safeParse({ ...draft, category: "servicos", observation: "Manutenção" }).success).toBe(true); });

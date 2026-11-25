@@ -22,7 +22,7 @@ export async function prepareSpendMatches(data: SpendData, statementId: string, 
   const lines = data.lines.filter(l => l.statement_id === statementId && !l.receipt_id && !l.receipt_not_applicable && l.status === 'pending');
   let skipped = 0;
   for (const receipt of data.receipts.filter(r => r.card_id === card.id && r.status === 'pending' && !data.lines.some(l => l.receipt_id === r.id))) {
-    const candidates = lines.filter(l => canMatch({ card_id: card.id, date: l.date, amount: l.amount, final_cartao: l.last_four ?? '' }, { card_id: receipt.card_id, date: receipt.date, amount: receipt.amount, final_cartao: card.last_four, payment_source: receipt.payment_source }));
+    const candidates = lines.filter(l => canMatch({ card_id: card.id, date: l.date, amount: l.amount, final_cartao: l.last_four ?? '' }, { card_id: receipt.card_id ?? '', date: receipt.date, amount: receipt.amount, final_cartao: card.last_four, payment_source: receipt.payment_source }));
     if (!candidates.length) continue;
     try {
       const reading = receiptReading(await read(receipt.file_path));

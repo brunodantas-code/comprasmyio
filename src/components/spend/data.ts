@@ -36,13 +36,22 @@ export async function deleteSpendReceipt(receiptId: string) {
   if (result.error) throw new Error(result.error.message);
   if (!result.data || typeof result.data !== 'object' || Array.isArray(result.data) || result.data['ok'] !== true) throw new Error("Não foi possível confirmar a exclusão");
 }
-export async function uploadSpend(file: File, card: SpendCard, period: string) {
+function validateSpendFile(file: File) {
   if (file.size > 20 * 1024 * 1024) throw new Error("O arquivo deve ter até 20 MB");
   if (!["application/pdf", "image/jpeg", "image/png", "image/webp"].includes(file.type)) throw new Error("Use PDF, JPG, PNG ou WebP");
-  const ext = file.type === "application/pdf" ? "pdf" : file.type.split("/")[1];
-  const path = `${card.company_key}/${period}/${card.id}/${crypto.randomUUID()}.${ext}`;
+  return file.type === "application/pdf" ? "pdf" : file.type.split("/")[1];
+}
+async function uploadSpendFile(file: File, path: string) {
   const r = await supabase.storage.from("spend-files").upload(path, file, { contentType: file.type, upsert: false });
   if (r.error) throw r.error; return path;
+}
+export async function uploadSpend(file: File, card: SpendCard, period: string) {
+  const ext = validateSpendFile(file);
+  return uploadSpendFile(file, `${card.company_key}/${period}/${card.id}/${crypto.randomUUID()}.${ext}`);
+}
+export async function uploadSpendAdvance(file: File, advanceId: string, period: string) {
+  const ext = validateSpendFile(file);
+  return uploadSpendFile(file, `advances/${advanceId}/${period}/${crypto.randomUUID()}.${ext}`);
 }
 export async function spendFileUrl(path: string) {
   const r = await supabase.storage.from("spend-files").createSignedUrl(path, 600); if (r.error) throw r.error; return r.data.signedUrl;

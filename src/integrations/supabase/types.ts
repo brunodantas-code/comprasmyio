@@ -11660,7 +11660,7 @@ export type Database = {
         Row: {
           action: string
           actor_id: string
-          card_id: string
+          card_id: string | null
           created_at: string
           details: Json
           id: string
@@ -11668,7 +11668,7 @@ export type Database = {
         Insert: {
           action: string
           actor_id: string
-          card_id: string
+          card_id?: string | null
           created_at?: string
           details?: Json
           id?: string
@@ -11676,7 +11676,7 @@ export type Database = {
         Update: {
           action?: string
           actor_id?: string
-          card_id?: string
+          card_id?: string | null
           created_at?: string
           details?: Json
           id?: string
@@ -11738,7 +11738,7 @@ export type Database = {
           amount: number
           analyzed_at: string
           analyzed_by: string
-          card_id: string
+          card_id: string | null
           content_hash: string
           document_date: string
           file_path: string
@@ -11750,7 +11750,7 @@ export type Database = {
           amount: number
           analyzed_at?: string
           analyzed_by: string
-          card_id: string
+          card_id?: string | null
           content_hash: string
           document_date: string
           file_path: string
@@ -11762,7 +11762,7 @@ export type Database = {
           amount?: number
           analyzed_at?: string
           analyzed_by?: string
-          card_id?: string
+          card_id?: string | null
           content_hash?: string
           document_date?: string
           file_path?: string
@@ -11792,7 +11792,7 @@ export type Database = {
           access_key: string | null
           advance_id: string | null
           amount: number
-          card_id: string
+          card_id: string | null
           category: string
           city: string | null
           clear_photo: boolean
@@ -11817,7 +11817,7 @@ export type Database = {
           access_key?: string | null
           advance_id?: string | null
           amount: number
-          card_id: string
+          card_id?: string | null
           category: string
           city?: string | null
           clear_photo?: boolean
@@ -11842,7 +11842,7 @@ export type Database = {
           access_key?: string | null
           advance_id?: string | null
           amount?: number
-          card_id?: string
+          card_id?: string | null
           category?: string
           city?: string | null
           clear_photo?: boolean
@@ -14015,6 +14015,7 @@ export type Database = {
       }
       spend_delete_receipt: { Args: { _receipt_id: string }; Returns: Json }
       spend_pending_adjustments: { Args: { _all?: boolean }; Returns: Json }
+      spend_pending_advances: { Args: { _all?: boolean }; Returns: Json }
       spend_project_allowed: { Args: { _project: string }; Returns: boolean }
       spend_receipt_analysis_matches: {
         Args: { _amount: number; _date: string; _path: string }
@@ -14027,7 +14028,7 @@ export type Database = {
           access_key: string | null
           advance_id: string | null
           amount: number
-          card_id: string
+          card_id: string | null
           category: string
           city: string | null
           clear_photo: boolean

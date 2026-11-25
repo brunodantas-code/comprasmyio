@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { activeSpendNotices, spendPendingAdjustments, type SpendAdjustment } from './pending';
+import { activeSpendNotices, spendPendingAdjustments, spendPendingAdvances, type SpendAdjustment } from './pending';
 const request: SpendAdjustment = { line_id:'line', receipt_id:'receipt', card_id:'card', holder_id:'portador', merchant:'Hotel', amount:139.90, date:'2026-10-08', status:'adjustment', message:'Confira o comprovante', requested_at:'2026-11-24T23:00:00Z', corrected_at:null, requester_name:'Financeiro' };
 describe('Spend adjustment pendencies', () => {
   it('includes a holder notification, including self-notification', () => {
@@ -29,5 +29,17 @@ describe('Spend adjustment pendencies', () => {
   });
   it('keeps a general notice that is not tied to a launch', () => {
     expect(activeSpendNotices([{id:'general',line_id:null}],[])).toEqual([{id:'general',line_id:null}]);
+  });
+});
+
+describe('Spend advance due pendencies', () => {
+  const advance = { advance_id:'advance', holder_id:'holder', due_at:'2026-11-24', purpose:'Viagem', amount:1000, remaining:250, requester_name:'Financeiro' };
+  it('warns the holder after the due date with an open balance', () => {
+    expect(spendPendingAdvances([advance], 'holder', '2026-11-25')).toEqual([advance]);
+  });
+  it('does not warn on the due date, another holder or a fully accounted balance', () => {
+    expect(spendPendingAdvances([advance], 'holder', '2026-11-24')).toEqual([]);
+    expect(spendPendingAdvances([advance], 'other', '2026-11-25')).toEqual([]);
+    expect(spendPendingAdvances([{...advance,remaining:0}], 'holder', '2026-11-25')).toEqual([]);
   });
 });

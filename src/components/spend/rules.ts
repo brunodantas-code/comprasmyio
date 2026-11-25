@@ -17,7 +17,7 @@ export const categories = [
 ] as const;
 export const categoryKey = z.string().regex(/^(alimentacao|transporte|estacionamento|pedagio|combustivel|ferramentas|insumos|servicos|ia|software|outros|custom_[0-9a-f-]{36})$/, "Categoria inválida");
 export const expenseSchema = z.object({
-  id: z.string().uuid(), card_id: z.string().uuid(), date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  id: z.string().uuid(), card_id: z.string().uuid().nullable(), date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   merchant: z.string().trim().min(1, "Informe o estabelecimento"), amount: z.number().positive("Informe o valor"),
   category: categoryKey, observation: z.string().trim().max(2000), project_id: z.string().uuid().nullable(),
   payment_source: paymentSourceSchema,
@@ -25,6 +25,8 @@ export const expenseSchema = z.object({
   file_path: z.string().min(1), clear_photo: z.boolean(), myio_cnpj: z.boolean({ message: "Confirme Com ou Sem CNPJ myio" }),
   confirmed: z.literal(true, { message: "Confirme todas as informações antes de salvar" }),
 }).superRefine((v, ctx) => {
+  if (v.payment_source === "advance" && v.card_id !== null) ctx.addIssue({ code: "custom", path: ["card_id"], message: "Adiantamento não deve ter cartão vinculado" });
+  if (v.payment_source !== "advance" && !v.card_id) ctx.addIssue({ code: "custom", path: ["card_id"], message: "Selecione um cartão para esta forma de pagamento" });
   if (v.category === "insumos" && !v.project_id) ctx.addIssue({ code: "custom", path: ["project_id"], message: "Insumos de instalação exige Projeto" });
   if (["servicos", "outros"].includes(v.category) && !v.observation) ctx.addIssue({ code: "custom", path: ["observation"], message: v.category === "outros" ? "Especifique a despesa em Outros" : "Serviços diversos exige observação" });
   if (v.category === "ferramentas" && !v.clear_photo) ctx.addIssue({ code: "custom", path: ["clear_photo"], message: "Confirme que a foto da NF/cupom está nítida" });

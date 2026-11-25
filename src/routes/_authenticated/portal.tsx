@@ -1,4 +1,4 @@
-import { spendPendingItems } from "@/components/spend/pending-items";
+import { spendPendingItems, spendAdvancePendingItems } from "@/components/spend/pending-items";
 import { NumericMarker, AlertMarker } from "@/components/cde/numeric-markers";
 import { legalPendingLabel } from "@/lib/legal-pending";
 import { ListItemStyleVars } from "@/components/cde/list-item-style";
@@ -210,6 +210,7 @@ function PortalPage() {
               <section aria-labelledby="pending-title">
                 <PendingGroups leading={<CriticalGroup />} items={[
       ...spendPendingItems(pendingActions?.spendItems ?? []),
+      ...spendAdvancePendingItems(pendingActions?.spendAdvanceItems ?? []),
       ...projectPendingItems(pendingActions?.projectsItems??[]),
       ...inventoryPendingItems(pendingActions?.inventorySignatures ?? []),
       ...((pendingActions?.approvals ?? 0) > 0 ? [{ key: "approvals", app: "Supply", requester: "Você", count: pendingActions?.approvals ?? 0, row: <PendingRow icon={CheckCircle2} label="Aguardando minha aprovação" count={pendingActions?.approvals ?? 0} to="/pendentes" /> }] : []),
