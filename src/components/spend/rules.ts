@@ -26,7 +26,7 @@ export const expenseSchema = z.object({
   confirmed: z.literal(true, { message: "Confirme todas as informações antes de salvar" }),
 }).superRefine((v, ctx) => {
   if (v.payment_source === "advance" && v.card_id !== null) ctx.addIssue({ code: "custom", path: ["card_id"], message: "Adiantamento não deve ter cartão vinculado" });
-  if (v.payment_source !== "advance" && !v.card_id) ctx.addIssue({ code: "custom", path: ["card_id"], message: "Selecione um cartão para esta forma de pagamento" });
+  if (v.payment_source === "myio_card" && !v.card_id) ctx.addIssue({ code: "custom", path: ["card_id"], message: "Selecione o cartão myio" });
   if (v.category === "insumos" && !v.project_id) ctx.addIssue({ code: "custom", path: ["project_id"], message: "Insumos de instalação exige Projeto" });
   if (["servicos", "outros"].includes(v.category) && !v.observation) ctx.addIssue({ code: "custom", path: ["observation"], message: v.category === "outros" ? "Especifique a despesa em Outros" : "Serviços diversos exige observação" });
   if (v.category === "ferramentas" && !v.clear_photo) ctx.addIssue({ code: "custom", path: ["clear_photo"], message: "Confirme que a foto da NF/cupom está nítida" });

@@ -12,3 +12,11 @@ export function isAdvanceReceipt(receipt: { payment_source: string }) {
 export function paymentSourceLabel(source: string) {
   return source === "advance" ? paymentSourceLabels.advance : source === "myio_card" ? paymentSourceLabels.myio_card : paymentSourceLabels.reimbursement;
 }
+/** Only the myio card option needs a card; reimbursement (cash or personal card) and advance do not. */
+export function paymentSourceNeedsCard(source: string) {
+  return source === "myio_card";
+}
+/** Options a person can pick: myio card only when one is available, reimbursement always, advance when one is open. */
+export function paymentSourceOptions(hasCard: boolean, hasOpenAdvance: boolean) {
+  return [...(hasCard ? ["myio_card"] : []), "reimbursement", ...(hasOpenAdvance ? ["advance"] : [])];
+}

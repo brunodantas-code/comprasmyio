@@ -29,3 +29,4 @@
 - Expense advances are Finance/Admin-created via the guarded spend_advance RPC; advance receipts (payment_source='advance') have no card link, use advance-keyed private storage, are balance-locked by trigger, never reach Supply or card statements, and closing requires approved receipts plus an audited balance resolution. Overdue open balances create holder pendencies in personal/Admin Central and the Spend badge.
 - Receipt rows keep a fixed action slot (invisible placeholder when edit is unavailable) so amounts stay right-aligned.
 - Personal reimbursements stay listed for their holder in Meus comprovantes even when their storage card is inactive or not selected; card filtering never hides them.
+- Reimbursement receipts may carry no card at all: files live under reimbursement/<user>/<YYYY-MM>/..., extraction evidence stores no card, and the table check allows reimbursement with or without card while myio_card always keeps one.

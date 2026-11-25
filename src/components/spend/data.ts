@@ -53,6 +53,10 @@ export async function uploadSpendAdvance(file: File, advanceId: string, period: 
   const ext = validateSpendFile(file);
   return uploadSpendFile(file, `advances/${advanceId}/${period}/${crypto.randomUUID()}.${ext}`);
 }
+export async function uploadSpendReimbursement(file: File, userId: string, period: string) {
+  const ext = validateSpendFile(file);
+  return uploadSpendFile(file, `reimbursement/${userId}/${period}/${crypto.randomUUID()}.${ext}`);
+}
 export async function spendFileUrl(path: string) {
   const r = await supabase.storage.from("spend-files").createSignedUrl(path, 600); if (r.error) throw r.error; return r.data.signedUrl;
 }export async function spendDelegation(action: "grant" | "revoke", data: Json) {

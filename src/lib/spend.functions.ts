@@ -48,7 +48,7 @@ export const extractSpendDocument = createServerFn({ method: "POST" }).middlewar
         if (currentVersion.error || currentVersion.data !== version.data) throw new Error('O arquivo mudou durante a análise. Tente novamente.');
         // Only the authorized reader writes evidence; client edits cannot forge OCR results.
         const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
-        const cardId = data.path.startsWith('advances/') ? null : data.path.split('/')[2] ?? null;
+        const cardId = data.path.startsWith('myio/') ? data.path.split('/')[2] ?? null : null;
         const saved = await supabaseAdmin.from('spend_receipt_analyses').upsert({ file_path: data.path, card_id: cardId, object_id: version.data, analyzed_by: context.userId, amount: item.valor, document_date: item.data, merchant: item.estabelecimento, content_hash: contentHash, result: normalized, analyzed_at: new Date().toISOString() });
         if (saved.error) throw new Error('Não foi possível registrar a análise do comprovante. O arquivo foi preservado; tente novamente.');
       }
