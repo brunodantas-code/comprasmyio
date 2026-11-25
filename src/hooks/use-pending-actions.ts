@@ -1,3 +1,4 @@
+import { indicadoresPendingKrs } from "@/components/indicadores/pending";
 import { spendPendingAdjustments, spendPendingAdvances } from "@/components/spend/pending";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,12 +31,14 @@ export function usePendingActions() {
       const { data: authData, error: authError } = await supabase.auth.getUser();
       if (authError || !authData.user) throw authError ?? new Error("Sessão não encontrada");
       const userId = authData.user.id;
-      const [spendResult, spendAdvanceResult] = await Promise.all([
+      const [spendResult, spendAdvanceResult, krResult] = await Promise.all([
         supabase.rpc("spend_pending_adjustments"),
         supabase.rpc("spend_pending_advances"),
+        supabase.rpc("indicadores_pending_krs"),
       ]);
       if (spendResult.error) throw spendResult.error;
       if (spendAdvanceResult.error) throw spendAdvanceResult.error;
+      const indicadoresItems = krResult.error ? [] : indicadoresPendingKrs(krResult.data, userId);
       const spendItems = spendPendingAdjustments(spendResult.data, userId);
       const spendAdvanceItems = spendPendingAdvances(spendAdvanceResult.data, userId);
       const inventoryResult = await supabase.from('stock_inventory_signatures').select('inventory_id,user_id,signed_at,stock_inventories(name)').eq('user_id', userId).is('signed_at', null);
@@ -133,6 +136,8 @@ export function usePendingActions() {
 
       return {
         spendItems,
+        indicadoresItems,
+        indicadores: indicadoresItems.length,
         spendAdvanceItems,
         spend: spendItems.length + spendAdvanceItems.length,
         inventorySignatures,
@@ -155,7 +160,7 @@ export function usePendingActions() {
         supportCallItems,
         isCustomerSupportAnalyst: currentUser?.isCustomerSupportAnalyst ?? false,
         supply: inventorySignatures.length + pendingApprovals + pendingUserDeletions + pendingSupplyQueue + supplyQuestionCount + supplyReceipts.length,
-        total: spendItems.length + spendAdvanceItems.length + inventorySignatures.length + (projectsMessagesResult.data?.length??0) + todos.length + legalCount + pendingApprovals + pendingUserDeletions + pendingCodeTickets + pendingSupplyQueue + supportCalls + supplyQuestionCount + supplyReceipts.length + (mytosisResult.data?.length ?? 0),
+        total: indicadoresItems.length + spendItems.length + spendAdvanceItems.length + inventorySignatures.length + (projectsMessagesResult.data?.length??0) + todos.length + legalCount + pendingApprovals + pendingUserDeletions + pendingCodeTickets + pendingSupplyQueue + supportCalls + supplyQuestionCount + supplyReceipts.length + (mytosisResult.data?.length ?? 0),
       };
     },
     staleTime: 30_000,

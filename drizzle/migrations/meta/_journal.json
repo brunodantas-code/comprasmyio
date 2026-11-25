@@ -2192,6 +2192,13 @@
       "when": 1795640917428,
       "tag": "0312_spend_card_active_toggle",
       "breakpoints": true
+    },
+    {
+      "idx": 313,
+      "version": "7",
+      "when": 1795641137310,
+      "tag": "0313_indicadores_pending_krs",
+      "breakpoints": true
     }
   ]
 }

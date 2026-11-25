@@ -1,3 +1,4 @@
+import { indicadoresPendingItems } from "@/components/indicadores/pending-items";
 import { spendPendingItems, spendAdvancePendingItems } from "@/components/spend/pending-items";
 import { NumericMarker, AlertMarker } from "@/components/cde/numeric-markers";
 import { legalPendingLabel } from "@/lib/legal-pending";
@@ -126,6 +127,7 @@ function PortalPage() {
         className="mobile-app-tile group relative flex flex-col items-center justify-between rounded-2xl border-2 border-[color:var(--tile-border,var(--primary))] bg-[var(--tile-fill,var(--primary))] px-1 pb-2 pt-1 text-primary-foreground outline-none hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring"
       >
         {key === "spend" && (pendingActions?.spend ?? 0) > 0 ? <PendingBadge count={pendingActions?.spend ?? 0} label="ajustes pendentes no Spend" /> : null}
+{key === "indicadores" && (pendingActions?.indicadores ?? 0) > 0 ? <PendingBadge count={pendingActions?.indicadores ?? 0} label="KRs pendentes" /> : null}
         {key === "supply" && (pendingActions?.supply ?? 0) > 0 ? <PendingBadge count={pendingActions?.supply ?? 0} label="pendências no Supply" /> : null}
         {key === "development" && (pendingActions?.codeTickets ?? 0) > 0 ? <PendingBadge count={pendingActions?.codeTickets ?? 0} label="tickets pendentes no Code" /> : null}
         {key === "chamados" && (pendingActions?.supportCalls ?? 0) > 0 ? <PendingBadge count={pendingActions?.supportCalls ?? 0} label="chamados pendentes no OpDesk" /> : null}
@@ -179,6 +181,7 @@ function PortalPage() {
                   {apps.map(({ key, name, to }) => (
                      <div key={key} className="relative min-w-0 snap-start justify-self-center sm:justify-self-start">
                          {key === "spend" && (pendingActions?.spend ?? 0) > 0 ? <PendingBadge count={pendingActions?.spend ?? 0} label="ajustes pendentes no Spend" /> : null}
+{key === "indicadores" && (pendingActions?.indicadores ?? 0) > 0 ? <PendingBadge count={pendingActions?.indicadores ?? 0} label="KRs pendentes" /> : null}
         {key === "supply" && (pendingActions?.supply ?? 0) > 0 ? <PendingBadge count={pendingActions?.supply ?? 0} label="pendências no Supply" /> : null}
                           {key === "development" && (pendingActions?.codeTickets ?? 0) > 0 ? <PendingBadge count={pendingActions?.codeTickets ?? 0} label="tickets pendentes no Code" /> : null}
                            {key === "chamados" && (pendingActions?.supportCalls ?? 0) > 0 ? <PendingBadge count={pendingActions?.supportCalls ?? 0} label="chamados pendentes no OpDesk" /> : null}
@@ -209,6 +212,7 @@ function PortalPage() {
                 : (<>{(pendingActions?.total ?? 0) > (pendingActions?.todoCount ?? 0) || (criticalPending?.length ?? 0) > 0 ? (
               <section aria-labelledby="pending-title">
                 <PendingGroups leading={<CriticalGroup />} items={[
+      ...indicadoresPendingItems(pendingActions?.indicadoresItems ?? []),
       ...spendPendingItems(pendingActions?.spendItems ?? []),
       ...spendAdvancePendingItems(pendingActions?.spendAdvanceItems ?? []),
       ...projectPendingItems(pendingActions?.projectsItems??[]),

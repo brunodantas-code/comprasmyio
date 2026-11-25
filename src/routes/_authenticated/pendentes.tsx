@@ -1,3 +1,4 @@
+import { indicadoresPendingItems } from "@/components/indicadores/pending-items";
 import { spendPendingItems, spendAdvancePendingItems } from "@/components/spend/pending-items";
 import { NumericMarker, AlertMarker } from "@/components/cde/numeric-markers";
 import { CriticalGroup } from "@/components/central/critical-group";
@@ -53,6 +54,7 @@ function PendentesPage() {
           <div className="space-y-6">
             {(
               <PendingGroups leading={<CriticalGroup />} items={[
+      ...indicadoresPendingItems(data?.indicadoresItems ?? []),
       ...spendPendingItems(data?.spendItems ?? []),
       ...spendAdvancePendingItems(data?.spendAdvanceItems ?? []),
       ...projectPendingItems(data?.projectsItems??[]),

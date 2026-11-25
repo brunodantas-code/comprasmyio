@@ -13711,6 +13711,7 @@ export type Database = {
       indicadores_import_okr: { Args: { _payload: Json }; Returns: Json }
       indicadores_metric_visible: { Args: { _id: string }; Returns: boolean }
       indicadores_objective_visible: { Args: { _id: string }; Returns: boolean }
+      indicadores_pending_krs: { Args: { _all?: boolean }; Returns: Json }
       indicadores_role: { Args: { _user_id: string }; Returns: string }
       indicadores_source_uuid: { Args: { v: string }; Returns: string }
       indicadores_users: {
