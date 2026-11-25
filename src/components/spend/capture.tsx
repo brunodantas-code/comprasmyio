@@ -32,7 +32,7 @@ import { SpendReceiptPdfPreview } from './receipt-pdf-preview';
 
 const today = () => new Date().toLocaleDateString("en-CA");
 
-export function SpendCapture({ data, cardId, line, receipt, onDone, onClose }: { data: SpendData; cardId: string; line?: Line; receipt?: Receipt; onDone: () => Promise<void>; onClose: () => void }) {
+export function SpendCapture({ data, cardId, line, receipt, initialFile, onDone, onClose }: { data: SpendData; cardId: string; line?: Line; receipt?: Receipt; initialFile?: File; onDone: () => Promise<void>; onClose: () => void }) {
   const card = receipt?.payment_source === 'advance' ? undefined : data.cards.find(c => c.id === cardId);
   const extract = useServerFn(extractSpendDocument);
   const availableCategories = configuredCategories(data.settings);
@@ -67,6 +67,9 @@ export function SpendCapture({ data, cardId, line, receipt, onDone, onClose }: {
   }, [receipt?.id, receipt?.file_path]);
 
   useEffect(() => () => { if (preview) URL.revokeObjectURL(preview); }, [preview]);
+  // The photo is taken before the dialog opens (direct camera tap); payment source and reading come after it.
+  const initialHandled = useRef(false);
+  useEffect(() => { if (initialFile && !initialHandled.current) { initialHandled.current = true; void filePicked(initialFile); } }, [initialFile]);
 
   function change(patch: Partial<typeof draft>) {
     setDraft(current => ({ ...current, ...patch, confirmed: false }));
@@ -198,7 +201,7 @@ export function SpendCapture({ data, cardId, line, receipt, onDone, onClose }: {
     } finally { setBusy(false); }
   }
 
-  return <Dialog open onOpenChange={open => { if (!open && !busy) onClose(); }}><DialogContent onOpenAutoFocus={event => { if (!receipt) { event.preventDefault(); if (photoFirst || sourceReady) picker.current?.click(); } }} className="max-h-[90dvh] max-w-xl overflow-y-auto"><DialogHeader className="pr-24"><DialogTitle>{receipt ? "Editar comprovante" : line ? "Anexar Invoice / Comprovante" : "Salvar Comprovante Fiscal"}</DialogTitle></DialogHeader>
+  return <Dialog open onOpenChange={open => { if (!open && !busy) onClose(); }}><DialogContent onOpenAutoFocus={event => { if (!receipt) { event.preventDefault(); if (!initialFile && (photoFirst || sourceReady)) picker.current?.click(); } }} className="max-h-[90dvh] max-w-xl overflow-y-auto"><DialogHeader className="pr-24"><DialogTitle>{receipt ? "Editar comprovante" : line ? "Anexar Invoice / Comprovante" : "Salvar Comprovante Fiscal"}</DialogTitle></DialogHeader>
     <input ref={picker} type="file" className="hidden" accept={line ? "image/jpeg,image/png,image/webp,application/pdf" : "image/jpeg,image/png,image/webp"} capture={line ? undefined : "environment"} onChange={event => { const file = event.target.files?.[0]; if (file) void filePicked(file); event.target.value = ""; }} />
     {photoFirst && !staged ? <div className="space-y-3 py-6 text-center text-sm text-muted-foreground">{busy ? <p role="status" className="flex items-center justify-center gap-2"><Loader2 className="size-4 animate-spin" />Preparando comprovante…</p> : <><p>Fotografe o comprovante para continuar.</p><Button variant="ghost" onClick={() => picker.current?.click()} aria-label="Abrir câmera"><Camera />Abrir câmera</Button></>}</div> : <>
     <div className="space-y-1"><Label>Forma de pagamento *</Label><RadioGroup aria-label="Forma de pagamento" value={draft.payment_source} disabled={busy || !!line || isDelegatedCard(card, data.user_id, data.role === "finance")} onValueChange={changePaymentSource} className="gap-1">{card && <label className="flex min-h-11 cursor-pointer items-center gap-2 text-sm"><RadioGroupItem value="myio_card" /><span>Cartão myio · •••• {card.last_four}</span></label>}<label className="flex min-h-11 cursor-pointer items-center gap-2 text-sm"><RadioGroupItem value="reimbursement" /><span>Reembolso · dinheiro ou cartão pessoal</span></label>{(openAdvances.length > 0 || draft.payment_source === "advance") && <label className="flex min-h-11 cursor-pointer items-center gap-2 text-sm"><RadioGroupItem value="advance" /><AdvanceIcon className="size-4 text-primary" /><span>Adiantamento · prestação de contas</span></label>}</RadioGroup></div>
