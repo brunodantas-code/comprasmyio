@@ -2462,7 +2462,7 @@
   {
     "id": "components/cde/cde-navigation.tsx|0ac78ace83bf3f5d|0",
     "file": "components/cde/cde-navigation.tsx",
-    "line": 86,
+    "line": 87,
     "tag": "CdeButton",
     "label": "Sem nome fixo",
     "dynamic": false,
@@ -2477,7 +2477,7 @@
   {
     "id": "components/cde/cde-navigation.tsx|c4582bf25237266e|0",
     "file": "components/cde/cde-navigation.tsx",
-    "line": 94,
+    "line": 95,
     "tag": "Button",
     "label": "Selecionar",
     "dynamic": true,
@@ -3302,7 +3302,7 @@
   {
     "id": "components/cde/numeric-marker-editor.tsx|b1b9a573830366f7|0",
     "file": "components/cde/numeric-marker-editor.tsx",
-    "line": 43,
+    "line": 44,
     "tag": "Button",
     "label": "Salvar aparência",
     "dynamic": false,
@@ -3317,7 +3317,7 @@
   {
     "id": "components/cde/numeric-marker-editor.tsx|21c94b7067defe93|0",
     "file": "components/cde/numeric-marker-editor.tsx",
-    "line": 44,
+    "line": 45,
     "tag": "CdeButton",
     "label": "Sem nome fixo",
     "dynamic": false,
@@ -3332,7 +3332,7 @@
   {
     "id": "components/cde/numeric-marker-editor.tsx|39144813f5ebdcdb|0",
     "file": "components/cde/numeric-marker-editor.tsx",
-    "line": 54,
+    "line": 56,
     "tag": "Button",
     "label": "Restaurar padrão",
     "dynamic": false,

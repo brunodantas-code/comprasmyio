@@ -35,13 +35,15 @@ export function NumericMarkerEditor({ kind, handle }: { kind: "record_number" | 
     } catch (e) { toast.error(e instanceof Error ? e.message : "Não foi possível salvar"); } finally { setBusy(false); }
   }
   return <section aria-label={title} className="cde-model-section min-w-0">
-    <div className="cde-sub-band flex items-center gap-3 px-5 py-2">
+    <div className="cde-sub-band flex items-center gap-3 px-4 py-2">
       {handle}
       <Button cdeNative actionKind="specific" variant="ghost" type="button" aria-expanded={open} onClick={() => setOpen(value => !value)} className="!flex !h-auto !min-w-0 flex-1 items-center !justify-start gap-4 !bg-transparent !p-0 text-left whitespace-normal">
         <span className="min-w-0 flex-1"><span className="cde-section-title block">{title}</span><span className="cde-sub-hint mt-0.5 block">{kind === "record_number" ? "Identificadores de chamados e tickets · formato, tamanho, fonte e cores" : "Notificações e pendências · formato, tamanho, fonte e cores"}</span></span>
       </Button>
+      <div className="cde-header-actions">
       <Button variant="ghost" size="icon" aria-label={`Salvar ${title}`} title="Salvar aparência" disabled={busy || !dirty || JSON.stringify(draft) === JSON.stringify(saved)} onClick={() => void save()}><Save /></Button>
       <CdeButton group="toggle" screen="components/cde/numeric-marker-editor.tsx" aria-label={`${open ? "Recolher" : "Exibir"} ${title}`} title={`${open ? "Recolher" : "Exibir"} ${title}`} aria-expanded={open} onClick={() => setOpen(value => !value)} />
+      </div>
     </div>
     {open && <div className="cde-section-content min-w-0 space-y-4">
     <div className="grid gap-3 sm:grid-cols-3">

@@ -1,3 +1,6 @@
+- [x] CDE: título duplicado da aparência do menu removido; subtítulo e controles reunidos em Menu principal dos apps.
+- [x] CDE: cabeçalhos compartilhados e marcadores reservam posições de disquete, cancelar e seta; ausência de ação não desloca os demais ícones.
+- [x] CDE Alertas: numeração removida dos cabeçalhos Approvals e Atas; descrições abaixo dos títulos na tipografia compartilhada, mantendo prazos e controles.
 - [x] Digitação numérica: buffer compartilhado aplicado a medidas do menu, marcadores e fonte de barras do CDE, condições de propostas CRM e quantidades de demandas Supply (código revisado). Digitação tecla a tecla, apagar, limites e prévia conferidos em medidas do menu no computador/celular; sem salvar escolhas. Mytosis mantém texto livre com validação posterior. Nenhum registro, permissão, processamento ou função de banco alterado.
 - [x] Home: limite anterior restaurado, com cabeçalho alinhado e celular sem excesso lateral.
 - [x] Largura dos apps: limite global anterior restaurado; ampliação adicional exclusiva do Supply. Home, Code, Projects, CDE e Wishlist conferidos em 1920 px (1355,6 px); Supply manteve 1675,6 px e recuo lateral; Code/Projects sem recuo fantasma.

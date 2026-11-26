@@ -17,7 +17,7 @@ export function CdeSection({ title, hint, marker, actions, children, className, 
         <h3 className="cde-section-title flex min-w-0 items-center gap-3">{marker && <span className="shrink-0">{marker}</span>}<span className="min-w-0 break-words">{title}</span></h3>
         {hint && <p className="cde-sub-hint mt-1">{hint}</p>}
       </div>
-      {actions && <div className="flex shrink-0 items-center gap-1">{actions}</div>}
+      {actions && <div className="cde-header-actions">{actions}</div>}
     </header>
     {open && <div className="cde-section-content min-w-0 space-y-4">{children}</div>}
   </section>;

@@ -857,6 +857,17 @@ input[data-custom-calendar="true"]::-webkit-calendar-picker-indicator {
   font-weight: 600;
   line-height: 1.5;
 }
+.cde-header-actions {
+  display: grid;
+  flex-shrink: 0;
+  grid-template-columns: repeat(3, 2.5rem);
+  gap: 4px;
+  align-items: center;
+  justify-items: center;
+}
+.cde-header-actions > * { grid-row: 1; grid-column: 2; }
+.cde-header-actions > :has(svg.lucide-save) { grid-column: 1; }
+.cde-header-actions > [aria-expanded] { grid-column: 3; }
 .cde-section-content { padding: 24px 16px; }
 .cde-category-sections > .cde-cat-band + .cde-section {
   border-top: 0;

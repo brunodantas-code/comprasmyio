@@ -79,12 +79,13 @@ export function CdeNavigation({ number, handle }: { number: number; handle?: imp
       <CdeCategoryHeader handle={handle} number={number} title="Navegação (UI/UX)" hint="Tela x pop-up, menus superior, inferior e lateral, flutuantes e organização do conteúdo" open={open} onToggle={() => setOpen(!open)} />
       {open ? (
           DECISIONS.map((d) => {
+            if (d.key === "nav_menu") return <MenuLookEditor key={d.key} />;
             const expanded = !collapsed[d.key];
             const title = d.key === "nav_edit" ? "Padrões de navegação" : d.title;
             const toggleLabel = `${expanded ? "Recolher" : "Exibir"} ${title}`;
             return (
             <CdeSection key={d.key} title={title} {...(d.key === "nav_edit" ? { hint: d.title } : {})} open={expanded} actions={<CdeButton group="toggle" screen="components/cde/cde-navigation.tsx" aria-label={toggleLabel} title={toggleLabel} aria-expanded={expanded} onClick={() => setCollapsed(current => ({ ...current, [d.key]: !current[d.key] }))} />}>
-              {d.key === "nav_menu" ? <MenuLookEditor /> : <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-3">
                 {standardsFirst(d.patterns, p => chosen?.some(c => c.group_key === d.key && c.variant_key === p.key) ?? false).map((p) => {
                   const sel = chosen?.some((c) => c.group_key === d.key && c.variant_key === p.key);
                   return (
@@ -95,7 +96,7 @@ export function CdeNavigation({ number, handle }: { number: number; handle?: imp
                     </div>
                   );
                 })}
-              </div>}
+              </div>
             </CdeSection>
             );
           })
