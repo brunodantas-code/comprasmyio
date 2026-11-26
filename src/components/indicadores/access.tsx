@@ -1,24 +1,20 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { CdeButton } from "@/components/cde/cde-button";
-import { useState } from "react";
-import { Choice } from "./editors";
 import { SearchableSelect } from "@/components/ui/searchable-select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAppDisplayName } from "@/components/cde/app-order-config";
-import {
-  Table,
-  TableHeader,
-  TableHead,
-  TableRow,
-  TableBody,
-  TableCell,
-} from "@/components/ui/table";
+import { AccessUserRow } from "@/components/access/access-user-row";
+
 const roles = [
   { value: "viewer", label: "Visualizador" },
   { value: "editor", label: "Editor" },
   { value: "admin", label: "Administrador" },
 ];
+
 export function IndicadoresAccess() {
   const nameOf = useAppDisplayName();
   const qc = useQueryClient();
@@ -37,13 +33,9 @@ export function IndicadoresAccess() {
     },
   });
   const save = useMutation({
-    mutationFn: async (v: { id: string; role: string }) => {
-      const r = await supabase
-        .from("indicadores_members")
-        .upsert({ user_id: v.id, role: v.role })
-        .select("user_id")
-        .single();
-      if (r.error) throw r.error;
+    mutationFn: async (value: { id: string; role: string }) => {
+      const result = await supabase.from("indicadores_members").upsert({ user_id: value.id, role: value.role }).select("user_id").single();
+      if (result.error) throw result.error;
     },
     onSuccess: () => {
       setUser("");
@@ -51,60 +43,53 @@ export function IndicadoresAccess() {
       void qc.invalidateQueries({ queryKey: ["my-erp-access"] });
       toast.success("Perfil atualizado");
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (error: Error) => toast.error(error.message),
   });
-  if (query.isPending) return <p>Carregando...</p>;
-  if (query.isError)
-    return <p className="text-destructive">Não foi possível carregar os perfis.</p>;
+
   return (
-    <section className="space-y-4">
-      <h2 className="text-lg">Perfis · {nameOf("indicadores")}</h2>
-      <div className="flex flex-wrap items-end gap-3">
-        <div className="min-w-48 flex-1">
-          <SearchableSelect
-            aria-label={`Usuário de ${nameOf("indicadores")}`}
-            value={user}
-            onChange={setUser}
-            options={query.data.users.map((u) => ({ value: u.id, label: u.full_name }))}
-          />
+    <Card>
+      <CardHeader>
+        <CardTitle>Perfis · {nameOf("indicadores")}</CardTitle>
+        <CardDescription>Adicione usuários e defina quem visualiza, edita ou administra.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex flex-col items-stretch gap-3 rounded-md border border-border bg-muted/50 p-3 sm:flex-row sm:items-end">
+          <div className="min-w-0 flex-1">
+            <SearchableSelect
+              aria-label={`Usuário de ${nameOf("indicadores")}`}
+              value={user}
+              onChange={setUser}
+              options={query.data?.users.map((item) => ({ value: item.id, label: item.full_name })) ?? []}
+              placeholder="Selecione o usuário"
+            />
+          </div>
+          <Select value={role} onValueChange={setRole}>
+            <SelectTrigger className="w-full sm:w-44" aria-label="Perfil do novo usuário"><SelectValue /></SelectTrigger>
+            <SelectContent>{roles.map((item) => <SelectItem key={item.value} value={item.value}>{item.label}</SelectItem>)}</SelectContent>
+          </Select>
+          <CdeButton group="plus" screen="components/indicadores/access.tsx" aria-label="Adicionar perfil" title="Adicionar perfil" disabled={!user || save.isPending} onClick={() => save.mutate({ id: user, role })} />
         </div>
-        <div className="w-44">
-          <Choice label="Perfil" value={role} onChange={setRole} options={roles} />
+        {query.isPending ? <p className="text-sm text-muted-foreground">Carregando perfis...</p> : null}
+        {query.isError ? <p className="text-sm text-destructive">Não foi possível carregar os perfis.</p> : null}
+        <div className="space-y-2">
+          {query.data?.members.map((member) => {
+            const profile = query.data.users.find((item) => item.id === member.user_id);
+            return (
+              <AccessUserRow
+                key={member.user_id}
+                name={profile?.full_name ?? "Usuário"}
+                email={profile?.email}
+                controls={
+                  <Select value={member.role} disabled={save.isPending} onValueChange={(value) => save.mutate({ id: member.user_id, role: value })}>
+                    <SelectTrigger className="w-full max-sm:col-span-2 sm:w-[280px]" aria-label={`Perfil de ${profile?.full_name ?? "usuário"}`}><SelectValue /></SelectTrigger>
+                    <SelectContent>{roles.map((item) => <SelectItem key={item.value} value={item.value}>{item.label}</SelectItem>)}</SelectContent>
+                  </Select>
+                }
+              />
+            );
+          })}
         </div>
-        <CdeButton
-          group="plus"
-          screen="components/indicadores/access.tsx"
-          aria-label="Adicionar perfil"
-          title="Adicionar perfil"
-          disabled={!user || save.isPending}
-          onClick={() => save.mutate({ id: user, role })}
-        />
-      </div>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Usuário</TableHead>
-            <TableHead>Perfil</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {query.data.members.map((m) => (
-            <TableRow key={m.user_id}>
-              <TableCell>
-                {query.data.users.find((u) => u.id === m.user_id)?.full_name ?? "Usuário"}
-              </TableCell>
-              <TableCell>
-                <Choice
-                  label="Perfil"
-                  value={m.role}
-                  onChange={(r) => save.mutate({ id: m.user_id, role: r })}
-                  options={roles}
-                />
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </section>
+      </CardContent>
+    </Card>
   );
 }

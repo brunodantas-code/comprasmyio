@@ -1,6 +1,6 @@
 import { useTableFilters } from "@/components/use-table-filters";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChevronUp, ChevronDown, Search, ShieldCheck } from "lucide-react";
+import { Search, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -12,6 +12,8 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { ALL_MENU_PERMISSION_KEYS } from "@/lib/menu-permissions";
 import { useRequestTypes } from "@/components/request-types-tab";
+import { AccessUserRow } from "@/components/access/access-user-row";
+import { CdeDisclosureIcon } from "@/components/cde/cde-button";
 
 type ProfileDefinition = {
   name: string;
@@ -123,33 +125,29 @@ export function AccessProfilesTab() {
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> : null}
         {!isLoading && data?.length === 0 ? <p className="text-sm text-muted-foreground">Nenhum usuário cadastrado.</p> : null}
         {!isLoading && data?.length !== 0 && filteredUsers?.length === 0 ? <p className="text-sm text-muted-foreground">Nenhum usuário encontrado.</p> : null}
-        {filteredUsers?.map((user) => (
-          <div key={user.id} className="rounded-md border border-border">
-            <div className="flex items-center gap-3 p-3">
-              <Button type="button" size="compactIcon" variant="ghost" aria-label={expandedUserId === user.id ? `Recolher ${user.full_name || "usuário"}` : `Exibir ${user.full_name || "usuário"}`} onClick={() => setExpandedUserId((current) => current === user.id ? null : user.id)}>{expandedUserId === user.id ? <ChevronUp className="h-3.5 w-3.5"  /> : <ChevronDown className="h-3.5 w-3.5"  />}</Button>
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-2">
-                <p className="truncate text-sm font-medium">{user.full_name || "—"}</p>
-                <Badge variant="outline">{user.profileName}</Badge>
-                {user.differences.size > 0 || user.requestTypeDifferences.size > 0 ? <Badge className="border-primary bg-primary/15 text-foreground hover:bg-primary/20">Acesso Customizado</Badge> : null}
-                {user.permissions.size === 0 ? <Badge variant="outline">Configuração pendente</Badge> : null}
-              </div>
-              <p className="truncate text-xs text-muted-foreground">{user.email}</p>
-            </div>
-            </div>
-            {expandedUserId === user.id ? <div className="border-t border-border p-3"><MenuPermissionSelector
-              value={user.permissions}
-              highlightedKeys={user.differences}
-              requestTypes={requestTypes.filter((type) => type.active)}
-              requestTypeValue={user.requestTypes}
-              highlightedRequestTypes={user.requestTypeDifferences}
-              showAdministration={user.isAdmin}
-              disabled={user.isAdmin || updatePermissions.isPending}
-              onChange={(permissions) => updatePermissions.mutate({ userId: user.id, permissions, profilePermissions: user.profilePermissions, requestTypes: permissions.has("solicitacoes_novas") ? user.requestTypes : new Set(), profileRequestTypes: user.profileRequestTypes })}
-              onRequestTypeChange={(nextRequestTypes) => updatePermissions.mutate({ userId: user.id, permissions: user.permissions, profilePermissions: user.profilePermissions, requestTypes: nextRequestTypes, profileRequestTypes: user.profileRequestTypes })}
-            /></div> : null}
-          </div>
-        ))}
+        {filteredUsers?.map((user) => {
+          const expanded = expandedUserId === user.id;
+          return (
+            <AccessUserRow
+              key={user.id}
+              name={user.full_name || "—"}
+              email={user.email}
+              leading={<Button type="button" size="compactIcon" variant="ghost" className="shrink-0" aria-label={expanded ? `Recolher ${user.full_name || "usuário"}` : `Exibir ${user.full_name || "usuário"}`} aria-expanded={expanded} onClick={() => setExpandedUserId((current) => current === user.id ? null : user.id)}><CdeDisclosureIcon open={expanded} screen="components/access-profiles-tab.tsx" /></Button>}
+              badges={<><Badge variant="outline">{user.profileName}</Badge>{user.differences.size > 0 || user.requestTypeDifferences.size > 0 ? <Badge className="border-primary bg-primary/15 text-foreground hover:bg-primary/20">Acesso Customizado</Badge> : null}{user.permissions.size === 0 ? <Badge variant="outline">Configuração pendente</Badge> : null}</>}
+              details={expanded ? <MenuPermissionSelector
+                value={user.permissions}
+                highlightedKeys={user.differences}
+                requestTypes={requestTypes.filter((type) => type.active)}
+                requestTypeValue={user.requestTypes}
+                highlightedRequestTypes={user.requestTypeDifferences}
+                showAdministration={user.isAdmin}
+                disabled={user.isAdmin || updatePermissions.isPending}
+                onChange={(permissions) => updatePermissions.mutate({ userId: user.id, permissions, profilePermissions: user.profilePermissions, requestTypes: permissions.has("solicitacoes_novas") ? user.requestTypes : new Set(), profileRequestTypes: user.profileRequestTypes })}
+                onRequestTypeChange={(nextRequestTypes) => updatePermissions.mutate({ userId: user.id, permissions: user.permissions, profilePermissions: user.profilePermissions, requestTypes: nextRequestTypes, profileRequestTypes: user.profileRequestTypes })}
+              /> : null}
+            />
+          );
+        })}
       </CardContent>
     </Card>
   );

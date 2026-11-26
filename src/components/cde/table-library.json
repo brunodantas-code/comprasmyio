@@ -296,7 +296,7 @@
   {
     "id": "components/crm/crm-workspace.tsx|0",
     "file": "components/crm/crm-workspace.tsx",
-    "line": 92,
+    "line": 93,
     "context": "Próximas ações vencidas ou para hoje ( )",
     "headers": [
       "Data",
@@ -309,7 +309,7 @@
   {
     "id": "components/crm/crm-workspace.tsx|1",
     "file": "components/crm/crm-workspace.tsx",
-    "line": 126,
+    "line": 127,
     "context": "Próximas ações vencidas ou para hoje ( )",
     "headers": [
       "Nome",
@@ -324,7 +324,7 @@
   {
     "id": "components/crm/crm-workspace.tsx|2",
     "file": "components/crm/crm-workspace.tsx",
-    "line": 174,
+    "line": 175,
     "context": "Importar leads (CSV)",
     "headers": [
       "Nome fantasia",
@@ -339,7 +339,7 @@
   {
     "id": "components/crm/crm-workspace.tsx|3",
     "file": "components/crm/crm-workspace.tsx",
-    "line": 263,
+    "line": 265,
     "context": "Motivo para “ ”",
     "headers": [
       "Título",
@@ -479,16 +479,6 @@
     ]
   },
   {
-    "id": "components/indicadores/access.tsx|0",
-    "file": "components/indicadores/access.tsx",
-    "line": 81,
-    "context": "Perfis · Indicadores",
-    "headers": [
-      "Usuário",
-      "Perfil"
-    ]
-  },
-  {
     "id": "components/job-titles-tab.tsx|0",
     "file": "components/job-titles-tab.tsx",
     "line": 124,
@@ -602,21 +592,9 @@
     ]
   },
   {
-    "id": "components/mytosis/users-tab.tsx|0",
-    "file": "components/mytosis/users-tab.tsx",
-    "line": 67,
-    "context": "Usuários do Mytosis",
-    "headers": [
-      "Usuário",
-      "E-mail",
-      "Permissão",
-      "(sem título)"
-    ]
-  },
-  {
     "id": "components/opdesk/legacy-calls.tsx|0",
     "file": "components/opdesk/legacy-calls.tsx",
-    "line": 79,
+    "line": 80,
     "context": "Acompanhamento",
     "headers": [
       "Nº",
@@ -642,16 +620,6 @@
     ]
   },
   {
-    "id": "components/projects/access.tsx|0",
-    "file": "components/projects/access.tsx",
-    "line": 9,
-    "context": "Perfis do Projects",
-    "headers": [
-      "Usuário",
-      "Perfil"
-    ]
-  },
-  {
     "id": "components/projects/assumptions.tsx|0",
     "file": "components/projects/assumptions.tsx",
     "line": 38,
@@ -666,7 +634,7 @@
   {
     "id": "components/projects/workspace.tsx|0",
     "file": "components/projects/workspace.tsx",
-    "line": 112,
+    "line": 122,
     "context": "",
     "headers": [
       "Projeto",
@@ -680,7 +648,7 @@
   {
     "id": "components/projects/workspace.tsx|1",
     "file": "components/projects/workspace.tsx",
-    "line": 115,
+    "line": 125,
     "context": "Atividades",
     "headers": [
       "Atividade",
@@ -695,7 +663,7 @@
   {
     "id": "components/projects/workspace.tsx|2",
     "file": "components/projects/workspace.tsx",
-    "line": 119,
+    "line": 129,
     "context": "Atividades",
     "headers": [
       "Profissional",
@@ -708,7 +676,7 @@
   {
     "id": "components/projects/workspace.tsx|3",
     "file": "components/projects/workspace.tsx",
-    "line": 121,
+    "line": 131,
     "context": "Recursos",
     "headers": [
       "Recurso",
@@ -721,7 +689,7 @@
   {
     "id": "components/projects/workspace.tsx|4",
     "file": "components/projects/workspace.tsx",
-    "line": 122,
+    "line": 132,
     "context": "Recursos",
     "headers": [
       "Atividade / recurso",
@@ -735,7 +703,7 @@
   {
     "id": "components/projects/workspace.tsx|5",
     "file": "components/projects/workspace.tsx",
-    "line": 123,
+    "line": 133,
     "context": "·",
     "headers": [
       "Atividade",
@@ -759,7 +727,7 @@
   {
     "id": "components/site-survey-profiles-admin.tsx|0",
     "file": "components/site-survey-profiles-admin.tsx",
-    "line": 54,
+    "line": 55,
     "context": "Perfis cadastrados",
     "headers": [
       "Nome",
@@ -769,10 +737,21 @@
     ]
   },
   {
+    "id": "components/spend/supplier-allocations.tsx|0",
+    "file": "components/spend/supplier-allocations.tsx",
+    "line": 39,
+    "context": "Fornecedores → Plano de Contas",
+    "headers": [
+      "Fornecedor",
+      "Plano de Contas",
+      "Ações"
+    ]
+  },
+  {
     "id": "components/spend/workspace.tsx|0",
     "file": "components/spend/workspace.tsx",
-    "line": 118,
-    "context": "Lançamentos da fatura",
+    "line": 282,
+    "context": "Lista de comprovantes",
     "headers": [
       "(sem título)",
       "Data / Descrição",
@@ -1044,7 +1023,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3002,
+    "line": 3099,
     "context": "Itens e valores",
     "headers": [
       "Approval",
@@ -1064,7 +1043,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|1",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3295,
+    "line": 3392,
     "context": "Aprovações",
     "headers": [
       "Etapa",
@@ -1077,7 +1056,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|2",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3914,
+    "line": 4011,
     "context": "Projetos",
     "headers": [
       "Nome do projeto",
@@ -1091,7 +1070,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|3",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 4375,
+    "line": 4472,
     "context": "Logs de pedidos",
     "headers": [
       "Quando",
@@ -1104,7 +1083,7 @@
   {
     "id": "routes/_authenticated/development.tsx|0",
     "file": "routes/_authenticated/development.tsx",
-    "line": 261,
+    "line": 259,
     "context": "Acompanhamento",
     "headers": [
       "Nº",

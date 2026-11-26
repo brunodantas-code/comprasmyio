@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { confirmAction } from "@/components/confirm-dialog";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { ChevronDown, ChevronRight, ShieldCheck } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { useTableFilters } from "@/components/use-table-filters";
 import { toast } from "sonner";
@@ -12,6 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { useAppDisplayName } from "@/components/cde/app-order-config";
+import { AccessUserRow } from "@/components/access/access-user-row";
 
 const APPS = [
   { key: "spend", label: "Spend" },
@@ -82,40 +83,63 @@ export function ErpAppAccessAdmin({ appKey }: { appKey?: string }) {
         {userFilters.summary}
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando usuários...</p> : null}
         {!isLoading ? <p className="mb-2 text-xs text-muted-foreground">{filtered.length} de {users.length} usuários</p> : null}
-        <div className="divide-y divide-border">
+        <div className="space-y-2">
           {filtered.map((user) => {
             const isOpen = open.has(user.id);
+            const appControls = apps.map((app) => {
+              const checked = accessSet.has(`${user.id}:${app.key}`);
+              const control = (
+                <div className="flex shrink-0 items-center gap-2">
+                  <span className="w-12 text-right text-xs text-muted-foreground">{checked ? "Ativo" : "Inativo"}</span>
+                  <Switch
+                    checked={checked}
+                    disabled={update.isPending || !user.is_active}
+                    onCheckedChange={(allowed) => update.mutate({ data: { userId: user.id, appKey: app.key, allowed } })}
+                    aria-label={`${nameOf(app.key)} para ${user.full_name || user.email || "usuário"}`}
+                  />
+                </div>
+              );
+              return { app, control };
+            });
             return (
-            <div key={user.id} className={user.is_active ? "" : "opacity-60"}>
-              <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 py-2 sm:flex">
-                <button type="button" onClick={() => toggle(user.id)} className="flex min-w-0 flex-1 flex-col items-start gap-1 text-left sm:flex-row sm:flex-wrap sm:items-center sm:gap-2">
-                  <span className="min-w-0 max-w-full break-words font-semibold">{user.full_name || "Sem nome"}</span>
-                  <span className="min-w-0 max-w-full break-all text-xs text-muted-foreground">{user.email}</span>
-                </button>
-                {adminSet.has(user.id) ? <Badge variant="outline" className="col-start-1 row-start-2 w-fit">Admin do ERP</Badge> : null}
-                {!appKey && <label className="col-start-1 flex items-center gap-2 text-xs sm:ml-auto">
-                  <Switch checked={user.is_active} disabled={activate.isPending} onCheckedChange={async (active) => { if (active || await confirmAction(`Inativar ${user.full_name || user.email}? O usuário não conseguirá mais entrar.`)) activate.mutate({ data: { userId: user.id, active } }); }} aria-label={`Ativo: ${user.full_name || user.email || "usuário"}`} />
-                  <span className={user.is_active ? "" : "text-destructive"}>{user.is_active ? "Ativo" : "Inativo"}</span>
-                </label>}
-                {!appKey && <Button type="button" variant="ghost" size="compactIcon" className="col-start-2 row-start-1 shrink-0" aria-label={`${isOpen ? "Recolher" : "Exibir"} aplicativos de ${user.full_name || "usuário"}`} aria-expanded={isOpen} onClick={() => toggle(user.id)}><CdeDisclosureIcon open={isOpen} screen="components/erp-app-access-admin.tsx" /></Button>}
-              </div>
-              {isOpen || appKey ? <div className={appKey ? "pb-3" : "grid min-w-0 grid-cols-2 gap-x-4 gap-y-3 rounded-md border border-border p-3 sm:grid-cols-4 lg:grid-cols-6"}>
-                {apps.map((app) => {
-                  const checked = accessSet.has(`${user.id}:${app.key}`);
-                  return (
-                    <label key={app.key} className="grid min-w-0 grid-cols-[2.75rem_minmax(0,1fr)] items-center gap-2 text-sm">
-                      <Switch
-                        checked={checked}
-                        disabled={update.isPending || !user.is_active}
-                        onCheckedChange={(allowed) => update.mutate({ data: { userId: user.id, appKey: app.key, allowed } })}
-                        aria-label={`${nameOf(app.key)} para ${user.full_name || user.email || "usuário"}`}
-                      />
-                      <span className="min-w-0 whitespace-nowrap">{nameOf(app.key)}</span>
+              <AccessUserRow
+                key={user.id}
+                name={user.full_name || "Sem nome"}
+                email={user.email}
+                inactive={!user.is_active}
+                badges={adminSet.has(user.id) ? <Badge variant="outline">Admin do ERP</Badge> : null}
+                {...(!appKey ? { onNameClick: () => toggle(user.id) } : {})}
+                controls={appKey ? appControls[0]?.control : (
+                  <div className="flex shrink-0 items-center gap-2">
+                    <label className="flex items-center gap-2 text-xs">
+                      <span className={user.is_active ? "" : "text-destructive"}>{user.is_active ? "Ativo" : "Inativo"}</span>
+                      <Switch checked={user.is_active} disabled={activate.isPending} onCheckedChange={async (active) => { if (active || await confirmAction(`Inativar ${user.full_name || user.email}? O usuário não conseguirá mais entrar.`)) activate.mutate({ data: { userId: user.id, active } }); }} aria-label={`Ativo: ${user.full_name || user.email || "usuário"}`} />
                     </label>
-                  );
-                })}
-              </div> : null}
-            </div>
+                    <Button type="button" variant="ghost" size="compactIcon" aria-label={`${isOpen ? "Recolher" : "Exibir"} aplicativos de ${user.full_name || "usuário"}`} aria-expanded={isOpen} onClick={() => toggle(user.id)}><CdeDisclosureIcon open={isOpen} screen="components/erp-app-access-admin.tsx" /></Button>
+                  </div>
+                )}
+                details={!appKey && isOpen ? (
+                  <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                    {apps.map((app) => {
+                      const checked = accessSet.has(`${user.id}:${app.key}`);
+                      return (
+                        <label key={app.key} className="flex min-w-0 items-center justify-between gap-3 text-sm">
+                          <span className="min-w-0 truncate">{nameOf(app.key)}</span>
+                          <span className="flex shrink-0 items-center gap-2">
+                            <span className="text-xs text-muted-foreground">{checked ? "Ativo" : "Inativo"}</span>
+                            <Switch
+                              checked={checked}
+                              disabled={update.isPending || !user.is_active}
+                              onCheckedChange={(allowed) => update.mutate({ data: { userId: user.id, appKey: app.key, allowed } })}
+                              aria-label={`${nameOf(app.key)} para ${user.full_name || user.email || "usuário"}`}
+                            />
+                          </span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                ) : null}
+              />
             );
           })}
         </div>

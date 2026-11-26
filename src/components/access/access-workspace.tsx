@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ShieldCheck, UsersRound, Briefcase } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { ErpAppAccessAdmin } from "@/components/erp-app-access-admin";
 import { AccessProfileDefinitionsTab } from "@/components/access-profile-definitions-tab";
@@ -40,7 +41,7 @@ function CodeAccess() {
     const ids = new Set((admins.data ?? []).filter(a => allowed.has(a.user_id)).map(a => a.user_id));
     return (profiles.data ?? []).filter(p => ids.has(p.id));
   } });
-  return query.isPending ? <p className="text-sm text-muted-foreground">Carregando responsáveis...</p> : query.isError ? <p className="text-sm text-destructive">Não foi possível carregar os responsáveis.</p> : <section className="space-y-5"><h2 className="text-lg font-medium">Responsáveis pelos chamados · Code</h2><CodeAttendantsPanel admins={query.data} appNames={Object.fromEntries(Object.entries(APP_NAMES).map(([key, label]) => [key, nameOf(key) || label]))} /></section>;
+  return query.isPending ? <p className="text-sm text-muted-foreground">Carregando responsáveis...</p> : query.isError ? <p className="text-sm text-destructive">Não foi possível carregar os responsáveis.</p> : <Card><CardHeader><CardTitle>Responsáveis · Code</CardTitle><CardDescription>Defina o Admin responsável pelos chamados de cada app.</CardDescription></CardHeader><CardContent><CodeAttendantsPanel admins={query.data} appNames={Object.fromEntries(Object.entries(APP_NAMES).map(([key, label]) => [key, nameOf(key) || label]))} /></CardContent></Card>;
 }
 
 export function AccessWorkspace({ capabilities, section, app, onChange }: { capabilities: AccessCapabilities; section?: AccessSection; app?: string; onChange: (change: { section: AccessSection; app?: string }) => void }) {

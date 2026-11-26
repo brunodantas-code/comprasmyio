@@ -8,7 +8,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SearchableSelect } from "@/components/ui/searchable-select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { AccessUserRow } from "@/components/access/access-user-row";
 import type { MytosisData } from "./use-mytosis";
 
 const ROLES = [
@@ -30,57 +31,78 @@ export function UsersTab({ data }: { data: Pick<MytosisData, "users" | "role"> }
       return rows;
     },
   });
-  const refresh = () => { queryClient.invalidateQueries({ queryKey: ["mytosis-members"] }); queryClient.invalidateQueries({ queryKey: ["mytosis"] }); };
+  const refresh = () => {
+    queryClient.invalidateQueries({ queryKey: ["mytosis-members"] });
+    queryClient.invalidateQueries({ queryKey: ["mytosis"] });
+  };
   const upsert = useMutation({
     mutationFn: async ({ userId, role }: { userId: string; role: string }) => {
       const { error } = await supabase.from("mytosis_members").upsert({ user_id: userId, role }, { onConflict: "user_id" });
       if (error) throw error;
     },
-    onSuccess: () => { toast.success("Permissão salva."); setNewUser(""); refresh(); },
-    onError: (e: Error) => toast.error(e.message),
+    onSuccess: () => {
+      toast.success("Permissão salva.");
+      setNewUser("");
+      refresh();
+    },
+    onError: (error: Error) => toast.error(error.message),
   });
   const remove = useMutation({
     mutationFn: async (userId: string) => {
       const { error } = await supabase.from("mytosis_members").delete().eq("user_id", userId);
       if (error) throw error;
     },
-    onSuccess: () => { toast.success("Usuário removido."); refresh(); },
-    onError: (e: Error) => toast.error(e.message),
+    onSuccess: () => {
+      toast.success("Usuário removido.");
+      refresh();
+    },
+    onError: (error: Error) => toast.error(error.message),
   });
-  const nameOf = (id: string) => data.users.find((u) => u.id === id);
-  const available = data.users.filter((u) => !members.some((m) => m.user_id === u.id));
+  const nameOf = (id: string) => data.users.find((user) => user.id === id);
+  const available = data.users.filter((user) => !members.some((member) => member.user_id === user.id));
 
   return (
-    <div className="space-y-4">
-      <div>
-        <h2 className="text-lg font-normal">Usuários do Mytosis</h2>
-        <p className="text-sm text-muted-foreground">Defina quem vê, quem edita e quem administra. Administradores do ERP são sempre Administradores aqui.</p>
-      </div>
-      {isAdmin ? (
-        <div className="flex flex-wrap items-end gap-3 rounded-xl border border-border bg-muted/50 px-4 py-3">
-          <div className="min-w-64 flex-1"><SearchableSelect value={newUser} onChange={setNewUser} options={available.map((u) => ({ value: u.id, label: u.full_name, keywords: u.email ?? "" }))} placeholder="Selecione o usuário" /></div>
-          <Select value={newRole} onValueChange={setNewRole}><SelectTrigger className="w-44"><SelectValue /></SelectTrigger><SelectContent>{ROLES.map((r) => <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>)}</SelectContent></Select>
-          <CdeButton group="plus" screen="components/mytosis/users-tab.tsx" disabled={!newUser || upsert.isPending} onClick={() => upsert.mutate({ userId: newUser, role: newRole })} aria-label="Adicionar usuário" title="Adicionar usuário"></CdeButton>
+    <Card>
+      <CardHeader>
+        <CardTitle>Usuários do Mytosis</CardTitle>
+        <CardDescription>Defina quem vê, quem edita e quem administra. Administradores do ERP são sempre Administradores aqui.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {isAdmin ? (
+          <div className="flex flex-col items-stretch gap-3 rounded-md border border-border bg-muted/50 p-3 sm:flex-row sm:items-end">
+            <div className="min-w-0 flex-1"><SearchableSelect value={newUser} onChange={setNewUser} options={available.map((user) => ({ value: user.id, label: user.full_name, keywords: user.email ?? "" }))} placeholder="Selecione o usuário" /></div>
+            <Select value={newRole} onValueChange={setNewRole}>
+              <SelectTrigger className="w-full sm:w-44" aria-label="Permissão do novo usuário"><SelectValue /></SelectTrigger>
+              <SelectContent>{ROLES.map((role) => <SelectItem key={role.value} value={role.value}>{role.label}</SelectItem>)}</SelectContent>
+            </Select>
+            <CdeButton group="plus" screen="components/mytosis/users-tab.tsx" disabled={!newUser || upsert.isPending} onClick={() => upsert.mutate({ userId: newUser, role: newRole })} aria-label="Adicionar usuário" title="Adicionar usuário" />
+          </div>
+        ) : null}
+        <div className="space-y-2">
+          {members.length ? members.map((member) => {
+            const profile = nameOf(member.user_id);
+            return (
+              <AccessUserRow
+                key={member.user_id}
+                name={profile?.full_name ?? "Usuário"}
+                email={profile?.email}
+                controls={
+                  <div className="flex min-w-0 items-center gap-2 max-sm:col-span-2 sm:w-[280px]">
+                    {isAdmin ? (
+                      <Select value={member.role} disabled={upsert.isPending} onValueChange={(role) => upsert.mutate({ userId: member.user_id, role })}>
+                        <SelectTrigger className="min-w-0 flex-1" aria-label={`Permissão de ${profile?.full_name ?? "usuário"}`}><SelectValue /></SelectTrigger>
+                        <SelectContent>{ROLES.map((role) => <SelectItem key={role.value} value={role.value}>{role.label}</SelectItem>)}</SelectContent>
+                      </Select>
+                    ) : <span className="text-sm">{ROLES.find((role) => role.value === member.role)?.label}</span>}
+                    {isAdmin ? <Button variant="ghost" size="compactIcon" className="shrink-0 text-primary" onClick={async () => { if (await confirmAction("Remover este usuário do Mytosis?")) remove.mutate(member.user_id); }} aria-label={`Remover ${profile?.full_name ?? "usuário"}`} title="Remover usuário"><Trash2 className="h-4 w-4" /></Button> : null}
+                  </div>
+                }
+              />
+            );
+          }) : <p className="py-6 text-center text-sm text-muted-foreground">Nenhum usuário cadastrado.</p>}
         </div>
-      ) : null}
-      <div className="rounded-xl border border-border bg-card">
-        <Table>
-          <TableHeader><TableRow><TableHead>Usuário</TableHead><TableHead>E-mail</TableHead><TableHead>Permissão</TableHead><TableHead className="w-16" /></TableRow></TableHeader>
-          <TableBody>
-            {members.length ? members.map((m) => (
-              <TableRow key={m.user_id}>
-                <TableCell>{nameOf(m.user_id)?.full_name ?? "Usuário"}</TableCell>
-                <TableCell className="text-muted-foreground">{nameOf(m.user_id)?.email ?? "—"}</TableCell>
-                <TableCell>{isAdmin ? (
-                  <Select value={m.role} onValueChange={(role) => upsert.mutate({ userId: m.user_id, role })}><SelectTrigger className="h-8 w-44"><SelectValue /></SelectTrigger><SelectContent>{ROLES.map((r) => <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>)}</SelectContent></Select>
-                ) : ROLES.find((r) => r.value === m.role)?.label}</TableCell>
-                <TableCell>{isAdmin ? <Button variant="ghost" size="icon" className="text-primary" onClick={async () => { if (await confirmAction("Remover este usuário do Mytosis?")) remove.mutate(m.user_id); }} aria-label="Remover usuário" title="Remover usuário"><Trash2 className="h-4 w-4" /></Button> : null}</TableCell>
-              </TableRow>
-            )) : <TableRow><TableCell colSpan={4} className="py-10 text-center text-muted-foreground">Nenhum usuário cadastrado.</TableCell></TableRow>}
-          </TableBody>
-        </Table>
-      </div>
-      <ul className="space-y-1 text-xs text-muted-foreground">{ROLES.map((r) => <li key={r.value}>{r.label}: {r.hint}</li>)}</ul>
-    </div>
+        <ul className="space-y-1 text-xs text-muted-foreground">{ROLES.map((role) => <li key={role.value}>{role.label}: {role.hint}</li>)}</ul>
+      </CardContent>
+    </Card>
   );
 }

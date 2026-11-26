@@ -51,6 +51,13 @@
   ]
  },
  {
+  "kind": "subtitulo",
+  "text": "Adicione usuários e defina quem visualiza, edita ou administra.",
+  "files": [
+   "components/indicadores/access.tsx"
+  ]
+ },
+ {
   "kind": "titulo",
   "text": "Alçadas de Aprovação",
   "files": [
@@ -277,9 +284,30 @@
  },
  {
   "kind": "subtitulo",
+  "text": "Defina o Admin responsável pelos chamados de cada app.",
+  "files": [
+   "components/access/access-workspace.tsx"
+  ]
+ },
+ {
+  "kind": "subtitulo",
   "text": "Defina o cargo principal da cadeia, cargos adicionais e o perfil de acesso.",
   "files": [
    "components/access/users-admin.tsx"
+  ]
+ },
+ {
+  "kind": "subtitulo",
+  "text": "Defina o perfil dos usuários com acesso ao Projects.",
+  "files": [
+   "components/projects/access.tsx"
+  ]
+ },
+ {
+  "kind": "subtitulo",
+  "text": "Defina quem vê, quem edita e quem administra. Administradores do ERP são sempre Administradores aqui.",
+  "files": [
+   "components/mytosis/users-tab.tsx"
   ]
  },
  {
@@ -448,13 +476,6 @@
   "text": "Lembretes de approvals pendentes",
   "files": [
    "components/reminders-tab.tsx"
-  ]
- },
- {
-  "kind": "subtitulo",
-  "text": "Libere os aplicativos do ERP sem alterar cargos ou perfis internos de cada app.",
-  "files": [
-   "components/erp-app-access-admin.tsx"
   ]
  },
  {
@@ -663,6 +684,13 @@
  },
  {
   "kind": "titulo",
+  "text": "Perfis · Projects",
+  "files": [
+   "components/projects/access.tsx"
+  ]
+ },
+ {
+  "kind": "titulo",
   "text": "Perfis cadastrados",
   "files": [
    "components/access-profile-definitions-tab.tsx",
@@ -744,6 +772,13 @@
   "text": "Projetos",
   "files": [
    "routes/_authenticated/dashboard.tsx"
+  ]
+ },
+ {
+  "kind": "titulo",
+  "text": "Responsáveis · Code",
+  "files": [
+   "components/access/access-workspace.tsx"
   ]
  },
  {
@@ -846,7 +881,7 @@
  },
  {
   "kind": "titulo",
-  "text": "Usuários",
+  "text": "Usuários · Site Survey",
   "files": [
    "components/access/survey-users-admin.tsx"
   ]
@@ -856,6 +891,13 @@
   "text": "Usuários cadastrados",
   "files": [
    "components/access/users-admin.tsx"
+  ]
+ },
+ {
+  "kind": "titulo",
+  "text": "Usuários do Mytosis",
+  "files": [
+   "components/mytosis/users-tab.tsx"
   ]
  },
  {
