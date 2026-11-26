@@ -1,3 +1,4 @@
+- [x] CDE: formatos ativos destacados; segundo clique remove o formato e pesos retornam ao normal, preservando os demais formatos.
 - [x] CDE: Formatação da Fonte em aparência, modelos, cabeçalhos/listas, títulos dos campos, nomes/legendas dos apps e marcadores; Semi-Negrito, Negrito, Itálico e Sublinhado. Salvamento/reabertura conferidos e aparência original restaurada; 119 testes passaram.
 - [x] CDE: remover Atual/Padrão das listas de aparência e marcar diretamente a opção selecionada, preservando escolhas salvas.
 - [x] Títulos/subtítulos: cabeçalho CDE dentro do bloco dos 23 menus; revisão de títulos principais do ERP aplicada em Spend, CRM, Legal, Indicadores, Projects, Code, RH, Acessos, Finance, Mytosis, Wishlist, OpDesk, To Dos e Pendências. Site Survey/Supply já usam cabeçalhos dentro das listas. Conferidas 14 entradas no computador/celular; nenhum dado alterado. Falta publicar.

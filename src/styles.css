@@ -914,3 +914,8 @@ input[data-custom-calendar="true"]::-webkit-calendar-picker-indicator {
 .cde-subtitle { font-weight: var(--sub-weight, inherit); font-style: var(--sub-style, normal); text-decoration-line: var(--sub-decoration, none); }
 .cde-field-title { font-weight: var(--field-title-weight, inherit); font-style: var(--field-title-style, normal); text-decoration-line: var(--field-title-decoration, none); }
 [class*="text-[length:var(--filter-fs)]"] { font-weight: var(--filter-weight, inherit); font-style: var(--filter-style, normal); text-decoration-line: var(--filter-decoration, none); }
+.cde-font-format button[aria-pressed="true"] {
+  background-color: var(--dropdown-highlight) !important;
+  color: var(--dropdown-highlight-foreground) !important;
+  box-shadow: inset 0 -2px 0 var(--primary);
+}

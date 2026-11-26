@@ -1,6 +1,10 @@
 import type { CSSProperties } from "react";
 
 export type FontFormat = { weight?: "400" | "600" | "700"; italic?: boolean; underline?: boolean };
+export function toggleFontFormat(value: FontFormat, option: "600" | "700" | "italic" | "underline", defaultWeight = "400"): FontFormat {
+  if (option === "600" || option === "700") return { ...value, weight: (value.weight ?? defaultWeight) === option ? "400" : option };
+  return { ...value, [option]: !value[option] };
+}
 export function parseFontFormat(value: unknown): FontFormat {
   const p = value && typeof value === "object" ? value as Record<string, unknown> : {};
   return {
