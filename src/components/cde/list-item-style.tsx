@@ -56,7 +56,7 @@ export function ListItemStyleEditor() {
     } catch { toast.error("Não foi possível salvar (somente Admin)."); }
   }
   const rows = [{ l: "Nova visita", I: Plus }, { l: "Histórico de Visitas", I: FileText, hover: true }, { l: "Realizar Visita", I: Check }];
-  return <CdeSection title="Itens de lista" actions={<><Button aria-label="Salvar Itens de lista" title="Salvar Itens de lista" disabled={!draft || JSON.stringify(draft) === JSON.stringify(data ?? DEF)} size="icon" variant="ghost" onClick={save}><Save /></Button><Button aria-label="Cancelar alterações" title="Cancelar alterações" size="icon" variant="ghost" onClick={() => setDraft(null)}><X /></Button></>}>
+  return <CdeSection title="Itens de lista" hint="Submenus e menu de 3 barras" actions={<><Button aria-label="Salvar Itens de lista" title="Salvar Itens de lista" disabled={!draft || JSON.stringify(draft) === JSON.stringify(data ?? DEF)} size="icon" variant="ghost" onClick={save}><Save /></Button><Button aria-label="Cancelar alterações" title="Cancelar alterações" size="icon" variant="ghost" onClick={() => setDraft(null)}><X /></Button></>}>
     <div className="w-56 rounded-lg border border-border bg-card p-1.5 shadow" style={vars(s) as React.CSSProperties}>{rows.map(({ l, I, hover }) => <div key={l} role="menuitem" data-preview-hl={hover ? "" : undefined} className="flex items-center gap-2 rounded-md px-2 py-2 text-sm"><I className="h-4 w-4" />{l}</div>)}</div>
     <div className="grid gap-3 sm:grid-cols-3">
       <CdeColorSwatches label="Cor do símbolo" value={s.fg} onChange={(fg) => set({ fg })} />
