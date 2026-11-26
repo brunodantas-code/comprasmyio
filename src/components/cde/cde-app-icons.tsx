@@ -97,15 +97,19 @@ export function CdeAppIcons({ number, handle }: { number: number; handle?: impor
   const menuConfig = useMainMenuConfig().data ?? parseMenuConfig();
   const menuItems: Item[] = menuConfig.order.filter((id) => !menuConfig.hidden.includes(id)).flatMap((id) => { const m = MENU_ITEMS.find((x) => x.id === id); return m ? [{ label: id === "access" ? "Acessos" : m.label, icon: m.icon as Item["icon"], name: (m.icon as { displayName?: string }).displayName ?? m.label }] : []; });
   const [openApps, setOpenApps] = useState<Set<string>>(new Set());
+  const [rulesOpen, setRulesOpen] = useState(true);
+  const [appsOpen, setAppsOpen] = useState(true);
   return <section className="cde-category-sections">
     <CdeCategoryHeader handle={handle} number={number} title="Ícones dos Apps e menus" hint={`${APPS.length} apps · ícone do portal, barra inferior, submenus e ações para comparar padrões`} open={open} onToggle={() => setOpen(!open)} />
     {open ? <div className="space-y-4">
-      <CdeSection title="Regras para todos os apps" hint="Cor, fundo, borda e arredondamento valem para os ícones da barra superior e dos menus de todos os apps." open={false}>
+      <CdeSection title="Regras para todos os apps" hint="Cor, fundo, borda e arredondamento valem para os ícones da barra superior e dos menus de todos os apps." open={rulesOpen} actions={<CdeButton group="toggle" screen="components/cde/cde-app-icons.tsx" aria-label={`${rulesOpen ? "Recolher" : "Exibir"} regras para todos os apps`} title={`${rulesOpen ? "Recolher" : "Exibir"} regras para todos os apps`} aria-expanded={rulesOpen} onClick={() => setRulesOpen(!rulesOpen)} />}>
         {null}
       </CdeSection>
-      <TopIconStyleEditor items={[...SHARED.slice(0, 2), ...(APPS[0]?.groups[0]?.items.slice(0, 3) ?? []).map((i) => ({ ...i, name: (i as { name?: string }).name ?? i.label }))]} />
-      <ListItemStyleEditor />
-      <CdeSection title="Ícones e menus por app" hint="Menu superior compartilhado e ícones dos menus, submenus e ações de cada app.">
+      <div className={rulesOpen ? "contents" : "hidden"}>
+        <TopIconStyleEditor items={[...SHARED.slice(0, 2), ...(APPS[0]?.groups[0]?.items.slice(0, 3) ?? []).map((i) => ({ ...i, name: (i as { name?: string }).name ?? i.label }))]} />
+        <ListItemStyleEditor />
+      </div>
+      <CdeSection title="Ícones e menus por app" hint="Menu superior compartilhado e ícones dos menus, submenus e ações de cada app." open={appsOpen} actions={<CdeButton group="toggle" screen="components/cde/cde-app-icons.tsx" aria-label={`${appsOpen ? "Recolher" : "Exibir"} ícones e menus por app`} title={`${appsOpen ? "Recolher" : "Exibir"} ícones e menus por app`} aria-expanded={appsOpen} onClick={() => setAppsOpen(!appsOpen)} />}>
       <CdeSection title="Menu superior comum a todos os apps" open={topOpen} className="cde-app-menu-section" marker={<span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary"><Menu className="h-5 w-5" /></span>} actions={<CdeButton group="toggle" screen="components/cde/cde-app-icons.tsx" aria-label={`${topOpen ? "Recolher" : "Exibir"} menu superior comum`} title={`${topOpen ? "Recolher" : "Exibir"} menu superior comum`} aria-expanded={topOpen} onClick={() => setTopOpen(!topOpen)} />}>
         <div className="flex flex-wrap gap-3">{SHARED.slice(0, 2).map((it) => <Tile key={it.label} it={it} />)}</div><div className="mt-3 mb-1 text-xs text-muted-foreground">Ações dentro do menu</div><div className="flex flex-wrap gap-3">{menuItems.map((it) => <Tile key={it.label} it={it} />)}</div>
       </CdeSection>

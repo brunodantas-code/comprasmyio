@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Check, FileText, Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { CdeButton } from "./cde-button";
 import { CdeColorSwatches } from "./top-icon-style-editor";
 
 /** Style of list-type menu items (submenus and 3-bar menu), stored in cde_selected group list_item_style. */
@@ -41,6 +42,7 @@ export function ListItemStyleEditor() {
   const qc = useQueryClient();
   const { data } = useListItemStyle();
   const [draft, setDraft] = useState<ListItemStyle | null>(null);
+  const [open, setOpen] = useState(true);
   const s = draft ?? data ?? DEF;
   const set = (p: Partial<ListItemStyle>) => setDraft({ ...s, ...p });
   async function save() {
@@ -56,7 +58,7 @@ export function ListItemStyleEditor() {
     } catch { toast.error("Não foi possível salvar (somente Admin)."); }
   }
   const rows = [{ l: "Nova visita", I: Plus }, { l: "Histórico de Visitas", I: FileText, hover: true }, { l: "Realizar Visita", I: Check }];
-  return <CdeSection title="Itens de lista" hint="Submenus e menu de 3 barras" actions={<><Button aria-label="Salvar Itens de lista" title="Salvar Itens de lista" disabled={!draft || JSON.stringify(draft) === JSON.stringify(data ?? DEF)} size="icon" variant="ghost" onClick={save}><Save /></Button><Button aria-label="Cancelar alterações" title="Cancelar alterações" size="icon" variant="ghost" onClick={() => setDraft(null)}><X /></Button></>}>
+  return <CdeSection title="Itens de lista" hint="Submenus e menu de 3 barras" open={open} actions={<><Button aria-label="Salvar Itens de lista" title="Salvar Itens de lista" disabled={!draft || JSON.stringify(draft) === JSON.stringify(data ?? DEF)} size="icon" variant="ghost" onClick={save}><Save /></Button><Button aria-label="Cancelar alterações" title="Cancelar alterações" size="icon" variant="ghost" onClick={() => setDraft(null)}><X /></Button><CdeButton group="toggle" screen="components/cde/list-item-style.tsx" aria-label={`${open ? "Recolher" : "Exibir"} itens de lista`} title={`${open ? "Recolher" : "Exibir"} itens de lista`} aria-expanded={open} onClick={() => setOpen(!open)} /></>}>
     <div className="w-56 rounded-lg border border-border bg-card p-1.5 shadow" style={vars(s) as React.CSSProperties}>{rows.map(({ l, I, hover }) => <div key={l} role="menuitem" data-preview-hl={hover ? "" : undefined} className="flex items-center gap-2 rounded-md px-2 py-2 text-sm"><I className="h-4 w-4" />{l}</div>)}</div>
     <div className="grid gap-3 sm:grid-cols-3">
       <CdeColorSwatches label="Cor do símbolo" value={s.fg} onChange={(fg) => set({ fg })} />

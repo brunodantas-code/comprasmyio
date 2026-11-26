@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useCdeSwatchStyle } from "./cde-button";
+import { CdeButton } from "./cde-button";
 import { cn } from "@/lib/utils";
 import { TOP_ICON_DEFAULT, TOP_ICON_GROUP, topIconVars, useTopIconStyle, type TopIconStyle } from "./top-icon-style";
 import { COLOR_PALETTE } from "./color-palette";
@@ -42,6 +43,7 @@ export function TopIconStyleEditor({ items }: { items: Item[] }) {
   const { data } = useTopIconStyle();
   const [draft, setDraft] = useState<TopIconStyle | null>(null);
   const [saving, setSaving] = useState(false);
+  const [open, setOpen] = useState(true);
   const s = draft ?? data ?? TOP_ICON_DEFAULT;
   const set = (p: Partial<TopIconStyle>) => setDraft({ ...s, ...p });
   async function save() {
@@ -57,7 +59,7 @@ export function TopIconStyleEditor({ items }: { items: Item[] }) {
       setDraft(null); toast.success("Regra dos ícones aplicada a todos os apps");
     } catch { toast.error("Não foi possível salvar (somente Admin)."); } finally { setSaving(false); }
   }
-  return <CdeSection title="Ícones dos menus" actions={<><Button aria-label="Salvar Ícones dos menus" title="Salvar Ícones dos menus" size="icon" variant="ghost" disabled={saving || !draft} onClick={save}><Save /></Button><Button aria-label="Cancelar alterações" title="Cancelar alterações" size="icon" variant="ghost" onClick={() => setDraft(null)}><X /></Button></>}>
+  return <CdeSection title="Ícones dos menus" open={open} actions={<><Button aria-label="Salvar Ícones dos menus" title="Salvar Ícones dos menus" size="icon" variant="ghost" disabled={saving || !draft} onClick={save}><Save /></Button><Button aria-label="Cancelar alterações" title="Cancelar alterações" size="icon" variant="ghost" onClick={() => setDraft(null)}><X /></Button><CdeButton group="toggle" screen="components/cde/top-icon-style-editor.tsx" aria-label={`${open ? "Recolher" : "Exibir"} ícones dos menus`} title={`${open ? "Recolher" : "Exibir"} ícones dos menus`} aria-expanded={open} onClick={() => setOpen(!open)} /></>}>
     <div className="flex flex-wrap gap-4" style={topIconVars(s) as React.CSSProperties}>{items.map((it) => { const Icon = it.icon; return <div key={it.label} className="flex w-24 flex-col items-center gap-1 text-center">
       <span className="top-icon flex h-10 w-10 items-center justify-center"><Icon className="h-5 w-5" /></span>
       <span className="text-[0.7rem] leading-tight">{it.label}</span><span className="text-[0.6rem] text-muted-foreground/70">{it.name}</span></div>; })}</div>
