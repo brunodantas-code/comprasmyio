@@ -17,7 +17,7 @@ export const TAG_COLORS: MessageColorOption[] = [
   { key: "cinza_texto", label: "Cinza (texto)", value: "var(--muted-foreground)" },
   { key: "preto", label: "Preto", value: "var(--cde-palette-black)" },
   { key: "vermelho", label: "Vermelho", value: "var(--destructive)" },
-  ...BRAND.filter((o) => !["transparent", "var(--foreground)", "var(--destructive)"].includes(o.value)),
+  ...BRAND.filter((o) => !["transparent", "var(--foreground)", "var(--destructive)"].includes(o.value)).map(o => ({ ...o, label: o.label.replace(/^Atual: branco \/ verde claro$/, "Branco").replace(/^Atual: /, "") })),
 ];
 export const tagColor = (key?: string) => TAG_COLORS.find((o) => o.key === key) ?? TAG_COLORS[0];
 

@@ -1,3 +1,4 @@
+- [x] CDE: remover Atual/Padrão das listas de aparência e marcar diretamente a opção selecionada, preservando escolhas salvas.
 - [x] Títulos/subtítulos: cabeçalho CDE dentro do bloco dos 23 menus; revisão de títulos principais do ERP aplicada em Spend, CRM, Legal, Indicadores, Projects, Code, RH, Acessos, Finance, Mytosis, Wishlist, OpDesk, To Dos e Pendências. Site Survey/Supply já usam cabeçalhos dentro das listas. Conferidas 14 entradas no computador/celular; nenhum dado alterado. Falta publicar.
 - [x] Tema P&B: vermelho limitado às tags e bolinhas de notificação; cores de textos comuns e laranja convertidas, amostras/ícones de referência só convertidos na exibição. Tags vermelhas do Code e notificações do portal conferidas; arquivos originais preservados.
 - [x] Tema P&B: logo myio preto em fundos claros e branco em fundos escuros; conferidos CDE e Home/portal, usando os mesmos logos compartilhados dos apps.

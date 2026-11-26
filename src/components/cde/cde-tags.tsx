@@ -22,17 +22,18 @@ import { SelectValue } from "@/components/ui/select";
 type Inv = { label: string; variant: string; className: string; apps: string[]; files: string[]; custom?: boolean };
 const PARTS: [TagPart, string][] = [["bg", "Fundo"], ["text", "Texto"], ["border", "Borda"]];
 
-export function ColorSelect({ value, currentValue, label, onChange }: { value?: string; currentValue?: string; label: string; onChange: (v: string) => void }) {
+export function ColorSelect({ value, inheritedColor, label, onChange }: { value?: string; inheritedColor?: { key: string; label: string; value: string }; label: string; onChange: (v: string) => void }) {
   const swatch = useCdeSwatchStyle();
-  const dot = (o: { key: string; value: string }) => <span aria-hidden="true" style={o.key === "padrao" ? undefined : { background: o.value, ...swatch.css }} className={cn("block h-4 w-4 shrink-0 rounded-full border border-border", o.key === "padrao" && "bg-[repeating-linear-gradient(45deg,var(--muted),var(--muted)_2px,transparent_2px,transparent_4px)]", swatch.cls)} />;
-  const cur = tagColor(value);
-  const current = currentValue === undefined ? undefined : tagColor(currentValue);
-  const isCurrent = current?.key === cur.key;
-  return <Select value={isCurrent ? "current_saved" : cur.key} onValueChange={v => onChange(v === "current_saved" ? current?.key ?? "padrao" : v)}><SelectTrigger className="h-8 w-36 text-xs" aria-label={label} title={isCurrent ? `Atual: ${cur.label}` : cur.label}><span style={{ display: "inline-flex", alignItems: "center", gap: 6, minWidth: 0, lineHeight: 1 }}>{dot(cur)}<span className="truncate text-xs" style={{ lineHeight: "16px" }}>{isCurrent ? "Atual" : cur.label}</span></span></SelectTrigger>
-    <SelectContent>{current && <SelectItem value="current_saved"><span className="inline-flex items-center gap-2 text-xs">{dot(current)}<span>Atual</span></span></SelectItem>}{TAG_COLORS.map((o) => <SelectItem key={o.key} value={o.key}><span style={{ display: "inline-flex", alignItems: "center", gap: 8 }} className="text-xs">{dot(o)}<span>{current && o.key === "padrao" ? "Padrão original" : o.label}</span></span></SelectItem>)}</SelectContent></Select>;
+  const dot = (o: { key: string; value: string }) => <span aria-hidden="true" style={{ background: o.value, ...swatch.css }} className={cn("block h-4 w-4 shrink-0 rounded-full border border-border", swatch.cls)} />;
+  const chosen = tagColor(value);
+  const cur = chosen.key === "padrao" ? inheritedColor : chosen;
+  const options = TAG_COLORS.filter(o => o.key !== "padrao" && o.key !== inheritedColor?.key);
+  if (inheritedColor) options.unshift(inheritedColor);
+  return <Select value={cur?.key ?? ""} onValueChange={v => onChange(v === inheritedColor?.key ? "padrao" : v)}><SelectTrigger className="h-8 w-36 text-xs" aria-label={label} title={cur?.label}><span className="inline-flex min-w-0 items-center gap-1.5">{cur && dot(cur)}<span className="truncate text-xs">{cur?.label ?? "Escolha uma cor"}</span></span></SelectTrigger>
+    <SelectContent>{options.map((o) => <SelectItem key={o.key} value={o.key}><span className="inline-flex items-center gap-2 text-xs">{dot(o)}<span>{o.label}</span></span></SelectItem>)}</SelectContent></Select>;
 }
 
-/** CDE item Tags: every tag in use, each with independent background/text/border; "Atual" keeps the starting look. */
+/** CDE item Tags: every tag in use, each with independent background/text/border. */
 export function CdeTags({ number, handle }: { number: number; handle?: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
@@ -105,7 +106,7 @@ export function CdeTags({ number, handle }: { number: number; handle?: React.Rea
     <CdeCategoryHeader handle={handle} number={number} title="Tags" hint="Nome, fundo, texto e borda de cada etiqueta usada nos apps" open={open} onToggle={() => setOpen(!open)} />
     {open && <CdeSection title="Etiquetas dos apps" actions={<><Button variant="ghost" size="icon" aria-label="Salvar" title="Salvar tags" onClick={save} disabled={saving || !draft || JSON.stringify(draft) === JSON.stringify(saved)}><Save /></Button><Button variant="ghost" size="icon" aria-label="Cancelar" title="Cancelar" onClick={() => setDraft(null)}><X /></Button></>}>
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-xs text-muted-foreground">{rows.length} tags. “Atual (padrão)” mantém a aparência de hoje. Renomear muda só o nome exibido; os registros continuam os mesmos.</p>
+        <p className="text-xs text-muted-foreground">{rows.length} tags. Renomear muda só o nome exibido; os registros continuam os mesmos.</p>
         <div className="flex items-center gap-1">
           {draft && <></>}
           <Input aria-label="Buscar tag" placeholder="Buscar tag ou app" value={q} onChange={(e) => setQ(e.target.value)} className="h-8 w-56 text-[length:var(--filter-fs)] md:text-[length:var(--filter-fs)]" />

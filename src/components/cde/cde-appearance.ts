@@ -5,7 +5,7 @@ import { tagColor } from "./tag-style";
 /** Look of the CDE itself (group cde_appearance): category headers and subcategory bands. "padrao" keeps today's look. */
 export const CDE_APPEARANCE_GROUP = "cde_appearance";
 export const CDE_FONTS = [
-  { key: "padrao", label: "Nunito (atual)", value: "" },
+  { key: "padrao", label: "Nunito", value: "" },
   { key: "sistema", label: "Sistema", value: "ui-sans-serif, system-ui, sans-serif" },
   { key: "serifa", label: "Serifada", value: "Georgia, 'Times New Roman', serif" },
   { key: "mono", label: "Monoespaçada", value: "ui-monospace, Menlo, monospace" },
@@ -17,6 +17,21 @@ export const CDE_APPEARANCE_DEFAULT: CdeAppearanceConfig = {
   cat: { bg: "padrao", text: "padrao", border: "padrao", hint: "padrao", titlePx: 14, hintPx: 12, font: "padrao" },
   sub: { bg: "padrao", text: "padrao", border: "padrao", hint: "padrao", titlePx: 14, hintPx: 12, font: "padrao" },
 };
+/** Named inherited tokens keep legacy saved colours intact without a visible default choice. */
+export const CDE_INHERITED_COLORS = {
+  cat: {
+    bg: { key: "transparente", label: "Sem cor", value: "transparent" },
+    border: { key: "cde_border", label: "Cinza claro", value: "var(--border)" },
+    text: { key: "cde_text", label: "Escuro", value: "var(--foreground)" },
+    hint: { key: "cinza_texto", label: "Cinza (texto)", value: "var(--muted-foreground)" },
+  },
+  sub: {
+    bg: { key: "cde_section_bg", label: "Verde claro", value: "var(--erp-section-head)" },
+    border: { key: "cde_border", label: "Cinza claro", value: "var(--border)" },
+    text: { key: "cde_text", label: "Escuro", value: "var(--foreground)" },
+    hint: { key: "cinza_texto", label: "Cinza (texto)", value: "var(--muted-foreground)" },
+  },
+} as const;
 function level(p: unknown, d: CdeLevel): CdeLevel {
   const o = (p && typeof p === "object" ? p : {}) as Record<string, unknown>;
   const col = (v: unknown) => tagColor(typeof v === "string" ? v : undefined).key;
