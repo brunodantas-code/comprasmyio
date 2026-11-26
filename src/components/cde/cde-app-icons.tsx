@@ -4,7 +4,7 @@ import {
   BookOpen, Boxes, Briefcase, Building2, Bell, CalendarDays, CheckCircle2, ChevronDown, ChevronUp, ClipboardCheck, ClipboardList, CodeXml,
   DatabaseBackup, DollarSign, FileSignature, FileText, Files, FolderKanban, Gauge, History, Landmark, Layers3, ListTree, Package, Phone,
   Plus, ReceiptText, ScrollText, Search, Settings, ShieldCheck, ShoppingCart, Tag, Target, Users, UsersRound, WalletCards, Workflow, Flag, GitBranch, Wallet,
-  LayoutGrid, Menu, ArrowLeft, KeyRound, LogOut, type LucideIcon,
+  LayoutGrid, Menu, ArrowLeft, KeyRound, LogOut, UserPlus, KanbanSquare, ListChecks, Tags, Pencil, type LucideIcon,
 } from "lucide-react";
 import { CrmFunnelIcon } from "@/components/crm-funnel-icon";
 import { MytosisIcon } from "@/components/mytosis-icon";
@@ -40,20 +40,27 @@ const APPS: App[] = [
     { title: "Submenus", items: [i("Nova visita", Plus, "Plus"), i("Realizar Visita", CalendarDays, "CalendarDays"), i("Sanar Pendências", ClipboardCheck, "ClipboardCheck"), i("Histórico de Visitas", FileText, "FileText")] },
   ] },
   { name: "OpDesk", icon: Phone, iconName: "Phone", groups: [{ title: "Barra inferior", items: [i("Painel Global", LayoutGrid, "LayoutGrid"), i("Clientes", Building2, "Building2"), i("Responsáveis", UsersRound, "UsersRound"), i("Chamados", Phone, "Phone")] }, { title: "Ações", items: [i("Nova tarefa", Plus, "Plus"), i("Adicionar chamado (redondo)", Plus, "Plus")] }] },
-  { name: "CRM", icon: CrmFunnelIcon, iconName: "CrmFunnelIcon", groups: [{ title: "Aplicativo externo", items: [] }] },
+  { name: "CRM", icon: CrmFunnelIcon, iconName: "CrmFunnelIcon", groups: [{ title: "Barra inferior", items: [
+    i("Painel", Gauge, "Gauge"), i("Leads", UserPlus, "UserPlus"), i("Empresas", Building2, "Building2"), i("Funil", KanbanSquare, "KanbanSquare"),
+    i("Oportunidades", ListChecks, "ListChecks"), i("Propostas", FileText, "FileText"), i("Preços", Tags, "Tags"), i("Configurações", Settings, "Settings"),
+  ] }] },
   { name: "Legal", icon: FileSignature, iconName: "FileSignature", groups: [
     { title: "Barra inferior", items: [i("Contratos", FileSignature, "FileSignature"), i("Atas de Reunião", Users, "Users"), i("Documentos Padrão", Files, "Files")] },
     { title: "Ações", items: [i("Novo", Plus, "Plus")] },
   ] },
   { name: "RH", icon: UsersRound, iconName: "UsersRound", groups: [{ title: STD, items: [] }] },
-  { name: "Code", icon: CodeXml, iconName: "CodeXml", groups: [{ title: STD, items: [i("Tickets", CodeXml, "CodeXml"), i("Novo ticket", Plus, "Plus")] }] },
+  { name: "Code", icon: CodeXml, iconName: "CodeXml", groups: [{ title: "Barra inferior", items: [i("Tickets", CodeXml, "CodeXml"), i("Novo ticket", Plus, "Plus")] }] },
   { name: "Mytosis", icon: MytosisIcon, iconName: "MytosisIcon", groups: [
     { title: "Barra inferior", items: [i("Fluxogramas", Workflow, "Workflow"), i("Processos", BookOpen, "BookOpen")] },
   ] },
   { name: "Indicadores", icon: Gauge, iconName: "Gauge", groups: [{ title: "Barra inferior", items: [i("OKRs", Target, "Target"), i("KPIs", Gauge, "Gauge"), i("Check-ins", CheckCircle2, "CheckCircle2"), i("Ciclos", CalendarDays, "CalendarDays")] }] },
   { name: "CDE", icon: CdeIcon, iconName: "CdeIcon", groups: [{ title: STD, items: [i("Criar modelo", Plus, "Plus")] }] },
   { name: "Projects", icon: FolderKanban, iconName: "FolderKanban", groups: [
-    { title: "Seções do projeto", items: [i("Cronograma", CalendarDays, "CalendarDays"), i("Escopo", Flag, "Flag"), i("Equipe e recursos", UsersRound, "UsersRound"), i("Custos", Wallet, "Wallet"), i("Linha de base", GitBranch, "GitBranch"), i("Histórico", History, "History")] },
+    { title: "Seções do projeto", items: [
+      i("Cronograma", CalendarDays, "CalendarDays"), i("Quadro", FolderKanban, "FolderKanban"), i("Lista", Pencil, "Pencil"), i("Calendário", CalendarDays, "CalendarDays"),
+      i("Carga da equipe", UsersRound, "UsersRound"), i("Escopo / EAP", Flag, "Flag"), i("Equipe e recursos", UsersRound, "UsersRound"), i("Custos", Wallet, "Wallet"),
+      i("Linha de base", GitBranch, "GitBranch"), i("Histórico", History, "History"),
+    ] },
   ] },
 ];
 
@@ -80,7 +87,6 @@ function Tile({ it }: { it: Item }) {
   return <div className="flex w-24 flex-col items-center gap-1 text-center">
     <span className="flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-background"><Icon className="h-5 w-5" /></span>
     <span className="text-[0.7rem] leading-tight">{it.label}</span>
-    <span className="text-[0.6rem] leading-3 text-muted-foreground/70">{it.name}</span>
   </div>;
 }
 
@@ -100,14 +106,14 @@ export function CdeAppIcons({ number, handle }: { number: number; handle?: impor
       <TopIconStyleEditor items={[...SHARED.slice(0, 2), ...(APPS[0]?.groups[0]?.items.slice(0, 3) ?? []).map((i) => ({ ...i, name: (i as { name?: string }).name ?? i.label }))]} />
       <ListItemStyleEditor />
       <CdeSection title="Ícones e menus por app" hint="Menu superior compartilhado e ícones dos menus, submenus e ações de cada app.">
-      <CdeSection title="Menu superior comum a todos os apps" open={topOpen} marker={<span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary"><Menu className="h-5 w-5" /></span>} actions={<CdeButton group="toggle" screen="components/cde/cde-app-icons.tsx" aria-label={`${topOpen ? "Recolher" : "Exibir"} menu superior comum`} title={`${topOpen ? "Recolher" : "Exibir"} menu superior comum`} aria-expanded={topOpen} onClick={() => setTopOpen(!topOpen)} />}>
+      <CdeSection title="Menu superior comum a todos os apps" open={topOpen} className="cde-app-menu-section" marker={<span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary"><Menu className="h-5 w-5" /></span>} actions={<CdeButton group="toggle" screen="components/cde/cde-app-icons.tsx" aria-label={`${topOpen ? "Recolher" : "Exibir"} menu superior comum`} title={`${topOpen ? "Recolher" : "Exibir"} menu superior comum`} aria-expanded={topOpen} onClick={() => setTopOpen(!topOpen)} />}>
         <div className="flex flex-wrap gap-3">{SHARED.slice(0, 2).map((it) => <Tile key={it.label} it={it} />)}</div><div className="mt-3 mb-1 text-xs text-muted-foreground">Ações dentro do menu</div><div className="flex flex-wrap gap-3">{menuItems.map((it) => <Tile key={it.label} it={it} />)}</div>
       </CdeSection>
-      {APPS.map((a) => { const AppIcon = a.icon; const isOpen = openApps.has(a.name); return <CdeSection key={a.name} title={nameOf(a.name)} hint={a.iconName} open={isOpen}
-        marker={<span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary"><AppIcon className="h-5 w-5" /></span>}
+      {APPS.map((a) => { const AppIcon = a.icon; const isOpen = openApps.has(a.name); return <CdeSection key={a.name} title={nameOf(a.name)} open={isOpen} className="cde-app-menu-section"
+        marker={<span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary"><AppIcon className="h-5 w-5" /></span>}
         actions={<CdeButton group="toggle" screen="components/cde/cde-app-icons.tsx" aria-label={`${isOpen ? "Recolher" : "Exibir"} ${nameOf(a.name)}`} title={`${isOpen ? "Recolher" : "Exibir"} ${nameOf(a.name)}`} aria-expanded={isOpen} onClick={() => setOpenApps((p) => { const n = new Set(p); if (n.has(a.name)) n.delete(a.name); else n.add(a.name); return n; })} />}>
-        <div className="space-y-2">{a.groups.filter((g) => !(g.title === "Submenus" && SUB_PARENT[a.name])).map((g) => <div key={g.title}><div className="mb-1 text-xs text-muted-foreground">{g.title === "Barra inferior" ? "Menu principal do app" : g.title}</div>{g.title === "Barra inferior" ? <div className="mb-2"><CdeMenuType app={a.name} items={g.items} /></div> : null}
-          {g.items.length ? g.title === "Seções do projeto" ? <div className="flex flex-wrap gap-3">{g.items.map(it => <Tile key={it.label} it={it} />)}</div> : <CdeSortableIcons app={a.name} group={g.title} items={g.items} /> : <span className="text-xs text-muted-foreground">—</span>}</div>)}{SUB_PARENT[a.name] ? <div><div className="mb-1 text-xs text-muted-foreground">Menus e seus submenus</div><MenuTree app={a.name} groups={a.groups} /></div> : null}</div>
+        <div className="space-y-2">{a.groups.filter((g) => !(g.title === "Submenus" && SUB_PARENT[a.name])).map((g) => <div key={g.title}><div className="mb-1 text-xs text-muted-foreground">{g.title === "Barra inferior" ? "Menu principal do app" : g.title}</div>{g.title === "Barra inferior" || g.title === "Seções do projeto" ? <div className="mb-2"><CdeMenuType app={a.name} items={g.items} /></div> : null}
+          {g.items.length ? <CdeSortableIcons app={a.name} group={g.title} items={g.items} /> : <span className="text-xs text-muted-foreground">—</span>}</div>)}{SUB_PARENT[a.name] ? <div><div className="mb-1 text-xs text-muted-foreground">Menus e seus submenus</div><MenuTree app={a.name} groups={a.groups} /></div> : null}</div>
       </CdeSection>; })}
       </CdeSection>
     </div> : null}

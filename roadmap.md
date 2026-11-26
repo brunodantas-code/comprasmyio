@@ -1,3 +1,7 @@
+- [x] CDE Ícones dos Apps e menus: nomes técnicos removidos, 14 linhas com 48 px e uma única divisória; computador e celular conferidos, sem erros.
+- [x] CDE Ícones dos Apps e menus: CRM exibe os oito menus reais com ordem personalizável e opções Mobile/Desktop; abertura e recolhimento conferidos.
+- [x] CDE Ícones dos Apps e menus: Code tem opções Mobile/Desktop e navegação real Tickets/Novo ticket; ordem legada preservada, abertura do novo ticket e 390 px conferidos.
+- [x] CDE Ícones dos Apps e menus: Projects tem as dez seções reais, ordem personalizável e opções Mobile/Desktop aplicadas à navegação; desktop e 390 px sem excesso lateral.
 - [x] Acessos: Perfis por app com os 14 apps para Admin, ícones monocromáticos acima dos nomes em uma linha (rolagem no celular); editores próprios preservados, demais apps usam acesso individual existente. CRM aberto sem alterar dados, seis testes passaram e computador/celular conferidos.
 - [x] CDE catálogo de menus: ícone verde e nome de cada app no cabeçalho compartilhado; 14 setas alinhadas à direita, incluindo o menu superior comum. Conferidos computador/celular e abertura/recolhimento de Projects; escolhas salvas preservadas.
 - [x] CDE Ícones dos Apps e menus: cabeçalho e subtítulo explicativo incluídos no catálogo de menus e ícones por app; recuo interno afasta todos os ícones da borda. Conferidos computador/celular e expansão do menu, sem alterar configurações.

@@ -16,7 +16,7 @@ import { useTableFilters, type FilterColumn } from "@/components/use-table-filte
 import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { CodeXml, Download, Eye, History, MessageCircleQuestion, MessageCircleMore, Paperclip, Send, Trash2, Pencil } from "lucide-react";
+import { CodeXml, Download, Eye, History, MessageCircleQuestion, MessageCircleMore, Paperclip, Plus, Send, Trash2, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { MyioAppLogo } from "@/components/myio-app-logo";
@@ -32,6 +32,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { APP_NAVIGATION_OPTIONS } from "@/lib/app-navigation-options";
 import { AppHeader } from "@/components/app-header";
+import { AppNavigation } from "@/components/ui/app-navigation";
+import { useAppMenuLayout } from "@/components/cde/cde-menu-type";
+import { sortByMenuOrder, useMenuOrders } from "@/components/cde/menu-order";
 import { MilestoneTimeline } from "@/components/milestone-timeline";
 import { currentCodeObservations, proposedSolutionSchema, codeObservationSchema } from "@/lib/code-records";
 import { canReplyToCodeQuestion, shouldShowCodeAnswer } from "@/lib/code-conversation";
@@ -146,7 +149,8 @@ function DevelopmentPage() {
   const [searchOp, setSearchOp] = useState<FilterOp>("contains");
   const [searchText, setSearchText] = useState("");
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
-
+  const menuLayout = useAppMenuLayout("Code");
+  const { data: menuOrders } = useMenuOrders();
 
   const { data, isLoading } = useQuery({
     queryKey: ["development-tickets"],
@@ -219,11 +223,15 @@ function DevelopmentPage() {
     setSelectedTicketId(null);
     if (routeSearch.ticket) navigate({ to: "/development", search: { ticket: undefined }, replace: true });
   };
+  const codeMenuItems = sortByMenuOrder([
+    { label: "Tickets", icon: CodeXml, action: () => { closeTicket(); window.scrollTo({ top: 0, behavior: "smooth" }); } },
+    { label: "Novo ticket", icon: Plus, action: () => setCreateOpen(true) },
+  ], menuOrders?.["Code|Barra inferior"] ?? menuOrders?.["Code|Sem barra inferior"]);
 
   return (
     <div className="min-h-screen bg-background">
       <AppHeader manualApp="Code" logo={<MyioAppLogo appName="Code" className="text-base sm:text-2xl" />} />
-      <main className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6">
+      <main className={`mx-auto max-w-7xl space-y-6 px-4 py-8 pb-28 sm:px-6 ${menuLayout.main}`}>
         <Card>
           <CardHeader>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -269,6 +277,11 @@ function DevelopmentPage() {
           </CardContent>
         </Card>
       </main>
+      <AppNavigation className={menuLayout.nav} aria-label="Navegação do Code">
+        <div className={`mx-auto grid max-w-md grid-cols-2 items-stretch rounded-[1.75rem] border border-border bg-card/95 p-1.5 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-card/90 ${menuLayout.grid}`}>
+          {codeMenuItems.map(({ label, icon: Icon, action }) => <Button key={label} type="button" variant="ghost" aria-current={label === "Tickets" && !selectedTicket ? "page" : undefined} className={`h-auto min-w-0 rounded-[1.35rem] p-0 shadow-none ${label === "Tickets" ? "!bg-primary/15 !text-primary hover:!bg-primary/20 hover:!text-primary" : "!bg-transparent !text-muted-foreground hover:!bg-muted hover:!text-foreground"}`} onClick={action}><span className="flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 px-1"><span className="menu-icon"><Icon className="h-5 w-5 shrink-0" /></span><span className="max-w-full truncate text-[10px] font-semibold leading-none">{label}</span></span></Button>)}
+        </div>
+      </AppNavigation>
       <TicketDetails key={selectedTicket?.id ?? "closed"} ticket={selectedTicket} onClose={closeTicket} data={data} onUpdated={async () => {
         await Promise.all([
           queryClient.invalidateQueries({ queryKey: ["development-tickets"] }),

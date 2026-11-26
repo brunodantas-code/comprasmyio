@@ -18,7 +18,6 @@ function SortableTile({ it, n }: { it: Item; n: number }) {
     <div className="flex min-w-0 flex-1 flex-col items-center gap-1 text-center">
       <span className="relative flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-background"><Icon className="h-5 w-5" /><CdeNumber screen="components/cde/cde-sortable-icons.tsx" className="absolute -left-3 -top-3">{n}</CdeNumber></span>
       <span className="text-[0.7rem] leading-tight">{it.label}</span>
-      <span className="text-[0.6rem] leading-3 text-muted-foreground/70">{it.name}</span>
     </div>
   </div>;
 }
@@ -28,7 +27,8 @@ export function CdeSortableIcons({ app, group, items }: { app: string; group: st
   const qc = useQueryClient();
   const { data } = useMenuOrders();
   const key = menuKey(app, group);
-  const ordered = sortByMenuOrder(items, data?.[key]);
+  const legacyOrder = app === "Code" && group === "Barra inferior" ? data?.["Code|Sem barra inferior"] : undefined;
+  const ordered = sortByMenuOrder(items, data?.[key] ?? legacyOrder);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }), useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }));
   async function onDragEnd(e: DragEndEvent) {
     if (!e.over || e.active.id === e.over.id) return;
