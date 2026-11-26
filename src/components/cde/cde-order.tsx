@@ -24,9 +24,10 @@ export function mergeCdeOrder(raw: string | null | undefined, defaults: CdeOrder
   const cats = Array.isArray(saved.cats) ? saved.cats.filter((x): x is string => typeof x === "string" && defaults.cats.includes(x)) : [];
   defaults.cats.forEach((k, i) => { if (!cats.includes(k)) cats.splice(Math.min(i, cats.length), 0, k); });
   const titles: Record<string, string> = {};
+  const titleIds = new Set([...defaults.cats, ...Object.values(defaults.subs).flat()]);
   if (saved.titles && typeof saved.titles === "object") {
     for (const [id, title] of Object.entries(saved.titles)) {
-      if (defaults.cats.includes(id) && typeof title === "string" && title.trim()) titles[id] = title.trim();
+      if (titleIds.has(id) && typeof title === "string" && title.trim()) titles[id] = title.trim();
     }
   }
   return { cats: [...new Set(cats)], subs, titles };

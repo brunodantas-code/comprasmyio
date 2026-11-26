@@ -45,6 +45,7 @@ import { readButtonBindings } from "./library-bindings";
 import numberUsage from "./number-usage.json";
 import { saveLibrarySelection } from "./save-library-selection";
 import { CdeDraftSave } from "./cde-draft-save";
+import { CdeSection } from "./cde-section";
 
 type Variant = { key: string; name?: string; custom?: boolean; tag: string; variant: string; size: string; className: string; icon: string; iconClass: string; label: string; count: number; files: string[]; uses?: { file: string; n: number }[]; style?: CdeStyle };
 
@@ -61,7 +62,7 @@ const GROUPS: { key: GroupKey; title: string; hint: string; multi?: boolean }[] 
   { key: "fields_select", title: "1.2 Listas suspensas (droplists)", hint: "Seletores de opções · admite vários padrões", multi: true },
   { key: "fields_textarea", title: "1.3 Textos longos", hint: "Áreas de texto com várias linhas · admite vários padrões", multi: true },
   { key: "fields_password", title: "1.4 Senhas", hint: "Campos de senha com olho · admite vários padrões", multi: true },
-  { key: "filter", title: "2. Filtros", hint: "Múltiplos filtros combinados · identificação e remoção individual · padrão único" },
+  { key: "filter", title: "4.14 Filtros", hint: "Múltiplos filtros combinados · identificação e remoção individual · padrão único" },
   { key: "sort", title: "3.1 Ordenar colunas e listas", hint: "Setas de ordem crescente/decrescente · padrão único" },
   { key: "move", title: "3.2 Mover para cima/baixo", hint: "Setas que reposicionam uma linha · padrão único" },
   { key: "summary", title: "3.3 Voltar ao Sumário", hint: "Link de retorno ao sumário · padrão único" },
@@ -109,8 +110,8 @@ const PARENTS: Record<string, string> = { "1": "Campos para preenchimento", "3":
 const baseTitle = (t: string) => t.split(" ").slice(1).join(" ");
 const groupParent = (t: string) => { const n = t.split(" ")[0].replace(/\.$/, ""); return n.includes(".") ? n.split(".")[0] : null; };
 const CDE_DEFAULT_ORDER: CdeOrder = {
-  cats: ["app_appearance", ...[...new Set(GROUPS.map((g) => groupParent(g.title) ? `p:${groupParent(g.title)}` : g.key))], "card_borders", "icons", "nav", "menu", "apps", "table_fonts", "title_texts", "tags", "corporate_messages", "button_library", "deadline_alerts", "project_budget"],
-  subs: Object.fromEntries(Object.keys(PARENTS).map((p) => [p, [...GROUPS.filter((g) => groupParent(g.title) === p).map((g) => g.key), ...(p === "6" ? ["record_number"] : [])]])),
+  cats: ["app_appearance", ...[...new Set(GROUPS.map((g) => groupParent(g.title) ? `p:${groupParent(g.title)}` : g.key))].filter(key => key !== "p:3" && key !== "color_swatch"), "card_borders", "icons", "nav", "menu", "apps", "table_fonts", "title_texts", "tags", "corporate_messages", "button_library", "deadline_alerts"],
+  subs: { ...Object.fromEntries(Object.keys(PARENTS).map((p) => [p, [...GROUPS.filter((g) => groupParent(g.title) === p).map((g) => g.key), ...(p === "4" ? ["p:3"] : []), ...(p === "6" ? ["record_number"] : [])]])), app_appearance: ["color_swatch", "project_budget"] },
 };
 const EXTRA_LABELS: Record<string, string> = { spend_categories: "Spend — categorias de despesas", project_appearance: "Cores do Projects", project_budget: "Customizações do Projects", cde_appearance: "Aparência do CDE", icons: "Ícones dos Apps e menus", nav: "Navegação (UI/UX)", menu: "Menu principal", apps: "Home Page", table_fonts: "Cabeçalhos e Listas", tags: "Tags", title_texts: "Títulos e Subtítulos", corporate_messages: "Mensagens corporativas", button_library: "Biblioteca de botões em uso", deadline_alerts: "Alertas de Prazo" };
 
@@ -141,7 +142,12 @@ export function CdeWorkspace() {
   const catLabel = (c: string) => cdeOrder.titles?.[c] ?? (c === "card_borders" ? "Bordas de classificação dos cards" : c === "app_appearance" ? "Aparência" : c.startsWith("p:") ? PARENTS[c.slice(2)] : EXTRA_LABELS[c] ?? baseTitle(GROUPS.find((x) => x.key === c)?.title ?? c));
   const groupTitle = (key: string) => {
     const g = GROUPS.find((x) => x.key === key); if (!g) return "";
+    if (key === "color_swatch") return `${cdeOrder.cats.indexOf("app_appearance") + 1}.3 ${baseTitle(g.title)}`;
     const p = groupParent(g.title);
+    if (p === "3") {
+      const ci = cdeOrder.cats.indexOf("p:4") + 1;
+      return `${ci}.${(cdeOrder.subs["4"] ?? []).indexOf("p:3") + 1}.${(cdeOrder.subs["3"] ?? []).indexOf(key) + 1} ${baseTitle(g.title)}`;
+    }
     const ci = cdeOrder.cats.indexOf(p ? `p:${p}` : key) + 1;
     return p ? `${ci}.${(cdeOrder.subs[p] ?? []).indexOf(key) + 1} ${baseTitle(g.title)}` : `${ci} ${baseTitle(g.title)}`;
   };
@@ -338,7 +344,7 @@ export function CdeWorkspace() {
   });
 
   const renderGroup = (g0: (typeof GROUPS)[number], num: string, parent: string | null, handle: React.ReactNode) => {
-        const g = { ...g0, title: `${num} ${baseTitle(g0.title)}` };
+        const g = { ...g0, title: `${num} ${cdeOrder.titles?.[g0.key] ?? baseTitle(g0.title)}` };
                   const list = groupModels(g.key);
         const standards = standardsOf(g.key);
         const primaries = primariesOf(g.key);
@@ -470,8 +476,13 @@ export function CdeWorkspace() {
               <div>
                 <CdeCategoryHeader handle={handle} number={n} title={PARENTS[pk]} open={!collapsedCategories.has(pk)} onToggle={() => setCollapsedCategories((s) => { const next = new Set(s); if (next.has(pk)) next.delete(pk); else next.add(pk); return next; })} />
                 {!collapsedCategories.has(pk) ? (
-                  <CdeSortableList className="cde-subcategory-list space-y-0" ids={subs} labelOf={(k) => k === "record_number" ? "Números de chamados e tickets" : baseTitle(GROUPS.find((x) => x.key === k)?.title ?? k)} onMove={(ids) => saveCdeOrder({ ...cdeOrder, subs: { ...cdeOrder.subs, [pk]: ids } })}>
+                  <CdeSortableList className="cde-subcategory-list space-y-0" ids={subs} labelOf={(k) => k === "p:3" ? catLabel(k) : k === "record_number" ? "Números de chamados e tickets" : baseTitle(GROUPS.find((x) => x.key === k)?.title ?? k)} onMove={(ids) => saveCdeOrder({ ...cdeOrder, subs: { ...cdeOrder.subs, [pk]: ids } })}>
                     {(key, si, subHandle) => {
+                      if (key === "p:3") return <CdeSection className="[&>.cde-section-content]:p-0 [&>.cde-section-content]:space-y-0" title={catLabel(key)} hint="Ordenar listas, mover linhas, voltar ao sumário e exibir/recolher" marker={subHandle} open={!collapsedCategories.has("3")} actions={<CdeButton group="toggle" screen="components/cde/cde-workspace.tsx" aria-label={`${collapsedCategories.has("3") ? "Exibir" : "Recolher"} ${catLabel(key)}`} title={`${collapsedCategories.has("3") ? "Exibir" : "Recolher"} ${catLabel(key)}`} aria-expanded={!collapsedCategories.has("3")} onClick={() => setCollapsedCategories(current => { const next = new Set(current); if (next.has("3")) next.delete("3"); else next.add("3"); return next; })} />}>
+                        <CdeSortableList className="cde-subcategory-list space-y-0" ids={cdeOrder.subs["3"] ?? []} labelOf={id => baseTitle(GROUPS.find(group => group.key === id)?.title ?? id)} onMove={ids => saveCdeOrder({ ...cdeOrder, subs: { ...cdeOrder.subs, "3": ids } })}>
+                          {(id, index, nestedHandle) => { const group = GROUPS.find(group => group.key === id); return group ? renderGroup(group, `${n}.${si + 1}.${index + 1}`, n, nestedHandle) : null; }}
+                        </CdeSortableList>
+                      </CdeSection>;
                       if (key === "record_number") return <NumericMarkerEditor key={`record-number-${collapseKey}`} kind="record_number" number={`${n}.${si + 1}`} handle={subHandle} />;
                       const group = GROUPS.find(x => x.key === key);
                       return group ? renderGroup(group, `${n}.${si + 1}`, n, subHandle) : null;
@@ -485,11 +496,14 @@ export function CdeWorkspace() {
           if (cat === "card_borders") return <CdeCardBorders key={`CdeCardBorders-${collapseKey}`} number={ci + 1} handle={handle} />;
           if (cat === "nav") return <CdeNavigation key={`CdeNavigation-${collapseKey}`} number={ci + 1} handle={handle} />;
           if (cat === "menu") return <CdeMainMenu key={`CdeMainMenu-${collapseKey}`} number={ci + 1} handle={handle} />;
-          if (cat === "project_budget") return <CdeProjectCustomizations key={`CdeProjectCustomizations-${collapseKey}`} number={ci + 1} handle={handle} />;
           if (cat === "apps") return <CdeAppOrder key={`CdeAppOrder-${collapseKey}`} number={ci + 1} handle={handle} />;
           if (cat === "corporate_messages") return <CdeCorporateMessages key={`CdeCorporateMessages-${collapseKey}`} number={ci + 1} handle={handle} />;
           if (cat === "title_texts") return <CdeTitleTexts key={`CdeTitleTexts-${collapseKey}`} number={ci + 1} handle={handle} />;
-          if (cat === "app_appearance") return <AppAppearanceItem key={`AppAppearance-${collapseKey}`} number={ci + 1} handle={handle} />;
+          if (cat === "app_appearance") return <AppAppearanceItem key={`AppAppearance-${collapseKey}`} number={ci + 1} handle={handle}>
+            <CdeSortableList className="cde-subcategory-list space-y-0" ids={cdeOrder.subs["app_appearance"] ?? []} labelOf={catLabel} onMove={ids => saveCdeOrder({ ...cdeOrder, subs: { ...cdeOrder.subs, app_appearance: ids } })}>
+              {(id, index, subHandle) => { if (id === "project_budget") return <CdeProjectCustomizations key={`CdeProjectCustomizations-${collapseKey}`} number={ci + 1} handle={subHandle} title={catLabel(id)} embedded />; const group = GROUPS.find(group => group.key === id); return group ? renderGroup(group, `${n}.${index + 3}`, n, subHandle) : null; }}
+            </CdeSortableList>
+          </AppAppearanceItem>;
           if (cat === "tags") return <CdeTags key={`CdeTags-${collapseKey}`} number={ci + 1} handle={handle} />;
           if (cat === "table_fonts") return <CdeTableFonts key={`CdeTableFonts-${collapseKey}`} number={ci + 1} handle={handle} />;
           if (cat === "button_library") return <CdeButtonLibrary key={`CdeButtonLibrary-${collapseKey}`} number={ci + 1} handle={handle} onEdit={(button, group, ids, modelKey) => {

@@ -13,7 +13,7 @@ import { CdeSection } from "./cde-section";
 import { CdeButton } from "./cde-button";
 import { CdeAppearance } from "./cde-appearance-item";
 
-export function AppAppearanceItem({ number, handle }: { number: number; handle?: React.ReactNode }) {
+export function AppAppearanceItem({ number, handle, children }: { number: number; handle?: React.ReactNode; children?: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const [contentOpen, setContentOpen] = useState(true);
   const [draft, setDraft] = useState<AppAppearance | null>(null);
@@ -54,6 +54,6 @@ export function AppAppearanceItem({ number, handle }: { number: number; handle?:
           <span className="whitespace-nowrap">{option.label}</span>
         </label>)}
       </RadioGroup>
-    </CdeSection><CdeAppearance /></>}
+    </CdeSection><CdeAppearance />{children}</>}
   </section>;
 }

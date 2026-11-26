@@ -136,8 +136,11 @@ export function CdeButtonLibrary({ number, handle, onEdit }: { number: number; h
   return <section className="min-w-0 space-y-4">
     <CdeCategoryHeader number={number} handle={handle} title="Biblioteca de botões em uso" hint={`${models.length} modelos · ${library.length} usos`} open={open} onToggle={() => setOpen(!open)} />
     {open && <>
-      <div role="toolbar" aria-label="Controles da biblioteca de botões" className="flex min-w-0 flex-wrap items-center justify-end gap-2">
-        <Input aria-label="Buscar botão pelo nome" placeholder="Nome do botão…" className="w-48 min-w-0" value={nameSearch} onChange={e => setNameSearch(e.target.value)} />
+      <div role="toolbar" aria-label="Controles da biblioteca de botões" className="flex min-w-0 flex-wrap items-start justify-end gap-2">
+        <div className="min-w-0 max-w-full space-y-2">
+          <Input aria-label="Buscar botão pelo nome" placeholder="Nome do botão…" className="w-48 min-w-0" value={nameSearch} onChange={e => setNameSearch(e.target.value)} />
+          <p className="text-xs text-muted-foreground">{cards.length} modelos encontrados · {cards.flatMap(usesOf).length} usos</p>
+        </div>
         <div className="flex shrink-0 items-center gap-2">{filters.menu}<Popover><PopoverTrigger asChild><Button type="button" variant="ghost" size="compactIcon" aria-label="Ordenar botões" title="Ordenar botões"><ArrowUpDown /></Button></PopoverTrigger><PopoverContent align="start" className="w-64 space-y-3"><Select value={sort} onValueChange={setSort}><SelectTrigger aria-label="Ordenar por"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="name">Nome do botão</SelectItem><SelectItem value="type">Tipo / grupo CDE</SelectItem><SelectItem value="file">Local de uso</SelectItem></SelectContent></Select><Select value={direction} onValueChange={setDirection}><SelectTrigger aria-label="Sentido da ordenação"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="asc">A → Z</SelectItem><SelectItem value="desc">Z → A</SelectItem></SelectContent></Select></PopoverContent></Popover>
         <Checkbox aria-label="Selecionar todos os cards visíveis" checked={cards.length > 0 && cards.flatMap(usesOf).every(b => checked.includes(libraryEntryKey(b)))} onCheckedChange={value => setChecked(value ? cards.flatMap(usesOf).map(libraryEntryKey) : [])} />
         <Button type="button" variant="ghost" size="compactIcon" title="Excluir cards selecionados" aria-label="Excluir cards selecionados" disabled={saving || !checked.length} onClick={() => removeCards(cards.filter(b => checked.includes(libraryEntryKey(b))))}><Trash2 /></Button>
@@ -145,7 +148,6 @@ export function CdeButtonLibrary({ number, handle, onEdit }: { number: number; h
         </div>
       </div>
       {filters.summary}
-      <p className="text-xs text-muted-foreground">{cards.length} modelos encontrados · {cards.flatMap(usesOf).length} usos</p>
       {([["common", "Botões de ação padrão", "Salvar, Cancelar, Excluir, Adicionar e demais ações que seguem o padrão visual comum"], ["specific", "Botões de funções específicas", "Botões com altura, borda, fundo ou modelo próprios"]] as const).map(([kind, title, hint]) => {
         const sectionCards = cards.filter(b => (classification(b) === "Função específica") === (kind === "specific"));
         return <section key={kind} className="min-w-0 space-y-2">

@@ -27,4 +27,27 @@ describe("ordem das subcategorias de numeração", () => {
     expect(result.cats).toEqual(["alerts", "project_budget", "spend"]);
     expect(result.titles).toEqual({ spend: "Despesas" });
   });
+  it("consolida Filtros e Ordenação em Botões de ação sem perder a ordem nem os nomes salvos", () => {
+    const defaults = { cats: ["app_appearance", "p:1", "p:4", "p:5"], subs: { "4": ["save", "cancel", "filter", "p:3"], "3": ["sort", "move", "summary", "toggle"] } };
+    const saved = { cats: ["app_appearance", "p:1", "filter", "p:3", "p:4", "p:5"], subs: { "4": ["cancel", "save"], "3": ["toggle", "summary", "move", "sort"] }, titles: { filter: "Meus filtros", "p:3": "Minha ordenação", "p:4": "Minhas ações" } };
+    const result = mergeCdeOrder(JSON.stringify(saved), defaults);
+    expect(result.cats).toEqual(["app_appearance", "p:1", "p:4", "p:5"]);
+    expect(result.subs["4"]).toEqual(["cancel", "save", "filter", "p:3"]);
+    expect(result.subs["3"]).toEqual(["toggle", "summary", "move", "sort"]);
+    expect(result.titles).toEqual(saved.titles);
+  });
+  it("move a edição de cores para Aparência preservando o nome salvo e as outras categorias", () => {
+    const defaults = { cats: ["app_appearance", "p:4", "apps"], subs: { app_appearance: ["color_swatch"] } };
+    const result = mergeCdeOrder(JSON.stringify({ cats: ["app_appearance", "p:4", "color_swatch", "apps"], titles: { color_swatch: "Amostras de cores" } }), defaults);
+    expect(result.cats).toEqual(["app_appearance", "p:4", "apps"]);
+    expect(result.subs["app_appearance"]).toEqual(["color_swatch"]);
+    expect(result.titles).toEqual({ color_swatch: "Amostras de cores" });
+  });
+  it("move Customizações do Projects para Aparência sem perder nomes nem duplicar a categoria", () => {
+    const defaults = { cats: ["app_appearance", "apps"], subs: { app_appearance: ["color_swatch", "project_budget"] } };
+    const result = mergeCdeOrder(JSON.stringify({ cats: ["app_appearance", "apps", "project_budget"], titles: { project_budget: "Ajustes do Projects" } }), defaults);
+    expect(result.cats).toEqual(["app_appearance", "apps"]);
+    expect(result.subs["app_appearance"]).toEqual(["color_swatch", "project_budget"]);
+    expect(result.titles).toEqual({ project_budget: "Ajustes do Projects" });
+  });
 });

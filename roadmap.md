@@ -1,3 +1,10 @@
+- [x] CDE: subir a prévia indicada no print para não sobrepor os menus.
+- [x] Spend Categorias de despesas: cabeçalho cinza CDE, disquete alinhado às lixeiras e título único.
+- [x] CDE Biblioteca: mover texto cinza abaixo da linha verde da busca por nome do botão.
+- [x] CDE: consolidar o item 20 como subitem do item 1 conforme print, preservando escolhas.
+- [x] CDE: consolidar o item 18 como subitem do item 1, conforme print, preservando escolhas.
+- [x] CDE: consolidar Filtros e Ordenação em Botões de ação, preservar escolhas e renumerar categorias.
+- [x] CDE: remover área branca entre as faixas verdes indicada no print.
 - [x] CDE: Faixa superior dos apps em subitem próprio com logo/cor/altura e setas independentes; Home/apps/prévias usam o mesmo logo. 36 px salvos e relidos na Home/CRM, original 32 px restaurado; quatro prévias e celular sem excesso lateral, 21 testes passaram.
 - [x] CDE Projects: Orçamento e Cores consolidados em Customizações do Projects, subitens com setas independentes e amostras circulares nos campos/opções; conferidos no computador/celular sem salvar escolhas.
 - [x] Spend: Categorias de despesas movidas do CDE para menu próprio, mantendo administração ERP e gravações existentes; tela carregada com categorias reais e disquete inativo sem alterações.

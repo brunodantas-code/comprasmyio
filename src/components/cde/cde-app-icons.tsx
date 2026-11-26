@@ -102,7 +102,7 @@ export function CdeAppIcons({ number, handle }: { number: number; handle?: impor
   const [appsOpen, setAppsOpen] = useState(true);
   return <section className="cde-category-sections">
     <CdeCategoryHeader handle={handle} number={number} title="Ícones dos Apps e menus" hint={`${APPS.length} apps · ícone do portal, barra inferior, submenus e ações para comparar padrões`} open={open} onToggle={() => setOpen(!open)} />
-    {open ? <div className="space-y-4">
+    {open ? <div className="space-y-0">
       <CdeSection title="Regras para todos os apps" hint="Cor, fundo, borda e arredondamento valem para os ícones da barra superior e dos menus de todos os apps." open={rulesOpen} actions={<CdeButton group="toggle" screen="components/cde/cde-app-icons.tsx" aria-label={`${rulesOpen ? "Recolher" : "Exibir"} regras para todos os apps`} title={`${rulesOpen ? "Recolher" : "Exibir"} regras para todos os apps`} aria-expanded={rulesOpen} onClick={() => setRulesOpen(!rulesOpen)} />}>
         {null}
       </CdeSection>

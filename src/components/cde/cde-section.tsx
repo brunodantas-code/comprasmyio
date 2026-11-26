@@ -19,6 +19,6 @@ export function CdeSection({ title, hint, marker, actions, children, className, 
       </div>
       {actions && <div className="cde-header-actions">{actions}</div>}
     </header>
-    {open && <div className="cde-section-content min-w-0 space-y-4">{children}</div>}
+    {open && children != null && <div className="cde-section-content min-w-0 space-y-4">{children}</div>}
   </section>;
 }
