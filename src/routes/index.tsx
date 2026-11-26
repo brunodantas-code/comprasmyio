@@ -206,7 +206,8 @@ export function Landing() {
       </div>
 
       <div className="relative z-10 mx-auto grid w-full max-w-7xl grid-cols-1 items-start gap-8 min-[960px]:grid-cols-[37rem_17rem] min-[960px]:gap-3 lg:grid-cols-[41rem_18rem] lg:gap-6">
-        <section className="w-full min-w-0">
+        <section className="contents min-[960px]:block min-[960px]:w-full min-[960px]:min-w-0">
+          <div className="order-1 min-w-0">
           <MyioPlatformLogo tone="light" className="mb-4 h-10 sm:h-11" />
 
           <h1 className="max-w-3xl text-4xl font-extrabold leading-[1.02] text-erp-landing-foreground sm:text-5xl lg:text-6xl">
@@ -216,8 +217,9 @@ export function Landing() {
           <p className="mt-3 max-w-xl text-base leading-snug text-erp-landing-muted sm:text-lg">
             A plataforma ERP completa para escalar o negócio.
           </p>
+          </div>
 
-          <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 min-[960px]:gap-3">
+          <div className="order-3 grid grid-cols-2 gap-3 sm:grid-cols-3 min-[960px]:mt-5 min-[960px]:gap-3">
             {orderedModules.map(({ icon: Icon, title, body, available }) => (
               <div
                 key={title}
@@ -235,7 +237,7 @@ export function Landing() {
           </div>
         </section>
 
-         <section className="w-full min-[960px]:mt-[13.25rem] min-[960px]:w-[17rem] lg:mt-[14.95rem] lg:w-[18rem]" aria-labelledby="access-title">
+         <section className="order-2 w-full min-[960px]:order-none min-[960px]:mt-[13.25rem] min-[960px]:w-[17rem] lg:mt-[14.95rem] lg:w-[18rem]" aria-labelledby="access-title">
           <div className="rounded-2xl border border-erp-access-border bg-erp-access p-5 text-erp-landing-foreground shadow-2xl backdrop-blur-2xl lg:p-6">
             <div className="mb-5">
               <h2 id="access-title" className="text-2xl font-extrabold text-erp-landing-foreground">Acesse sua conta</h2>
