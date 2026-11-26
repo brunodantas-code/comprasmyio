@@ -95,7 +95,6 @@ export function CdeTableFonts({ number, handle }: { number: number; handle?: imp
             <div role="group" aria-label="Formatação dos títulos dos campos" className="grid w-full max-w-5xl grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-3">
               {([["fieldBg", "Títulos dos campos — fundo"], ["fieldText", "Títulos dos campos — texto"], ["fieldBorder", "Títulos dos campos — borda"]] as const).map(([k, l]) => <div key={k} className="min-w-0 space-y-2"><ColorPick kind={k} label={l} value={fonts[k]} onChange={(v) => setDraft({ ...fonts, [k]: v })} />{k === "fieldText" && <FontFormatControl context="Títulos dos campos" value={fonts.fieldFormat ?? {}} onChange={format => setDraft({ ...fonts, fieldFormat: format })} />}</div>)}
             </div>
-            <div aria-label="Prévia dos títulos dos campos" style={tableAlignVars(fonts) as React.CSSProperties} className="flex flex-wrap gap-4 py-3"><Label>Nome</Label><Label>Responsável</Label><Label>Borda</Label></div>
           </div>
           <div className="space-y-1">
             <Label>Prévia</Label>
