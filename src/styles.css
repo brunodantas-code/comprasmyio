@@ -797,7 +797,15 @@ input[data-custom-calendar="true"]::-webkit-calendar-picker-indicator {
 }
 
 /* Aparência do CDE (item do próprio CDE): variáveis definidas no <main> do CDE; fora dele valem os valores atuais. */
+.cde-category-list {
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: clip;
+}
+.cde-category-list > div + div { border-top: 1px solid var(--border); }
 .cde-cat-band { background: var(--cde-cat-bg, transparent); border-color: var(--cde-cat-border, var(--border)); }
+.cde-category-list .cde-cat-band:has([aria-expanded="false"]) { border-bottom-width: 0; }
 .cde-cat-title { color: var(--cde-cat-text, inherit); font-size: var(--cde-cat-title-fs, 0.875rem); font-family: var(--cde-cat-font, inherit); }
 .cde-cat-hint { color: var(--cde-cat-hint-color, var(--muted-foreground)); font-size: var(--cde-cat-hint-fs, 0.75rem); font-family: var(--cde-cat-font, inherit); }
 .cde-sub-band { background: var(--cde-sub-bg, var(--accent)); box-shadow: inset 0 0 0 1px var(--cde-sub-border, transparent); }

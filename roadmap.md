@@ -1,3 +1,4 @@
+- [x] CDE: 23 menus reunidos em lista única com borda cinza-clara contínua, preservada ao expandir; conferidos com sessão no computador e celular, sem excesso lateral ou erros. 13 testes passaram e build OK.
 - [x] CDE: seções internas com cabeçalho verde-claro, borda cinza e título 16px sem negrito; categoria principal fora, sem espaço antes da primeira seção. Verde-claro aplicado por Aparência do CDE; 13 categorias conferidas com sessão.
 - [x] CDE: disquetes sem texto nos cabeçalhos, visíveis e desabilitados sem alteração; modelo novo testado sem salvar, disquete e X com centro vertical idêntico. Biblioteca regenerada; 131 testes passaram e build OK.
 - [x] CDE ícones: ERP primeiro antes de Spend, somente IO verde/preto e IO verde/lilás; 15 pares, cinco itens por linha no computador, celular sem excesso lateral. Escolha salva/relida na Home e restaurada; falta publicar.

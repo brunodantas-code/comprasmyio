@@ -449,7 +449,7 @@ export function CdeWorkspace() {
         </div>
         <p className="text-sm text-muted-foreground">Modelos de UI/UX utilizados em todos os apps, agrupados por tipo. Crie e exclua modelos e selecione os que devem ser utilizados como padrão.</p>
       </div>
-      <CdeSortableList className="space-y-0" ids={cdeOrder.cats} labelOf={catLabel} onMove={(cats) => saveCdeOrder({ ...cdeOrder, cats })}>
+      <CdeSortableList className="cde-category-list space-y-0" ids={cdeOrder.cats} labelOf={catLabel} onMove={(cats) => saveCdeOrder({ ...cdeOrder, cats })}>
         {(cat, ci, handle) => {
           const n = String(ci + 1);
           if (cat.startsWith("p:")) {
