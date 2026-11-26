@@ -2,7 +2,7 @@
   {
     "id": "components/access/access-workspace.tsx|fc8c45ec8ac31349|0",
     "file": "components/access/access-workspace.tsx",
-    "line": 57,
+    "line": 58,
     "tag": "Button",
     "label": "item.icon",
     "dynamic": true,
@@ -17,7 +17,7 @@
   {
     "id": "components/access/access-workspace.tsx|5af89f8b2175717b|0",
     "file": "components/access/access-workspace.tsx",
-    "line": 61,
+    "line": 62,
     "tag": "Button",
     "label": "AppSymbol",
     "dynamic": true,
@@ -4592,7 +4592,7 @@
   {
     "id": "components/erp-app-access-admin.tsx|d8080386dc1bf053|0",
     "file": "components/erp-app-access-admin.tsx",
-    "line": 90,
+    "line": 91,
     "tag": "button",
     "label": "Sem nome",
     "dynamic": true,
@@ -4607,7 +4607,7 @@
   {
     "id": "components/erp-app-access-admin.tsx|a14e3248ff0e79ea|0",
     "file": "components/erp-app-access-admin.tsx",
-    "line": 99,
+    "line": 100,
     "tag": "Button",
     "label": "CdeDisclosureIcon",
     "dynamic": false,

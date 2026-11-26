@@ -21,6 +21,11 @@ export function accessProfileApps(c: AccessCapabilities) {
   ];
 }
 
+/** Global admins see the full catalog; specialized editors keep their own guards. */
+export function accessNavigationApps(c: AccessCapabilities, catalog: readonly string[]) {
+  return c.erpAdmin ? [...catalog] : accessProfileApps(c);
+}
+
 export function legacySupplyAccessDestination(subsection?: string) {
   if (subsection === "usuarios") return { section: "cadastro" as const, app: "supply" as const };
   if (subsection === "acesso-restrito") return { section: "perfis" as const, app: "supply" as const };

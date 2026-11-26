@@ -10,8 +10,8 @@ import { SiteSurveyProfilesAdmin } from "@/components/site-survey-profiles-admin
 import { UsersTab } from "@/components/mytosis/users-tab";
 import { CodeAttendantsPanel } from "@/components/code-app-attendants";
 import { AppSymbol } from "@/components/cde/app-tile";
-import { useAppDisplayName } from "@/components/cde/app-order-config";
-import { accessProfileApps, type AccessCapabilities } from "@/lib/access-management";
+import { PORTAL_APPS, useAppDisplayName } from "@/components/cde/app-order-config";
+import { accessNavigationApps, accessProfileApps, type AccessCapabilities } from "@/lib/access-management";
 import { UsersAdmin } from "./users-admin";
 import { SurveyUsersAdmin } from "./survey-users-admin";
 import { ProjectsAccess } from "@/components/projects/access";
@@ -45,7 +45,8 @@ function CodeAccess() {
 
 export function AccessWorkspace({ capabilities, section, app, onChange }: { capabilities: AccessCapabilities; section?: AccessSection; app?: string; onChange: (change: { section: AccessSection; app?: string }) => void }) {
   const nameOf = useAppDisplayName();
-  const apps = accessProfileApps(capabilities);
+  const specializedApps = accessProfileApps(capabilities);
+  const apps = accessNavigationApps(capabilities, PORTAL_APPS.map(app => app.key));
   const sections = [
     ...(capabilities.erpAdmin ? [{ value: "usuarios" as const, label: "Usuários e aplicativos", icon: UsersRound }] : []),
     ...(capabilities.supplyAdmin ? [{ value: "cadastro" as const, label: "Cadastro e cargos", icon: Briefcase }] : []),
@@ -58,12 +59,13 @@ export function AccessWorkspace({ capabilities, section, app, onChange }: { capa
     {active === "usuarios" && capabilities.erpAdmin ? <ErpAppAccessAdmin /> : null}
     {active === "cadastro" && capabilities.supplyAdmin ? <UsersAdmin /> : null}
     {active === "perfis" ? <Tabs value={selectedApp} onValueChange={value => onChange({ section: "perfis", app: value })}>
-      <nav aria-label="Aplicativos em Acessos" className="mb-5 flex flex-wrap gap-2">{apps.map(key => <Button key={key} variant="ghost" aria-pressed={selectedApp === key} className={selectedApp === key ? "font-semibold underline underline-offset-4" : "font-normal"} onClick={() => onChange({ section: "perfis", app: key })}><AppSymbol name={nameOf(key)} className="size-4 shrink-0" />{nameOf(key)}</Button>)}</nav>
+      <nav aria-label="Aplicativos em Acessos" className="mb-5 flex min-w-0 gap-1 overflow-x-auto">{apps.map(key => <Button key={key} variant="ghost" aria-label={nameOf(key)} aria-pressed={selectedApp === key} className={`h-auto min-h-20 min-w-[68px] flex-1 flex-col gap-2 px-1 py-2 whitespace-normal ${selectedApp === key ? "font-semibold" : "font-normal"}`} onClick={() => onChange({ section: "perfis", app: key })}><AppSymbol name={nameOf(key)} className="size-5 shrink-0 text-foreground" /><span className={`w-full min-w-0 break-words text-center text-xs leading-tight ${selectedApp === key ? "underline underline-offset-4" : ""}`}>{nameOf(key)}</span></Button>)}</nav>
       {capabilities.supplyAdmin ? <TabsContent value="supply"><div className="space-y-6"><AccessProfileDefinitionsTab /><AccessProfilesTab /></div></TabsContent> : null}
       {capabilities.surveyUsers || capabilities.surveyProfiles ? <TabsContent value="site_survey"><div className="space-y-6">{capabilities.surveyUsers ? <SurveyUsersAdmin /> : null}{capabilities.surveyProfiles ? <SiteSurveyProfilesAdmin /> : null}</div></TabsContent> : null}
       {capabilities.mytosisAdmin ? <TabsContent value="mytosis"><MytosisAccess /></TabsContent> : null}
       {capabilities.codeAdmin ? <TabsContent value="development"><CodeAccess /></TabsContent> : null}
       {capabilities.erpAdmin ? <><TabsContent value="projects"><ProjectsAccess /></TabsContent><TabsContent value="indicadores"><IndicadoresAccess /></TabsContent></> : null}
+      {capabilities.erpAdmin ? apps.filter(key => !specializedApps.includes(key)).map(key => <TabsContent key={key} value={key}><ErpAppAccessAdmin appKey={key} /></TabsContent>) : null}
     </Tabs> : null}
   </div>;
 }

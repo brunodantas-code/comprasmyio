@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { accessProfileApps, canOpenAccessManagement, legacySupplyAccessDestination } from "./access-management";
+import { accessNavigationApps, accessProfileApps, canOpenAccessManagement, legacySupplyAccessDestination } from "./access-management";
 
 const none = { erpAdmin: false, supplyAdmin: false, surveyUsers: false, surveyProfiles: false, mytosisAdmin: false, codeAdmin: false };
 describe("centralized access preserves app-specific administration", () => {
@@ -16,6 +16,15 @@ describe("centralized access preserves app-specific administration", () => {
     expect(accessProfileApps({ ...none, mytosisAdmin: true })).toEqual(["mytosis"]);
     expect(accessProfileApps({ ...none, codeAdmin: true })).toEqual(["development"]);
     expect(accessProfileApps({ ...none, supplyAdmin: true })).toEqual(["supply"]);
+  });
+  it("shows all 14 apps to ERP admins without changing specialized permissions", () => {
+    const catalog = ["supply", "spend", "cash_flow", "crm", "legal", "rh", "site_survey", "chamados", "development", "mytosis", "indicadores", "wishlist", "projects", "cde"];
+    expect(accessNavigationApps({ ...none, erpAdmin: true }, catalog)).toEqual(catalog);
+    expect(accessProfileApps({ ...none, erpAdmin: true })).toEqual(["projects", "indicadores"]);
+  });
+  it("does not expose the full catalog to app-only managers", () => {
+    expect(accessNavigationApps({ ...none, supplyAdmin: true }, ["supply", "spend", "crm"])).toEqual(["supply"]);
+    expect(accessNavigationApps(none, ["supply", "spend", "crm"])).toEqual([]);
   });
   it("moves old user/profile links but keeps approval settings in Supply", () => {
     expect(legacySupplyAccessDestination("usuarios")).toEqual({ section: "cadastro", app: "supply" });

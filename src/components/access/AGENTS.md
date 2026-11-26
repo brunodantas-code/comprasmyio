@@ -1,3 +1,4 @@
 - Access management reuses existing user/profile editors and their authenticated actions; navigation never merges app-specific permissions or migrates role data.
 - accessManagementOptions derives UI capabilities from identity-bound role rows/RPCs; each editor retains its existing RLS and server authorization boundary.
 - Supply approval rules/logs/backup remain in Supply; central Acessos owns user/app grants, profile editors, Mytosis memberships and Code attendants so operational controls are not confused with access rights.
+- ERP admins see the portal app catalog in profile navigation; apps without an authorized specialized editor reuse the app-scoped ERP grant editor, never inventing or widening internal roles.
