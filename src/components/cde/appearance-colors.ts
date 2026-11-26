@@ -3,9 +3,9 @@ import { converter, formatCss, parse } from "culori";
 export type AppAppearance = "green" | "purple" | "grayscale";
 export const APP_APPEARANCE_GROUP = "app_appearance";
 export const APP_APPEARANCES = [
-  { key: "purple", label: "Roxo myio" },
-  { key: "green", label: "Verde myio" },
-  { key: "grayscale", label: "P&B (grayscale)" },
+  { key: "purple", label: "Roxo" },
+  { key: "green", label: "Verde" },
+  { key: "grayscale", label: "P&B" },
 ] as const;
 export function parseAppAppearance(raw: unknown): AppAppearance | null {
   return raw === "green" || raw === "purple" || raw === "grayscale" ? raw : null;

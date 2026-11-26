@@ -731,3 +731,5 @@
 - [x] Spend: veículo em Aluguel de Veículos e nome sem repetição no seletor de cartão.
 
 - [x] ERP: ícone da myio ao adicionar à tela inicial (iPhone/Android) — apple-touch-icon, manifest e favicon
+- [x] CDE: Aparência e Aparência do CDE reunidas na seção 1, com títulos verdes em 18 px/seminegrito e personalizações preservadas; computador e celular conferidos, 12 testes passaram.
+- [x] CDE: opções de exibição simplificadas para Verde, Roxo e P&B, preservando as cores originais.

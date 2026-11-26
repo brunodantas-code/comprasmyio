@@ -7,16 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
-import { CdeCategoryHeader } from "./cde-category-header";
 import { CdeNumber } from "./cde-button";
 import { ColorSelect } from "./cde-tags";
 import { CDE_APPEARANCE_DEFAULT, CDE_APPEARANCE_GROUP, CDE_FONTS, CDE_SIZES, cdeAppearanceVars, useCdeAppearance, type CdeAppearanceConfig, type CdeLevel } from "./cde-appearance";
 
 const COLORS: [keyof CdeLevel, string][] = [["bg", "Fundo"], ["border", "Borda"], ["text", "Texto do título"], ["hint", "Texto da descrição"]];
 
-/** CDE item "Aparência do CDE": colours, sizes and font of the CDE's own category headers and subcategory bands. */
-export function CdeAppearance({ number, handle }: { number: number; handle?: React.ReactNode }) {
-  const [open, setOpen] = useState(false);
+/** Internal appearance editor within the consolidated Appearance category. */
+export function CdeAppearance() {
   const [saving, setSaving] = useState(false);
   const qc = useQueryClient();
   const saved = useCdeAppearance().data ?? CDE_APPEARANCE_DEFAULT;
@@ -43,9 +41,7 @@ export function CdeAppearance({ number, handle }: { number: number; handle?: Rea
       <div className="space-y-1"><Label className="text-xs">Fonte</Label><Select value={cfg[lv].font} onValueChange={(v) => setLv(lv, "font", v)}><SelectTrigger aria-label={`Fonte — ${title}`} className="h-8 w-36 text-xs"><SelectValue /></SelectTrigger><SelectContent>{CDE_FONTS.map((f) => <SelectItem key={f.key} value={f.key}><span style={f.value ? { fontFamily: f.value } : undefined}>{f.label}</span></SelectItem>)}</SelectContent></Select></div>
     </div>
   </CdeSection>;
-  return <section className="cde-category-sections">
-    <CdeCategoryHeader handle={handle} number={number} title="Aparência do CDE" hint="Cores, tamanhos e fonte das categorias e subcategorias do próprio CDE" open={open} onToggle={() => setOpen(!open)} />
-    {open && <div className="space-y-4"><CdeSection title="Cabeçalhos do CDE" actions={<><Button variant="ghost" size="icon" aria-label="Salvar" title="Salvar aparência" onClick={save} disabled={saving || !draft || JSON.stringify(draft) === JSON.stringify(saved)}><Save /></Button><Button variant="ghost" size="icon" aria-label="Cancelar" title="Cancelar" onClick={() => setDraft(null)}><X /></Button></>}>
+  return <><CdeSection title="Aparência do CDE" actions={<><Button variant="ghost" size="icon" aria-label="Salvar" title="Salvar aparência" onClick={save} disabled={saving || !draft || JSON.stringify(draft) === JSON.stringify(saved)}><Save /></Button><Button variant="ghost" size="icon" aria-label="Cancelar" title="Cancelar" onClick={() => setDraft(null)}><X /></Button></>}>
       <div className="flex items-center justify-between gap-2"><p className="text-xs text-muted-foreground">As opções “atual” mantêm a aparência de hoje. Ao salvar, vale na hora para todo o CDE.</p>
         {draft && <div className="flex gap-1"></div>}</div>
       <div className="space-y-1"><p className="text-sm font-medium">Prévia</p>
@@ -53,6 +49,5 @@ export function CdeAppearance({ number, handle }: { number: number; handle?: Rea
           <div className="cde-cat-band flex items-center gap-3 border-b px-2 py-3"><CdeNumber>1</CdeNumber><span className="flex flex-wrap items-baseline gap-x-3"><span className="cde-cat-title">Campos para preenchimento</span><span className="cde-cat-hint">Descrição da categoria</span></span></div>
           <div className="py-2 pl-8"><div className="cde-sub-band flex items-center gap-4 px-5 py-2"><CdeNumber subcategory>1.1</CdeNumber><span><span className="cde-sub-title block">Campos de texto e número</span><span className="cde-sub-hint mt-0.5 block">2 modelos · Caixas de uma linha</span></span></div></div>
         </div></div>
-    </CdeSection>{block("cat", "Categorias")}{block("sub", "Subcategorias")}</div>}
-  </section>;
+    </CdeSection>{block("cat", "Categorias")}{block("sub", "Subcategorias")}</>;
 }
