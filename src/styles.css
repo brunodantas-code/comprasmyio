@@ -445,7 +445,7 @@ input[data-custom-calendar="true"]::-webkit-calendar-picker-indicator {
 
 /* One frame for authenticated page content and its brand header; dialogs stay independent. */
 .erp-shell {
-  --erp-workspace-width: calc(80rem + 2cm);
+  --erp-workspace-width: calc(100rem + 2cm);
   --erp-workspace-gutter: 1rem;
 }
 .erp-shell main:not(main main),
@@ -583,6 +583,8 @@ input[data-custom-calendar="true"]::-webkit-calendar-picker-indicator {
   --app-menu-fixed-selected-foreground: var(--dropdown-highlight-foreground);
   --app-menu-side-width: var(--app-menu-side-custom-width, 15rem);
   --app-menu-side-offset: calc(var(--app-menu-side-width) + 1rem);
+  /* Only an actually mounted lateral panel reserves content space (set by AppNavigation). */
+  --erp-side-offset: 0px;
 }
 @layer base {
 .app-menu-fixed-preview,

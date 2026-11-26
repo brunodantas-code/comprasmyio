@@ -32,8 +32,8 @@ export function menuMainClasses({ mobile, desktop }: DeviceMenus) {
   // extenso. Com o nome montado por interpolação, o deslocamento não era gerado e
   // o menu lateral cobria as listas.
   const offsets: Record<string, { mobile: string; desktop: string }> = {
-    left: { mobile: "max-lg:!pl-[var(--app-menu-side-offset)]", desktop: "lg:!pl-[var(--app-menu-side-offset)]" },
-    right: { mobile: "max-lg:!pr-[var(--app-menu-side-offset)]", desktop: "lg:!pr-[var(--app-menu-side-offset)]" },
+    left: { mobile: "max-lg:!pl-[var(--erp-side-offset,0px)]", desktop: "lg:!pl-[var(--erp-side-offset,0px)]" },
+    right: { mobile: "max-lg:!pr-[var(--erp-side-offset,0px)]", desktop: "lg:!pr-[var(--erp-side-offset,0px)]" },
     top_tabs: { mobile: "max-lg:!pt-28", desktop: "lg:!pt-28" },
   };
   const bottoms: Record<string, { mobile: string; desktop: string }> = {

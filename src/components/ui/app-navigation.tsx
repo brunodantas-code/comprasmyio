@@ -16,6 +16,14 @@ export function AppNavigation({ className = "", ...props }: ComponentProps<"nav"
     return () => { root.removeProperty("--app-menu-side-custom-width"); };
   }, [look?.sideWidth]);
   useEffect(() => { setMounted(true); }, []);
+  // Content space follows the panel that is really on screen: floating, bottom and
+  // unmounted menus must not shrink the lists.
+  useEffect(() => {
+    if (!mounted) return;
+    const root = document.documentElement.style;
+    root.setProperty("--erp-side-offset", layout === "left" || layout === "right" ? "var(--app-menu-side-offset)" : "0px");
+    return () => { root.removeProperty("--erp-side-offset"); };
+  }, [layout, mounted]);
   useEffect(() => {
     const breakpoint = window.matchMedia("(min-width: 1024px)");
     const update = () => {

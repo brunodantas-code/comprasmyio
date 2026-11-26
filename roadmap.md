@@ -773,3 +773,9 @@
 - [x] CDE item 10: aparência do menu dos apps (fundo, texto, selecionado, borda, sombra) salva e aplicada na hora; o tipo de menu ficou só no item 8.
 - [x] Resumo de tudo que foi feito desde a última publicação (erpmyio.lovable.app), para conferência de Leonardo.
 - [ ] Publicar de novo para levar ao ar as mudanças feitas depois da publicação de 26/11 19:24 UTC.
+- [x] Projects: sem menu lateral, a área de exibição usa a largura inteira, sem recuo de menu.
+- [x] Supply: lápis das linhas voltou a 16 px de largura (botão só com ícone não é mais comprimido).
+- [x] Code: sem menu lateral, tela cheia no padrão do Wishlist; botão de + Ticket preservado.
+- [x] Wishlist: todas as linhas ocupam a largura toda, com divisor completo até a borda direita.
+- [x] Wishlist: cabeçalho no padrão de Approvals, Solicitações e Tickets (CDE).
+- [x] Menu do cabeçalho: "Minha assinatura" com a mesma fonte e destaque completo das demais linhas.

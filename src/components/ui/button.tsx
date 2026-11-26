@@ -66,6 +66,8 @@ export interface ButtonProps
   actionKind?: "standard" | "specific";
   cdeId?: string;
   cdeNative?: boolean;
+  /** Navigation rows (app menu, sidebars) are never action buttons: no CDE action model, no auto width. */
+  cdeIgnore?: boolean;
 }
 
 const actionLabelPattern = /\b(salvar|salvando|salvo|excluir|excluindo|cancelar|cancelando|confirmar|confirmando|concluir|concluindo)\b/i;
@@ -78,15 +80,15 @@ function buttonText(node: React.ReactNode): string {
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, children, style, actionKind, cdeId, cdeNative, ...props }, ref) => {
+  ({ className, variant, size, asChild = false, children, style, actionKind, cdeId, cdeNative, cdeIgnore, ...props }, ref) => {
     const Comp = asChild ? Slot : "button";
     const visibleText = buttonText(children).trim();
     const accessibleLabel = visibleText || [props["aria-label"], props.title].filter(Boolean).join(" ");
     // CdeButton (style passed) keeps its own CDE variant; never re-skin it by label.
     const resolvedVariant = !style && actionLabelPattern.test(accessibleLabel) ? "action" : variant;
     // CDE: action buttons follow the chosen standard live; CdeButton passes its own style and is skipped.
-    const binding = useButtonBinding(accessibleLabel, cdeId);
-    const group = binding?.group as AutoGroup | undefined ?? detectButtonGroup(children, [props["aria-label"], props.title].filter(Boolean).join(" ")) ?? (actionKind === "standard" || visibleText && (!variant || ["default", "action", "outline", "secondary", "destructive"].includes(variant)) ? "action_standard" : undefined);
+    const binding = cdeIgnore ? undefined : useButtonBinding(accessibleLabel, cdeId);
+    const group = cdeIgnore ? undefined : (binding?.group as AutoGroup | undefined ?? detectButtonGroup(children, [props["aria-label"], props.title].filter(Boolean).join(" ")) ?? (actionKind === "standard" || visibleText && (!variant || ["default", "action", "outline", "secondary", "destructive"].includes(variant)) ? "action_standard" : undefined));
     const specific = actionKind === "specific" || (!actionKind && (isSpecificAction({ className, customStyle: !!style }) || !visibleText));
     const look = useCdeLook((style || cdeNative) && !binding ? undefined : group, true, cdeId?.split("|")[0] ?? (group === "save" && !visibleText ? "controls/save-icon" : undefined), specific, binding?.modelKey);
     const standardSave = !style && !asChild && (group === "save" || group === "trash");
@@ -103,10 +105,14 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const progress = /salvando|excluindo|enviando|gerando|carregando|processando|cancelando|confirmando|concluindo/i.test(visibleText);
     const boundContent = binding && !asChild && !binding.preserveContent ? <>{BoundIcon && <BoundIcon className={look.iconClass || "h-4 w-4"} />}{progress ? children : binding.label || null}</> : undefined;
     const content = binding?.preserveContent ? children : boundContent ?? (sendStandard ? <><SendIcon className={look.iconClass || "h-4 w-4"} />{look.label?.trim() || null}</> : standardSave ? <><SaveIcon className={look.iconClass || "h-4 w-4"} />{visibleText ? actionLabel : null}</> : children);
+    // Icon-only buttons keep the icon's own box: a CDE model's padding must never squeeze it.
+    const iconOnly = !buttonText(content).trim();
     const cdeVariant = look.variant ? look.variant as VariantProps<typeof buttonVariants>["variant"] : resolvedVariant;
     const cdeSize = look.size ? look.size as VariantProps<typeof buttonVariants>["size"] : size;
+    // A caller that sets its own width (list rows, full-width controls) keeps that geometry.
+    const hasOwnWidth = /(?:^|\s)(?:[^\s:]+:)*w-(?:full|fit|max|min|\[|[\d.])/.test(className ?? "");
     return (
-      <Comp data-cde-id={cdeId} data-action-kind={group ? specific ? "specific" : "standard" : undefined} className={cn(cdeNative && !binding ? className : buttonVariants({ variant: "data-cde-number" in props && !binding ? null : cdeVariant, size: cdeSize, className: binding ? undefined : className }), look.className, !asChild && props.role !== "combobox" && (binding ? binding.label : visibleText) && group && !(sendStandard && !look.label?.trim()) && ["!w-auto shrink-0", className?.includes("whitespace-normal") ? "!min-w-0" : "!min-w-max"])} style={binding ? look.style : style ?? (look.variant || look.className ? look.style : undefined)} ref={ref} {...((binding && !binding.label || sendStandard && !look.label?.trim()) && visibleText ? { "aria-label": accessibleLabel, title: accessibleLabel } : {})} {...props}>{cdeNative && !binding ? children : content}</Comp>
+      <Comp data-cde-id={cdeId} data-action-kind={group ? specific ? "specific" : "standard" : undefined} className={cn(cdeNative && !binding ? className : buttonVariants({ variant: "data-cde-number" in props && !binding ? null : cdeVariant, size: cdeSize, className: binding ? undefined : className }), look.className, !asChild && props.role !== "combobox" && (binding ? binding.label : visibleText) && group && !hasOwnWidth && !(sendStandard && !look.label?.trim()) && ["!w-auto shrink-0", className?.includes("whitespace-normal") ? "!min-w-0" : "!min-w-max"], iconOnly && "[&_svg]:!max-w-none")} style={binding ? look.style : style ?? (look.variant || look.className ? look.style : undefined)} ref={ref} {...((binding && !binding.label || sendStandard && !look.label?.trim()) && visibleText ? { "aria-label": accessibleLabel, title: accessibleLabel } : {})} {...props}>{cdeNative && !binding ? children : content}</Comp>
     );
   },
 );

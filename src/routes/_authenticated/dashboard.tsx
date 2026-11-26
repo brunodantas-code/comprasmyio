@@ -2772,7 +2772,7 @@ function BuyerQueue({ mode = "all" }: { mode?: ApprovalListMode }) {
           <p className="text-sm text-muted-foreground">Nada por aqui.</p>
         ) : (
           <div className="space-y-2">
-            {(groupByProject || showTagCosts) && <div className="flex items-center gap-2 overflow-x-auto">{organizeActions}</div>}
+            {(groupByProject || showTagCosts) && <div className="flex flex-wrap items-center gap-2">{organizeActions}</div>}
             {showTagCosts ? <SupplyTagCostReport /> : renderOrders(filtered)}
           </div>
         )}
@@ -3026,7 +3026,7 @@ function OrdersTable({
 
   return (
     <>
-      <div className="mb-2 flex items-center gap-2 overflow-x-auto py-1 text-[length:var(--filter-fs)] [&>*]:shrink-0">
+      <div className="mb-2 flex flex-wrap items-center gap-2 py-1 text-[length:var(--filter-fs)] [&>*]:shrink-0">
         <TableFilterMenu triggerLabel="Filtros" rows={orders} columns={colDefs.filter(c => showRequester || c.key !== "req").map(c => ({ key: c.key, label: c.label, kind: c.kind, value: c.raw as (o: typeof orders[number]) => string | number | null | undefined, display: c.list }))} filters={cf} onChange={(key, value) => setCf(prev => ({ ...prev, [key]: value }))} clear={() => setCf({})} />
         {<TableSortMenu columns={colDefs} value={columnSort} onChange={setColumnSort} />}
         {toolbarActions}

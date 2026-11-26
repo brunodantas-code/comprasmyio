@@ -108,20 +108,20 @@ function MainMenuEntries({ onSignOut, onChangePassword, supplyManual, homePage, 
   const config = data ?? parseMenuConfig();
   const pendingTotal = usePendingActions().data?.total ?? 0;
   const { data: accessCapabilities } = useQuery(accessManagementOptions);
-  return <>{menuActions?.map(action => <Button key={action.label} variant="ghost" className={itemClass} onClick={action.onClick}>{action.icon}{action.label}</Button>)}{menuOrderForContext(config, homePage).filter((id) => (id !== "manual" || supplyManual || !!manualApp) && (id !== "access" || accessCapabilities && canOpenAccessManagement(accessCapabilities))).map((id) => {
+  return <>{menuActions?.map(action => <Button key={action.label} cdeIgnore variant="ghost" className={itemClass} onClick={action.onClick}>{action.icon}{action.label}</Button>)}{menuOrderForContext(config, homePage).filter((id) => (id !== "manual" || supplyManual || !!manualApp) && (id !== "access" || accessCapabilities && canOpenAccessManagement(accessCapabilities))).map((id) => {
     const item = MENU_ITEMS.find((i) => i.id === id);
     if (!item) return null;
     const Icon = item.icon;
     const appKey = menuAppKey(id);
     const label = appKey ? nameOf(appKey) : item.label;
-    if ("to" in item) return <Button key={id} asChild variant="ghost" className={itemClass}><Link to={item.to}><Icon className="h-5 w-5" />{label}{id === "pendentes" ? <CountBadge count={pendingTotal} className="ml-auto" /> : null}</Link></Button>;
-    if (id === "manual" && supplyManual) return <Button key={id} asChild variant="ghost" className={itemClass}><Link to="/supply-manual"><Icon className="h-5 w-5" />{label}</Link></Button>;
-    if (id === "manual") return <Button key={id} variant="ghost" className={itemClass} onClick={onOpenManual}><Icon className="h-5 w-5" />{label}</Button>;
-    if (id === "signature") return <Button key={id} variant="ghost" className={itemClass} onClick={onOpenSignature}><Icon className="h-5 w-5" />{label}</Button>;
-    if (id === "access") return <Button key={id} asChild variant="ghost" className={itemClass}><Link to="/acessos"><Icon className="h-5 w-5" />Acessos</Link></Button>;
+    if ("to" in item) return <Button key={id} asChild cdeIgnore variant="ghost" className={itemClass}><Link to={item.to}><Icon className="h-5 w-5" />{label}{id === "pendentes" ? <CountBadge count={pendingTotal} className="ml-auto" /> : null}</Link></Button>;
+    if (id === "manual" && supplyManual) return <Button key={id} asChild cdeIgnore variant="ghost" className={itemClass}><Link to="/supply-manual"><Icon className="h-5 w-5" />{label}</Link></Button>;
+    if (id === "manual") return <Button key={id} cdeIgnore variant="ghost" className={itemClass} onClick={onOpenManual}><Icon className="h-5 w-5" />{label}</Button>;
+    if (id === "signature") return <Button key={id} cdeIgnore variant="ghost" className={itemClass} onClick={onOpenSignature}><Icon className="h-5 w-5" />{label}</Button>;
+    if (id === "access") return <Button key={id} asChild cdeIgnore variant="ghost" className={itemClass}><Link to="/acessos"><Icon className="h-5 w-5" />Acessos</Link></Button>;
     if (id === "theme") return <ThemeEntry key={id} className={itemClass} />;
-    if (id === "favorites") return <Button key={id} variant="ghost" className={itemClass} onClick={() => window.dispatchEvent(new Event("open-mobile-favorites"))}><Icon className="h-5 w-5" />{label}</Button>;
-    return <Button key={id} variant="ghost" className={`${itemClass}`} onClick={id === "logout" ? onSignOut : id === "password" ? onChangePassword : () => window.history.back()}><Icon className="h-5 w-5" />{label}</Button>;
+    if (id === "favorites") return <Button key={id} cdeIgnore variant="ghost" className={itemClass} onClick={() => window.dispatchEvent(new Event("open-mobile-favorites"))}><Icon className="h-5 w-5" />{label}</Button>;
+    return <Button key={id} cdeIgnore variant="ghost" className={`${itemClass}`} onClick={id === "logout" ? onSignOut : id === "password" ? onChangePassword : () => window.history.back()}><Icon className="h-5 w-5" />{label}</Button>;
   })}</>;
 }
 
@@ -149,8 +149,8 @@ function ThemeEntry({ className }: { className: string }) {
     setExpanded(false);
   };
   return <div className="flex flex-col">
-    <Button variant="ghost" className={className} aria-expanded={expanded} onClick={(event) => { event.stopPropagation(); setExpanded(value => !value); }}><Palette className="h-5 w-5" />Aparência{expanded ? <ChevronDown className="ml-auto h-4 w-4" /> : <ChevronRight className="ml-auto h-4 w-4" />}</Button>
-    {expanded ? APP_APPEARANCES.map(option => <Button key={option.key} variant="ghost" className={className + " pl-10"} aria-pressed={current === option.key} onClick={() => choose(option.key)}>
+    <Button cdeIgnore variant="ghost" className={className} aria-expanded={expanded} onClick={(event) => { event.stopPropagation(); setExpanded(value => !value); }}><Palette className="h-5 w-5" />Aparência{expanded ? <ChevronDown className="ml-auto h-4 w-4" /> : <ChevronRight className="ml-auto h-4 w-4" />}</Button>
+    {expanded ? APP_APPEARANCES.map(option => <Button key={option.key} cdeIgnore variant="ghost" className={className + " pl-10"} aria-pressed={current === option.key} onClick={() => choose(option.key)}>
       {current === option.key ? <Check className="h-4 w-4" /> : <span className="h-4 w-4" />}{option.label}
     </Button>) : null}
   </div>;
