@@ -80,11 +80,13 @@ export function CdeAppShortcuts({ tile }: { tile: AppTileConfig }) {
     <h3 className="text-sm font-medium">Favicons e ícones de atalhos</h3>
     <div className="space-y-3">
       <Label>Ícone padrão do ERP</Label>
-      <RadioGroup aria-label="Ícone padrão do ERP" value={selected} onValueChange={value => setDraft(erpIconKey(value))} disabled={!data?.admin || saving} className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        {ERP_ICON_OPTIONS.map(option => <Label key={option.key} htmlFor={`erp-icon-${option.key}`} className="flex min-w-0 items-center gap-3">
-          <RadioGroupItem id={`erp-icon-${option.key}`} value={option.key} />
+      <RadioGroup aria-label="Ícone padrão do ERP" value={selected} onValueChange={value => setDraft(erpIconKey(value))} disabled={!data?.admin || saving} className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+        {ERP_ICON_OPTIONS.map(option => <Label key={option.key} htmlFor={`erp-icon-${option.key}`} className="grid min-w-0 justify-items-center gap-4 text-center">
+          <span className="grid min-w-0 justify-items-center gap-4">
           <img src={`${option.base}/apple-touch-icon.png`} width={64} height={64} alt={option.label} className="size-16 shrink-0 rounded-lg" />
+          <RadioGroupItem id={`erp-icon-${option.key}`} value={option.key} />
           <span className="min-w-0 text-sm">{option.label}</span>
+          </span>
         </Label>)}
       </RadioGroup>
       {data?.admin && <Button variant="ghost" size="compactIcon" aria-label="Salvar ícone padrão do ERP" title="Salvar ícone padrão do ERP" onClick={save} disabled={saving || !draft || draft === data.key}><Save /></Button>}
@@ -96,9 +98,11 @@ export function CdeAppShortcuts({ tile }: { tile: AppTileConfig }) {
       </figure>
       {APP_SHORTCUTS.map(app => <figure key={app.key} className="flex min-w-0 flex-col items-center gap-2 text-center">
         <RadioGroup aria-label={`Ícone de atalho do ${app.name}`} value={(appDraft ?? data?.apps)?.[app.key] ?? "white"} onValueChange={value => setAppDraft({ ...(appDraft ?? data?.apps ?? {}), [app.key]: value === "green" ? "green" : "white" })} disabled={!data?.admin || saving} className="grid grid-cols-2 gap-3">
-          {(["white", "green"] as const).map(model => <Label key={model} htmlFor={`shortcut-${app.key}-${model}`} className="flex flex-col items-center gap-2">
+          {(["white", "green"] as const).map(model => <Label key={model} htmlFor={`shortcut-${app.key}-${model}`} className="grid justify-items-center gap-4">
+            <span className="grid justify-items-center gap-4">
             <img src={`/app-icons/${app.key}${model === "green" ? "/green" : ""}/apple-touch-icon.png`} width={64} height={64} alt={`${app.name}: ${model === "green" ? "símbolo preto no verde" : "símbolo verde no branco"}`} className="size-16 rounded-lg" />
             <RadioGroupItem id={`shortcut-${app.key}-${model}`} value={model} />
+            </span>
           </Label>)}
         </RadioGroup>
         <figcaption className="max-w-full break-words text-sm">{appDisplay(tile, app.key).name}<span className="block text-xs text-muted-foreground">{app.path}</span></figcaption>
