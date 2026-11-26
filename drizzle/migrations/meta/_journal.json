@@ -2248,6 +2248,13 @@
       "when": 1795705523780,
       "tag": "0320_public_app_shortcut_choices",
       "breakpoints": true
+    },
+    {
+      "idx": 321,
+      "version": "7",
+      "when": 1795706188378,
+      "tag": "0321_erp_official_phone_icons",
+      "breakpoints": true
     }
   ]
 }

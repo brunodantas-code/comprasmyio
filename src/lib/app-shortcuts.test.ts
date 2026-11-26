@@ -15,11 +15,12 @@ describe("individual app shortcuts", () => {
       expect(appShortcutHead(path).links[0]?.href).toBe("/favicon.png");
     }
   });
-  for (const key of ["io-purple", "io-black"] as const) {
+  for (const key of ["io-purple", "io-black", "official-purple", "official-dark"] as const) {
     it(`applies ${key} to ERP only`, () => {
       expect(appShortcutHead("/", key).links[0]?.href).toBe(`/erp-icons/${key}/favicon.png`);
       expect(appShortcutHead("/portal", key).links[1]?.href).toBe(`/erp-icons/${key}/manifest.webmanifest`);
       expect(appShortcutHead("/spend", key).links[0]?.href).toBe("/app-icons/spend/favicon.png");
+      expect(appShortcutHead("/", key).links.find(link => link.rel === "apple-touch-icon")?.href).toBe(`/erp-icons/${key}/apple-touch-icon.png`);
     });
   }
   it("applies green background independently for each app", () => {

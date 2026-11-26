@@ -4,3 +4,4 @@
 - Complete survey report editions share audience guards for preview/PDF; visit-scoped presentation state shares Aa with registration, and display-only spelling normalization preserves stored records.
 - App shortcuts resolve from matched path in the root head; shared symbol registry and per-app static manifests keep Home/CDE and phone icons consistent without service workers. Regenerate assets with scripts/generate-app-icons.tsx after symbol changes.
 - ERP icon choice uses admin-RLS cde_selected and a key-only public RPC; root loader applies the choice to static variant assets/manifests, all retaining the same install identity and start URL.
+- Official uploaded artwork stays in CDN pointers cataloged by brand-assets; phone derivatives crop transparent source margins and use opaque square backgrounds so the logo remains legible at shortcut sizes.

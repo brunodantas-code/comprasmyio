@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Save } from "lucide-react";
 import { toast } from "sonner";
+import { BRAND_ASSETS } from "@/lib/brand-assets";
 
 /** Catalog of the actual assets used by route head and phone manifests. */
 export function CdeAppShortcuts({ tile }: { tile: AppTileConfig }) {
@@ -104,5 +105,17 @@ export function CdeAppShortcuts({ tile }: { tile: AppTileConfig }) {
       </figure>)}
     </div>
     {data?.admin && <Button variant="ghost" size="compactIcon" aria-label="Salvar ícones dos apps" title="Salvar ícones dos apps" onClick={saveApps} disabled={saving || !appDraft}><Save /></Button>}
+    <div className="space-y-3">
+      <h3 className="text-sm font-medium">Arquivos oficiais da marca</h3>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        {BRAND_ASSETS.map(asset => <figure key={asset.key} className="flex min-w-0 items-center gap-3">
+          <img src={asset.preview} width={64} height={64} alt={asset.label} className="size-16 shrink-0 object-contain" />
+          <figcaption className="min-w-0 text-sm">
+            <span className="block">{asset.label}</span>
+            <a href={asset.url} target="_blank" rel="noopener noreferrer" className="text-foreground underline hover:text-primary" aria-label={`Abrir original ${asset.filename}`}>Arquivo original</a>
+          </figcaption>
+        </figure>)}
+      </div>
+    </div>
   </div>;
 }
