@@ -5,12 +5,14 @@ import logoDark from "@/assets/myio-logo-dark.png.asset.json";
 type Props = {
   className?: string;
   tone?: "light" | "dark" | "auto";
+  logoPx?: number;
 };
 
-export function MyioPlatformLogo({ className, tone = "auto" }: Props) {
+export function MyioPlatformLogo({ className, tone = "auto", logoPx }: Props) {
+  const size = logoPx === undefined ? undefined : { height: `${logoPx}px` };
   if (tone === "auto") {
     return (
-      <span className={cn("inline-flex items-center", className)}>
+      <span style={size} className={cn("inline-flex items-center", className)}>
         <img data-myio-logo-tone="dark" src={logoLightSrc} alt="myio" className="h-full w-auto select-none dark:hidden" draggable={false} />
         <img data-myio-logo-tone="light" src={logoDark.url} alt="myio" className="hidden h-full w-auto select-none dark:block" draggable={false} />
       </span>
@@ -21,6 +23,7 @@ export function MyioPlatformLogo({ className, tone = "auto" }: Props) {
       data-myio-logo-tone={tone}
       src={tone === "light" ? logoDark.url : logoLightSrc}
       alt="myio"
+      style={size}
       className={cn("h-auto w-auto select-none", className)}
       draggable={false}
     />

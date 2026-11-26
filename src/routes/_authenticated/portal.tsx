@@ -16,7 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { MyioPlatformLogo } from "@/components/myio-platform-logo";
-import { useAppOrder, useAppTile, APP_TILE_DEFAULT, appDisplay, appTileColorVars, homeHeaderVars, homeHeaderLogoTone, mobileTileVars } from "@/components/cde/app-order-config";
+import { useAppOrder, useAppTile, APP_TILE_DEFAULT, appDisplay, appLogoPx, appTileColorVars, homeHeaderVars, homeHeaderLogoTone, mobileTileVars } from "@/components/cde/app-order-config";
 import { AppTileFace, AppTileDescription } from "@/components/cde/app-tile";
 import { partitionMobileApps, useMobileFavorites } from "@/components/mobile-favorites-config";
 import { mobileDockVars, useMobileDockStyle } from "@/components/cde/mobile-dock-style";
@@ -144,8 +144,8 @@ function PortalPage() {
       <TopIconStyleVars /><ListItemStyleVars />
         <div className="app-header-workspace mx-auto max-w-7xl px-4 pb-9 pt-5 sm:flex sm:items-center sm:justify-between sm:gap-4 sm:px-6 sm:py-4">
           <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4 sm:block">
-            <div className="min-w-0"><MyioPlatformLogo tone={homeHeaderLogoTone(tile, true)} className="h-10 sm:hidden" />
-            <MyioPlatformLogo tone={homeHeaderLogoTone(tile)} className="hidden h-10 sm:inline-flex" /></div>
+            <div className="min-w-0"><MyioPlatformLogo tone={homeHeaderLogoTone(tile, true)} logoPx={appLogoPx(tile)} className="sm:hidden" />
+            <MyioPlatformLogo tone={homeHeaderLogoTone(tile)} logoPx={appLogoPx(tile)} className="hidden sm:inline-flex" /></div>
             <div className="shrink-0 sm:hidden">
               <HeaderMenu homePage={activeView === "apps"} userName={data.name} onSignOut={handleSignOut} onChangePassword={() => setPasswordOpen(true)} onOpenSignature={() => setSignatureOpen(true)} buttonClass="top-icon !bg-transparent !text-foreground shadow-none hover:!bg-transparent hover:!text-foreground" />
             </div>

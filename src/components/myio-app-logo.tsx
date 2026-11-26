@@ -2,7 +2,7 @@ import { fontFormatCss } from "@/components/cde/font-format";
 import { cn } from "@/lib/utils";
 import logoDark from "@/assets/myio-logo-dark.png.asset.json";
 import logoLightSrc from "@/assets/myio-logo-light.svg";
-import { APP_TILE_DEFAULT, appDisplay, appLogoPx, appKeyForName, useAppTile, type AppDisplay } from "@/components/cde/app-order-config";
+import { APP_TILE_DEFAULT, appDisplay, appLogoPx, appKeyForName, homeHeaderLogoTone, useAppTile, type AppDisplay } from "@/components/cde/app-order-config";
 
 type Props = {
   appName: string;
@@ -13,8 +13,9 @@ type Props = {
 };
 
 /** Official myio logo, separator and configurable app name shared by every app header. */
-export function MyioAppLogo({ appName, className, tone = "auto", display, logoPx }: Props) {
+export function MyioAppLogo({ appName, className, tone: requestedTone, display, logoPx }: Props) {
   const saved = useAppTile().data ?? APP_TILE_DEFAULT;
+  const tone = requestedTone ?? homeHeaderLogoTone(saved);
   const current = display ?? appDisplay(saved, appKeyForName(appName, saved), 16, appName);
   const px = logoPx ?? appLogoPx(saved);
   const imgStyle = { height: `${px}px` };

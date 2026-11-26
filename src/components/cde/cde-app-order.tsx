@@ -36,13 +36,14 @@ function Row({ id, index, displayName }: { id: string; index: number; displayNam
   </div>;
 }
 
-const COLOR_FIELDS: [AppTileColorKind, string][] = [["headerBg", "Fundo da faixa superior"], ["bg", "Fundo da página"], ["fill", "Preenchimento dos ícones"], ["border", "Borda dos ícones"], ["symbol", "Símbolo dentro do ícone"], ["inside", "Texto dentro do ícone"]];
+const COLOR_FIELDS: [AppTileColorKind, string][] = [["bg", "Fundo da página"], ["fill", "Preenchimento dos ícones"], ["border", "Borda dos ícones"], ["symbol", "Símbolo dentro do ícone"], ["inside", "Texto dentro do ícone"]];
 
 function HeaderPreview({ tile, mobile = false, appName, display }: { tile: AppTileConfig; mobile?: boolean; appName?: string; display?: ReturnType<typeof appDisplay> }) {
-  const background = tile.headerBg === "padrao" ? (mobile ? "var(--accent)" : "var(--card)") : appTileColor("headerBg", tile.headerBg).value;
-  return <div aria-label={mobile ? "Prévia da faixa superior mobile" : appName ? "Prévia do cabeçalho do app" : "Prévia da faixa superior desktop"} style={{ ...homeHeaderVars(tile), "--home-header-bg": background } as React.CSSProperties} className={`home-page-header px-4 py-5 ${mobile ? "" : "home-header-desktop-preview flex items-center"}`}>
-    <div className="flex items-center justify-between gap-3">{appName ? <MyioAppLogo appName={appName} logoPx={appLogoPx(tile)} tone={homeHeaderLogoTone(tile, mobile)} {...(display ? { display } : {})} /> : <MyioPlatformLogo tone={homeHeaderLogoTone(tile, mobile)} className="h-10" />}<div className="flex min-w-0 items-center gap-3">{!mobile && <span className="text-sm">Usuário</span>}<Menu aria-hidden className="h-6 w-6 shrink-0" /></div></div>
-    {mobile && <p className="mt-8 text-xl font-bold">Olá, Usuário</p>}
+  const background = tile.headerBg === "padrao" ? (mobile && !appName ? "var(--accent)" : "var(--card)") : appTileColor("headerBg", tile.headerBg).value;
+  const tone = appName && tile.headerBg === "padrao" ? "auto" : homeHeaderLogoTone(tile, mobile);
+  return <div aria-label={mobile ? (appName ? "Prévia do cabeçalho do app mobile" : "Prévia da faixa superior mobile") : appName ? "Prévia do cabeçalho do app" : "Prévia da faixa superior desktop"} style={{ ...homeHeaderVars(tile), "--home-header-bg": background } as React.CSSProperties} className={`home-page-header px-4 py-5 ${mobile ? "" : "home-header-desktop-preview flex items-center"}`}>
+    <div className="flex w-full items-center justify-between gap-3">{appName ? <MyioAppLogo appName={appName} logoPx={appLogoPx(tile)} tone={tone} {...(display ? { display } : {})} /> : <MyioPlatformLogo tone={tone} logoPx={appLogoPx(tile)} />}<div className="flex min-w-0 items-center gap-3">{!mobile && <span className="text-sm">Usuário</span>}<Menu aria-hidden className="h-6 w-6 shrink-0" /></div></div>
+    {mobile && !appName && <p className="mt-8 text-xl font-bold">Olá, Usuário</p>}
   </div>;
 }
 
@@ -68,6 +69,7 @@ export function CdeAppOrder({ number, handle }: { number: number; handle?: impor
   const [orderOpen, setOrderOpen] = useState(true);
   const [namesOpen, setNamesOpen] = useState(true);
   const [iconsOpen, setIconsOpen] = useState(true);
+  const [headerOpen, setHeaderOpen] = useState(true);
   const [draft, setDraft] = useState<string[] | null>(null);
   const [saving, setSaving] = useState(false);
   const { data } = useAppOrder();
@@ -137,7 +139,20 @@ export function CdeAppOrder({ number, handle }: { number: number; handle?: impor
           </div>; })}
         </div>
         <div className="max-w-xs"><ColorChoice kind="below" label="Cor padrão dos textos abaixo dos ícones" value={tile.below} onChange={below => setTileDraft({ ...tile, below })} /></div>
-        <div className="max-w-[12rem] space-y-1"><Label>Tamanho do logo myio nos apps</Label><Select value={String(appLogoPx(tile))} onValueChange={value => setTileDraft({ ...tile, appLogoPx: Number(value) })}><SelectTrigger aria-label="Tamanho do logo myio nos apps" className="h-9"><SelectValue /></SelectTrigger><SelectContent>{[24, 28, 32, 36, 40, 44, 48, 56, 64].map(px => <SelectItem key={px} value={String(px)}>{px} px{px === 40 ? " (Home)" : ""}</SelectItem>)}</SelectContent></Select></div>
+
+      </CdeSection>
+      <CdeSection title="Faixa superior dos apps" hint="Logo myio, cor e altura da faixa da Home e dos apps" open={headerOpen} actions={<><Button variant="ghost" size="icon" aria-label="Salvar faixa superior dos apps" title="Salvar faixa superior dos apps" onClick={saveTile} disabled={saving || !tileDraft}><Save /></Button><CdeButton group="toggle" screen="components/cde/cde-app-order.tsx" aria-label={`${headerOpen ? "Recolher" : "Exibir"} faixa superior dos apps`} title={`${headerOpen ? "Recolher" : "Exibir"} faixa superior dos apps`} aria-expanded={headerOpen} onClick={() => setHeaderOpen(!headerOpen)} /></>}>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="space-y-1"><Label className="flex min-h-10 items-end pb-1">Tamanho do logo myio</Label><Select value={String(appLogoPx(tile))} onValueChange={value => setTileDraft({ ...tile, appLogoPx: Number(value) })}><SelectTrigger aria-label="Tamanho do logo myio" className="h-9"><SelectValue /></SelectTrigger><SelectContent>{[24, 28, 32, 36, 40, 44, 48, 56, 64].map(px => <SelectItem key={px} value={String(px)}>{px} px</SelectItem>)}</SelectContent></Select></div>
+        <div className="space-y-1"><Label className="flex min-h-10 items-end pb-1">Altura da faixa superior — Desktop</Label><Select value={String(tile.desktopHeaderPx ?? 0)} onValueChange={v => { const { desktopHeaderPx: _old, ...rest } = tile; setTileDraft({ ...rest, ...(Number(v) ? { desktopHeaderPx: Number(v) } : {}) }); }}><SelectTrigger aria-label="Altura da faixa superior Desktop"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="0">Ajustar ao conteúdo</SelectItem>{[80, 90, 100, 110, 120, 140, 160, 180, 200, 240].map(px => <SelectItem key={px} value={String(px)}>{px} px</SelectItem>)}</SelectContent></Select></div>
+          <ColorChoice kind="headerBg" label="Fundo da faixa superior" value={tile.headerBg} onChange={headerBg => setTileDraft({ ...tile, headerBg })} />
+        </div>
+        <div className="space-y-1"><Label>Prévia da faixa dos apps — Desktop</Label><HeaderPreview tile={tile} appName="CRM" display={appDisplay(tile, "crm", 16)} /></div>
+        <div className="space-y-1"><Label>Prévia da faixa da Home — Desktop</Label><HeaderPreview tile={tile} /></div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="min-w-0 max-w-[390px] space-y-1"><Label>Prévia da faixa dos apps — Mobile</Label><HeaderPreview tile={tile} mobile appName="CRM" display={appDisplay(tile, "crm", 16)} /></div>
+          <div className="min-w-0 max-w-[390px] space-y-1"><Label>Prévia da faixa da Home — Mobile</Label><HeaderPreview tile={tile} mobile /></div>
+        </div>
       </CdeSection>
       <CdeSection title="Ícones da página principal" open={iconsOpen} actions={<><Button variant="ghost" size="icon" aria-label="Salvar Home Page" title="Salvar Home Page" onClick={saveTile} disabled={saving || !tileDraft}><Save /></Button><CdeButton group="toggle" screen="components/cde/cde-app-order.tsx" aria-label={`${iconsOpen ? "Recolher" : "Exibir"} ícones da página principal`} title={`${iconsOpen ? "Recolher" : "Exibir"} ícones da página principal`} aria-expanded={iconsOpen} onClick={() => setIconsOpen(!iconsOpen)} /></>}>
         
@@ -172,15 +187,13 @@ export function CdeAppOrder({ number, handle }: { number: number; handle?: impor
             <Button variant="outline" size="compactIcon" aria-label={`Aumentar ${label.toLowerCase()}`} title="Aumentar" disabled={tile[key] >= 80} onClick={() => setTileDraft({ ...tile, [key]: Math.min(80, tile[key] + 4) })}><Plus /></Button>
           </div></div>)}
         </div>
-        <div className="max-w-xs space-y-2"><Label>Altura da faixa superior — Desktop</Label><Select value={String(tile.desktopHeaderPx ?? 0)} onValueChange={v => setTileDraft({ ...tile, desktopHeaderPx: Number(v) || undefined })}><SelectTrigger aria-label="Altura da faixa superior Desktop"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="0">Ajustar ao conteúdo</SelectItem>{[80, 90, 100, 110, 120, 140, 160, 180, 200, 240].map(px => <SelectItem key={px} value={String(px)}>{px} px</SelectItem>)}</SelectContent></Select></div>
+
         <p className="pt-2 text-sm font-medium">Cores da página principal (Manual da Marca myio)</p>
         <div role="group" aria-label="Cores da página principal" className="grid w-full max-w-5xl grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-5">
           {COLOR_FIELDS.map(([kind, label]) => <ColorChoice key={kind} kind={kind} label={label} value={tile[kind]} onChange={(v) => setTileDraft({ ...tile, [kind]: v })} />)}
         </div>
         {appTileLowContrast(tile) && <p className="text-xs text-destructive">O texto abaixo dos ícones fica pouco visível neste fundo; escolha uma cor de texto contrastante.</p>}
-        <div className="space-y-1"><Label>Prévia do cabeçalho dos apps</Label><HeaderPreview tile={tile} appName="CRM" display={appDisplay(tile, "crm", 16)} /></div>
         <div className="space-y-1"><Label>Prévia desktop</Label>
-          <HeaderPreview tile={tile} />
           <div aria-label="Prévia dos apps" style={{ columnGap: tile.gapX, rowGap: tile.gapY, ...appTileColorVars(tile) } as React.CSSProperties} className="flex w-full flex-wrap bg-[var(--portal-bg)] px-4 py-10 sm:py-14">
             {order.map((key) => { const app = PORTAL_APPS.find((a) => a.key === key); return app ? <div key={key} style={{ zoom: tile.tilePct / 100 }} className="flex w-28 min-w-0 flex-col items-center text-center">
               <div className="relative flex h-28 w-28 flex-col items-center justify-between rounded-3xl border-2 border-[color:var(--tile-border)] bg-[var(--tile-fill)] px-2 pb-2 pt-1.5 text-primary-foreground"><AppTileFace appKey={key} name={app.name} tile={tile} /></div>
@@ -188,7 +201,6 @@ export function CdeAppOrder({ number, handle }: { number: number; handle?: impor
             </div> : null; })}
           </div></div>
         <div className="space-y-1"><Label>Prévia mobile</Label>
-          <div className="w-full max-w-[390px]"><HeaderPreview tile={tile} mobile /></div>
           <div aria-label="Prévia mobile dos apps" style={{ ...appTileColorVars(tile), ...mobileTileVars(tile) } as React.CSSProperties} className="mobile-app-grid grid w-full max-w-[390px] bg-[var(--portal-bg)] px-3 py-8">
             {order.map(key => { const app = PORTAL_APPS.find(a => a.key === key); return app ? <div key={key} className="flex min-w-0 flex-col items-center text-center">
               <div className="mobile-app-tile relative flex flex-col items-center justify-between rounded-2xl border-2 border-[color:var(--tile-border)] bg-[var(--tile-fill)] px-1 pb-2 pt-1 text-primary-foreground"><AppTileFace appKey={key} name={app.name} tile={tile} mobile /></div>

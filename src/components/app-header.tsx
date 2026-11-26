@@ -22,11 +22,12 @@ import { AppManualDialog } from "@/components/app-manual-dialog";
 import { PersonalSignature } from "@/components/personal-signature";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { MENU_ITEMS, menuAppKey, menuOrderForContext, parseMenuConfig, useMainMenuConfig, userInfoLine } from "@/components/cde/main-menu-config";
-import { useAppDisplayName } from "@/components/cde/app-order-config";
+import { useAppDisplayName, useAppTile, APP_TILE_DEFAULT, homeHeaderVars } from "@/components/cde/app-order-config";
 import { accessManagementOptions } from "@/components/access/access-context";
 import { canOpenAccessManagement } from "@/lib/access-management";
 
 export function AppHeader({ logo, children, supplyManual = false, manualApp, menuActions }: { logo: ReactNode; children?: ReactNode; supplyManual?: boolean; manualApp?: string; menuActions?: MenuAction[] }) {
+  const tile = useAppTile().data ?? APP_TILE_DEFAULT;
   const [manualOpen, setManualOpen] = useState(false);
   const [signatureOpen, setSignatureOpen] = useState(false);
   const { data: me } = useCurrentUser();
@@ -54,7 +55,7 @@ export function AppHeader({ logo, children, supplyManual = false, manualApp, men
   const iconButton = "top-icon shrink-0 !bg-transparent !text-foreground shadow-none hover:!bg-muted hover:!text-foreground";
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-card">
+    <header style={{ "--home-header-bg": "var(--card)", ...homeHeaderVars(tile) } as React.CSSProperties} className="home-page-header sticky top-0 z-50 border-b border-border bg-card">
       <TopIconStyleVars /><ListItemStyleVars />
       <div className="app-header-workspace mx-auto max-w-7xl px-4 pb-4 pt-5 sm:flex sm:min-h-[73px] sm:items-center sm:justify-between sm:gap-4 sm:px-6 sm:py-4">
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
