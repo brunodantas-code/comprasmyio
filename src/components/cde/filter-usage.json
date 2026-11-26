@@ -45,6 +45,11 @@
     "general": 0
   },
   {
+    "file": "components/central/dashboard.tsx",
+    "standard": 1,
+    "general": 0
+  },
+  {
     "file": "components/clients-tab.tsx",
     "standard": 1,
     "general": 0
@@ -146,7 +151,7 @@
   },
   {
     "file": "components/spend/workspace.tsx",
-    "standard": 1,
+    "standard": 2,
     "general": 0
   },
   {

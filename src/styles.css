@@ -804,6 +804,35 @@ input[data-custom-calendar="true"]::-webkit-calendar-picker-indicator {
 .cde-sub-title { color: var(--cde-sub-text, inherit); font-size: var(--cde-sub-title-fs, 0.875rem); font-family: var(--cde-sub-font, inherit); }
 .cde-sub-hint { color: var(--cde-sub-hint-color, var(--muted-foreground)); font-size: var(--cde-sub-hint-fs, 0.75rem); font-family: var(--cde-sub-font, inherit); }
 
+/* Internal CDE sections reuse the approved Supply heading surface and the
+   live CDE subcategory colour/font choices, without painting model previews. */
+.cde-section {
+  min-width: 0;
+  border: 1px solid var(--cde-sub-border, var(--border));
+  border-radius: 6px;
+  background: var(--card);
+}
+.cde-section-header {
+  padding: 14px 16px;
+  background: var(--cde-sub-bg, var(--erp-section-head));
+  border-bottom: 1px solid var(--cde-sub-border, var(--border));
+  border-radius: 5px 5px 0 0;
+}
+.cde-section-title {
+  margin: 0;
+  color: var(--cde-sub-text, var(--foreground));
+  font-family: var(--cde-sub-font, inherit);
+  font-size: var(--cde-section-title-fs, 1rem);
+  font-weight: 400;
+  line-height: 1.5;
+}
+.cde-section-content { padding: 24px 16px; }
+.cde-category-sections > .cde-cat-band + .cde-section {
+  border-top: 0;
+  border-radius: 0 0 6px 6px;
+}
+.cde-category-sections > .cde-cat-band + .cde-section > .cde-section-header { border-radius: 0; }
+
 /* OpDesk task states: role tokens, with live CDE tag styles able to replace them. */
 @layer base {
   .opdesk-status-waiting, .opdesk-status-closed, .opdesk-priority-low { color: var(--opdesk-neutral); background: var(--muted); border-color: var(--border); }
@@ -835,3 +864,9 @@ input[data-custom-calendar="true"]::-webkit-calendar-picker-indicator {
 .home-header-desktop-preview { min-height:var(--home-header-desktop-height,80px); }
 .home-header-desktop-preview > div { width:100%; }
 @media(min-width:640px){ .home-page-header > .app-header-workspace { min-height:var(--home-header-desktop-height,0px); } }
+
+.cde-model-section { border: 1px solid var(--cde-sub-border, var(--border)); border-radius: 6px; background: var(--card); }
+.cde-model-section > .cde-sub-band { border-bottom: 1px solid var(--cde-sub-border, var(--border)); border-radius: 5px 5px 0 0; background: var(--cde-sub-bg, var(--erp-section-head)); box-shadow: none; }
+.cde-model-section + .cde-model-section { margin-top: 16px; }
+.cde-category-sections > .cde-cat-band + div > .cde-section:first-child { border-top: 0; border-radius: 0 0 6px 6px; }
+.cde-category-sections > .cde-cat-band + div > .cde-section:first-child > .cde-section-header { border-radius: 0; }

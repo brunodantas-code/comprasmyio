@@ -1,3 +1,4 @@
+import { CdeSection } from "./cde-section";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Save, X } from "lucide-react";
@@ -42,10 +43,9 @@ export function MessageStyleEditor() {
       setDraft(null); toast.success("Aparência das mensagens atualizada");
     } catch { toast.error("Não foi possível salvar a aparência."); } finally { setSaving(false); }
   }
-  return <div className="max-w-5xl space-y-3">
-    <div className="flex items-center gap-1"><p className="text-sm font-medium">Aparência das mensagens</p>
-      {draft && <><Button variant="ghost" size="icon" aria-label="Salvar" title="Salvar aparência" onClick={save} disabled={saving}><Save /></Button><Button variant="ghost" size="icon" aria-label="Cancelar" title="Cancelar" onClick={() => setDraft(null)}><X /></Button></>}</div>
+  return <CdeSection title="Aparência das mensagens" actions={<><Button variant="ghost" size="icon" aria-label="Salvar" title="Salvar aparência" onClick={save} disabled={saving || !draft || JSON.stringify(draft) === JSON.stringify(saved)}><Save /></Button><Button variant="ghost" size="icon" aria-label="Cancelar" title="Cancelar" onClick={() => setDraft(null)}><X /></Button></>}>
+    
     <div className="grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-2 lg:grid-cols-4">{FIELDS.map(([k, l]) => <Pick key={k} kind={k} label={l} value={style[k]} onChange={(v) => setDraft({ ...style, [k]: v })} />)}</div>
     <div className="space-y-1"><p className="text-xs text-muted-foreground">Prévia</p><CorporateMessageBox text="Novembro é o mês de fecharmos o orçamento de 2027. Todos devem atualizar seus KPIs e OKRs!" style={style} /></div>
-  </div>;
+  </CdeSection>;
 }

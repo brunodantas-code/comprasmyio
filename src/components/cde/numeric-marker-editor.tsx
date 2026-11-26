@@ -1,3 +1,4 @@
+import { CdeSection } from "./cde-section";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Save, RotateCcw } from "lucide-react";
@@ -32,14 +33,14 @@ export function NumericMarkerEditor({ kind, number }: { kind: "record_number" | 
       setDirty(false); toast.success("Aparência atualizada nos apps");
     } catch (e) { toast.error(e instanceof Error ? e.message : "Não foi possível salvar"); } finally { setBusy(false); }
   }
-  return <section className="space-y-3 py-3" aria-label={title}>
-    <h3 className="flex items-center gap-3 bg-primary/10 px-3 py-2 text-sm"><CdeNumber subcategory>{number}</CdeNumber>{title}</h3>
+  return <CdeSection title={title} marker={<CdeNumber subcategory>{number}</CdeNumber>} actions={<><Button variant="ghost" size="icon" aria-label={`Salvar ${title}`} title="Salvar aparência" disabled={busy || !dirty || JSON.stringify(draft) === JSON.stringify(saved)} onClick={() => void save()}><Save /></Button></>}>
+    
     <div className="grid gap-3 sm:grid-cols-3">
       {(["bg", "text", "border"] as const).map((key, i) => <div key={key} className="space-y-1"><Label>{["Fundo", "Texto", "Borda"][i]}</Label><Select value={look[key]} onValueChange={v => { setDraft({ ...look, [key]: v }); setDirty(true); }}><SelectTrigger aria-label={`${title} — ${["Fundo", "Texto", "Borda"][i]}`}><SelectValue /></SelectTrigger><SelectContent>{MARKER_COLORS.map(c => <SelectItem key={c.key} value={c.key}>{c.label}</SelectItem>)}</SelectContent></Select></div>)}
       <div className="space-y-1"><Label>Formato</Label><Select value={look.shape} onValueChange={v => { setDraft({ ...look, shape: v }); setDirty(true); }}><SelectTrigger aria-label={`${title} — Formato`}><SelectValue /></SelectTrigger><SelectContent><SelectItem value="circle">Circular</SelectItem><SelectItem value="square">Quadrado</SelectItem><SelectItem value="rounded">Arredondado</SelectItem></SelectContent></Select></div>
       <div className="space-y-1"><Label htmlFor={`${kind}-size`}>Tamanho (px)</Label><Input id={`${kind}-size`} type="number" min={16} max={48} value={look.size} onChange={e => { setDraft({ ...look, size: Math.min(48, Math.max(16, Number(e.target.value))) }); setDirty(true); }} /></div>
       <div className="space-y-1"><Label htmlFor={`${kind}-font`}>Texto (px)</Label><Input id={`${kind}-font`} type="number" min={9} max={20} value={look.font} onChange={e => { setDraft({ ...look, font: Math.min(20, Math.max(9, Number(e.target.value))) }); setDirty(true); }} /></div>
     </div>
-    <div className="flex items-center gap-3"><span className="text-xs text-muted-foreground">Prévia</span>{["7", "59", "99+"].map(v => <NumericMarker key={v} kind={kind} look={look}>{v}</NumericMarker>)}<Button variant="ghost" size="compactIcon" aria-label={`Salvar ${title}`} title="Salvar aparência" disabled={busy} onClick={() => void save()}><Save /></Button><Button variant="ghost" size="compactIcon" aria-label={`Restaurar padrão de ${title}`} title="Restaurar padrão" onClick={() => { setDraft(MARKER_DEFAULTS[kind]); setDirty(true); }}><RotateCcw /></Button></div>
-  </section>;
+    <div className="flex items-center gap-3"><span className="text-xs text-muted-foreground">Prévia</span>{["7", "59", "99+"].map(v => <NumericMarker key={v} kind={kind} look={look}>{v}</NumericMarker>)}<Button variant="ghost" size="compactIcon" aria-label={`Restaurar padrão de ${title}`} title="Restaurar padrão" onClick={() => { setDraft(MARKER_DEFAULTS[kind]); setDirty(true); }}><RotateCcw /></Button></div>
+  </CdeSection>;
 }

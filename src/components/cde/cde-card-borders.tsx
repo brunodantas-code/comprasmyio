@@ -1,3 +1,4 @@
+import { CdeSection } from "./cde-section";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Save, X } from "lucide-react";
@@ -75,12 +76,12 @@ export function CdeCardBorders({ number, handle }: { number: number; handle?: Re
     } catch { toast.error("Não foi possível salvar as bordas. Verifique seu acesso de Admin do ERP."); }
     finally { setSaving(false); }
   }
-  return <section>
+  return <section className="cde-category-sections">
     <CdeCategoryHeader number={number} handle={handle} title="Bordas de classificação dos cards" open={open} onToggle={() => setOpen(!open)} />
-    {open && <div className="space-y-4 py-4">
+    {open && <CdeSection title="Classificação e cores" actions={<><Button variant="ghost" size="icon" title="Salvar bordas dos cards" aria-label="Salvar bordas dos cards" disabled={saving || !draft || standards.isLoading} onClick={save}><Save /></Button><Button variant="ghost" size="icon" title="Cancelar alterações das bordas" aria-label="Cancelar alterações das bordas" disabled={saving} onClick={() => setDraft(null)}><X /></Button></>}>
       <div className="flex items-center justify-end gap-1">
-        <Button variant="ghost" size="icon" title="Salvar bordas dos cards" aria-label="Salvar bordas dos cards" disabled={saving || !draft || standards.isLoading} onClick={save}><Save /></Button>
-        {draft && <Button variant="ghost" size="icon" title="Cancelar alterações das bordas" aria-label="Cancelar alterações das bordas" disabled={saving} onClick={() => setDraft(null)}><X /></Button>}
+        
+        
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div><Label>Aplicativo</Label><Select value={app} onValueChange={v => { const choice = CARD_BORDER_APPS.find(a => a.key === v); if (choice) setApp(choice.key); }} disabled={saving}><SelectTrigger aria-label="Aplicativo das bordas"><SelectValue /></SelectTrigger><SelectContent>{CARD_BORDER_APPS.map(a => <SelectItem key={a.key} value={a.key}>{nameOf(a.key) || a.label}</SelectItem>)}</SelectContent></Select></div>
@@ -99,6 +100,6 @@ export function CdeCardBorders({ number, handle }: { number: number; handle?: Re
         }}><SelectTrigger aria-label={`Cor da borda: ${label}`}><SelectValue /></SelectTrigger><SelectContent><SelectItem value="padrao">Padrão atual</SelectItem>{CARD_BORDER_COLORS.map(color => <SelectItem key={color.key} value={color.key}><span className="flex items-center gap-2"><span aria-hidden="true" data-appearance-reference="" data-card-border-color={color.key} className="card-border-swatch size-4 shrink-0" style={swatch.css} />{color.label}</span></SelectItem>)}</SelectContent></Select></div>)}</div>
         <div className="space-y-2"><Label>Prévia</Label><div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{rows.slice(0, 6).map(([key, label]) => <Card key={key} classification={{ app, [rule.mode]: key }} classificationPreview={config} className="h-24 min-w-0"><CardContent className="flex h-full min-w-0 items-center p-4 sm:p-4"><span className="truncate text-sm" title={label}>{label}</span></CardContent></Card>)}</div></div>
       </>}
-    </div>}
+    </CdeSection>}
   </section>;
 }

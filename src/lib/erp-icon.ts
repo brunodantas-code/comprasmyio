@@ -6,6 +6,11 @@ export const ERP_ICON_OPTIONS = [
   { key: "official-dark", label: "IO oficial · roxo escuro", base: "/erp-icons/official-dark" },
 ] as const;
 export type ErpIconKey = typeof ERP_ICON_OPTIONS[number]["key"];
+/** Only these choices are offered; legacy assets remain for existing installs. */
+export const ERP_SELECTABLE_ICONS = [
+  { key: "io-black", label: "IO verde · fundo preto", base: "/erp-icons/io-black" },
+  { key: "official-purple", label: "IO verde · fundo lilás", base: "/erp-icons/official-purple" },
+] as const;
 export type AppIconChoices = Record<string, "white" | "green">;
 export function appIconChoices(value: unknown): AppIconChoices {
   if (!value || typeof value !== "object" || Array.isArray(value)) return {};

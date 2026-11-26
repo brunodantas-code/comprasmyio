@@ -33,6 +33,7 @@ export function cdeAppearanceVars(c: CdeAppearanceConfig): React.CSSProperties {
     const put = (name: string, key: string) => { if (key !== "padrao") out[`--cde-${lv}-${name}`] = tagColor(key).value; };
     put("bg", l.bg); put("text", l.text); put("border", l.border); put("hint-color", l.hint);
     out[`--cde-${lv}-title-fs`] = `${l.titlePx}px`; out[`--cde-${lv}-hint-fs`] = `${l.hintPx}px`;
+    if (lv === "sub") out["--cde-section-title-fs"] = `${l.titlePx === CDE_APPEARANCE_DEFAULT.sub.titlePx ? 16 : l.titlePx}px`;
     const f = CDE_FONTS.find((x) => x.key === l.font)?.value; if (f) out[`--cde-${lv}-font`] = f;
   }
   return out as React.CSSProperties;

@@ -1,3 +1,4 @@
+import { CdeSection } from "./cde-section";
 import {useState} from "react";
 import {useQuery,useQueryClient} from "@tanstack/react-query";
 import {Save} from "lucide-react";
@@ -21,5 +22,5 @@ export function CdeProjectBudget({number,handle}:{number:number;handle?:React.Re
   if(saved.length!==ids.length||ids.some(id=>!saved.includes(id)))throw new Error("Não foi possível confirmar as contas selecionadas.");
   await Promise.all([qc.invalidateQueries({queryKey:["pm-budget-catalog"]}),qc.invalidateQueries({queryKey:["pm-workspace"]})]);setDraft(null);toast.success("Plano sintético atualizado");
  }catch{toast.error("Não foi possível salvar o plano sintético.");}finally{setSaving(false);}}
- return <section><CdeCategoryHeader number={number} handle={handle} title="Orçamento do Projects" hint="Plano de contas sintético baseado nas despesas do Finance" open={open} onToggle={()=>setOpen(!open)}/>{open?<div className="space-y-4 py-4"><div className="grid gap-3 sm:grid-cols-2">{data.map(a=><label key={a.id} className="flex min-w-0 items-center gap-2 text-sm"><Checkbox checked={ids.includes(a.id)} disabled={saving} onCheckedChange={checked=>setDraft(checked?[...ids,a.id]:ids.filter(id=>id!==a.id))}/><span>{a.code} · {a.name}</span></label>)}</div><Button variant="ghost" size="icon" title="Salvar plano sintético" aria-label="Salvar plano sintético" disabled={saving||!draft} onClick={save}><Save/></Button></div>:null}</section>;
+ return <section className="cde-category-sections"><CdeCategoryHeader number={number} handle={handle} title="Orçamento do Projects" hint="Plano de contas sintético baseado nas despesas do Finance" open={open} onToggle={()=>setOpen(!open)}/>{open?<CdeSection title="Plano de contas sintético" actions={<><Button variant="ghost" size="icon" title="Salvar plano sintético" aria-label="Salvar plano sintético" disabled={saving || !draft} onClick={save}><Save/></Button></>}><div className="grid gap-3 sm:grid-cols-2">{data.map(a=><label key={a.id} className="flex min-w-0 items-center gap-2 text-sm"><Checkbox checked={ids.includes(a.id)} disabled={saving} onCheckedChange={checked=>setDraft(checked?[...ids,a.id]:ids.filter(id=>id!==a.id))}/><span>{a.code} · {a.name}</span></label>)}</div></CdeSection>:null}</section>;
 }

@@ -1,3 +1,4 @@
+import { CdeSection } from "./cde-section";
 import type React from "react";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -47,10 +48,10 @@ export function CdeTableFonts({ number, handle }: { number: number; handle?: imp
   }
 
   return (
-    <section className="space-y-4">
+    <section className="cde-category-sections">
       <CdeCategoryHeader handle={handle} number={number} title="Cabeçalhos e Listas" hint="Fontes, cores, títulos dos campos, títulos e subtítulos, alinhamento e ordem das colunas" open={open} onToggle={() => setOpen(!open)} />
       {open && (
-        <div className="w-full min-w-0 space-y-4 py-4">
+        <div className="space-y-4"><CdeSection title="Fontes, cores e alinhamento" actions={<><Button variant="ghost" size="icon" aria-label="Salvar" title="Salvar padrão" onClick={save} disabled={saving || !draft || JSON.stringify(draft) === JSON.stringify(saved)}><Save /></Button><Button variant="ghost" size="icon" aria-label="Cancelar" title="Cancelar" disabled={saving} onClick={() => setDraft(null)}><X /></Button></>}>
           <div role="group" aria-label="Fontes de cabeçalhos e filtros" className="grid w-full max-w-3xl grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
             <div className="min-w-0 space-y-1">
               <Label>Cabeçalhos de tabela</Label>
@@ -116,12 +117,8 @@ export function CdeTableFonts({ number, handle }: { number: number; handle?: imp
             </div>
           </div>
           <p className="text-xs text-muted-foreground">Aplicado imediatamente a todos os apps após salvar. No celular, os campos de busca mantêm 16 px ao serem tocados para evitar o zoom automático.</p>
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" aria-label="Salvar" title="Salvar padrão" onClick={save} disabled={saving || !draft}><Save /></Button>
-            {draft && <Button variant="ghost" size="icon" aria-label="Cancelar" title="Cancelar" disabled={saving} onClick={() => setDraft(null)}><X /></Button>}
-          </div>
-          <div className="border-t border-border pt-4"><CdeTableOrder embedded /></div>
-        </div>
+
+        </CdeSection><CdeTableOrder embedded /></div>
       )}
     </section>
   );

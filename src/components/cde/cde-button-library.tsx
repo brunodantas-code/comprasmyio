@@ -24,6 +24,7 @@ import { UsageLinks } from "./usage-links";
 import { libraryDescription } from "./library-details";
 import { consolidateLibrary, libraryModelKey } from "./library-models";
 import { saveLibrarySelection } from "./save-library-selection";
+import { CdeDraftSave } from "./cde-draft-save";
 
 const normalize = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
@@ -181,14 +182,14 @@ export function CdeButtonLibrary({ number, handle, onEdit }: { number: number; h
       })}
       {!filtered.length && <p className="text-sm text-muted-foreground">Nenhum botão encontrado.</p>}
     </>}
-    <Dialog open={!!editingButton} onOpenChange={open => { if (!open) setEditingButton(null); }}><DialogContent className="max-h-[90vh] overflow-y-auto"><DialogHeader><DialogTitle>Editar botão e substituir modelo</DialogTitle></DialogHeader>
+    <Dialog open={!!editingButton} onOpenChange={open => { if (!open) setEditingButton(null); }}><DialogContent className="max-h-[90vh] overflow-y-auto" topActions={<CdeDraftSave value={{ editText, editGroup, editModel, scope }} disabled={saving || !editGroup || (!editModel && !data?.selected.some(s => s.group_key === editGroup && s.is_primary))} label="Salvar substituição" onSave={() => void saveBinding()} />}><DialogHeader><DialogTitle>Editar botão e substituir modelo</DialogTitle></DialogHeader>
       <p className="break-words text-xs text-muted-foreground">{editingButton?.file}:{editingButton?.line}</p>
       <Label>Aplicar a</Label><Select value={scope} onValueChange={setScope}><SelectTrigger aria-label="Aplicar a"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="one">Todos os usos deste modelo ({editingButton ? usesOf(editingButton).length : 0})</SelectItem><SelectItem value="same">Mesmo nome e função em todos os apps</SelectItem><SelectItem value="checked" disabled={!checked.length}>Usos selecionados ({checked.length})</SelectItem></SelectContent></Select>
       <Label htmlFor="library-button-text">Texto alternativo (vazio = somente ícone)</Label><Input id="library-button-text" value={editText} disabled={editingButton?.dynamic} onChange={e => setEditText(e.target.value)} />
       {editingButton?.dynamic && <p className="text-xs text-muted-foreground">Conteúdo variável preservado.</p>}
       <Label>Padrão vinculado</Label><Select value={editGroup} onValueChange={v => { setEditGroup(v); setEditModel(""); }}><SelectTrigger aria-label="Padrão vinculado"><SelectValue placeholder="Escolher padrão" /></SelectTrigger><SelectContent>{[["action_standard","Padrão visual comum"],["plus","Adicionar (+)"],["add","Adicionar / Novo"],["save","Salvar"],["cancel","Cancelar"],["confirm","Confirmar / Concluir"],["trash","Excluir"],["pencil","Editar"],["toggle","Exibir / Recolher"],["move","Mover"],["sort","Ordenar"],["filter","Filtrar"],["close","X"],["send","Enviar"],["attach","Anexar"],["export","Exportar"],["clear","Limpar"],["organize","Organizar"]].map(([key, label]) => <SelectItem key={key} value={key}>{label}</SelectItem>)}</SelectContent></Select>
       <Label>Substituir por modelo</Label><Select value={editModel || "primary"} onValueChange={v => setEditModel(v === "primary" ? "" : v)}><SelectTrigger aria-label="Substituir por modelo"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="primary">Padrão principal do grupo</SelectItem>{data?.models.filter(m => ["Button", "button"].includes(m.tag)).map(m => <SelectItem key={m.id} value={`custom:${m.id}`}>{m.name || m.label || m.icon || "Modelo"}</SelectItem>)}</SelectContent></Select>
-      <div className="flex flex-wrap justify-end gap-2"><Button variant="ghost" onClick={() => { if (editingButton) { onEdit(editingButton, editGroup, scopeEntries(editingButton).map(b => b.id), editModel); setEditingButton(null); } }}>Editar aparência</Button><Button disabled={saving || !editGroup || (!editModel && !data?.selected.some(s => s.group_key === editGroup && s.is_primary))} onClick={saveBinding}>Salvar substituição</Button></div>
+      <div className="flex flex-wrap justify-end gap-2"><Button variant="ghost" onClick={() => { if (editingButton) { onEdit(editingButton, editGroup, scopeEntries(editingButton).map(b => b.id), editModel); setEditingButton(null); } }}>Editar aparência</Button></div>
     </DialogContent></Dialog>
     <Dialog open={replacing.length > 0} onOpenChange={open => { if (!open) setReplacing([]); }}><DialogContent><DialogHeader><DialogTitle>Substituir e consolidar modelos</DialogTitle></DialogHeader>
       <p className="text-sm text-muted-foreground">{replacing.length} uso(s) selecionado(s)</p>

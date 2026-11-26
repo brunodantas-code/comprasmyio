@@ -46,6 +46,7 @@ import { UsageLinks } from "./usage-links";
 import { readButtonBindings } from "./library-bindings";
 import numberUsage from "./number-usage.json";
 import { saveLibrarySelection } from "./save-library-selection";
+import { CdeDraftSave } from "./cde-draft-save";
 
 type Variant = { key: string; name?: string; custom?: boolean; tag: string; variant: string; size: string; className: string; icon: string; iconClass: string; label: string; count: number; files: string[]; uses?: { file: string; n: number }[]; style?: CdeStyle };
 
@@ -333,14 +334,14 @@ export function CdeWorkspace() {
         const removed = (data?.removed ?? []).filter((r) => r.group_key === g.key);
         const isOpen = open.has(g.key);
         return (
-          <section className={cn(parent ? "min-w-0 overflow-hidden border-b border-border" : "min-w-0")}>
+          <section className={cn(parent ? "cde-model-section min-w-0" : "min-w-0 cde-category-sections")}>
             {!parent ? <CdeCategoryHeader handle={handle} number={num} title={g.title.split(" ").slice(1).join(" ")} hint={`${list.length} modelos · ${g.hint}`} open={isOpen} onToggle={() => setOpen((s) => { const n = new Set(s); if (n.has(g.key)) n.delete(g.key); else n.add(g.key); return n; })} action={<CdeButton group="plus" screen="components/cde/cde-workspace.tsx" title="Criar modelo" aria-label={`Criar modelo em ${g.title}`} onClick={() => { setDraft({ ...emptyDraft, tag: (g.key === "box" || g.key === "confirm_dialog") ? "div" : "Button" }); setCreating(g.key); }} />} /> : <div className="cde-sub-band flex items-center gap-3 px-5 py-2">{handle}
               <button type="button" aria-expanded={isOpen} onClick={() => setOpen((s) => { const n = new Set(s); if (n.has(g.key)) n.delete(g.key); else n.add(g.key); return n; })} className="flex min-w-0 flex-1 items-center gap-4 text-left">
                 <span className="flex flex-col">
                   <CdeNumber subcategory={!!parent}>{num}</CdeNumber>
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="cde-sub-title block font-normal">{g.title.split(" ").slice(1).join(" ")}</span>
+                  <span className="cde-section-title block font-normal">{g.title.split(" ").slice(1).join(" ")}</span>
                   <span className="cde-sub-hint mt-0.5 block">{list.length} modelos · {g.hint}</span>
                 </span>
               </button>
@@ -497,7 +498,7 @@ export function CdeWorkspace() {
       </CdeSortableList>
 
       <Dialog open={!!creating} onOpenChange={(o) => { if (!o) { setCreating(null); setEditing(null); setLibraryEdit(null); } }}>
-        <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
+        <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto" topActions={<CdeDraftSave value={draft} disabled={create.isPending} label="Salvar modelo" onSave={() => { if (creating) create.mutate(creating); }} />}>
           <DialogHeader className="flex-row items-center justify-between gap-3 space-y-0 pr-8"><DialogTitle>{editing ? "Editar modelo" : "Criar modelo"} · {creating ? groupTitle(creating) : ""}</DialogTitle><div className="flex min-h-12 min-w-24 items-center justify-center px-3 py-2"><Preview v={draft} /></div></DialogHeader>
           <div className="grid gap-3 sm:grid-cols-2 [&_:is(input,textarea,button[role=combobox])]:!rounded-none [&_:is(input,textarea,button[role=combobox])]:!border-0 [&_:is(input,textarea,button[role=combobox])]:!border-b [&_:is(input,textarea,button[role=combobox])]:!border-myio-green [&_:is(input,textarea,button[role=combobox])]:!bg-transparent [&_:is(input,textarea,button[role=combobox])]:!px-0 [&_:is(input,textarea,button[role=combobox])]:!shadow-none [&_:is(input,textarea,button[role=combobox])]:!ring-0 [&_textarea]:!border-solid">
             <div className="space-y-1 sm:col-span-2"><Label>Nome do modelo</Label><Input value={draft.name} maxLength={60} onChange={(e) => setDraft({ ...draft, name: e.target.value })} placeholder="Ex.: Campo de busca" /></div>
@@ -533,10 +534,6 @@ export function CdeWorkspace() {
             <div className="space-y-1 sm:col-span-2"><Label>Descrição do desenvolvedor</Label><Textarea value={draft.style.description ?? ""} maxLength={1000} rows={3} onChange={(e) => setDraft({ ...draft, style: { ...draft.style, description: e.target.value } })} placeholder="Descreva como deseja o botão ou forma: uso, comportamento, cores, tamanho..." /></div>
             <div className="space-y-1 sm:col-span-2"><Label>Classes (opcional)</Label><Input value={draft.className} onChange={(e) => setDraft({ ...draft, className: e.target.value })} placeholder="h-8 text-sm" /></div>
           </div>
-          <DialogFooter>
-            <Button type="button" variant="action" onClick={() => { setCreating(null); setEditing(null); setLibraryEdit(null); }}>Cancelar</Button>
-            <Button type="button" variant="action" disabled={create.isPending} onClick={() => creating && create.mutate(creating)}>Salvar</Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
 
@@ -560,7 +557,7 @@ export function CdeWorkspace() {
         </DialogContent>
       </Dialog>
       <Dialog open={!!secondary} onOpenChange={(o) => !o && setSecondary(null)}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg" topActions={<CdeDraftSave value={secondary?.screens} disabled={saveSecondary.isPending} label="Salvar padrão secundário" onSave={() => saveSecondary.mutate()} />}>
           <DialogHeader><DialogTitle>Padrão secundário: {secondary?.label}</DialogTitle></DialogHeader>
           <p className="text-sm text-muted-foreground">Escolha as telas que usarão este modelo para contraste ou diferenciação. As demais telas continuam no padrão principal.</p>
           <Input value={screenSearch} onChange={(e) => setScreenSearch(e.target.value)} placeholder="Buscar tela ou app..." />
@@ -576,10 +573,6 @@ export function CdeWorkspace() {
             })}
           </div>
           <p className="text-xs text-muted-foreground">{secondary?.screens.length ?? 0} tela(s) selecionada(s). Sem telas, o modelo deixa de ser secundário.</p>
-          <DialogFooter>
-            <Button type="button" variant="action" onClick={() => setSecondary(null)}>Cancelar</Button>
-            <Button type="button" variant="action" disabled={saveSecondary.isPending} onClick={() => saveSecondary.mutate()}>Salvar</Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
     </main>

@@ -1,3 +1,5 @@
+import { Save, X } from "lucide-react";
+import { CdeSection } from "./cde-section";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -50,7 +52,7 @@ export function TopIconStyleEditor({ items }: { items: Item[] }) {
       setDraft(null); toast.success("Regra dos ícones aplicada a todos os apps");
     } catch { toast.error("Não foi possível salvar (somente Admin)."); } finally { setSaving(false); }
   }
-  return <div className="space-y-3">
+  return <CdeSection title="Ícones dos menus" actions={<><Button aria-label="Salvar Ícones dos menus" title="Salvar Ícones dos menus" size="icon" variant="ghost" disabled={saving || !draft} onClick={save}><Save /></Button><Button aria-label="Cancelar alterações" title="Cancelar alterações" size="icon" variant="ghost" onClick={() => setDraft(null)}><X /></Button></>}>
     <div className="flex flex-wrap gap-4" style={topIconVars(s) as React.CSSProperties}>{items.map((it) => { const Icon = it.icon; return <div key={it.label} className="flex w-24 flex-col items-center gap-1 text-center">
       <span className="top-icon flex h-10 w-10 items-center justify-center"><Icon className="h-5 w-5" /></span>
       <span className="text-[0.7rem] leading-tight">{it.label}</span><span className="text-[0.6rem] text-muted-foreground/70">{it.name}</span></div>; })}</div>
@@ -64,7 +66,7 @@ export function TopIconStyleEditor({ items }: { items: Item[] }) {
         <select className="h-7 rounded border border-border bg-background px-1" value={s.borderWidth} onChange={(e) => set({ borderWidth: Number(e.target.value) })}>{[0, 1, 2, 3].map((n) => <option key={n} value={n}>{n === 0 ? "Sem borda" : `${n} px`}</option>)}</select></label>
       <label className="flex items-center gap-2">Arredondamento
         <select className="h-7 rounded border border-border bg-background px-1" value={s.radius} onChange={(e) => set({ radius: Number(e.target.value) })}>{[0, 4, 6, 8, 12, 999].map((n) => <option key={n} value={n}>{n === 999 ? "Redondo" : `${n} px`}</option>)}</select></label>
-      {draft ? <><Button size="sm" variant="action" disabled={saving} onClick={save}>Salvar</Button><Button size="sm" variant="outline" onClick={() => setDraft(null)}>Cancelar</Button></> : null}
+      {draft ? <></> : null}
     </div>
-  </div>;
+  </CdeSection>;
 }

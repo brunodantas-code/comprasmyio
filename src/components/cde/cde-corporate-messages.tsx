@@ -1,3 +1,4 @@
+import { CdeSection } from "./cde-section";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Ban, Pencil, Plus, Save, X } from "lucide-react";
@@ -53,12 +54,12 @@ function PortalSectionsEditor() {
       setDraft(null); toast.success("Disposição da tela principal atualizada");
     } catch { toast.error("Não foi possível salvar a disposição."); } finally { setSaving(false); }
   }
-  return <div className="max-w-xl space-y-2">
-    <p className="text-sm font-medium">Local de exibição na tela principal</p>
+  return <CdeSection title="Local de exibição na tela principal" actions={<><Button variant="ghost" size="icon" aria-label="Salvar" title="Salvar disposição" onClick={save} disabled={saving || !draft}><Save /></Button></>}>
+    
     <p className="text-xs text-muted-foreground">Arraste as mensagens e os demais blocos para definir a ordem da tela principal.</p>
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={move}><SortableContext items={order} strategy={verticalListSortingStrategy}>{order.map((id, i) => <SectionRow key={id} id={id} index={i} />)}</SortableContext></DndContext>
-    <Button variant="ghost" size="icon" aria-label="Salvar" title="Salvar disposição" onClick={save} disabled={saving || !draft}><Save /></Button>
-  </div>;
+    
+  </CdeSection>;
 }
 import { isMessageActive, todayIso, useCorporateMessages, type CorporateMessage } from "@/components/corporate/corporate-messages";
 
@@ -101,11 +102,12 @@ export function CdeCorporateMessages({ number, handle }: { number: number; handl
     if (error || !gone?.length) toast.error("Não foi possível excluir. Somente Admin do ERP exclui mensagens.");
     else { await refresh(); toast.success("Mensagem excluída"); }
   }
-  return <section className="space-y-4">
+  return <section className="cde-category-sections">
     <CdeCategoryHeader handle={handle} number={number} title="Mensagens corporativas" hint="Avisos, local de exibição e histórico" open={open} onToggle={() => setOpen(!open)} />
-    {open && <div className="w-full min-w-0 space-y-4 py-4">
+    {open && <div className="space-y-4">
       <PortalSectionsEditor />
       <MessageStyleEditor />
+      <CdeSection title="Mensagens e histórico" actions={<><Button variant="ghost" size="icon" aria-label="Salvar mensagem" title="Salvar mensagem" disabled={saving || !draft || (draft.id ? all.some(m => m.id === draft.id && m.message === draft.message && m.starts_at === draft.starts_at && (m.ends_at ?? "") === draft.ends_at) : !draft.message.trim())} onClick={save}><Save /></Button><Button variant="ghost" size="icon" aria-label="Cancelar mensagem" title="Cancelar" onClick={() => setDraft(null)}><X /></Button></>}>
       {!draft && <Button variant="ghost" onClick={() => setDraft({ message: "", starts_at: todayIso(), ends_at: "" })}><Plus className="h-4 w-4" />Nova mensagem</Button>}
       {draft && <div className="max-w-3xl space-y-3">
         <div className="space-y-1"><Label>Mensagem</Label><Textarea value={draft.message} onChange={(e) => setDraft({ ...draft, message: e.target.value })} rows={2} maxLength={300} /></div>
@@ -113,10 +115,7 @@ export function CdeCorporateMessages({ number, handle }: { number: number; handl
           <div className="space-y-1"><Label>Data de exibição</Label><Input type="date" value={draft.starts_at} onChange={(e) => setDraft({ ...draft, starts_at: e.target.value })} /></div>
           <div className="space-y-1"><Label>Data de inatividade (último dia exibido)</Label><Input type="date" value={draft.ends_at} onChange={(e) => setDraft({ ...draft, ends_at: e.target.value })} /></div>
         </div>
-        <div className="flex items-center gap-1">
-          <Button variant="ghost" size="icon" aria-label="Salvar" title="Salvar mensagem" onClick={save} disabled={saving}><Save /></Button>
-          <Button variant="ghost" size="icon" aria-label="Cancelar" title="Cancelar" onClick={() => setDraft(null)}><X /></Button>
-        </div>
+
       </div>}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Button type="button" variant="ghost" className="!h-auto !w-full !max-w-none !justify-between gap-2 !bg-transparent px-0 py-2 text-sm font-medium" aria-expanded={historyOpen} onClick={() => setHistoryOpen((v) => !v)}><span className="min-w-0 break-words">Histórico de mensagens ({all.length})</span><CdeDisclosureIcon open={historyOpen} screen="components/cde/cde-corporate-messages.tsx" direction="vertical" /></Button>
@@ -138,6 +137,6 @@ export function CdeCorporateMessages({ number, handle }: { number: number; handl
         </TableRow>; })}
         {!data.length && <TableRow><TableCell colSpan={6} className="text-center text-xs text-muted-foreground">Nenhuma mensagem encontrada</TableCell></TableRow>}</TableBody>
       </Table>}
-    </div>}
+    </CdeSection></div>}
   </section>;
 }

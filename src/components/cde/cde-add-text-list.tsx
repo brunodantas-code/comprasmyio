@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Pencil, RotateCcw } from "lucide-react";
+import { Pencil, RotateCcw, Save, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -61,8 +61,8 @@ export function CdeAddTextList() {
               <div className="flex flex-col gap-2">
                 <Input autoFocus value={value} onChange={(ev) => setValue(ev.target.value)} aria-label={`Novo texto para ${e.label}`} className="h-8 text-xs" />
                 <div className="flex gap-2">
-                  <Button type="button" variant="action" size="sm" disabled={saving} onClick={() => save(key, value)}>Salvar</Button>
-                  <Button type="button" variant="action" size="sm" onClick={() => setEditing(null)}>Cancelar</Button>
+                  <Button type="button" variant="ghost" size="icon" title="Salvar texto" aria-label="Salvar texto" disabled={saving || value === (overrides[key] ?? e.label)} onClick={() => save(key, value)}><Save /></Button>
+                  <Button type="button" variant="ghost" size="icon" title="Cancelar" aria-label="Cancelar" onClick={() => setEditing(null)}><X /></Button>
                 </div>
               </div>
             ) : (

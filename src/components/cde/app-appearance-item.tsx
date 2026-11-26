@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { CdeCategoryHeader } from "./cde-category-header";
 import { APP_APPEARANCES, APP_APPEARANCE_GROUP, parseAppAppearance, type AppAppearance } from "./appearance-colors";
 import { APP_APPEARANCE_QUERY, useAppAppearance } from "./app-appearance";
+import { CdeSection } from "./cde-section";
 
 export function AppAppearanceItem({ number, handle }: { number: number; handle?: React.ReactNode }) {
   const [open, setOpen] = useState(false);
@@ -36,16 +37,12 @@ export function AppAppearanceItem({ number, handle }: { number: number; handle?:
     } catch { toast.error("Não foi possível alterar a aparência. Verifique seu acesso de Admin do ERP."); }
     finally { setSaving(false); }
   }
-  return <section className="space-y-4">
+  return <section className="cde-category-sections">
     <CdeCategoryHeader number={number} handle={handle} title="Aparência" open={open} onToggle={() => setOpen(!open)} />
-    {open && <div className="space-y-4 py-4">
-      <div className="flex items-center justify-between gap-3">
-        <Label>Padrão de exibição</Label>
-        {draft && <div className="flex shrink-0 gap-1">
-          <Button variant="ghost" size="icon" aria-label="Salvar aparência dos apps" title="Salvar aparência dos apps" onClick={save} disabled={saving || saved.isLoading}><Save /></Button>
+    {open && <CdeSection title="Padrão de exibição" actions={<>
+          <Button variant="ghost" size="icon" aria-label="Salvar aparência dos apps" title="Salvar aparência dos apps" onClick={save} disabled={saving || !draft || draft === saved.data || saved.isLoading}><Save /></Button>
           <Button variant="ghost" size="icon" aria-label="Cancelar aparência dos apps" title="Cancelar" onClick={() => setDraft(null)} disabled={saving}><X /></Button>
-        </div>}
-      </div>
+        </>}>
       <RadioGroup aria-label="Aparência dos apps" value={draft ?? saved.data ?? "green"} onValueChange={value => setDraft(parseAppAppearance(value))} disabled={saving || saved.isLoading} className="grid gap-4 sm:grid-cols-3">
         {APP_APPEARANCES.map(option => <label key={option.key} htmlFor={`app-appearance-${option.key}`} className="flex cursor-pointer flex-nowrap items-center justify-center gap-3 text-sm font-medium leading-none">
           <RadioGroupItem id={`app-appearance-${option.key}`} value={option.key} className="shrink-0" />
@@ -53,6 +50,6 @@ export function AppAppearanceItem({ number, handle }: { number: number; handle?:
           <span className="whitespace-nowrap">{option.label}</span>
         </label>)}
       </RadioGroup>
-    </div>}
+    </CdeSection>}
   </section>;
 }

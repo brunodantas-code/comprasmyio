@@ -1,3 +1,4 @@
+import { CdeSection } from "./cde-section";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Pencil, Plus, RotateCcw, Save, Trash2, X } from "lucide-react";
@@ -98,13 +99,13 @@ export function CdeTags({ number, handle }: { number: number; handle?: React.Rea
     } catch { toast.error("Não foi possível salvar as tags. Somente Admin do ERP altera o CDE."); } finally { setSaving(false); }
   }
   const variantOf = (t: Inv) => (["default", "secondary", "destructive", "outline", "status"].includes(t.variant) ? t.variant : "default") as "default";
-  return <section className="space-y-4">
+  return <section className="cde-category-sections">
     <CdeCategoryHeader handle={handle} number={number} title="Tags" hint="Nome, fundo, texto e borda de cada etiqueta usada nos apps" open={open} onToggle={() => setOpen(!open)} />
-    {open && <div className="w-full min-w-0 space-y-3 py-4">
+    {open && <CdeSection title="Etiquetas dos apps" actions={<><Button variant="ghost" size="icon" aria-label="Salvar" title="Salvar tags" onClick={save} disabled={saving || !draft || JSON.stringify(draft) === JSON.stringify(saved)}><Save /></Button><Button variant="ghost" size="icon" aria-label="Cancelar" title="Cancelar" onClick={() => setDraft(null)}><X /></Button></>}>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-xs text-muted-foreground">{rows.length} tags. “Atual (padrão)” mantém a aparência de hoje. Renomear muda só o nome exibido; os registros continuam os mesmos.</p>
         <div className="flex items-center gap-1">
-          {draft && <><Button variant="ghost" size="icon" aria-label="Salvar" title="Salvar tags" onClick={save} disabled={saving}><Save /></Button><Button variant="ghost" size="icon" aria-label="Cancelar" title="Cancelar" onClick={() => setDraft(null)}><X /></Button></>}
+          {draft && <></>}
           <Input aria-label="Buscar tag" placeholder="Buscar tag ou app" value={q} onChange={(e) => setQ(e.target.value)} className="h-8 w-56 text-[length:var(--filter-fs)] md:text-[length:var(--filter-fs)]" />
         </div>
       </div>
@@ -121,7 +122,7 @@ export function CdeTags({ number, handle }: { number: number; handle?: React.Rea
           {!shown.length && <TableRow><TableCell colSpan={7} className="text-muted-foreground">Nenhuma tag.</TableCell></TableRow>}</TableBody></Table>
       {removedRows.length > 0 && <div className="space-y-1"><p className="text-sm font-medium">Tags excluídas ({removedRows.length})</p>
         <ul className="space-y-1">{removedRows.map((t) => <li key={t.label} className="flex flex-wrap items-center gap-2 text-sm"><span className="text-muted-foreground line-through">{t.label}</span><span className="text-xs text-muted-foreground">→ exibida como “{cfg.renames[tagKey(cfg.removed[tagKey(t.label)])] ?? cfg.removed[tagKey(t.label)]}”</span><Button variant="ghost" size="icon" aria-label="Restaurar tag" title="Restaurar tag" onClick={() => restore(t)}><RotateCcw /></Button></li>)}</ul></div>}
-    </div>}
+    </CdeSection>}
     <Dialog open={!!removing} onOpenChange={(o) => { if (!o) setRemoving(null); }}><DialogContent className="sm:max-w-md">
       <DialogHeader><DialogTitle>Excluir a tag “{removing ? nameOf(removing) : ""}”</DialogTitle></DialogHeader>
       <p className="text-sm text-muted-foreground">Onde ela aparece, passa a ser exibida a tag escolhida abaixo, com o nome e as cores dela. Os registros não são alterados e a exclusão pode ser desfeita.</p>

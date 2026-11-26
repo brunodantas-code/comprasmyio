@@ -1,9 +1,10 @@
+import { CdeSection } from "./cde-section";
 import { APP_SHORTCUTS } from "@/lib/app-shortcuts";
 import { appDisplay, type AppTileConfig } from "./app-order-config";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "@tanstack/react-router";
-import { ERP_ICON_OPTIONS, erpIconKey, appIconChoices, type ErpIconKey, type AppIconChoices } from "@/lib/erp-icon";
+import { ERP_SELECTABLE_ICONS, erpIconKey, appIconChoices, type ErpIconKey, type AppIconChoices } from "@/lib/erp-icon";
 import { supabase } from "@/integrations/supabase/client";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
@@ -33,7 +34,6 @@ export function CdeAppShortcuts({ tile }: { tile: AppTileConfig }) {
     return { key: erpIconKey(choice.data), admin: Boolean(admin.data), apps: appIconChoices(apps.data) };
   } });
   const selected = draft ?? data?.key ?? "myio";
-  const selectedBase = ERP_ICON_OPTIONS.find(option => option.key === data?.key)?.base ?? "";
   async function saveApps() {
     if (!data?.admin || !appDraft) return;
     setSaving(true);
@@ -76,24 +76,19 @@ export function CdeAppShortcuts({ tile }: { tile: AppTileConfig }) {
     } catch { toast.error("Não foi possível salvar o ícone"); }
     finally { setSaving(false); }
   }
-  return <div className="mt-6 space-y-4 border-t border-border pt-4">
-    <h3 className="text-sm font-medium">Favicons e ícones de atalhos</h3>
-    <div className="space-y-3">
-      <Label>Ícone padrão do ERP</Label>
-      <RadioGroup aria-label="Ícone padrão do ERP" value={selected} onValueChange={value => setDraft(erpIconKey(value))} disabled={!data?.admin || saving} className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-        {ERP_ICON_OPTIONS.map(option => <Label key={option.key} htmlFor={`erp-icon-${option.key}`} className="grid min-w-0 justify-items-center gap-4 text-center">
-          <span className="grid min-w-0 justify-items-center gap-4">
-          <img src={`${option.base}/apple-touch-icon.png`} width={64} height={64} alt={option.label} className="size-16 shrink-0 rounded-lg" />
-          <RadioGroupItem id={`erp-icon-${option.key}`} value={option.key} />
-          <span className="min-w-0 text-sm">{option.label}</span>
-          </span>
-        </Label>)}
-      </RadioGroup>
-      {data?.admin && <Button variant="ghost" size="compactIcon" aria-label="Salvar ícone padrão do ERP" title="Salvar ícone padrão do ERP" onClick={save} disabled={saving || !draft || draft === data.key}><Save /></Button>}
-    </div>
-    <div role="group" aria-label="Favicons e ícones de atalhos" className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+  return <div className="space-y-4">
+    
+    <CdeSection title="Favicons e ícones de atalhos" actions={<><Button variant="ghost" size="compactIcon" aria-label="Salvar ícone padrão do ERP" title="Salvar ícone padrão do ERP" onClick={save} disabled={saving || !draft || draft === data?.key}><Save /></Button><Button variant="ghost" size="compactIcon" aria-label="Salvar ícones dos apps" title="Salvar ícones dos apps" onClick={saveApps} disabled={saving || !appDraft || JSON.stringify(appDraft) === JSON.stringify(data?.apps ?? {})}><Save /></Button></>}>
+      <div role="group" aria-label="Favicons e ícones de atalhos" className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
       <figure className="flex min-w-0 flex-col items-center gap-2 text-center">
-        <img src={`${selectedBase}/apple-touch-icon.png`} width={64} height={64} alt="Ícone da Home myio ERP" className="size-16 rounded-lg" />
+        <RadioGroup aria-label="Ícone padrão do ERP" value={selected} onValueChange={value => setDraft(erpIconKey(value))} disabled={!data?.admin || saving} className="grid grid-cols-2 gap-3">
+          {ERP_SELECTABLE_ICONS.map(option => <Label key={option.key} htmlFor={`erp-icon-${option.key}`} title={option.label} className="grid justify-items-center gap-4">
+            <span className="grid justify-items-center gap-4">
+              <img src={`${option.base}/apple-touch-icon.png`} width={64} height={64} alt={option.label} className="size-16 shrink-0 rounded-lg" />
+              <RadioGroupItem id={`erp-icon-${option.key}`} value={option.key} />
+            </span>
+          </Label>)}
+        </RadioGroup>
         <figcaption className="text-sm">myio ERP<span className="block text-xs text-muted-foreground">Home Page</span></figcaption>
       </figure>
       {APP_SHORTCUTS.map(app => <figure key={app.key} className="flex min-w-0 flex-col items-center gap-2 text-center">
@@ -107,10 +102,11 @@ export function CdeAppShortcuts({ tile }: { tile: AppTileConfig }) {
         </RadioGroup>
         <figcaption className="max-w-full break-words text-sm">{appDisplay(tile, app.key).name}<span className="block text-xs text-muted-foreground">{app.path}</span></figcaption>
       </figure>)}
-    </div>
-    {data?.admin && <Button variant="ghost" size="compactIcon" aria-label="Salvar ícones dos apps" title="Salvar ícones dos apps" onClick={saveApps} disabled={saving || !appDraft}><Save /></Button>}
-    <div className="space-y-3">
-      <h3 className="text-sm font-medium">Arquivos oficiais da marca</h3>
+      </div>
+    </CdeSection>
+    
+    <CdeSection title="Arquivos oficiais da marca">
+      
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {BRAND_ASSETS.map(asset => <figure key={asset.key} className="flex min-w-0 items-center gap-3">
           <img src={asset.preview} width={64} height={64} alt={asset.label} className="size-16 shrink-0 object-contain" />
@@ -120,6 +116,6 @@ export function CdeAppShortcuts({ tile }: { tile: AppTileConfig }) {
           </figcaption>
         </figure>)}
       </div>
-    </div>
+    </CdeSection>
   </div>;
 }

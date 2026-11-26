@@ -3,6 +3,7 @@
 - Live swap: screens render finalized groups through CdeButton (cde-button.tsx), which reads cde_selected at runtime (readable by all authenticated users); convert a group's screens to CdeButton once its standard is chosen and others excluded, and add the group to CdeGroup.
 - CDE numbering uses separate number_section/number_subsection standards through CdeNumber; main_menu stores ordered/hidden action IDs in cde_selected.variant_key and AppHeader reads them without changing action permissions or the standalone home button.
 - Use CdeCategoryHeader for every top-level CDE category so titles stay unframed and only subcategories use green bands.
+- Internal CDE configuration groups use CdeSection and live cde_appearance subcategory tokens; dialog saves use topActions with CdeDraftSave to keep the close/save row aligned and unchanged drafts disabled.
 - Filter usage counts expand shared controls into logical consumer sites using filter-usage.json; exclude embedded editors and unused definitions, and validate this ledger against source when filter sites change.
 - useTableFilters consumers render the shared summary outside headers; ActiveFilterTags identifies/removes each condition without changing predicates or exports, and CDE previews the same control.
 - Model edits update custom IDs in place; inventory edits become custom models while preserving selected references and replacement history; UPDATE policies remain ERP-admin-only.

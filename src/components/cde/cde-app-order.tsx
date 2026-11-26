@@ -1,3 +1,4 @@
+import { CdeSection } from "./cde-section";
 import { CdeNumber } from "@/components/cde/cde-button";
 import { useState } from "react";
 import type React from "react";
@@ -109,14 +110,14 @@ export function CdeAppOrder({ number, handle }: { number: number; handle?: impor
       setDraft(null); toast.success("Ordem dos apps atualizada");
     } catch { toast.error("Não foi possível salvar a ordem."); } finally { setSaving(false); }
   }
-  return <section className="space-y-4">
+  return <section className="cde-category-sections">
     <CdeCategoryHeader handle={handle} number={number} title="Home Page" hint="Faixa superior, apps, espaçamento e cores" open={open} onToggle={() => setOpen(!open)} />
-    {open && <div className="w-full min-w-0 py-4"><p className="mb-3 text-sm font-medium">Ordenação dos Apps na Home Page</p><DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={move}><SortableContext items={order} strategy={verticalListSortingStrategy}>{order.map((id, i) => <Row key={id} id={id} index={i} displayName={appDisplay(tile, id).name} />)}</SortableContext></DndContext>
-      <Button variant="action" className="mt-3" onClick={save} disabled={saving || !draft}><Save className="h-4 w-4" />Salvar</Button>
+    {open && <div className="space-y-4"><CdeSection title="Ordenação dos Apps na Home Page" actions={<Button variant="ghost" size="icon" title="Salvar ordem dos apps" aria-label="Salvar ordem dos apps" onClick={save} disabled={saving || !draft}><Save /></Button>}><DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={move}><SortableContext items={order} strategy={verticalListSortingStrategy}>{order.map((id, i) => <Row key={id} id={id} index={i} displayName={appDisplay(tile, id).name} />)}</SortableContext></DndContext></CdeSection>
+      
       <CdeCodeApps />
       <CdeAppShortcuts tile={tile} />
-      <div className="mt-6 space-y-4 border-t border-border pt-4">
-        <p className="text-sm font-medium">Nomes e fontes dos apps</p>
+      <CdeSection title="Nomes e fontes dos apps" actions={<Button variant="ghost" size="icon" aria-label="Salvar Home Page" title="Salvar Home Page" onClick={saveTile} disabled={saving || !tileDraft}><Save /></Button>}>
+        
         <div role="group" aria-label="Nomes e fontes dos apps" className="grid gap-4 xl:grid-cols-2">
           {PORTAL_APPS.map(app => { const display = appDisplay(tile, app.key); const caption = tile.apps?.[app.key]; return <div key={app.key} className="space-y-3"><div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_7rem_10rem] sm:items-end">
             <div className="min-w-0 space-y-1"><Label>Nome — {app.name}</Label><Input aria-label={`Nome do app ${app.name}`} maxLength={30} value={tile.apps?.[app.key]?.name ?? display.name} onChange={event => updateApp(app.key, { name: event.target.value })} /></div>
@@ -132,9 +133,9 @@ export function CdeAppOrder({ number, handle }: { number: number; handle?: impor
         <div className="max-w-xs"><ColorChoice kind="below" label="Cor padrão dos textos abaixo dos ícones" value={tile.below} onChange={below => setTileDraft({ ...tile, below })} /></div>
         <div className="max-w-[12rem] space-y-1"><Label>Tamanho do logo myio nos apps</Label><Select value={String(appLogoPx(tile))} onValueChange={value => setTileDraft({ ...tile, appLogoPx: Number(value) })}><SelectTrigger aria-label="Tamanho do logo myio nos apps" className="h-9"><SelectValue /></SelectTrigger><SelectContent>{[24, 28, 32, 36, 40, 44, 48, 56, 64].map(px => <SelectItem key={px} value={String(px)}>{px} px{px === 40 ? " (Home)" : ""}</SelectItem>)}</SelectContent></Select></div>
         <div className="space-y-1"><Label>Prévia do cabeçalho dos apps</Label><HeaderPreview tile={tile} appName="CRM" display={appDisplay(tile, "crm", 16)} /></div>
-      </div>
-      <div className="mt-6 space-y-3 border-t border-border pt-4">
-        <p className="text-sm font-medium">Ícones da página principal</p>
+      </CdeSection>
+      <CdeSection title="Ícones da página principal" actions={<Button variant="ghost" size="icon" aria-label="Salvar Home Page" title="Salvar Home Page" onClick={saveTile} disabled={saving || !tileDraft}><Save /></Button>}>
+        
         <div role="group" aria-label="Ajustes dos ícones da página principal" className="grid w-full max-w-5xl grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-6">
           <div className="min-w-0 space-y-1"><Label className="flex min-h-10 items-end pb-1">Fonte do nome</Label><Select value={String(tile.labelPx)} onValueChange={(v) => setTileDraft({ ...tile, labelPx: Number(v) })}><SelectTrigger className="h-9"><SelectValue /></SelectTrigger><SelectContent>{[11, 12, 13, 14, 15, 16].map((n) => <SelectItem key={n} value={String(n)}>{n} px</SelectItem>)}</SelectContent></Select></div>
           <div className="min-w-0 space-y-1"><Label className="flex min-h-10 items-end pb-1">Ícone Desktop</Label>
@@ -188,11 +189,8 @@ export function CdeAppOrder({ number, handle }: { number: number; handle?: impor
             </div> : null; })}
           </div>
         </div>
-        <CdeMobileDockStyle />
         <p className="text-xs text-muted-foreground">No celular, a fonte fica 2 px menor. Os símbolos mais finos recebem correção automática para parecerem do mesmo tamanho.</p>
-        <div className="flex items-center gap-2"><Button variant="action" aria-label="Salvar Home Page" title="Salvar Home Page" onClick={saveTile} disabled={saving || !tileDraft}><Save className="h-4 w-4" />Salvar</Button>
-          {tileDraft && <Button variant="action" disabled={saving} onClick={() => setTileDraft(null)}>Cancelar</Button>}
-        </div>
-      </div></div>}
+        
+      </CdeSection><CdeMobileDockStyle /></div>}
   </section>;
 }

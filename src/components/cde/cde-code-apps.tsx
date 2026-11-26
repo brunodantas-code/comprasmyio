@@ -1,3 +1,4 @@
+import { CdeSection } from "./cde-section";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Save } from "lucide-react";
@@ -31,11 +32,11 @@ export function CdeCodeApps() {
       setDraft(null); toast.success("Apps atendidos pelo Code atualizados");
     } catch { toast.error("Não foi possível salvar os apps do Code."); } finally { setSaving(false); }
   }
-  return <div className="mt-6 space-y-3 border-t border-border pt-4">
-    <div className="flex items-center justify-between gap-3"><p className="text-sm font-medium">Apps atendidos pelo Code</p><Button variant="ghost" size="icon" title="Salvar apps do Code" aria-label="Salvar apps do Code" onClick={save} disabled={saving || !draft}><Save /></Button></div>
+  return <CdeSection title="Apps atendidos pelo Code" actions={<><Button variant="ghost" size="icon" title="Salvar apps do Code" aria-label="Salvar apps do Code" onClick={save} disabled={saving || !draft || JSON.stringify(draft) === JSON.stringify(data ?? [])}><Save /></Button></>}>
+    
     <p className="text-xs text-muted-foreground">Novos apps entram automaticamente; desmarque para retirar do Code.</p>
     <div role="group" aria-label="Apps atendidos pelo Code" className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-6">
       {PORTAL_APPS.map((app) => { const id = `code-app-${app.key}`; return <label key={app.key} htmlFor={id} className="flex min-h-9 items-center gap-2 text-sm"><Checkbox id={id} checked={!excluded.includes(app.key)} onCheckedChange={(v) => toggle(app.key, v === true)} />{nameOf(app.key) || app.name}</label>; })}
     </div>
-  </div>;
+  </CdeSection>;
 }

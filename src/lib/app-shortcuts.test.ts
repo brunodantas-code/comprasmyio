@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { APP_SHORTCUTS, appShortcutHead } from "./app-shortcuts";
+import { ERP_SELECTABLE_ICONS } from "./erp-icon";
 
 describe("individual app shortcuts", () => {
+  it("offers only green IO on black or lilac for ERP", () => {
+    expect(ERP_SELECTABLE_ICONS.map(icon => icon.key)).toEqual(["io-black", "official-purple"]);
+  });
   for (const app of APP_SHORTCUTS) {
     it(`${app.name} uses its own icon and manifest`, () => {
       const head = appShortcutHead(app.path);

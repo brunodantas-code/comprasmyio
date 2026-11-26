@@ -1,3 +1,4 @@
+import { CdeSection } from "./cde-section";
 import { useState } from "react";
 import { Pencil, RotateCcw, Save, X } from "lucide-react";
 import { toast } from "sonner";
@@ -37,9 +38,9 @@ export function CdeTitleTexts({ number, handle }: { number: number; handle?: Rea
   }
   const save = (r: Inv) => { const k = titleKey(r.kind, r.text); const next = { ...saved }; const v = value.trim().replace(/\s+/g, " "); if (!v || v === r.text) delete next[k]; else next[k] = v; void persist(next, "Texto atualizado em todos os apps"); };
   const restore = (r: Inv) => { const next = { ...saved }; delete next[titleKey(r.kind, r.text)]; void persist(next, "Texto original restaurado"); };
-  return <section className="space-y-4">
+  return <section className="cde-category-sections">
     <CdeCategoryHeader handle={handle} number={number} title="Títulos e Subtítulos" hint="Textos dos títulos e subtítulos das telas, editáveis em todos os apps" open={open} onToggle={() => setOpen(!open)} />
-    {open && <div className="w-full min-w-0 space-y-3 py-4">
+    {open && <CdeSection title="Textos dos apps" actions={<><Button variant="ghost" size="icon" aria-label="Salvar texto" title="Salvar texto" disabled={busy || !editing || value === (saved[editing] ?? rows.find(r => titleKey(r.kind, r.text) === editing)?.text ?? "")} onClick={() => { const row = rows.find(r => titleKey(r.kind, r.text) === editing); if (row) save(row); }}><Save /></Button><Button variant="ghost" size="icon" aria-label="Cancelar texto" title="Cancelar" onClick={() => setEditing(null)}><X /></Button></>}>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-xs text-muted-foreground">{inventory.length} textos. As cores ficam em Cabeçalhos e Listas. O mesmo texto original muda junto em todas as telas onde aparece.</p>
         <div className="flex items-center gap-2">
@@ -53,10 +54,9 @@ export function CdeTitleTexts({ number, handle }: { number: number; handle?: Rea
           <TableCell className={r.kind === "titulo" ? "font-semibold" : "text-sm"}>{editing === k ? <Input aria-label="Novo texto" autoFocus value={value} onChange={(e) => setValue(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") save(r); if (e.key === "Escape") setEditing(null); }} /> : cur ?? r.text}</TableCell>
           <TableCell className="text-xs text-muted-foreground">{cur ? r.text : "—"}</TableCell>
           <TableCell className="text-xs text-muted-foreground">{where(r.files).map((w) => <div key={w}>{w}</div>)}</TableCell>
-          <TableCell className="whitespace-nowrap">{editing === k ? <><Button variant="ghost" size="icon" aria-label="Salvar" title="Salvar texto" disabled={busy} onClick={() => save(r)}><Save /></Button><Button variant="ghost" size="icon" aria-label="Cancelar" title="Cancelar" onClick={() => setEditing(null)}><X /></Button></>
-            : <><Button variant="ghost" size="icon" aria-label="Editar texto" title="Editar texto" onClick={() => { setEditing(k); setValue(cur ?? r.text); }}><Pencil /></Button>{cur && <Button variant="ghost" size="icon" aria-label="Restaurar original" title="Restaurar original" disabled={busy} onClick={() => restore(r)}><RotateCcw /></Button>}</>}</TableCell>
+          <TableCell className="whitespace-nowrap"><Button variant="ghost" size="icon" aria-label="Editar texto" title="Editar texto" onClick={() => { setEditing(k); setValue(cur ?? r.text); }}><Pencil /></Button>{cur && <Button variant="ghost" size="icon" aria-label="Restaurar original" title="Restaurar original" disabled={busy} onClick={() => restore(r)}><RotateCcw /></Button>}</TableCell>
         </TableRow>; })}
           {!rows.length && <TableRow><TableCell colSpan={5} className="text-muted-foreground">Nenhum texto.</TableCell></TableRow>}</TableBody></Table>
-    </div>}
+    </CdeSection>}
   </section>;
 }

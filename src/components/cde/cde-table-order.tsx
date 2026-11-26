@@ -1,3 +1,4 @@
+import { CdeSection } from "./cde-section";
 import { useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
@@ -84,12 +85,12 @@ export function CdeTableOrder({ number, handle, embedded }: { number?: number; h
       setDraft(null); toast.success("Ordem dos cabeçalhos aplicada nos apps");
     } catch { toast.error("Não foi possível salvar a ordem."); } finally { setSaving(false); }
   }
-  return <section className="space-y-4">
+  return <section className="cde-category-sections">
     {embedded ? <p className="text-sm font-medium">Ordem das colunas <span className="font-normal text-muted-foreground">— arraste as colunas de cada lista de dados</span></p> : <CdeCategoryHeader handle={handle} number={number ?? 0} title="Ordenação de cabeçalhos" hint="Arraste as colunas de cada lista de dados" open={open} onToggle={() => setOpen(!open)} />}
-    {open && <div className={`w-full min-w-0 space-y-6 ${embedded ? "py-2" : "py-4"}`}>
+    {open && <CdeSection title="Ordem das colunas" actions={<Button variant="ghost" size="icon" aria-label="Salvar" title="Salvar ordem dos cabeçalhos" onClick={save} disabled={saving || !draft || JSON.stringify(draft) === JSON.stringify(saved)}><Save /></Button>}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar app, menu ou coluna" className="max-w-xs text-[length:var(--filter-fs)]" />
-        <Button variant="ghost" size="icon" aria-label="Salvar" title="Salvar ordem dos cabeçalhos" onClick={save} disabled={saving || !draft}><Save /></Button>
+
       </div>
       {groups.map(([app, items]) => <div key={app} className="space-y-3">
         <p className="text-sm font-medium">{app}</p>
@@ -101,6 +102,6 @@ export function CdeTableOrder({ number, handle, embedded }: { number?: number; h
         </div>)}
       </div>)}
       <p className="text-xs text-muted-foreground">Colunas marcadas como condicionais só aparecem em certas situações; a ordem é mantida quando surgem.</p>
-    </div>}
+    </CdeSection>}
   </section>;
 }

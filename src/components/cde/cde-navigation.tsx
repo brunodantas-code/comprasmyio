@@ -1,3 +1,4 @@
+import { CdeSection } from "./cde-section";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, ChevronDown, ChevronUp } from "lucide-react";
@@ -74,10 +75,10 @@ export function CdeNavigation({ number, handle }: { number: number; handle?: imp
     toast.success("Padrão de navegação registrado");
   };
   return (
-    <section className="space-y-4">
+    <section className="cde-category-sections">
       <CdeCategoryHeader handle={handle} number={number} title="Navegação (UI/UX)" hint="Tela x pop-up, menus superior, inferior e lateral, flutuantes e organização do conteúdo" open={open} onToggle={() => setOpen(!open)} />
       {open ? (
-        <div className="space-y-4 p-4">
+        <CdeSection title="Padrões de navegação">
           {DECISIONS.map((d, di) => (
             <div key={d.key}>
               <div className="mb-2 flex items-center gap-3 text-sm font-semibold"><CdeNumber subcategory>{number}.{di + 1}</CdeNumber>{d.title}</div>
@@ -95,7 +96,7 @@ export function CdeNavigation({ number, handle }: { number: number; handle?: imp
               </div>}
             </div>
           ))}
-        </div>
+        </CdeSection>
       ) : null}
     </section>
   );
