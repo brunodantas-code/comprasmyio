@@ -1,15 +1,15 @@
-- CDE models: custom models in cde_models (style jsonb via CSS vars), exclusions in cde_removed with replacement standard; standards in cde_selected (multi only for field subgroups fields_input/select/textarea/password, derived from inventory "fields" by tag).
-- CDE standards: one primary per single group plus optional secondary rows (is_primary=false, screens[] of inventory file paths); secondaries take uses of their screens, primary keeps the rest.
-- Live swap: screens render finalized groups through CdeButton (cde-button.tsx), which reads cde_selected at runtime (readable by all authenticated users); convert a group's screens to CdeButton once its standard is chosen and others excluded, and add the group to CdeGroup.
-- CDE numbering uses separate number_section/number_subsection standards through CdeNumber; main_menu stores ordered/hidden action IDs in cde_selected.variant_key and AppHeader reads them without changing action permissions or the standalone home button.
+- CDE models: custom models in cde_models (style jsonb via CSS vars), exclusions in cde_removed with replacement standard; standards in cde_selected (multi only for field subgroups fields_input/select/textarea/password, from inventory "fields" by tag).
+- CDE standards: one primary per group plus optional secondary rows (is_primary=false, screens[] of inventory file paths); secondaries take uses of their screens, primary keeps the rest.
+- Live swap: screens render finalized groups through CdeButton (cde-button.tsx), which reads cde_selected at runtime (readable by all authenticated users); convert a group's screens to CdeButton once its standard is chosen and others excluded, then add it to CdeGroup.
+- CDE numbering uses separate number_section/number_subsection standards through CdeNumber; main_menu stores ordered/hidden action IDs in cde_selected.variant_key, read by AppHeader without changing action permissions or the standalone home button.
 - Use CdeCategoryHeader for every top-level CDE category so titles stay unframed and only subcategories use green bands.
-- CdeSection uses live cde_appearance tokens and category typography; the category list owns the outline and gapless dividers. Dialog saves use topActions/CdeDraftSave for aligned close/save and unchanged-draft disabling.
-- Filter usage counts expand shared controls into logical consumer sites using filter-usage.json; exclude embedded editors and unused definitions, and validate this ledger against source when filter sites change.
-- useTableFilters consumers render the shared summary outside headers; ActiveFilterTags identifies/removes each condition without changing predicates or exports, and CDE previews the same control.
-- Model edits update custom IDs in place; inventory edits become custom models while preserving selected references and replacement history; UPDATE policies remain ERP-admin-only.
-- Portal app order is stored in cde_selected group app_order (JSON array of app keys) and read by the portal; unknown/missing apps fall back to default order.
+- CdeSection uses live cde_appearance tokens and category typography; the category list owns the outline and gapless dividers. Dialog saves use topActions/CdeDraftSave for aligned close/save and disabled unchanged drafts.
+- Filter usage counts expand shared controls into logical consumer sites using filter-usage.json; exclude embedded editors and unused definitions, and validate the ledger against source when sites change.
+- useTableFilters consumers render the shared summary outside headers; ActiveFilterTags identifies/removes each condition without changing predicates or exports, and CDE previews it.
+- Model edits update custom IDs in place; inventory edits become custom models preserving selected references and replacement history; UPDATE policies stay ERP-admin-only.
+- Portal app order lives in cde_selected app_order (JSON array of app keys), read by the portal; unknown/missing apps fall back to default order.
 - New screens/improvements use CDE-connected shared components; ask only when a group lacks a chosen standard or a new element type appears.
-- Home Page reads app_tile from cde_selected for header/page brand colors and independent desktop/mobile tile and symbol sizes; previews share its helpers, header foreground/logo adapt to contrast, and per-app optical scale lives in APP_ICON_OPTICAL.
+- Home Page reads cde_selected app_tile for header/page brand colors and independent desktop/mobile tile and symbol sizes; previews share helpers, header foreground/logo adapt to contrast, per-app optical scale lives in APP_ICON_OPTICAL.
 - main_menu config also stores userInfo (name/job/profile/both); every header renders it via UserNameBlock, never per-app badges.
 - Confirmations never use window.confirm: call confirmAction() (ConfirmDialogHost in __root) or ConfirmDeleteButton; AlertDialogContent reads the CDE confirm_dialog standard.
 - `add-text-usage.json` lists current + buttons with text (shown in CDE 4.2); regenerate by scanning CdeButton group="plus"/<Plus/> with text when such buttons change.
@@ -17,28 +17,29 @@
 - CDE category/subcategory order lives in cde_selected group cde_order ({cats, subs}); numbers are derived from position, never hardcoded.
 - Linked + buttons share one add_text key via "shared" in add-text-usage.json.
 - App menu icon order lives in cde_selected group menu_order ("App|Group"→labels); apps sort tabs via sortByMenuOrder/useOrderedMenu (menu-order.ts).
-- Every saved CDE choice must take effect in the apps immediately; menu_type stores mobile/desktop choices with global defaults and app overrides. Pure menu-layout helpers preserve legacy floating bases; useAppMenuLayout and shared navigation CSS apply responsive geometry without changing items or permissions.
-- Button library counts static TSX call sites, not runtime instances; regenerate button-library.json with scripts/scan-cde-buttons.mjs whenever button sites change, retaining dynamic labels and source locations for auditing.
+- Saved CDE choices take effect in the apps immediately; menu_type is edited only per app (item 8), since a global save would overwrite every app; the stored "*" entry stays an unread fallback. Menu-layout helpers keep legacy floating bases; useAppMenuLayout and shared navigation CSS apply responsive geometry without changing items or permissions.
+- Menu look (background, text, selected item, border, shadow) lives in cde_selected menu_look, applied by AppNavigation as --app-menu-fixed-* CSS vars, and never changes which menu type an app uses.
+- Button library counts static TSX call sites, not runtime instances; regenerate button-library.json with scripts/scan-cde-buttons.mjs when button sites change, keeping dynamic labels and source locations for auditing.
 - The CDE button library reuses the active model editor, resolving screen-specific standards before the primary; unbound buttons cannot save ineffective visual edits.
-- Deadline alerts (CDE "Alertas de Prazo") keep every app in one deadline_alerts JSON with a key per app (minutes for Legal); Supply shares pure supply-deadlines helpers; timing indicators read authorized logs/approval decisions and never use updated_at as delivery time or invent causal attribution.
+- Deadline alerts (CDE "Alertas de Prazo") keep every app in one deadline_alerts JSON keyed per app (minutes for Legal); Supply shares pure supply-deadlines helpers; timing indicators read authorized logs/approval decisions, never updated_at as delivery time, and never invent causal attribution.
 - Organize actions inherit the live Save look when no organize standard is selected; deadline indicators share this group to prevent visual drift.
-- Library substitution validates live bindings before changing models; keep all source sites visible in consolidated model cards, including legacy retired sites, so audit totals never disappear.
+- Library substitution validates live bindings before changing models; keep every source site visible in consolidated model cards, including legacy retired ones, so audit totals never disappear.
 - Library bindings use cde_selected.button_bindings keyed by stable source-site ID (legacy label fallback); explicit modelKey replaces appearance per use or chosen set, while dynamic content remains intact.
-- Inventory and Vite instrumentation share the same TSX site parser; native controls keep their original rendering until explicitly bound, preventing unrelated visual changes.
-- Numbering counts come from scan-cde-numbering.ts and number-usage.json; count actual source sites per hierarchy, not fabricated repetitions from rendered records.
+- Inventory and Vite instrumentation share the same TSX site parser; native controls keep their original rendering until explicitly bound, so unrelated visuals never change.
+- Numbering counts come from scan-cde-numbering.ts and number-usage.json; count actual source sites per hierarchy, not repetitions from rendered records.
 - CdeNumber/CdeNumberButton share number-display.ts; preserve full values and independent record/alert markers.
-- Library descriptions/counts use library-details.ts: distinguish one source site from equal-label/group sites and never estimate runtime row repetitions.
+- Library descriptions/counts use library-details.ts: distinguish one source site from equal-label/group sites, never estimating runtime repetitions.
 - library-models.ts groups matching content/appearance/model identities, preserves unknown custom styles separately, and expands card edits/selections to every member ID.
-- Landing and portal share app ordering via public_app_order(), a narrow public read exposing only the order array, never other CDE records.
+- Landing and portal share app ordering via public_app_order(), a narrow public read exposing only the order array.
 - Icon-only shared Save controls resolve CDE secondary controls/save-icon before the primary.
 - Library JSON writes share saveLibrarySelection with bounded group/primary URL filters and returned-row verification, avoiding bulk-consolidation URL limits.
-- Table column order: scripts/cde-table-sites.ts inventories <Table> headers (table-library.json, regenerate with scan-cde-tables.mjs) and Vite injects cdeTableId/data-cde-col; shared TableRow permutes cells from cde_selected table_column_order, so lists with dynamic header .map are excluded.
-- Portal block order (messages, apps, To Dos, pending) lives in cde_selected group portal_sections; corporate messages: users read only active rows, ERP admins read history and create/edit/delete.
-- Corporate message look (fill, border, symbol, text) lives in cde_selected group message_style; options reuse the app-tile brand palette (message-style.ts).
-- CDE look of the CDE itself lives in cde_selected group cde_appearance (cde-appearance.ts) as --cde-cat-*/--cde-sub-* vars on the CDE main; header hints must avoid action words (excluir, salvar…) because shared Button detects action looks by label.
+- Table column order: scripts/cde-table-sites.ts inventories <Table> headers (table-library.json; regenerate with scan-cde-tables.mjs) and Vite injects cdeTableId/data-cde-col; TableRow permutes cells from cde_selected table_column_order, excluding dynamic header .map lists.
+- Portal block order (messages, apps, To Dos, pending) lives in cde_selected portal_sections; corporate messages: users read active rows, ERP admins read history and create/edit/delete.
+- Corporate message look (fill, border, symbol, text) lives in cde_selected message_style; options reuse app-tile brand palette (message-style.ts).
+- CDE look of the CDE itself lives in cde_selected cde_appearance (cde-appearance.ts) as --cde-cat-*/--cde-sub-* vars on the CDE main; header hints avoid action words (excluir, salvar…) because shared Button detects action looks by label.
 - NumericMarker/AlertMarker read independent record_number/alert_marker CDE standards; identifiers remain complete, counters retain existing caps, and appearance never changes business rules.
 - Both marker groups use their saved fixed diameter and fit text internally; per-screen scale never changes marker size, keeping previews and app uses consistent.
-- Disclosure headers reserve their rightmost slot for expansion; labelled CdeButton toggles order the arrow after text, while toolbars remain separate from the expansion control.
-- Rules for shared components in src/components/ui/ (Select, Dialog/Sheet X, Button/Input/Textarea, Badge, Card, Table) live in src/components/ui/AGENTS.md.
-- App-wide appearance uses app_appearance in cde_selected and a reversible root token/legacy literal overlay; convert original colours, preserve saved models and media pixels, and exempt fixed palette-reference swatches so theme changes never compound or erase customization.
+- Disclosure headers reserve their rightmost slot for expansion; labelled CdeButton toggles order the arrow after text, and toolbars stay separate from it.
+- Rules for shared src/components/ui/ components (Select, Dialog/Sheet X, Button/Input/Textarea, Badge, Card, Table) live in src/components/ui/AGENTS.md.
+- App-wide appearance uses cde_selected app_appearance with a reversible root token/legacy literal overlay; convert original colours, preserve saved models and media pixels, exempt palette-reference swatches, so theme changes never compound or erase customization.
 - Code app list derives from PORTAL_APPS minus CDE code_apps exclusions, so new apps join Code automatically.

@@ -756,3 +756,14 @@
 - [x] Localizado no print: Subcategorias, segunda linha à esquerda, campo Tamanho do título exibindo 13 px; não há menu separado chamado Títulos nesse bloco.
 - [x] CDE: categorias, subcategorias, cabeçalhos verdes e prévia respeitam o tamanho escolhido; 14/18 px medidos na tela, consumidores conferidos por código e 14 testes passaram, sem mudar escolhas salvas.
 - [x] CDE: paleta de cores simplificada em src/components/cde/color-palette.ts — um único "Branco", nomes e valores sem repetição em todos os seletores (Aparência, Cabeçalhos e Listas, Títulos dos campos, Mensagens corporativas); cores já salvas continuam valendo; 11 testes passaram e as listas foram conferidas na tela.
+- [x] Acessos: botões Ativo/Inativo aproximados dos nomes dos apps na lista expandida; sobra espaço em branco à direita, reservado para os próximos apps. Computador e celular conferidos, sem overflow ou erros.
+- [ ] CDE: setas de Exibir/Recolher padronizadas nos subitens que ainda não têm (Home Page, Cabeçalhos e Listas, Alertas, Cores do Projects, Mensagens).
+- [ ] Acessos: alternador Ativo padronizado sem borda em todas as telas (modelo da linha de usuário), incluindo a tabela Perfis cadastrados.
+- [ ] Acessos: usuário inativo aparece como Inativo em todas as telas, vai para o fim da lista e ganha aba própria de Inativos.
+- [ ] Acessos: setas de Exibir/Recolher por usuário em todas as telas que listam usuários, no padrão de Usuários e Aplicativos.
+- [x] Acessos: seta de Exibir/Recolher no canto direito do card do usuário em todas as telas de acesso.
+- [x] CDE: menu lateral (esquerda/direita) no padrão do CRM, nas cores da Aparência (painel verde, item ativo em cápsula escura).
+- [x] Menu lateral: a área principal desvia da largura do menu (256 px conferidos); listas e tabelas não ficam sob o painel.
+- [x] CDE item 9: prévias voltaram a mostrar a cor de classificação (borda superior 3 px verde myio conferida na tela).
+- [x] Menu lateral: submenus abrem abaixo do item, dentro do painel (6 itens de Approvals conferidos); no celular segue como caixa.
+- [x] CDE item 10: aparência do menu dos apps (fundo, texto, selecionado, borda, sombra) salva e aplicada na hora; o tipo de menu ficou só no item 8.

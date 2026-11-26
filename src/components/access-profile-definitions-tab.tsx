@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
+import { AccessActiveToggle } from "@/components/access/access-active-toggle";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { supabase } from "@/integrations/supabase/client";
 import { ALL_MENU_PERMISSION_KEYS, STANDARD_MENU_PERMISSION_KEYS } from "@/lib/menu-permissions";
@@ -132,12 +132,12 @@ export function AccessProfileDefinitionsTab() {
       <CardContent>
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> : (
           <Table>
-            <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>Acessos</TableHead><TableHead>Ativo</TableHead><TableHead aria-label="Ações" /></TableRow></TableHeader>
+            <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>Acessos</TableHead><TableHead aria-label="Situação" /><TableHead aria-label="Ações" /></TableRow></TableHeader>
             <TableBody>{definitions.map((definition) => (
               <TableRow key={definition.code}>
                 <TableCell className="font-medium">{definition.name}</TableCell>
                 <TableCell>{definition.base_profile === "admin" ? "Todos" : `${definition.permissions.size} selecionados`}</TableCell>
-                <TableCell><Switch checked={definition.active} disabled={toggle.isPending} onCheckedChange={(active) => toggle.mutate({ code: definition.code, active })} /></TableCell>
+                <TableCell><AccessActiveToggle active={definition.active} disabled={toggle.isPending} label={`Ativo: ${definition.name}`} onCheckedChange={(active) => toggle.mutate({ code: definition.code, active })} /></TableCell>
                 <TableCell><div className="flex items-center justify-end gap-1"><ProfileDialog requestTypes={requestTypes} definition={definition} title="Editar Perfil de Acesso" saving={update.isPending} onSave={(name, permissions, allowedRequestTypes) => update.mutateAsync({ code: definition.code, name, permissions, allowedRequestTypes })} /><DeleteProfileDialog definition={definition} definitions={definitions} deleting={remove.isPending} onDelete={(reallocations) => remove.mutateAsync({ code: definition.code, reallocations })} /></div></TableCell>
               </TableRow>
             ))}</TableBody>

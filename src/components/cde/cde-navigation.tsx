@@ -1,4 +1,5 @@
 import { CdeSection } from "./cde-section";
+import { CdeButton } from "./cde-button";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, ChevronDown, ChevronUp } from "lucide-react";
@@ -8,8 +9,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { CdeCategoryHeader } from "./cde-category-header";
 import { standardsFirst } from "./model-order";
-import { CdeMenuType } from "./cde-menu-type";
-import { Target, Gauge, CheckCheck, CalendarDays } from "lucide-react";
+import { MenuLookEditor } from "./cde-menu-look";
 
 type Pattern = { key: string; label: string; detail: string; uses: string; sketch: "screen" | "popup" | "confirm" | "bottom" | "top" | "side" | "floating" | "popover" | "collapse" | "tabs" };
 type Decision = { key: string; title: string; patterns: Pattern[] };
@@ -55,6 +55,7 @@ function Sketch({ kind }: { kind: Pattern["sketch"] }) {
 
 export function CdeNavigation({ number, handle }: { number: number; handle?: import("react").ReactNode }) {
   const [open, setOpen] = useState(false);
+  const [contentOpen, setContentOpen] = useState(true);
   const qc = useQueryClient();
   const { data: chosen } = useQuery({
     queryKey: ["cde-nav"],
@@ -77,11 +78,11 @@ export function CdeNavigation({ number, handle }: { number: number; handle?: imp
     <section className="cde-category-sections">
       <CdeCategoryHeader handle={handle} number={number} title="Navegação (UI/UX)" hint="Tela x pop-up, menus superior, inferior e lateral, flutuantes e organização do conteúdo" open={open} onToggle={() => setOpen(!open)} />
       {open ? (
-        <CdeSection title="Padrões de navegação">
+        <CdeSection title="Padrões de navegação" open={contentOpen} actions={<CdeButton group="toggle" screen="components/cde/cde-navigation.tsx" aria-label={`${contentOpen ? "Recolher" : "Exibir"} padrões de navegação`} title={`${contentOpen ? "Recolher" : "Exibir"} padrões de navegação`} aria-expanded={contentOpen} onClick={() => setContentOpen(!contentOpen)} />}>
           {DECISIONS.map((d) => (
             <div key={d.key}>
               <div className="mb-2 flex items-center gap-3 text-sm font-semibold">{d.title}</div>
-              {d.key === "nav_menu" ? <CdeMenuType app="*" cards items={[{label:"OKRs",icon:Target},{label:"KPIs",icon:Gauge},{label:"Check-ins",icon:CheckCheck},{label:"Ciclos",icon:CalendarDays}]} /> : <div className="flex flex-wrap gap-3">
+              {d.key === "nav_menu" ? <MenuLookEditor /> : <div className="flex flex-wrap gap-3">
                 {standardsFirst(d.patterns, p => chosen?.some(c => c.group_key === d.key && c.variant_key === p.key) ?? false).map((p) => {
                   const sel = chosen?.some((c) => c.group_key === d.key && c.variant_key === p.key);
                   return (

@@ -1,4 +1,5 @@
 import { CdeSection } from "./cde-section";
+import { CdeButton } from "./cde-button";
 import { useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
@@ -50,6 +51,7 @@ function TableRowEditor({ site, order, onChange }: { site: Site; order: number[]
 
 export function CdeTableOrder({ number, handle, embedded }: { number?: number; handle?: import("react").ReactNode; embedded?: boolean }) {
   const [open, setOpen] = useState(!!embedded);
+  const [contentOpen, setContentOpen] = useState(true);
   const [search, setSearch] = useState("");
   const [draft, setDraft] = useState<TableColumnOrders | null>(null);
   const [saving, setSaving] = useState(false);
@@ -87,7 +89,7 @@ export function CdeTableOrder({ number, handle, embedded }: { number?: number; h
   }
   return <section className="cde-category-sections">
     {embedded ? <p className="text-sm font-medium">Ordem das colunas <span className="font-normal text-muted-foreground">— arraste as colunas de cada lista de dados</span></p> : <CdeCategoryHeader handle={handle} number={number ?? 0} title="Ordenação de cabeçalhos" hint="Arraste as colunas de cada lista de dados" open={open} onToggle={() => setOpen(!open)} />}
-    {open && <CdeSection title="Ordem das colunas" actions={<Button variant="ghost" size="icon" aria-label="Salvar" title="Salvar ordem dos cabeçalhos" onClick={save} disabled={saving || !draft || JSON.stringify(draft) === JSON.stringify(saved)}><Save /></Button>}>
+    {open && <CdeSection title="Ordem das colunas" open={contentOpen} actions={<><Button variant="ghost" size="icon" aria-label="Salvar" title="Salvar ordem dos cabeçalhos" onClick={save} disabled={saving || !draft || JSON.stringify(draft) === JSON.stringify(saved)}><Save /></Button><CdeButton group="toggle" screen="components/cde/cde-table-order.tsx" aria-label={`${contentOpen ? "Recolher" : "Exibir"} ordem das colunas`} title={`${contentOpen ? "Recolher" : "Exibir"} ordem das colunas`} aria-expanded={contentOpen} onClick={() => setContentOpen(!contentOpen)} /></>}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar app, menu ou coluna" className="max-w-xs text-[length:var(--filter-fs)]" />
 

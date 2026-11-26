@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
-import { useCdeSwatchStyle } from "./cde-button";
+import { CdeButton, useCdeSwatchStyle } from "./cde-button";
 import { CorporateMessageBox } from "@/components/corporate/corporate-banner";
 import { MESSAGE_COLORS, MESSAGE_STYLE_DEFAULT, MESSAGE_STYLE_GROUP, messageColor, useMessageStyle, type MessageColorKind, type MessageStyle } from "@/components/corporate/message-style";
 
@@ -28,6 +28,7 @@ export function MessageStyleEditor() {
   const { data: saved = MESSAGE_STYLE_DEFAULT } = useMessageStyle();
   const [draft, setDraft] = useState<MessageStyle | null>(null);
   const [saving, setSaving] = useState(false);
+  const [contentOpen, setContentOpen] = useState(true);
   const style = draft ?? saved;
   async function save() {
     setSaving(true);
@@ -43,7 +44,7 @@ export function MessageStyleEditor() {
       setDraft(null); toast.success("Aparência das mensagens atualizada");
     } catch { toast.error("Não foi possível salvar a aparência."); } finally { setSaving(false); }
   }
-  return <CdeSection title="Aparência das mensagens" actions={<><Button variant="ghost" size="icon" aria-label="Salvar" title="Salvar aparência" onClick={save} disabled={saving || !draft || JSON.stringify(draft) === JSON.stringify(saved)}><Save /></Button><Button variant="ghost" size="icon" aria-label="Cancelar" title="Cancelar" onClick={() => setDraft(null)}><X /></Button></>}>
+  return <CdeSection title="Aparência das mensagens" open={contentOpen} actions={<><Button variant="ghost" size="icon" aria-label="Salvar" title="Salvar aparência" onClick={save} disabled={saving || !draft || JSON.stringify(draft) === JSON.stringify(saved)}><Save /></Button><Button variant="ghost" size="icon" aria-label="Cancelar" title="Cancelar" onClick={() => setDraft(null)}><X /></Button><CdeButton group="toggle" screen="components/cde/cde-message-style.tsx" aria-label={`${contentOpen ? "Recolher" : "Exibir"} aparência das mensagens`} title={`${contentOpen ? "Recolher" : "Exibir"} aparência das mensagens`} aria-expanded={contentOpen} onClick={() => setContentOpen(!contentOpen)} /></>}>
     
     <div className="grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-2 lg:grid-cols-4">{FIELDS.map(([k, l]) => <Pick key={k} kind={k} label={l} value={style[k]} onChange={(v) => setDraft({ ...style, [k]: v })} />)}</div>
     <div className="space-y-1"><p className="text-xs text-muted-foreground">Prévia</p><CorporateMessageBox text="Novembro é o mês de fecharmos o orçamento de 2027. Todos devem atualizar seus KPIs e OKRs!" style={style} /></div>

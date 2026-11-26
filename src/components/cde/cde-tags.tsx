@@ -11,7 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { CdeCategoryHeader } from "./cde-category-header";
-import { useCdeSwatchStyle } from "./cde-button";
+import { CdeButton, useCdeSwatchStyle } from "./cde-button";
 import inventory from "./tag-inventory.json";
 import { TAG_LOCATIONS } from "./tag-locations";
 import { TAG_COLOR_CHOICES, TAG_STYLE_GROUP, refreshTagStyles, tagColor, tagKey, useTagConfig, type TagConfig, type TagLook, type TagPart } from "./tag-style";
@@ -36,6 +36,7 @@ export function ColorSelect({ value, inheritedColor, label, onChange }: { value?
 /** CDE item Tags: every tag in use, each with independent background/text/border. */
 export function CdeTags({ number, handle }: { number: number; handle?: React.ReactNode }) {
   const [open, setOpen] = useState(false);
+  const [contentOpen, setContentOpen] = useState(true);
   const [q, setQ] = useState("");
   const [saving, setSaving] = useState(false);
   const saved = useTagConfig();
@@ -104,7 +105,7 @@ export function CdeTags({ number, handle }: { number: number; handle?: React.Rea
   const variantOf = (t: Inv) => (["default", "secondary", "destructive", "outline", "status"].includes(t.variant) ? t.variant : "default") as "default";
   return <section className="cde-category-sections">
     <CdeCategoryHeader handle={handle} number={number} title="Tags" hint="Nome, fundo, texto e borda de cada etiqueta usada nos apps" open={open} onToggle={() => setOpen(!open)} />
-    {open && <CdeSection title="Etiquetas dos apps" actions={<><Button variant="ghost" size="icon" aria-label="Salvar" title="Salvar tags" onClick={save} disabled={saving || !draft || JSON.stringify(draft) === JSON.stringify(saved)}><Save /></Button><Button variant="ghost" size="icon" aria-label="Cancelar" title="Cancelar" onClick={() => setDraft(null)}><X /></Button></>}>
+    {open && <CdeSection title="Etiquetas dos apps" open={contentOpen} actions={<><Button variant="ghost" size="icon" aria-label="Salvar" title="Salvar tags" onClick={save} disabled={saving || !draft || JSON.stringify(draft) === JSON.stringify(saved)}><Save /></Button><Button variant="ghost" size="icon" aria-label="Cancelar" title="Cancelar" onClick={() => setDraft(null)}><X /></Button><CdeButton group="toggle" screen="components/cde/cde-tags.tsx" aria-label={`${contentOpen ? "Recolher" : "Exibir"} etiquetas dos apps`} title={`${contentOpen ? "Recolher" : "Exibir"} etiquetas dos apps`} aria-expanded={contentOpen} onClick={() => setContentOpen(!contentOpen)} /></>}>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-xs text-muted-foreground">{rows.length} tags. Renomear muda só o nome exibido; os registros continuam os mesmos.</p>
         <div className="flex items-center gap-1">

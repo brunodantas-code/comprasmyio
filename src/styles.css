@@ -580,6 +580,7 @@ input[data-custom-calendar="true"]::-webkit-calendar-picker-indicator {
   --app-menu-fixed-background: var(--primary);
   --app-menu-fixed-foreground: var(--myio-white);
   --app-menu-fixed-selected: var(--myio-dark);
+  --app-menu-fixed-selected-foreground: var(--myio-white);
   --app-menu-side-width: 15rem;
   --app-menu-side-offset: 16rem;
 }
@@ -590,18 +591,18 @@ input[data-custom-calendar="true"]::-webkit-calendar-picker-indicator {
   color: var(--app-menu-fixed-foreground) !important;
 }
 .app-menu-fixed-preview-item { color: var(--app-menu-fixed-foreground); }
-.app-menu-fixed-preview-active { background: var(--app-menu-fixed-selected); }
+.app-menu-fixed-preview-active { background: var(--app-menu-fixed-selected); color: var(--app-menu-fixed-selected-foreground, var(--app-menu-fixed-foreground)); }
 .app-navigation:is([data-menu-layout="left"], [data-menu-layout="right"], [data-menu-layout="bottom"]) > div {
   max-width: none !important;
-  border: 0 !important;
+  border: var(--app-menu-fixed-border, 0) !important;
   border-radius: 0 !important;
-  box-shadow: none !important;
+  box-shadow: var(--app-menu-fixed-shadow, none) !important;
   background: transparent !important;
   backdrop-filter: none !important;
   padding: .75rem !important;
   gap: .5rem;
 }
-.app-navigation:is([data-menu-layout="left"], [data-menu-layout="right"], [data-menu-layout="bottom"]) > div > :is(button, a) {
+.app-navigation:is([data-menu-layout="left"], [data-menu-layout="right"], [data-menu-layout="bottom"]) > div :is(button, a) {
   height: auto !important;
   min-width: 0 !important;
   width: auto !important;
@@ -614,11 +615,11 @@ input[data-custom-calendar="true"]::-webkit-calendar-picker-indicator {
   background: transparent !important;
   box-shadow: none !important;
 }
-.app-navigation:is([data-menu-layout="left"], [data-menu-layout="right"], [data-menu-layout="bottom"]) > div > :is(button, a):is([aria-current="page"], [data-state="active"], [aria-selected="true"], :hover) {
+.app-navigation:is([data-menu-layout="left"], [data-menu-layout="right"], [data-menu-layout="bottom"]) > div :is(button, a):is([aria-current="page"], [data-state="active"], [aria-selected="true"], :hover) {
   background: var(--app-menu-fixed-selected) !important;
-  color: var(--app-menu-fixed-foreground) !important;
+  color: var(--app-menu-fixed-selected-foreground, var(--app-menu-fixed-foreground)) !important;
 }
-.app-navigation:is([data-menu-layout="left"], [data-menu-layout="right"], [data-menu-layout="bottom"]) > div > :is(button, a) > span:has(.menu-icon) {
+.app-navigation:is([data-menu-layout="left"], [data-menu-layout="right"], [data-menu-layout="bottom"]) > div :is(button, a) > span:has(.menu-icon) {
   flex-direction: row !important;
   justify-content: flex-start !important;
   min-height: 2.5rem;
@@ -626,7 +627,7 @@ input[data-custom-calendar="true"]::-webkit-calendar-picker-indicator {
   gap: .75rem !important;
   padding: 0;
 }
-.app-navigation:is([data-menu-layout="left"], [data-menu-layout="right"], [data-menu-layout="bottom"]) > div > :is(button, a) span:not(.menu-icon):not(:has(.menu-icon)) {
+.app-navigation:is([data-menu-layout="left"], [data-menu-layout="right"], [data-menu-layout="bottom"]) > div :is(button, a) span:not(.menu-icon):not(:has(.menu-icon)) {
   min-width: 0;
   font-size: .875rem !important;
   line-height: 1.25 !important;
@@ -650,12 +651,15 @@ input[data-custom-calendar="true"]::-webkit-calendar-picker-indicator {
 }
 .app-navigation[data-menu-layout="left"] { left: 0 !important; right: auto !important; }
 .app-navigation[data-menu-layout="right"] { right: 0 !important; left: auto !important; }
+/* Submenu do menu lateral: abre abaixo do item, dentro do próprio painel. */
+.app-navigation:is([data-menu-layout="left"], [data-menu-layout="right"]) .app-nav-group { display: flex; flex-direction: column; gap: .25rem; }
+.app-navigation:is([data-menu-layout="left"], [data-menu-layout="right"]) .app-nav-sub { display: flex; flex-direction: column; gap: .125rem; padding-left: 1rem; }
 .app-navigation:is([data-menu-layout="left"], [data-menu-layout="right"]) > div {
   display: flex !important;
   flex-direction: column !important;
   align-items: stretch !important;
 }
-.app-navigation:is([data-menu-layout="left"], [data-menu-layout="right"]) > div > :is(button, a) { flex: none !important; }
+.app-navigation:is([data-menu-layout="left"], [data-menu-layout="right"]) > div :is(button, a) { flex: none !important; }
 .app-navigation[data-menu-layout="bottom"] {
   left: 0 !important;
   right: 0 !important;
@@ -666,7 +670,7 @@ input[data-custom-calendar="true"]::-webkit-calendar-picker-indicator {
   overflow-x: auto;
   justify-content: center;
 }
-.app-navigation[data-menu-layout="bottom"] > div > :is(button, a) { flex: 1 0 auto; max-width: 16rem; }
+.app-navigation[data-menu-layout="bottom"] > div :is(button, a) { flex: 1 0 auto; max-width: 16rem; }
 }
 @media (max-width: 1023px) {
   :root { --app-menu-side-width: 10rem; --app-menu-side-offset: 11rem; }

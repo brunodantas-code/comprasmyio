@@ -9,6 +9,9 @@ import { decideUserDeletion, requestUserDeletion, setUserAccessProfile, setUserA
 import { useJobTitles } from "@/components/job-titles-tab";
 import { useAccessProfileDefinitions } from "@/components/access-profile-definitions-tab";
 import { useTableFilters } from "@/components/use-table-filters";
+import { AccessUserRow } from "@/components/access/access-user-row";
+import { AccessStatusTabs, putInactiveLast, type AccessStatusFilter } from "@/components/access/access-status-tabs";
+import { CdeDisclosureIcon } from "@/components/cde/cde-button";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -204,6 +207,9 @@ export function UsersAdmin() {
   };
 
   const [sortBy, setSortBy] = useState<"name" | "profile">("name");
+  const [status, setStatus] = useState<AccessStatusFilter>("all");
+  const [open, setOpen] = useState<Set<string>>(new Set());
+  const toggle = (id: string) => setOpen((current) => { const next = new Set(current); if (next.has(id)) next.delete(id); else next.add(id); return next; });
 
   const isPendingRestrictedUser = (user: NonNullable<typeof data>[number]) =>
     user.accessProfile === "customizado" && (!user.hasConfiguredAccess || !approverLabelOf(user.jobTitleId));
@@ -216,13 +222,19 @@ export function UsersAdmin() {
     { key: "role", label: "Cargo", value: u => jobTitles?.find(t => t.id === u.jobTitleId)?.name },
     { key: "profile", label: "Perfil", value: u => u.accessProfileName },
   ]);
-  const rows = [...userFilters.filtered].sort((a, b) => {
+  const sorted = [...userFilters.filtered].sort((a, b) => {
     if (sortBy === "profile") {
       const byProfile = String(a.accessProfileName).localeCompare(String(b.accessProfileName), "pt-BR");
       if (byProfile !== 0) return byProfile;
     }
     return String(a.full_name ?? "").localeCompare(String(b.full_name ?? ""), "pt-BR");
   });
+  const rows = putInactiveLast(sorted.filter((u) => status === "all" || (status === "active" ? u.is_active !== false : u.is_active === false)), (u) => u.is_active !== false);
+  const statusCounts = {
+    all: sorted.length,
+    active: sorted.filter((u) => u.is_active !== false).length,
+    inactive: sorted.filter((u) => u.is_active === false).length,
+  };
 
 
   return (
@@ -237,7 +249,8 @@ export function UsersAdmin() {
       <CardContent className="space-y-4">
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
         <>
-          <div className="flex justify-end">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <AccessStatusTabs value={status} onChange={setStatus} counts={statusCounts} />
             <Select value={sortBy} onValueChange={(value) => setSortBy(value as "name" | "profile")}>
               <SelectTrigger aria-label="Ordenação dos usuários" className="h-8 w-auto min-w-0 text-[length:var(--filter-fs)]"><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -314,22 +327,24 @@ export function UsersAdmin() {
               .filter((g) => g.users.length > 0);
             if (groups.length === 0) return <p className="text-sm text-muted-foreground">Nenhum usuário.</p>;
             return groups.map((g) => (
-              <div key={g.key} className="overflow-hidden rounded-lg border border-border bg-card">
-                <div className="flex items-center justify-between bg-primary/10 px-3 py-2">
+              <div key={g.key} className="space-y-2">
+                <div className="flex items-center justify-between rounded-lg bg-primary/10 px-3 py-2">
                   <h4 className="text-sm font-bold">{g.label}</h4>
                   <span className="text-xs text-muted-foreground">{g.users.length}</span>
                 </div>
-                <div className="divide-y divide-border">
+                <div className="space-y-2">
                   {g.users.map((u) => {
                     const primary = u.jobTitleId ?? "none";
+                    const isOpen = open.has(u.id);
                     return (
-                      <div key={u.id} className="p-3">
-                        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
-                          <div className="min-w-0">
-                            <div className="truncate font-medium">{u.full_name || "—"}</div>
-                            <div className="truncate text-xs text-muted-foreground">{u.email}</div>
-                          </div>
-                          <div className="flex justify-end">
+                      <AccessUserRow
+                        key={u.id}
+                        name={u.full_name || "—"}
+                        email={u.email}
+                        inactive={u.is_active === false}
+                        badges={u.is_active === false ? <span className="text-xs text-destructive">Inativo</span> : null}
+                        controls={
+                          <div className="flex shrink-0 items-center gap-1">
                             {u.id !== currentUser?.id ? (
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>
@@ -349,9 +364,11 @@ export function UsersAdmin() {
                                 </AlertDialogContent>
                               </AlertDialog>
                             ) : null}
+                            <Button type="button" size="compactIcon" variant="ghost" className="shrink-0" aria-label={`${isOpen ? "Recolher" : "Exibir"} dados de ${u.full_name || u.email || "usuário"}`} aria-expanded={isOpen} onClick={() => toggle(u.id)}><CdeDisclosureIcon open={isOpen} screen="components/access/users-admin.tsx" /></Button>
                           </div>
-                        </div>
-                        <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-2 sm:grid-cols-4">
+                        }
+                        details={isOpen ? (
+                        <div className="grid grid-cols-2 gap-x-3 gap-y-2 sm:grid-cols-4">
                           <div className="flex flex-col gap-1">
                             <span className="text-[10px] font-medium text-muted-foreground">Cargo</span>
                             <Select
@@ -391,7 +408,8 @@ export function UsersAdmin() {
                             </div>
                           </div>
                         </div>
-                      </div>
+                        ) : null}
+                      />
                     );
                   })}
                 </div>

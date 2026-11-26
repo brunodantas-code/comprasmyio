@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ALL_MENU_PERMISSION_KEYS } from "@/lib/menu-permissions";
 import { useRequestTypes } from "@/components/request-types-tab";
 import { AccessUserRow } from "@/components/access/access-user-row";
+import { AccessStatusTabs, putInactiveLast, type AccessStatusFilter } from "@/components/access/access-status-tabs";
 import { CdeDisclosureIcon } from "@/components/cde/cde-button";
 
 type ProfileDefinition = {
@@ -35,7 +36,7 @@ export function AccessProfilesTab() {
     queryKey: ["custom-access-profiles", activeRequestTypeCodes],
     queryFn: async () => {
       const [{ data: profiles, error: profilesError }, { data: access, error: accessError }, { data: permissions, error: permissionsError }, { data: individualTypes, error: individualTypesError }, { data: additionalTitles, error: additionalTitlesError }] = await Promise.all([
-        supabase.from("profiles").select("id, full_name, email").is("deleted_at", null).order("full_name"),
+        supabase.from("profiles").select("id, full_name, email, is_active").is("deleted_at", null).order("full_name"),
         supabase.from("user_access_profiles").select("user_id,is_customized,access_profile_definitions(name,base_profile,access_profile_permissions(menu_key,allowed),access_profile_request_types(request_type_code))"),
         supabase.from("user_menu_permissions").select("user_id,menu_key,allowed"),
         supabase.from("user_request_type_permissions").select("user_id,request_type_code"),
@@ -83,7 +84,16 @@ export function AccessProfilesTab() {
   const userFilters = useTableFilters(data ?? [], [
     { key: "name", label: "Nome", value: u => u.full_name },
   ]);
-  const filteredUsers = userFilters.filtered;
+  const [status, setStatus] = useState<AccessStatusFilter>("all");
+  const filteredUsers = putInactiveLast(
+    userFilters.filtered.filter((user) => status === "all" || (status === "active" ? user.is_active !== false : user.is_active === false)),
+    (user) => user.is_active !== false,
+  );
+  const statusCounts = {
+    all: userFilters.filtered.length,
+    active: userFilters.filtered.filter((user) => user.is_active !== false).length,
+    inactive: userFilters.filtered.filter((user) => user.is_active === false).length,
+  };
 
   const updatePermissions = useMutation({
     mutationFn: async ({ userId, permissions, profilePermissions, requestTypes, profileRequestTypes }: { userId: string; permissions: Set<string>; profilePermissions: Set<string>; requestTypes: Set<string>; profileRequestTypes: Set<string> }) => {
@@ -122,6 +132,7 @@ export function AccessProfilesTab() {
       <CardContent className="space-y-4">
         <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">{userFilters.header("name")}</div>
         {userFilters.summary}
+        <AccessStatusTabs value={status} onChange={setStatus} counts={statusCounts} />
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> : null}
         {!isLoading && data?.length === 0 ? <p className="text-sm text-muted-foreground">Nenhum usuário cadastrado.</p> : null}
         {!isLoading && data?.length !== 0 && filteredUsers?.length === 0 ? <p className="text-sm text-muted-foreground">Nenhum usuário encontrado.</p> : null}
@@ -132,8 +143,9 @@ export function AccessProfilesTab() {
               key={user.id}
               name={user.full_name || "—"}
               email={user.email}
-              leading={<Button type="button" size="compactIcon" variant="ghost" className="shrink-0" aria-label={expanded ? `Recolher ${user.full_name || "usuário"}` : `Exibir ${user.full_name || "usuário"}`} aria-expanded={expanded} onClick={() => setExpandedUserId((current) => current === user.id ? null : user.id)}><CdeDisclosureIcon open={expanded} screen="components/access-profiles-tab.tsx" /></Button>}
-              badges={<><Badge variant="outline">{user.profileName}</Badge>{user.differences.size > 0 || user.requestTypeDifferences.size > 0 ? <Badge className="border-primary bg-primary/15 text-foreground hover:bg-primary/20">Acesso Customizado</Badge> : null}{user.permissions.size === 0 ? <Badge variant="outline">Configuração pendente</Badge> : null}</>}
+              inactive={user.is_active === false}
+              controls={<Button type="button" size="compactIcon" variant="ghost" className="shrink-0" aria-label={expanded ? `Recolher ${user.full_name || "usuário"}` : `Exibir ${user.full_name || "usuário"}`} aria-expanded={expanded} onClick={() => setExpandedUserId((current) => current === user.id ? null : user.id)}><CdeDisclosureIcon open={expanded} screen="components/access-profiles-tab.tsx" /></Button>}
+              badges={<>{user.is_active === false ? <span className="text-xs text-destructive">Inativo</span> : null}<Badge variant="outline">{user.profileName}</Badge>{user.differences.size > 0 || user.requestTypeDifferences.size > 0 ? <Badge className="border-primary bg-primary/15 text-foreground hover:bg-primary/20">Acesso Customizado</Badge> : null}{user.permissions.size === 0 ? <Badge variant="outline">Configuração pendente</Badge> : null}</>}
               details={expanded ? <MenuPermissionSelector
                 value={user.permissions}
                 highlightedKeys={user.differences}

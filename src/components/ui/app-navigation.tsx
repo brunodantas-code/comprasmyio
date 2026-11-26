@@ -1,11 +1,14 @@
 import { useEffect, useRef, useState, type ComponentProps } from "react";
 import { createPortal } from "react-dom";
+import { MENU_LOOK_DEFAULT, menuLookVars, useMenuLook } from "@/components/cde/menu-look";
 
 /** Keep app navigation outside page stacking/scrolling contexts, below dialogs. */
 export function AppNavigation({ className = "", ...props }: ComponentProps<"nav">) {
   const [mounted, setMounted] = useState(false);
   const [layout, setLayout] = useState("floating");
   const ref = useRef<HTMLElement>(null);
+  // Look saved in the CDE (group menu_look): background, text, selected item, border and shadow.
+  const { data: look } = useMenuLook();
   useEffect(() => { setMounted(true); }, []);
   useEffect(() => {
     const breakpoint = window.matchMedia("(min-width: 1024px)");
@@ -48,5 +51,5 @@ export function AppNavigation({ className = "", ...props }: ComponentProps<"nav"
     };
   }, [mounted]);
   if (!mounted) return null;
-  return createPortal(<nav ref={ref} data-menu-layout={layout} className={`app-navigation fixed inset-x-3 bottom-3 z-40 ${className}`} {...props} />, document.body);
+  return createPortal(<nav ref={ref} data-menu-layout={layout} style={menuLookVars(look ?? MENU_LOOK_DEFAULT)} className={`app-navigation fixed inset-x-3 bottom-3 z-40 ${className}`} {...props} />, document.body);
 }

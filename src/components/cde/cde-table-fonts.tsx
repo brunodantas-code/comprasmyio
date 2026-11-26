@@ -15,11 +15,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { CdeCategoryHeader } from "./cde-category-header";
 import { CdeTableOrder } from "./cde-table-order";
 import { ALIGN_H, ALIGN_V, HEADER_COLORS, headerColor, tableAlignVars, type AlignH, type AlignV, type HeaderColorKind } from "./table-fonts-config";
-import { useCdeSwatchStyle } from "./cde-button";
+import { CdeButton, useCdeSwatchStyle } from "./cde-button";
 import { TABLE_FILTER_SIZES, TABLE_FONTS_DEFAULT, TABLE_HEADER_SIZES, useTableFonts, type TableFontsConfig } from "./table-fonts-config";
 
 export function CdeTableFonts({ number, handle }: { number: number; handle?: import("react").ReactNode }) {
   const [open, setOpen] = useState(false);
+  const [contentOpen, setContentOpen] = useState(true);
   const [saving, setSaving] = useState(false);
   const saved = useTableFonts().data ?? TABLE_FONTS_DEFAULT;
   const [draft, setDraft] = useState<TableFontsConfig | null>(null);
@@ -53,7 +54,7 @@ export function CdeTableFonts({ number, handle }: { number: number; handle?: imp
     <section className="cde-category-sections">
       <CdeCategoryHeader handle={handle} number={number} title="Cabeçalhos e Listas" hint="Fontes, cores, títulos dos campos, títulos e subtítulos, alinhamento e ordem das colunas" open={open} onToggle={() => setOpen(!open)} />
       {open && (
-        <div className="space-y-4"><CdeSection title="Fontes, cores e alinhamento" actions={<><Button variant="ghost" size="icon" aria-label="Salvar" title="Salvar padrão" onClick={save} disabled={saving || !draft || JSON.stringify(draft) === JSON.stringify(saved)}><Save /></Button><Button variant="ghost" size="icon" aria-label="Cancelar" title="Cancelar" disabled={saving} onClick={() => setDraft(null)}><X /></Button></>}>
+        <div className="space-y-4"><CdeSection title="Fontes, cores e alinhamento" open={contentOpen} actions={<><Button variant="ghost" size="icon" aria-label="Salvar" title="Salvar padrão" onClick={save} disabled={saving || !draft || JSON.stringify(draft) === JSON.stringify(saved)}><Save /></Button><Button variant="ghost" size="icon" aria-label="Cancelar" title="Cancelar" disabled={saving} onClick={() => setDraft(null)}><X /></Button><CdeButton group="toggle" screen="components/cde/cde-table-fonts.tsx" aria-label={`${contentOpen ? "Recolher" : "Exibir"} fontes, cores e alinhamento`} title={`${contentOpen ? "Recolher" : "Exibir"} fontes, cores e alinhamento`} aria-expanded={contentOpen} onClick={() => setContentOpen(!contentOpen)} /></>}>
           <div role="group" aria-label="Fontes de cabeçalhos e filtros" className="grid w-full max-w-3xl grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
             <div className="min-w-0 space-y-1">
               <Label>Cabeçalhos de tabela</Label>

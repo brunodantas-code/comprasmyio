@@ -53,7 +53,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { AppNavSubmenu } from "@/components/ui/app-nav-submenu";
 import { Input } from "@/components/ui/input";
 import { SearchableSelect } from "@/components/ui/searchable-select";
 import { Label } from "@/components/ui/label";
@@ -372,7 +372,7 @@ function SiteSurveyPage() {
           const submenuItems = value === "visitas"
             ? [...(can("site_survey_agendar") ? [{ value: "nova", label: "Nova visita", icon: Plus }] : []), { value: "minhas", label: "Realizar Visita", icon: CalendarDays }, { value: "pendencias", label: "Sanar Pendências", icon: ClipboardCheck }, ...(can("site_survey_agendar") ? [{ value: "realizada", label: "Cadastrar visita realizada", icon: ClipboardCheck }] : []), { value: "resumo", label: "Histórico de Visitas", icon: FileText }]
             : [];
-          return <DropdownMenu key={value}><DropdownMenuTrigger asChild><Button type="button" variant="ghost" className={itemClassName} onClick={selectSection} aria-current={active ? "page" : undefined}>{item}</Button></DropdownMenuTrigger><DropdownMenuContent side={ml.drop} align="center" sideOffset={10} className="w-56 rounded-lg p-1.5 shadow-xl"><DropdownMenuLabel>{label}</DropdownMenuLabel><DropdownMenuSeparator />{submenuItems.map(({ value: subValue, label: subLabel, icon: SubIcon }) => { const subActive = visitsSection === subValue; return <DropdownMenuItem key={subValue} className="min-h-11 rounded-md" onSelect={() => { selectSection(); setVisitsSection(subValue); }}><SubIcon className="h-4 w-4" /><span className="flex-1">{subLabel}</span>{subActive ? <Check className="h-4 w-4 text-primary" /> : null}</DropdownMenuItem>; })}</DropdownMenuContent></DropdownMenu>;
+          return <AppNavSubmenu key={value} menus={ml.menus} label={label} item={item} className={itemClassName} active={active} onSelectMain={selectSection} items={submenuItems} isSubActive={(subValue) => visitsSection === subValue} onSelectSub={(subValue) => { selectSection(); setVisitsSection(subValue); }} />;
         })}
       </div>
     </AppNavigation>

@@ -1,4 +1,5 @@
 import { CdeSection } from "./cde-section";
+import { CdeButton } from "./cde-button";
 import { APP_SHORTCUTS } from "@/lib/app-shortcuts";
 import { appDisplay, type AppTileConfig } from "./app-order-config";
 import { useState } from "react";
@@ -19,6 +20,8 @@ export function CdeAppShortcuts({ tile }: { tile: AppTileConfig }) {
   const router = useRouter();
   const [draft, setDraft] = useState<ErpIconKey | null>(null);
   const [saving, setSaving] = useState(false);
+  const [iconsOpen, setIconsOpen] = useState(true);
+  const [filesOpen, setFilesOpen] = useState(true);
   const [appDraft, setAppDraft] = useState<AppIconChoices | null>(null);
   const { data } = useQuery({ queryKey: ["cde-erp-icon"], queryFn: async () => {
     const user = (await supabase.auth.getUser()).data.user;
@@ -78,7 +81,7 @@ export function CdeAppShortcuts({ tile }: { tile: AppTileConfig }) {
   }
   return <div className="space-y-4">
     
-    <CdeSection title="Favicons e ícones de atalhos" actions={<><Button variant="ghost" size="compactIcon" aria-label="Salvar ícone padrão do ERP" title="Salvar ícone padrão do ERP" onClick={save} disabled={saving || !draft || draft === data?.key}><Save /></Button><Button variant="ghost" size="compactIcon" aria-label="Salvar ícones dos apps" title="Salvar ícones dos apps" onClick={saveApps} disabled={saving || !appDraft || JSON.stringify(appDraft) === JSON.stringify(data?.apps ?? {})}><Save /></Button></>}>
+    <CdeSection title="Favicons e ícones de atalhos" open={iconsOpen} actions={<><Button variant="ghost" size="compactIcon" aria-label="Salvar ícone padrão do ERP" title="Salvar ícone padrão do ERP" onClick={save} disabled={saving || !draft || draft === data?.key}><Save /></Button><Button variant="ghost" size="compactIcon" aria-label="Salvar ícones dos apps" title="Salvar ícones dos apps" onClick={saveApps} disabled={saving || !appDraft || JSON.stringify(appDraft) === JSON.stringify(data?.apps ?? {})}><Save /></Button><CdeButton group="toggle" screen="components/cde/cde-app-shortcuts.tsx" aria-label={`${iconsOpen ? "Recolher" : "Exibir"} favicons e ícones de atalhos`} title={`${iconsOpen ? "Recolher" : "Exibir"} favicons e ícones de atalhos`} aria-expanded={iconsOpen} onClick={() => setIconsOpen(!iconsOpen)} /></>}>
       <div role="group" aria-label="Favicons e ícones de atalhos" className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
       <figure className="flex min-w-0 flex-col items-center gap-2 text-center">
         <RadioGroup aria-label="Ícone padrão do ERP" value={selected} onValueChange={value => setDraft(erpIconKey(value))} disabled={!data?.admin || saving} className="grid grid-cols-2 gap-3">
@@ -105,7 +108,7 @@ export function CdeAppShortcuts({ tile }: { tile: AppTileConfig }) {
       </div>
     </CdeSection>
     
-    <CdeSection title="Arquivos oficiais da marca">
+    <CdeSection title="Arquivos oficiais da marca" open={filesOpen} actions={<CdeButton group="toggle" screen="components/cde/cde-app-shortcuts.tsx" aria-label={`${filesOpen ? "Recolher" : "Exibir"} arquivos oficiais da marca`} title={`${filesOpen ? "Recolher" : "Exibir"} arquivos oficiais da marca`} aria-expanded={filesOpen} onClick={() => setFilesOpen(!filesOpen)} />}>
       
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {BRAND_ASSETS.map(asset => <figure key={asset.key} className="flex min-w-0 items-center gap-3">

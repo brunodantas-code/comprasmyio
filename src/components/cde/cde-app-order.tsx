@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { CdeCategoryHeader } from "./cde-category-header";
 import { APP_NAME_COLORS, APP_TILE_COLORS, APP_TILE_DEFAULT, PORTAL_APPS, appDisplay, appLogoPx, appTileColor, appTileColorVars, appTileLowContrast, homeHeaderVars, homeHeaderLogoTone, mobileTileVars, parseAppOrder, useAppOrder, useAppTile, type AppDisplayOverride, type AppTileColorKind, type AppTileConfig } from "./app-order-config";
-import { useCdeSwatchStyle } from "./cde-button";
+import { CdeButton, useCdeSwatchStyle } from "./cde-button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -65,6 +65,9 @@ function AppNameColorChoice({ appName, value, onChange }: { appName: string; val
 
 export function CdeAppOrder({ number, handle }: { number: number; handle?: import("react").ReactNode }) {
   const [open, setOpen] = useState(false);
+  const [orderOpen, setOrderOpen] = useState(true);
+  const [namesOpen, setNamesOpen] = useState(true);
+  const [iconsOpen, setIconsOpen] = useState(true);
   const [draft, setDraft] = useState<string[] | null>(null);
   const [saving, setSaving] = useState(false);
   const { data } = useAppOrder();
@@ -113,11 +116,11 @@ export function CdeAppOrder({ number, handle }: { number: number; handle?: impor
   }
   return <section className="cde-category-sections">
     <CdeCategoryHeader handle={handle} number={number} title="Home Page" hint="Faixa superior, apps, espaçamento e cores" open={open} onToggle={() => setOpen(!open)} />
-    {open && <div className="space-y-4"><CdeSection title="Ordenação dos Apps na Home Page" actions={<Button variant="ghost" size="icon" title="Salvar ordem dos apps" aria-label="Salvar ordem dos apps" onClick={save} disabled={saving || !draft}><Save /></Button>}><DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={move}><SortableContext items={order} strategy={verticalListSortingStrategy}>{order.map((id, i) => <Row key={id} id={id} index={i} displayName={appDisplay(tile, id).name} />)}</SortableContext></DndContext></CdeSection>
+    {open && <div className="space-y-4"><CdeSection title="Ordenação dos Apps na Home Page" open={orderOpen} actions={<><Button variant="ghost" size="icon" title="Salvar ordem dos apps" aria-label="Salvar ordem dos apps" onClick={save} disabled={saving || !draft}><Save /></Button><CdeButton group="toggle" screen="components/cde/cde-app-order.tsx" aria-label={`${orderOpen ? "Recolher" : "Exibir"} ordenação dos apps`} title={`${orderOpen ? "Recolher" : "Exibir"} ordenação dos apps`} aria-expanded={orderOpen} onClick={() => setOrderOpen(!orderOpen)} /></>}><DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={move}><SortableContext items={order} strategy={verticalListSortingStrategy}>{order.map((id, i) => <Row key={id} id={id} index={i} displayName={appDisplay(tile, id).name} />)}</SortableContext></DndContext></CdeSection>
       
       <CdeCodeApps />
       <CdeAppShortcuts tile={tile} />
-      <CdeSection title="Nomes e fontes dos apps" actions={<Button variant="ghost" size="icon" aria-label="Salvar Home Page" title="Salvar Home Page" onClick={saveTile} disabled={saving || !tileDraft}><Save /></Button>}>
+      <CdeSection title="Nomes e fontes dos apps" open={namesOpen} actions={<><Button variant="ghost" size="icon" aria-label="Salvar Home Page" title="Salvar Home Page" onClick={saveTile} disabled={saving || !tileDraft}><Save /></Button><CdeButton group="toggle" screen="components/cde/cde-app-order.tsx" aria-label={`${namesOpen ? "Recolher" : "Exibir"} nomes e fontes dos apps`} title={`${namesOpen ? "Recolher" : "Exibir"} nomes e fontes dos apps`} aria-expanded={namesOpen} onClick={() => setNamesOpen(!namesOpen)} /></>}>
         
         <div role="group" aria-label="Nomes e fontes dos apps" className="grid gap-4 xl:grid-cols-2">
           {PORTAL_APPS.map(app => { const display = appDisplay(tile, app.key); const caption = tile.apps?.[app.key]; return <div key={app.key} className="space-y-3"><div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_7rem_10rem] sm:items-end">
@@ -137,7 +140,7 @@ export function CdeAppOrder({ number, handle }: { number: number; handle?: impor
         <div className="max-w-[12rem] space-y-1"><Label>Tamanho do logo myio nos apps</Label><Select value={String(appLogoPx(tile))} onValueChange={value => setTileDraft({ ...tile, appLogoPx: Number(value) })}><SelectTrigger aria-label="Tamanho do logo myio nos apps" className="h-9"><SelectValue /></SelectTrigger><SelectContent>{[24, 28, 32, 36, 40, 44, 48, 56, 64].map(px => <SelectItem key={px} value={String(px)}>{px} px{px === 40 ? " (Home)" : ""}</SelectItem>)}</SelectContent></Select></div>
         <div className="space-y-1"><Label>Prévia do cabeçalho dos apps</Label><HeaderPreview tile={tile} appName="CRM" display={appDisplay(tile, "crm", 16)} /></div>
       </CdeSection>
-      <CdeSection title="Ícones da página principal" actions={<Button variant="ghost" size="icon" aria-label="Salvar Home Page" title="Salvar Home Page" onClick={saveTile} disabled={saving || !tileDraft}><Save /></Button>}>
+      <CdeSection title="Ícones da página principal" open={iconsOpen} actions={<><Button variant="ghost" size="icon" aria-label="Salvar Home Page" title="Salvar Home Page" onClick={saveTile} disabled={saving || !tileDraft}><Save /></Button><CdeButton group="toggle" screen="components/cde/cde-app-order.tsx" aria-label={`${iconsOpen ? "Recolher" : "Exibir"} ícones da página principal`} title={`${iconsOpen ? "Recolher" : "Exibir"} ícones da página principal`} aria-expanded={iconsOpen} onClick={() => setIconsOpen(!iconsOpen)} /></>}>
         
         <div role="group" aria-label="Ajustes dos ícones da página principal" className="grid w-full max-w-5xl grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-6">
           <div className="min-w-0 space-y-1"><Label className="flex min-h-10 items-end pb-1">Fonte do nome</Label><Select value={String(tile.labelPx)} onValueChange={(v) => setTileDraft({ ...tile, labelPx: Number(v) })}><SelectTrigger className="h-9"><SelectValue /></SelectTrigger><SelectContent>{[11, 12, 13, 14, 15, 16].map((n) => <SelectItem key={n} value={String(n)}>{n} px</SelectItem>)}</SelectContent></Select></div>

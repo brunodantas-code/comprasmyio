@@ -1,4 +1,5 @@
 import { CdeSection } from "./cde-section";
+import { CdeButton } from "./cde-button";
 import { useState, type CSSProperties } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Save } from "lucide-react";
@@ -27,6 +28,7 @@ export function CdeMobileDockStyle() {
   const saved = useMobileDockStyle().data ?? DEFAULT;
   const [draft, setDraft] = useState<DockStyle | null>(null);
   const [saving, setSaving] = useState(false);
+  const [contentOpen, setContentOpen] = useState(true);
   const qc = useQueryClient();
   const c = draft ?? saved;
   async function save() {
@@ -42,5 +44,5 @@ export function CdeMobileDockStyle() {
       await qc.invalidateQueries({ queryKey: ["cde-mobile-dock"] }); setDraft(null); toast.success("Faixa de favoritos atualizada");
     } catch { toast.error("Não foi possível salvar a faixa de favoritos"); } finally { setSaving(false); }
   }
-  return <CdeSection title="Favoritos no celular" actions={<><Button variant="ghost" size="icon" aria-label="Salvar faixa de favoritos" title="Salvar faixa de favoritos" disabled={saving || !draft || JSON.stringify(draft) === JSON.stringify(saved)} onClick={save}><Save /></Button></>}><div className="flex flex-wrap items-end gap-6"><div className="space-y-2"><Label>Fundo da faixa</Label><ColorSelect label="Fundo da faixa de favoritos" value={c.bg} onChange={bg => setDraft({ ...c, bg })} /></div><div className="space-y-2"><Label>Borda da faixa</Label><ColorSelect label="Borda da faixa de favoritos" value={c.border} onChange={border => setDraft({ ...c, border })} /></div></div><div style={mobileDockVars(c)} className="mobile-favorites-band flex max-w-[390px] justify-around p-3" aria-label="Prévia da faixa de favoritos">{["Supply", "Code", "Projects", "OpDesk"].map(name => <AppSymbol key={name} name={name} className="size-8 text-foreground" />)}</div></CdeSection>;
+  return <CdeSection title="Favoritos no celular" open={contentOpen} actions={<><Button variant="ghost" size="icon" aria-label="Salvar faixa de favoritos" title="Salvar faixa de favoritos" disabled={saving || !draft || JSON.stringify(draft) === JSON.stringify(saved)} onClick={save}><Save /></Button><CdeButton group="toggle" screen="components/cde/mobile-dock-style.tsx" aria-label={`${contentOpen ? "Recolher" : "Exibir"} favoritos no celular`} title={`${contentOpen ? "Recolher" : "Exibir"} favoritos no celular`} aria-expanded={contentOpen} onClick={() => setContentOpen(!contentOpen)} /></>}><div className="flex flex-wrap items-end gap-6"><div className="space-y-2"><Label>Fundo da faixa</Label><ColorSelect label="Fundo da faixa de favoritos" value={c.bg} onChange={bg => setDraft({ ...c, bg })} /></div><div className="space-y-2"><Label>Borda da faixa</Label><ColorSelect label="Borda da faixa de favoritos" value={c.border} onChange={border => setDraft({ ...c, border })} /></div></div><div style={mobileDockVars(c)} className="mobile-favorites-band flex max-w-[390px] justify-around p-3" aria-label="Prévia da faixa de favoritos">{["Supply", "Code", "Projects", "OpDesk"].map(name => <AppSymbol key={name} name={name} className="size-8 text-foreground" />)}</div></CdeSection>;
 }

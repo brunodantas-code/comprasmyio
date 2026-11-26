@@ -1,4 +1,5 @@
 import { CdeSection } from "./cde-section";
+import { CdeButton } from "./cde-button";
 import { useState } from "react";
 import { Pencil, RotateCcw, Save, X } from "lucide-react";
 import { toast } from "sonner";
@@ -18,6 +19,7 @@ const where = (files: string[]) => [...new Set(files.map((f) => { const l = TAG_
 /** CDE item Títulos e Subtítulos: every static card title/subtitle, with its text editable; empty restores the original. */
 export function CdeTitleTexts({ number, handle }: { number: number; handle?: React.ReactNode }) {
   const [open, setOpen] = useState(false);
+  const [contentOpen, setContentOpen] = useState(true);
   const [q, setQ] = useState(""); const [kind, setKind] = useState<"all" | TitleKind>("all");
   const saved = useTitleTexts();
   const [editing, setEditing] = useState<string | null>(null); const [value, setValue] = useState("");
@@ -40,7 +42,7 @@ export function CdeTitleTexts({ number, handle }: { number: number; handle?: Rea
   const restore = (r: Inv) => { const next = { ...saved }; delete next[titleKey(r.kind, r.text)]; void persist(next, "Texto original restaurado"); };
   return <section className="cde-category-sections">
     <CdeCategoryHeader handle={handle} number={number} title="Títulos e Subtítulos" hint="Textos dos títulos e subtítulos das telas, editáveis em todos os apps" open={open} onToggle={() => setOpen(!open)} />
-    {open && <CdeSection title="Textos dos apps" actions={<><Button variant="ghost" size="icon" aria-label="Salvar texto" title="Salvar texto" disabled={busy || !editing || value === (saved[editing] ?? rows.find(r => titleKey(r.kind, r.text) === editing)?.text ?? "")} onClick={() => { const row = rows.find(r => titleKey(r.kind, r.text) === editing); if (row) save(row); }}><Save /></Button><Button variant="ghost" size="icon" aria-label="Cancelar texto" title="Cancelar" onClick={() => setEditing(null)}><X /></Button></>}>
+    {open && <CdeSection title="Textos dos apps" open={contentOpen} actions={<><Button variant="ghost" size="icon" aria-label="Salvar texto" title="Salvar texto" disabled={busy || !editing || value === (saved[editing] ?? rows.find(r => titleKey(r.kind, r.text) === editing)?.text ?? "")} onClick={() => { const row = rows.find(r => titleKey(r.kind, r.text) === editing); if (row) save(row); }}><Save /></Button><Button variant="ghost" size="icon" aria-label="Cancelar texto" title="Cancelar" onClick={() => setEditing(null)}><X /></Button><CdeButton group="toggle" screen="components/cde/cde-title-texts.tsx" aria-label={`${contentOpen ? "Recolher" : "Exibir"} textos dos apps`} title={`${contentOpen ? "Recolher" : "Exibir"} textos dos apps`} aria-expanded={contentOpen} onClick={() => setContentOpen(!contentOpen)} /></>}>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-xs text-muted-foreground">{inventory.length} textos. As cores ficam em Cabeçalhos e Listas. O mesmo texto original muda junto em todas as telas onde aparece.</p>
         <div className="flex items-center gap-2">

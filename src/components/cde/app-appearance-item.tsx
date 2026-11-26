@@ -10,10 +10,12 @@ import { CdeCategoryHeader } from "./cde-category-header";
 import { APP_APPEARANCES, APP_APPEARANCE_GROUP, parseAppAppearance, type AppAppearance } from "./appearance-colors";
 import { APP_APPEARANCE_QUERY, useAppAppearance } from "./app-appearance";
 import { CdeSection } from "./cde-section";
+import { CdeButton } from "./cde-button";
 import { CdeAppearance } from "./cde-appearance-item";
 
 export function AppAppearanceItem({ number, handle }: { number: number; handle?: React.ReactNode }) {
   const [open, setOpen] = useState(false);
+  const [contentOpen, setContentOpen] = useState(true);
   const [draft, setDraft] = useState<AppAppearance | null>(null);
   const [saving, setSaving] = useState(false);
   const saved = useAppAppearance();
@@ -40,9 +42,10 @@ export function AppAppearanceItem({ number, handle }: { number: number; handle?:
   }
   return <section className="cde-category-sections">
     <CdeCategoryHeader number={number} handle={handle} title="Aparência" open={open} onToggle={() => setOpen(!open)} />
-    {open && <><CdeSection title="Padrão de exibição do ERP" actions={<>
+    {open && <><CdeSection title="Padrão de exibição do ERP" open={contentOpen} actions={<>
           <Button variant="ghost" size="icon" aria-label="Salvar aparência dos apps" title="Salvar aparência dos apps" onClick={save} disabled={saving || !draft || draft === saved.data || saved.isLoading}><Save /></Button>
           <Button variant="ghost" size="icon" aria-label="Cancelar aparência dos apps" title="Cancelar" onClick={() => setDraft(null)} disabled={saving}><X /></Button>
+          <CdeButton group="toggle" screen="components/cde/app-appearance-item.tsx" aria-label={`${contentOpen ? "Recolher" : "Exibir"} padrão de exibição do ERP`} title={`${contentOpen ? "Recolher" : "Exibir"} padrão de exibição do ERP`} aria-expanded={contentOpen} onClick={() => setContentOpen(!contentOpen)} />
         </>}>
       <RadioGroup aria-label="Aparência dos apps" value={draft ?? saved.data ?? "green"} onValueChange={value => setDraft(parseAppAppearance(value))} disabled={saving || saved.isLoading} className="grid gap-4 sm:grid-cols-3">
         {APP_APPEARANCES.map(option => <label key={option.key} htmlFor={`app-appearance-${option.key}`} className="flex cursor-pointer flex-nowrap items-center justify-center gap-3 text-sm font-medium leading-none">

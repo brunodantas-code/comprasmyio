@@ -10,14 +10,19 @@
 [data-card-border-color="cinza"] { --classification-border-color: var(--card-classification-gray); }
 [data-card-border-color="cinza_claro"] { --classification-border-color: var(--card-classification-gray-light); }
 [data-card-border-color="cinza_muito_claro"] { --classification-border-color: var(--card-classification-gray-pale); }
-[data-card-border-edge="top"] {
-  border-top-color: var(--classification-border-color) !important;
-  border-top-width: var(--classification-border-width) !important;
-  border-top-style: solid !important;
-}
-[data-card-border-edge="all"] {
-  border-color: var(--classification-border-color) !important;
-  border-width: var(--classification-border-width) !important;
-  border-style: solid !important;
+/* Dentro de @layer components: para declarações !important, camadas anteriores
+   vencem as utilitários do Tailwind (ex.: !border-0 do padrão de box do CDE),
+   então a borda de classificação continua visível. */
+@layer components {
+  [data-card-border-edge="top"][data-card-border-edge] {
+    border-top-color: var(--classification-border-color) !important;
+    border-top-width: var(--classification-border-width) !important;
+    border-top-style: solid !important;
+  }
+  [data-card-border-edge="all"][data-card-border-edge] {
+    border-color: var(--classification-border-color) !important;
+    border-width: var(--classification-border-width) !important;
+    border-style: solid !important;
+  }
 }
 .card-border-swatch { background: var(--classification-border-color); }

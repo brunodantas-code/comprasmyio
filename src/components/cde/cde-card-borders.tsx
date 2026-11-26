@@ -14,13 +14,14 @@ import { crmOptions } from "@/components/crm/crm-data";
 import { importedField } from "@/lib/indicadores-import";
 import { CONFIDENCES } from "@/lib/indicadores";
 import { CdeCategoryHeader } from "./cde-category-header";
-import { useCdeStandards, useCdeSwatchStyle } from "./cde-button";
+import { CdeButton, useCdeStandards, useCdeSwatchStyle } from "./cde-button";
 import { CARD_BORDER_APPS, CARD_BORDER_COLORS, CARD_BORDER_GROUP, CARD_BORDER_MODES, DEFAULT_CARD_BORDER, parseCardBorders, type CardBorderApp, type CardBorderConfig, type CardBorderRule } from "./card-border-config";
 import { useAppDisplayName } from "./app-order-config";
 
 export function CdeCardBorders({ number, handle }: { number: number; handle?: React.ReactNode }) {
   const nameOf = useAppDisplayName();
   const [open, setOpen] = useState(false);
+  const [contentOpen, setContentOpen] = useState(true);
   const [app, setApp] = useState<CardBorderApp>("indicadores");
   const [draft, setDraft] = useState<CardBorderConfig | null>(null);
   const [saving, setSaving] = useState(false);
@@ -78,7 +79,7 @@ export function CdeCardBorders({ number, handle }: { number: number; handle?: Re
   }
   return <section className="cde-category-sections">
     <CdeCategoryHeader number={number} handle={handle} title="Bordas de classificação dos cards" open={open} onToggle={() => setOpen(!open)} />
-    {open && <CdeSection title="Classificação e cores" actions={<><Button variant="ghost" size="icon" title="Salvar bordas dos cards" aria-label="Salvar bordas dos cards" disabled={saving || !draft || standards.isLoading} onClick={save}><Save /></Button><Button variant="ghost" size="icon" title="Cancelar alterações das bordas" aria-label="Cancelar alterações das bordas" disabled={saving} onClick={() => setDraft(null)}><X /></Button></>}>
+    {open && <CdeSection title="Classificação e cores" open={contentOpen} actions={<><Button variant="ghost" size="icon" title="Salvar bordas dos cards" aria-label="Salvar bordas dos cards" disabled={saving || !draft || standards.isLoading} onClick={save}><Save /></Button><Button variant="ghost" size="icon" title="Cancelar alterações das bordas" aria-label="Cancelar alterações das bordas" disabled={saving} onClick={() => setDraft(null)}><X /></Button><CdeButton group="toggle" screen="components/cde/cde-card-borders.tsx" aria-label={`${contentOpen ? "Recolher" : "Exibir"} classificação e cores`} title={`${contentOpen ? "Recolher" : "Exibir"} classificação e cores`} aria-expanded={contentOpen} onClick={() => setContentOpen(!contentOpen)} /></>}>
       <div className="flex items-center justify-end gap-1">
         
         

@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
-import { CdeNumber } from "./cde-button";
+import { CdeButton, CdeNumber } from "./cde-button";
 import { ColorSelect } from "./cde-tags";
 import { CDE_APPEARANCE_DEFAULT, CDE_APPEARANCE_GROUP, CDE_FONTS, CDE_SIZES, CDE_INHERITED_COLORS, cdeAppearanceVars, useCdeAppearance, type CdeAppearanceConfig, type CdeLevel } from "./cde-appearance";
 
@@ -17,6 +17,9 @@ const COLORS: ["bg" | "border" | "text" | "hint", string][] = [["bg", "Fundo"], 
 /** Internal appearance editor within the consolidated Appearance category. */
 export function CdeAppearance() {
   const [saving, setSaving] = useState(false);
+  const [mainOpen, setMainOpen] = useState(true);
+  const [catOpen, setCatOpen] = useState(true);
+  const [subOpen, setSubOpen] = useState(true);
   const qc = useQueryClient();
   const saved = useCdeAppearance().data ?? CDE_APPEARANCE_DEFAULT;
   const [draft, setDraft] = useState<CdeAppearanceConfig | null>(null);
@@ -34,7 +37,10 @@ export function CdeAppearance() {
       await qc.invalidateQueries({ queryKey: ["cde-appearance"] }); setDraft(null); toast.success("Aparência do CDE atualizada");
     } catch { toast.error("Não foi possível salvar. Somente Admin do ERP altera o CDE."); } finally { setSaving(false); }
   }
-  const block = (lv: "cat" | "sub", title: string) => <CdeSection title={title}>
+  const block = (lv: "cat" | "sub", title: string) => {
+    const isOpen = lv === "cat" ? catOpen : subOpen;
+    const toggle = () => (lv === "cat" ? setCatOpen(!catOpen) : setSubOpen(!subOpen));
+    return <CdeSection title={title} open={isOpen} actions={<CdeButton group="toggle" screen="components/cde/cde-appearance-item.tsx" aria-label={`${isOpen ? "Recolher" : "Exibir"} ${title.toLowerCase()}`} title={`${isOpen ? "Recolher" : "Exibir"} ${title.toLowerCase()}`} aria-expanded={isOpen} onClick={toggle} />}>
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
       {COLORS.map(([k, l]) => <div key={k} className="space-y-1"><Label className="text-xs">{l}</Label><ColorSelect label={`${l} — ${title}`} value={String(cfg[lv][k])} inheritedColor={CDE_INHERITED_COLORS[lv][k]} onChange={(v) => setLv(lv, k, v)} /></div>)}
       {([["titlePx", "Tamanho do título"], ["hintPx", "Tamanho da descrição"]] as const).map(([k, l]) => <div key={k} className="space-y-1"><Label className="text-xs">{l}</Label>
@@ -44,7 +50,8 @@ export function CdeAppearance() {
       <FontFormatControl context={`${title} — descrição`} value={cfg[lv].hintFormat ?? {}} onChange={v => setLv(lv, "hintFormat", v)} />
     </div>
   </CdeSection>;
-  return <><CdeSection title="Aparência do CDE" actions={<><Button variant="ghost" size="icon" aria-label="Salvar" title="Salvar aparência" onClick={save} disabled={saving || !draft || JSON.stringify(draft) === JSON.stringify(saved)}><Save /></Button><Button variant="ghost" size="icon" aria-label="Cancelar" title="Cancelar" onClick={() => setDraft(null)}><X /></Button></>}>
+  };
+  return <><CdeSection title="Aparência do CDE" open={mainOpen} actions={<><Button variant="ghost" size="icon" aria-label="Salvar" title="Salvar aparência" onClick={save} disabled={saving || !draft || JSON.stringify(draft) === JSON.stringify(saved)}><Save /></Button><Button variant="ghost" size="icon" aria-label="Cancelar" title="Cancelar" onClick={() => setDraft(null)}><X /></Button><CdeButton group="toggle" screen="components/cde/cde-appearance-item.tsx" aria-label={`${mainOpen ? "Recolher" : "Exibir"} aparência do CDE`} title={`${mainOpen ? "Recolher" : "Exibir"} aparência do CDE`} aria-expanded={mainOpen} onClick={() => setMainOpen(!mainOpen)} /></>}>
       <div className="space-y-1"><p className="text-sm font-medium">Prévia</p>
         <div style={cdeAppearanceVars(cfg)} className="rounded-md border border-border p-3">
           <div className="cde-cat-band flex items-center gap-3 border-b px-2 py-3"><CdeNumber>1</CdeNumber><span className="flex flex-wrap items-baseline gap-x-3"><span className="cde-cat-title">Campos para preenchimento</span><span className="cde-cat-hint">Descrição da categoria</span></span></div>

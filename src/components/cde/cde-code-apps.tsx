@@ -1,4 +1,5 @@
 import { CdeSection } from "./cde-section";
+import { CdeButton } from "./cde-button";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Save } from "lucide-react";
@@ -16,6 +17,7 @@ export function CdeCodeApps() {
   const { data } = useCodeAppExclusions();
   const [draft, setDraft] = useState<string[] | null>(null);
   const [saving, setSaving] = useState(false);
+  const [contentOpen, setContentOpen] = useState(true);
   const excluded = draft ?? data ?? [];
   function toggle(key: string, on: boolean) { setDraft(on ? excluded.filter((k) => k !== key) : [...excluded, key]); }
   async function save() {
@@ -32,7 +34,7 @@ export function CdeCodeApps() {
       setDraft(null); toast.success("Apps atendidos pelo Code atualizados");
     } catch { toast.error("Não foi possível salvar os apps do Code."); } finally { setSaving(false); }
   }
-  return <CdeSection title="Apps atendidos pelo Code" actions={<><Button variant="ghost" size="icon" title="Salvar apps do Code" aria-label="Salvar apps do Code" onClick={save} disabled={saving || !draft || JSON.stringify(draft) === JSON.stringify(data ?? [])}><Save /></Button></>}>
+  return <CdeSection title="Apps atendidos pelo Code" open={contentOpen} actions={<><Button variant="ghost" size="icon" title="Salvar apps do Code" aria-label="Salvar apps do Code" onClick={save} disabled={saving || !draft || JSON.stringify(draft) === JSON.stringify(data ?? [])}><Save /></Button><CdeButton group="toggle" screen="components/cde/cde-code-apps.tsx" aria-label={`${contentOpen ? "Recolher" : "Exibir"} apps atendidos pelo Code`} title={`${contentOpen ? "Recolher" : "Exibir"} apps atendidos pelo Code`} aria-expanded={contentOpen} onClick={() => setContentOpen(!contentOpen)} /></>}>
     
     <p className="text-xs text-muted-foreground">Novos apps entram automaticamente; desmarque para retirar do Code.</p>
     <div role="group" aria-label="Apps atendidos pelo Code" className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-6">

@@ -13,6 +13,8 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { useAppDisplayName } from "@/components/cde/app-order-config";
 import { AccessUserRow } from "@/components/access/access-user-row";
+import { AccessActiveToggle } from "@/components/access/access-active-toggle";
+import { AccessStatusTabs, type AccessStatusFilter } from "@/components/access/access-status-tabs";
 
 const APPS = [
   { key: "spend", label: "Spend" },
@@ -50,6 +52,7 @@ export function ErpAppAccessAdmin({ appKey }: { appKey?: string }) {
   });
 
   const [open, setOpen] = useState<Set<string>>(new Set());
+  const [status, setStatus] = useState<AccessStatusFilter>("all");
   const toggle = (id: string) => setOpen((cur) => { const n = new Set(cur); if (n.has(id)) n.delete(id); else n.add(id); return n; });
   const saveActive = useServerFn(setErpUserActive);
   const activate = useMutation({
@@ -71,6 +74,12 @@ export function ErpAppAccessAdmin({ appKey }: { appKey?: string }) {
     ...apps.map((app) => ({ key: `app_${app.key}`, label: nameOf(app.key), value: (u: (typeof users)[number]) => (accessSet.has(`${u.id}:${app.key}`) ? "Com acesso" : "Sem acesso") })),
   ]);
   const filtered = userFilters.filtered;
+  const visible = filtered.filter((u) => status === "all" || (status === "active" ? u.is_active : !u.is_active));
+  const statusCounts = {
+    all: filtered.length,
+    active: filtered.filter((u) => u.is_active).length,
+    inactive: filtered.filter((u) => !u.is_active).length,
+  };
   const adminSet = new Set(data?.adminIds ?? []);
 
   return (
@@ -81,10 +90,11 @@ export function ErpAppAccessAdmin({ appKey }: { appKey?: string }) {
       </CardHeader>
       <CardContent>
         {userFilters.summary}
+        <AccessStatusTabs className="mb-2" value={status} onChange={setStatus} counts={statusCounts} />
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando usuários...</p> : null}
-        {!isLoading ? <p className="mb-2 text-xs text-muted-foreground">{filtered.length} de {users.length} usuários</p> : null}
+        {!isLoading ? <p className="mb-2 text-xs text-muted-foreground">{visible.length} de {users.length} usuários</p> : null}
         <div className="space-y-2">
-          {filtered.map((user) => {
+          {visible.map((user) => {
             const isOpen = open.has(user.id);
             const appControls = apps.map((app) => {
               const checked = accessSet.has(`${user.id}:${app.key}`);
@@ -111,10 +121,12 @@ export function ErpAppAccessAdmin({ appKey }: { appKey?: string }) {
                 {...(!appKey ? { onNameClick: () => toggle(user.id) } : {})}
                 controls={appKey ? appControls[0]?.control : (
                   <div className="flex shrink-0 items-center gap-2">
-                    <label className="flex items-center gap-2 text-xs">
-                      <span className={user.is_active ? "" : "text-destructive"}>{user.is_active ? "Ativo" : "Inativo"}</span>
-                      <Switch checked={user.is_active} disabled={activate.isPending} onCheckedChange={async (active) => { if (active || await confirmAction(`Inativar ${user.full_name || user.email}? O usuário não conseguirá mais entrar.`)) activate.mutate({ data: { userId: user.id, active } }); }} aria-label={`Ativo: ${user.full_name || user.email || "usuário"}`} />
-                    </label>
+                    <AccessActiveToggle
+                      active={user.is_active}
+                      disabled={activate.isPending}
+                      label={`Ativo: ${user.full_name || user.email || "usuário"}`}
+                      onCheckedChange={async (active) => { if (active || await confirmAction(`Inativar ${user.full_name || user.email}? O usuário não conseguirá mais entrar.`)) activate.mutate({ data: { userId: user.id, active } }); }}
+                    />
                     <Button type="button" variant="ghost" size="compactIcon" aria-label={`${isOpen ? "Recolher" : "Exibir"} aplicativos de ${user.full_name || "usuário"}`} aria-expanded={isOpen} onClick={() => toggle(user.id)}><CdeDisclosureIcon open={isOpen} screen="components/erp-app-access-admin.tsx" /></Button>
                   </div>
                 )}
@@ -123,7 +135,7 @@ export function ErpAppAccessAdmin({ appKey }: { appKey?: string }) {
                     {apps.map((app) => {
                       const checked = accessSet.has(`${user.id}:${app.key}`);
                       return (
-                        <label key={app.key} className="flex min-w-0 items-center justify-between gap-3 text-sm">
+                        <label key={app.key} className="flex min-w-0 items-center justify-start gap-3 text-sm">
                           <span className="min-w-0 truncate">{nameOf(app.key)}</span>
                           <span className="flex shrink-0 items-center gap-2">
                             <span className="text-xs text-muted-foreground">{checked ? "Ativo" : "Inativo"}</span>

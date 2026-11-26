@@ -27,6 +27,24 @@ export function resolveMenus(config: MenuConfig, app: string): DeviceMenus {
   return defaults;
 }
 export function menuMainClasses({ mobile, desktop }: DeviceMenus) {
-  const main = (t: MenuType, p: string) => t === "left" ? `${p}!pl-[var(--app-menu-side-offset)] ${p}!pb-8` : t === "right" ? `${p}!pr-[var(--app-menu-side-offset)] ${p}!pb-8` : t === "top_tabs" ? `${p}!pt-28 ${p}!pb-8` : "";
-  return `${main(mobile, "max-lg:")} ${main(desktop, "lg:")}`;
+  // Os utilitários precisam aparecer inteiros no código: o Tailwind só gera as
+  // classes que lê literalmente, então as variantes (max-lg:/lg:) são escritas por
+  // extenso. Com o nome montado por interpolação, o deslocamento não era gerado e
+  // o menu lateral cobria as listas.
+  const offsets: Record<string, { mobile: string; desktop: string }> = {
+    left: { mobile: "max-lg:!pl-[var(--app-menu-side-offset)]", desktop: "lg:!pl-[var(--app-menu-side-offset)]" },
+    right: { mobile: "max-lg:!pr-[var(--app-menu-side-offset)]", desktop: "lg:!pr-[var(--app-menu-side-offset)]" },
+    top_tabs: { mobile: "max-lg:!pt-28", desktop: "lg:!pt-28" },
+  };
+  const bottoms: Record<string, { mobile: string; desktop: string }> = {
+    left: { mobile: "max-lg:!pb-8", desktop: "lg:!pb-8" },
+    right: { mobile: "max-lg:!pb-8", desktop: "lg:!pb-8" },
+    top_tabs: { mobile: "max-lg:!pb-8", desktop: "lg:!pb-8" },
+  };
+  const parts: string[] = [];
+  const m = offsets[mobile];
+  if (m) parts.push(m.mobile, bottoms[mobile].mobile);
+  const d = offsets[desktop];
+  if (d) parts.push(d.desktop, bottoms[desktop].desktop);
+  return parts.join(" ");
 }

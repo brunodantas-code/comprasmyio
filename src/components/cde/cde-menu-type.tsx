@@ -58,6 +58,6 @@ export function CdeMenuType({ app, items, cards = false }: { app: string; items:
 export function useAppMenuLayout(app: string) {
   const menus = resolveMenus(useMenuTypes().data ?? {},app);
   const side = menus.desktop === "left" || menus.desktop === "right" ? menus.desktop : null;
-  return {side, nav:`menu-mobile-${menus.mobile} menu-desktop-${menus.desktop}`,grid:"",main:menuMainClasses(menus),drop:(side === "left" ? "right" : side === "right" ? "left" : menus.desktop === "top_tabs" ? "bottom" : "top") as "top"|"bottom"|"left"|"right"};
+  return {menus, side, nav:`menu-mobile-${menus.mobile} menu-desktop-${menus.desktop}`,grid:"",main:menuMainClasses(menus),drop:(side === "left" ? "right" : side === "right" ? "left" : menus.desktop === "top_tabs" ? "bottom" : "top") as "top"|"bottom"|"left"|"right"};
 }
 export function useAppMenuSide(app:string) {return useAppMenuLayout(app).side;}

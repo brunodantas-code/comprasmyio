@@ -16,7 +16,7 @@ import { DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, us
 import { SortableContext, arrayMove, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical } from "lucide-react";
-import { CdeDisclosureIcon, CdeNumber } from "./cde-button";
+import { CdeButton, CdeDisclosureIcon, CdeNumber } from "./cde-button";
 import { Search } from "lucide-react";
 import { MessageStyleEditor } from "./cde-message-style";
 import { PORTAL_SECTIONS, PORTAL_SECTIONS_GROUP, usePortalSections, type PortalSection } from "@/components/corporate/portal-sections";
@@ -37,6 +37,7 @@ function PortalSectionsEditor() {
   const { data: saved } = usePortalSections();
   const [draft, setDraft] = useState<PortalSection[] | null>(null);
   const [saving, setSaving] = useState(false);
+  const [contentOpen, setContentOpen] = useState(true);
   const order = draft ?? saved ?? PORTAL_SECTIONS.map((s) => s.key);
   const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }));
   const move = (e: DragEndEvent) => { if (!e.over || e.active.id === e.over.id) return; setDraft(arrayMove(order, order.indexOf(e.active.id as PortalSection), order.indexOf(e.over.id as PortalSection))); };
@@ -54,7 +55,7 @@ function PortalSectionsEditor() {
       setDraft(null); toast.success("Disposição da tela principal atualizada");
     } catch { toast.error("Não foi possível salvar a disposição."); } finally { setSaving(false); }
   }
-  return <CdeSection title="Local de exibição na tela principal" actions={<><Button variant="ghost" size="icon" aria-label="Salvar" title="Salvar disposição" onClick={save} disabled={saving || !draft}><Save /></Button></>}>
+  return <CdeSection title="Local de exibição na tela principal" open={contentOpen} actions={<><Button variant="ghost" size="icon" aria-label="Salvar" title="Salvar disposição" onClick={save} disabled={saving || !draft}><Save /></Button><CdeButton group="toggle" screen="components/cde/cde-corporate-messages.tsx" aria-label={`${contentOpen ? "Recolher" : "Exibir"} local de exibição na tela principal`} title={`${contentOpen ? "Recolher" : "Exibir"} local de exibição na tela principal`} aria-expanded={contentOpen} onClick={() => setContentOpen(!contentOpen)} /></>}>
     
     <p className="text-xs text-muted-foreground">Arraste as mensagens e os demais blocos para definir a ordem da tela principal.</p>
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={move}><SortableContext items={order} strategy={verticalListSortingStrategy}>{order.map((id, i) => <SectionRow key={id} id={id} index={i} />)}</SortableContext></DndContext>
@@ -68,6 +69,7 @@ type Draft = { id?: string; message: string; starts_at: string; ends_at: string 
 
 export function CdeCorporateMessages({ number, handle }: { number: number; handle?: import("react").ReactNode }) {
   const [open, setOpen] = useState(false);
+  const [messagesOpen, setMessagesOpen] = useState(true);
   const [draft, setDraft] = useState<Draft | null>(null);
   const [saving, setSaving] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(true);
@@ -107,7 +109,7 @@ export function CdeCorporateMessages({ number, handle }: { number: number; handl
     {open && <div className="space-y-4">
       <PortalSectionsEditor />
       <MessageStyleEditor />
-      <CdeSection title="Mensagens e histórico" actions={<><Button variant="ghost" size="icon" aria-label="Salvar mensagem" title="Salvar mensagem" disabled={saving || !draft || (draft.id ? all.some(m => m.id === draft.id && m.message === draft.message && m.starts_at === draft.starts_at && (m.ends_at ?? "") === draft.ends_at) : !draft.message.trim())} onClick={save}><Save /></Button><Button variant="ghost" size="icon" aria-label="Cancelar mensagem" title="Cancelar" onClick={() => setDraft(null)}><X /></Button></>}>
+      <CdeSection title="Mensagens e histórico" open={messagesOpen} actions={<><Button variant="ghost" size="icon" aria-label="Salvar mensagem" title="Salvar mensagem" disabled={saving || !draft || (draft.id ? all.some(m => m.id === draft.id && m.message === draft.message && m.starts_at === draft.starts_at && (m.ends_at ?? "") === draft.ends_at) : !draft.message.trim())} onClick={save}><Save /></Button><Button variant="ghost" size="icon" aria-label="Cancelar mensagem" title="Cancelar" onClick={() => setDraft(null)}><X /></Button><CdeButton group="toggle" screen="components/cde/cde-corporate-messages.tsx" aria-label={`${messagesOpen ? "Recolher" : "Exibir"} mensagens e histórico`} title={`${messagesOpen ? "Recolher" : "Exibir"} mensagens e histórico`} aria-expanded={messagesOpen} onClick={() => setMessagesOpen(!messagesOpen)} /></>}>
       {!draft && <Button variant="ghost" onClick={() => setDraft({ message: "", starts_at: todayIso(), ends_at: "" })}><Plus className="h-4 w-4" />Nova mensagem</Button>}
       {draft && <div className="max-w-3xl space-y-3">
         <div className="space-y-1"><Label>Mensagem</Label><Textarea value={draft.message} onChange={(e) => setDraft({ ...draft, message: e.target.value })} rows={2} maxLength={300} /></div>
