@@ -87,9 +87,9 @@ export function CdeTableOrder({ number, handle, embedded }: { number?: number; h
       setDraft(null); toast.success("Ordem dos cabeçalhos aplicada nos apps");
     } catch { toast.error("Não foi possível salvar a ordem."); } finally { setSaving(false); }
   }
-  return <section className="cde-category-sections">
-    {embedded ? <p className="text-sm font-medium">Ordem das colunas <span className="font-normal text-muted-foreground">— arraste as colunas de cada lista de dados</span></p> : <CdeCategoryHeader handle={handle} number={number ?? 0} title="Ordenação de cabeçalhos" hint="Arraste as colunas de cada lista de dados" open={open} onToggle={() => setOpen(!open)} />}
-    {open && <CdeSection title="Ordem das colunas" open={contentOpen} actions={<><Button variant="ghost" size="icon" aria-label="Salvar" title="Salvar ordem dos cabeçalhos" onClick={save} disabled={saving || !draft || JSON.stringify(draft) === JSON.stringify(saved)}><Save /></Button><CdeButton group="toggle" screen="components/cde/cde-table-order.tsx" aria-label={`${contentOpen ? "Recolher" : "Exibir"} ordem das colunas`} title={`${contentOpen ? "Recolher" : "Exibir"} ordem das colunas`} aria-expanded={contentOpen} onClick={() => setContentOpen(!contentOpen)} /></>}>
+  return <section className={embedded ? "cde-category-sections cde-shortcut-sections" : "cde-category-sections"}>
+    {!embedded && <CdeCategoryHeader handle={handle} number={number ?? 0} title="Ordenação de cabeçalhos" hint="Arraste as colunas de cada lista de dados" open={open} onToggle={() => setOpen(!open)} />}
+    {open && <CdeSection title="Ordem das colunas" hint="Arraste as colunas de cada lista de dados" open={contentOpen} actions={<><Button variant="ghost" size="icon" aria-label="Salvar" title="Salvar ordem dos cabeçalhos" onClick={save} disabled={saving || !draft || JSON.stringify(draft) === JSON.stringify(saved)}><Save /></Button><CdeButton group="toggle" screen="components/cde/cde-table-order.tsx" aria-label={`${contentOpen ? "Recolher" : "Exibir"} ordem das colunas`} title={`${contentOpen ? "Recolher" : "Exibir"} ordem das colunas`} aria-expanded={contentOpen} onClick={() => setContentOpen(!contentOpen)} /></>}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar app, menu ou coluna" className="max-w-xs text-[length:var(--filter-fs)]" />
 
