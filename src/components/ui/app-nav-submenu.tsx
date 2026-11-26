@@ -1,3 +1,4 @@
+import { useMenuDisplayName } from "@/components/cde/use-menu-names";
 import { useEffect, useState, type ReactNode } from "react";
 import { Check, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -42,6 +43,7 @@ function useActiveMenu(menus: DeviceMenus): { side: "left" | "right" | null; dro
  * inferior, superior, flutuante) continua como caixa suspensa.
  */
 export function AppNavSubmenu({
+  app,
   menus,
   label,
   item,
@@ -53,6 +55,7 @@ export function AppNavSubmenu({
   onSelectSub,
   contentClassName,
 }: {
+  app?: string;
   menus: DeviceMenus;
   label: string;
   item: ReactNode;
@@ -66,6 +69,7 @@ export function AppNavSubmenu({
 }) {
   const [open, setOpen] = useState(false);
   const layout = useActiveMenu(menus);
+  const menuName = useMenuDisplayName(app ?? "", "Submenus");
 
   if (layout.side) {
     return (
@@ -100,7 +104,7 @@ export function AppNavSubmenu({
               >
                 <span className="flex min-h-10 min-w-0 flex-1 flex-row items-center gap-2 px-1">
                   {SubIcon ? <span className="menu-icon"><SubIcon className="h-4 w-4 shrink-0" /></span> : null}
-                  <span className="min-w-0 flex-1 truncate">{subLabel}</span>
+                  <span className="min-w-0 flex-1 truncate">{menuName(subLabel)}</span>
                   {isSubActive(value) ? <Check className="size-4 shrink-0" /> : null}
                 </span>
               </Button>
@@ -124,7 +128,7 @@ export function AppNavSubmenu({
         {items.map(({ value, label: subLabel, icon: SubIcon }) => (
           <DropdownMenuItem key={value} className="min-h-11 rounded-md" onSelect={() => onSelectSub(value)}>
             {SubIcon ? <SubIcon className="h-4 w-4" /> : null}
-            <span className="flex-1">{subLabel}</span>
+            <span className="flex-1">{menuName(subLabel)}</span>
             {isSubActive(value) ? <Check className="h-4 w-4 text-primary" /> : null}
           </DropdownMenuItem>
         ))}

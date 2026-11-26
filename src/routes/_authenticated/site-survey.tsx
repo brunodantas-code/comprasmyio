@@ -1,3 +1,5 @@
+import { applyMenuNames } from "@/components/cde/menu-names";
+import { useMenuNames } from "@/components/cde/use-menu-names";
 import { useAppMenuLayout } from "@/components/cde/cde-menu-type";
 import { AlertMarker } from "@/components/cde/numeric-markers";
 import { AppNavigation } from "@/components/ui/app-navigation";
@@ -292,6 +294,7 @@ function SiteSurveyPage() {
   };
 
   const { data: menuOrders } = useMenuOrders();
+  const menuNames = useMenuNames().data;
   visitsRef.current = data?.visits ?? [];
   const ml = useAppMenuLayout("Site Survey");
   if (isLoading || !data) return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Carregando Site Survey...</div>;
@@ -301,7 +304,7 @@ function SiteSurveyPage() {
     { value: "cadastro", label: "Cadastro", icon: Package, allowed: can("site_survey_cadastro") || can("site_survey_configuracoes") },
     { value: "logs", label: "Logs", icon: History, allowed: can("site_survey_logs") },
   ].filter((item) => item.allowed);
-  const orderedTabs = sortByMenuOrder(tabs, menuOrders?.["Site Survey|Barra inferior"]);
+  const orderedTabs = applyMenuNames(sortByMenuOrder(tabs, menuOrders?.["Site Survey|Barra inferior"]), menuNames, "Site Survey", "Barra inferior");
 
   return <div className="min-h-screen bg-background">
     <AppHeader manualApp="Site Survey" logo={<MyioAppLogo appName="Site Survey" className="text-base sm:text-2xl" />} />
@@ -372,7 +375,7 @@ function SiteSurveyPage() {
           const submenuItems = value === "visitas"
             ? [...(can("site_survey_agendar") ? [{ value: "nova", label: "Nova visita", icon: Plus }] : []), { value: "minhas", label: "Realizar Visita", icon: CalendarDays }, { value: "pendencias", label: "Sanar Pendências", icon: ClipboardCheck }, ...(can("site_survey_agendar") ? [{ value: "realizada", label: "Cadastrar visita realizada", icon: ClipboardCheck }] : []), { value: "resumo", label: "Histórico de Visitas", icon: FileText }]
             : [];
-          return <AppNavSubmenu key={value} menus={ml.menus} label={label} item={item} className={itemClassName} active={active} onSelectMain={selectSection} items={submenuItems} isSubActive={(subValue) => visitsSection === subValue} onSelectSub={(subValue) => { selectSection(); setVisitsSection(subValue); }} />;
+          return <AppNavSubmenu app="Site Survey" key={value} menus={ml.menus} label={label} item={item} className={itemClassName} active={active} onSelectMain={selectSection} items={submenuItems} isSubActive={(subValue) => visitsSection === subValue} onSelectSub={(subValue) => { selectSection(); setVisitsSection(subValue); }} />;
         })}
       </div>
     </AppNavigation>

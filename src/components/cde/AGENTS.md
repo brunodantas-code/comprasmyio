@@ -43,3 +43,5 @@
 - Rules for shared src/components/ui/ components (Select, Dialog/Sheet X, Button/Input/Textarea, Badge, Card, Table) live in src/components/ui/AGENTS.md.
 - App-wide appearance uses cde_selected app_appearance with a reversible root token/legacy literal overlay; convert original colours, preserve saved models and media pixels, exempt palette-reference swatches, so theme changes never compound or erase customization.
 - Code app list derives from PORTAL_APPS minus CDE code_apps exclusions, so new apps join Code automatically.
+
+- Menu display names use CDE menu_names keyed by app/group/original identity (shared header uses action IDs); resolve them after ordering, never in permission or navigation values, so renames cannot change access or destinations.

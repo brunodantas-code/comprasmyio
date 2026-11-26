@@ -1,3 +1,4 @@
+import { CdeMenuNameEdit } from "./cde-menu-name-edit";
 import { CdeSection } from "./cde-section";
 import { useState } from "react";
 import {
@@ -19,7 +20,7 @@ import { TopIconStyleEditor } from "./top-icon-style-editor";
 import { ListItemStyleEditor } from "./list-item-style";
 import { MENU_ITEMS, parseMenuConfig, useMainMenuConfig } from "./main-menu-config";
 
-type Item = { label: string; icon: LucideIcon | React.ComponentType<{ className?: string }>; name: string };
+type Item = { id?: string; label: string; icon: LucideIcon | React.ComponentType<{ className?: string }>; name: string };
 type Group = { title: string; items: Item[] };
 type App = { name: string; icon: Item["icon"]; iconName: string; groups: Group[] };
 
@@ -30,7 +31,7 @@ const APPS: App[] = [
   { name: "Spend", icon: SpendIcon, iconName: "CreditCard", groups: [{ title: "Barra inferior", items: [i("Meus comprovantes", ReceiptText, "ReceiptText"), i("Conciliação", CheckCircle2, "CheckCircle2"), i("Adiantamentos", Wallet, "Wallet"), i("Cartões", WalletCards, "WalletCards"), i("Alocação Automática (De-Para)", Settings, "Settings"), i("Categorias de despesas", ReceiptText, "ReceiptText"), i("Histórico", History, "History")] }] },
   { name: "Supply", icon: Settings, iconName: "Settings", groups: [
     { title: "Barra inferior", items: [i("Solicitações", ClipboardList, "ClipboardList"), i("Approvals", ShoppingCart, "ShoppingCart"), i("Armazém", Boxes, "Boxes"), i("Cadastro", FolderKanban, "FolderKanban"), i("Aprovações e logs", CheckCircle2, "CheckCircle2")] },
-    { title: "Submenus", items: [i("Novas Solicitações", Plus, "Plus"), i("Approvals (todos)", ShoppingCart, "ShoppingCart"), i("Armazém (todos)", Boxes, "Boxes"), i("Clientes", Building2, "Building2"), i("Centro de Custo", Landmark, "Landmark"), i("Etiquetas", Tag, "Tag"), i("Cargos", Briefcase, "Briefcase"), i("Lembretes", Bell, "Bell"), i("Diversos", Layers3, "Layers3"), i("Alçadas/Organograma", CheckCircle2, "CheckCircle2"), i("Logs", ScrollText, "ScrollText"), i("Backup", DatabaseBackup, "DatabaseBackup"), i("Manual do Usuário", BookOpen, "BookOpen")] },
+    { title: "Submenus", items: [i("Novas Solicitações", Plus, "Plus"), i("Todos", ShoppingCart, "ShoppingCart"), i("Estoque de Componentes", Boxes, "Boxes"), i("Clientes", Building2, "Building2"), i("Centro de Custo", Landmark, "Landmark"), i("Etiquetas", Tag, "Tag"), i("Cargos", Briefcase, "Briefcase"), i("Lembretes", Bell, "Bell"), i("Diversos", Layers3, "Layers3"), i("Organograma de Aprovação", CheckCircle2, "CheckCircle2"), i("Alçadas de Aprovação", CheckCircle2, "CheckCircle2"), i("Etapas Adicionais", CheckCircle2, "CheckCircle2"), i("Logs", ScrollText, "ScrollText"), i("Backup", DatabaseBackup, "DatabaseBackup")] },
   ] },
   { name: "Finance", icon: DollarSign, iconName: "DollarSign", groups: [
     { title: "Barra inferior", items: [i("Contas a pagar", ReceiptText, "ReceiptText"), i("Plano de Contas", ListTree, "ListTree"), i("Caixa", WalletCards, "WalletCards")] },
@@ -66,7 +67,7 @@ const APPS: App[] = [
 
 /** Submenu → main menu it belongs to, per app (used to draw the menu tree). */
 const SUB_PARENT: Record<string, Record<string, string>> = {
-  Supply: { "Novas Solicitações": "Solicitações", "Approvals (todos)": "Approvals", "Armazém (todos)": "Armazém", Clientes: "Cadastro", "Centro de Custo": "Cadastro", Etiquetas: "Cadastro", Cargos: "Cadastro", Lembretes: "Cadastro", Diversos: "Cadastro", "Manual do Usuário": "Cadastro", "Alçadas/Organograma": "Aprovações e logs", Logs: "Aprovações e logs", Backup: "Aprovações e logs" },
+  Supply: { "Novas Solicitações": "Solicitações", Todos: "Approvals", "Estoque de Componentes": "Armazém", Clientes: "Cadastro", "Centro de Custo": "Cadastro", Etiquetas: "Cadastro", Cargos: "Cadastro", Lembretes: "Cadastro", Diversos: "Cadastro", "Organograma de Aprovação": "Aprovações e logs", "Alçadas de Aprovação": "Aprovações e logs", "Etapas Adicionais": "Aprovações e logs", Logs: "Aprovações e logs", Backup: "Aprovações e logs" },
   "Site Survey": { "Nova visita": "Visitas", "Realizar Visita": "Visitas", "Sanar Pendências": "Visitas", "Histórico de Visitas": "Visitas" },
 };
 
@@ -75,18 +76,18 @@ function MenuTree({ app, groups }: { app: string; groups: Group[] }) {
   const subs = groups.find((g) => g.title === "Submenus")?.items ?? [];
   const map = SUB_PARENT[app] ?? {};
   return <div className="space-y-2">{main.map((m) => { const children = subs.filter((s) => map[s.label] === m.label); return <div key={m.label} className="flex items-start gap-0 rounded-lg bg-muted/30 p-2">
-    <div className="shrink-0"><Tile it={m} /></div>
-    {children.length ? <div className="flex min-w-0 flex-1 items-start"><span className="mt-5 h-px w-6 shrink-0 bg-primary" /><div className="flex flex-wrap gap-3 border-l-2 border-primary pl-3">{children.map((c) => <Tile key={c.label} it={c} />)}</div></div> : <span className="ml-3 mt-4 text-xs text-muted-foreground">Sem submenus</span>}
+    <div className="shrink-0"><Tile it={m} app={app} group="Barra inferior" /></div>
+    {children.length ? <div className="flex min-w-0 flex-1 items-start"><span className="mt-5 h-px w-6 shrink-0 bg-primary" /><div className="flex flex-wrap gap-3 border-l-2 border-primary pl-3">{children.map((c) => <Tile key={c.label} it={c} app={app} group="Submenus" />)}</div></div> : <span className="ml-3 mt-4 text-xs text-muted-foreground">Sem submenus</span>}
   </div>; })}</div>;
 }
 
 const SHARED: Item[] = [i("Início (todos os apps)", LayoutGrid, "LayoutGrid"), i("Menu", Menu, "Menu"), i("Voltar", ArrowLeft, "ArrowLeft"), i("Alterar senha", KeyRound, "KeyRound"), i("Sair", LogOut, "LogOut")];
 
-function Tile({ it }: { it: Item }) {
+function Tile({ it, app, group, identity }: { it: Item; app?: string; group?: string; identity?: string }) {
   const Icon = it.icon;
   return <div className="flex w-24 flex-col items-center gap-1 text-center">
     <span className="flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-background"><Icon className="h-5 w-5" /></span>
-    <span className="text-[0.7rem] leading-tight">{it.label}</span>
+    {app && group ? <CdeMenuNameEdit app={app} group={group} identity={identity ?? it.label} label={it.label} /> : <span className="text-[0.7rem] leading-tight">{it.label}</span>}
   </div>;
 }
 
@@ -95,7 +96,7 @@ export function CdeAppIcons({ number, handle }: { number: number; handle?: impor
   const [open, setOpen] = useState(false);
   const [topOpen, setTopOpen] = useState(false);
   const menuConfig = useMainMenuConfig().data ?? parseMenuConfig();
-  const menuItems: Item[] = menuConfig.order.filter((id) => !menuConfig.hidden.includes(id)).flatMap((id) => { const m = MENU_ITEMS.find((x) => x.id === id); return m ? [{ label: id === "access" ? "Acessos" : m.label, icon: m.icon as Item["icon"], name: (m.icon as { displayName?: string }).displayName ?? m.label }] : []; });
+  const menuItems: Item[] = menuConfig.order.filter((id) => !menuConfig.hidden.includes(id)).flatMap((id) => { const m = MENU_ITEMS.find((x) => x.id === id); return m ? [{ id, label: id === "access" ? "Acessos" : m.label, icon: m.icon as Item["icon"], name: (m.icon as { displayName?: string }).displayName ?? m.label }] : []; });
   const [openApps, setOpenApps] = useState<Set<string>>(new Set());
   const [rulesOpen, setRulesOpen] = useState(true);
   const [appsOpen, setAppsOpen] = useState(true);
@@ -111,7 +112,7 @@ export function CdeAppIcons({ number, handle }: { number: number; handle?: impor
       </div>
       <CdeSection title="Ícones e menus por app" hint="Menu superior compartilhado e ícones dos menus, submenus e ações de cada app." open={appsOpen} actions={<CdeButton group="toggle" screen="components/cde/cde-app-icons.tsx" aria-label={`${appsOpen ? "Recolher" : "Exibir"} ícones e menus por app`} title={`${appsOpen ? "Recolher" : "Exibir"} ícones e menus por app`} aria-expanded={appsOpen} onClick={() => setAppsOpen(!appsOpen)} />}>
       <CdeSection title="Menu superior comum a todos os apps" open={topOpen} className="cde-app-menu-section" marker={<span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary"><Menu className="h-5 w-5" /></span>} actions={<CdeButton group="toggle" screen="components/cde/cde-app-icons.tsx" aria-label={`${topOpen ? "Recolher" : "Exibir"} menu superior comum`} title={`${topOpen ? "Recolher" : "Exibir"} menu superior comum`} aria-expanded={topOpen} onClick={() => setTopOpen(!topOpen)} />}>
-        <div className="flex flex-wrap gap-3">{SHARED.slice(0, 2).map((it) => <Tile key={it.label} it={it} />)}</div><div className="mt-3 mb-1 text-xs text-muted-foreground">Ações dentro do menu</div><div className="flex flex-wrap gap-3">{menuItems.map((it) => <Tile key={it.label} it={it} />)}</div>
+        <div className="flex flex-wrap gap-3">{SHARED.slice(0, 2).map((it) => <Tile key={it.label} it={it} />)}</div><div className="mt-3 mb-1 text-xs text-muted-foreground">Ações dentro do menu</div><div className="flex flex-wrap gap-3">{menuItems.map((it) => <Tile key={it.id} it={it} app="ERP" group="Menu superior" identity={it.id ?? it.label} />)}</div>
       </CdeSection>
       {APPS.map((a) => { const AppIcon = a.icon; const isOpen = openApps.has(a.name); return <CdeSection key={a.name} title={nameOf(a.name)} open={isOpen} className="cde-app-menu-section"
         marker={<span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary"><AppIcon className="h-5 w-5" /></span>}

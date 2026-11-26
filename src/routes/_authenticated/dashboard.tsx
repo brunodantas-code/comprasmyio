@@ -1,3 +1,5 @@
+import { applyMenuNames } from "@/components/cde/menu-names";
+import { useMenuNames } from "@/components/cde/use-menu-names";
 import { DependencyEditor } from "@/components/central/dependency-editor";
 import { ReimbursementAccounts, ReimbursementDestination } from "@/components/reimbursement-accounts";
 import { SupplyItemsSummary } from "@/components/supply-items-summary";
@@ -648,6 +650,7 @@ function Dashboard() {
   const [administrationSection, setAdministrationSection] = useState(search.subsection);
   const [workflowSection, setWorkflowSection] = useState("organograma");
   const { data: menuOrders } = useMenuOrders();
+  const menuNames = useMenuNames().data;
 
   if (meLoading || !me) {
     return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Carregando...</div>;
@@ -701,7 +704,7 @@ function Dashboard() {
     { value: "projects", label: "Cadastro", icon: FolderKanban, allowed: canSeeRegistration },
     { value: "admin", label: "Aprovações e logs", icon: CheckCircle2, allowed: canSeeAdministration },
   ].filter((item) => item.allowed);
-  const orderedNavigationTabs = sortByMenuOrder(navigationTabs, menuOrders?.["Supply|Barra inferior"]);
+  const orderedNavigationTabs = applyMenuNames(sortByMenuOrder(navigationTabs, menuOrders?.["Supply|Barra inferior"]), menuNames, "Supply", "Barra inferior");
 
 
   return (
@@ -833,7 +836,7 @@ function Dashboard() {
             const item = <span className="flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 px-1"><span className="menu-icon"><Icon className="h-5 w-5 shrink-0" /></span><span className="max-w-full truncate text-[10px] font-semibold leading-none">{label}</span></span>;
             const itemClassName = `h-auto min-w-0 rounded-[1.35rem] p-0 shadow-none ${active ? "!bg-primary/15 !text-primary hover:!bg-primary/20 hover:!text-primary" : "!bg-transparent !text-muted-foreground hover:!bg-muted hover:!text-foreground"}`;
             if (!submenuItems.length) return <Button key={value} type="button" variant="ghost" className={itemClassName} onClick={selectMain} aria-current={active ? "page" : undefined}>{item}</Button>;
-            return <AppNavSubmenu key={value} menus={ml.menus} label={label} item={item} className={itemClassName} active={active} onSelectMain={selectMain} items={submenuItems} isSubActive={(subValue) => selectedSubsection === subValue} onSelectSub={(subValue) => { selectMain(); if (value === "pedidos") setRequestSection(subValue); else if (value === "queue") setApprovalSection(subValue); else if (value === "stock") setStockSection(subValue); else if (value === "projects") setRegistrationSection(subValue); else if (subValue.startsWith("workflow:")) { setAdministrationSection("workflow"); setWorkflowSection(subValue.slice("workflow:".length)); } else setAdministrationSection(subValue); }} />;
+            return <AppNavSubmenu app="Supply" key={value} menus={ml.menus} label={label} item={item} className={itemClassName} active={active} onSelectMain={selectMain} items={submenuItems} isSubActive={(subValue) => selectedSubsection === subValue} onSelectSub={(subValue) => { selectMain(); if (value === "pedidos") setRequestSection(subValue); else if (value === "queue") setApprovalSection(subValue); else if (value === "stock") setStockSection(subValue); else if (value === "projects") setRegistrationSection(subValue); else if (subValue.startsWith("workflow:")) { setAdministrationSection("workflow"); setWorkflowSection(subValue.slice("workflow:".length)); } else setAdministrationSection(subValue); }} />;
           })}
         </div>
       </AppNavigation>

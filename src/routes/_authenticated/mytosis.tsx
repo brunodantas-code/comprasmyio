@@ -1,3 +1,5 @@
+import { applyMenuNames } from "@/components/cde/menu-names";
+import { useMenuNames } from "@/components/cde/use-menu-names";
 import { useAppMenuLayout } from "@/components/cde/cde-menu-type";
 import { AppNavigation } from "@/components/ui/app-navigation";
 import { useMenuOrders, sortByMenuOrder } from "@/components/cde/menu-order";
@@ -58,6 +60,7 @@ function MytosisPage() {
   }, [data?.nodes, search.node, search.task]);
 
   const { data: menuOrders } = useMenuOrders();
+  const menuNames = useMenuNames().data;
   if (isLoading || !data) return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Carregando...</div>;
   const canEdit = data.role === "admin" || data.role === "editor";
   const currentObjective = objectiveId || data.nodes.find((n) => !n.parent_id && n.is_process)?.id || "";
@@ -65,7 +68,7 @@ function MytosisPage() {
     { value: "flow" as const, label: "Fluxogramas", icon: Workflow },
     { value: "processes" as const, label: "Processos", icon: BookOpen },
   ];
-  const orderedTabs = sortByMenuOrder(tabs, menuOrders?.["Mytosis|Barra inferior"]);
+  const orderedTabs = applyMenuNames(sortByMenuOrder(tabs, menuOrders?.["Mytosis|Barra inferior"]), menuNames, "Mytosis", "Barra inferior");
 
   return (
     <div className="min-h-screen bg-background">

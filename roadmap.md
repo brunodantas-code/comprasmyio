@@ -799,3 +799,5 @@
 - [x] Wishlist: todas as linhas ocupam a largura toda, com divisor completo até a borda direita.
 - [x] Wishlist: cabeçalho no padrão de Approvals, Solicitações e Tickets (CDE).
 - [x] Menu do cabeçalho: "Minha assinatura" com a mesma fonte e destaque completo das demais linhas.
+
+- [x] CDE item 8: Admin edita nomes dos menus e submenus com lápis e disquete; aplicado nos apps sem alterar ordem, ações ou permissões. Salvamento e abertura no Spend conferidos, nome original restaurado.

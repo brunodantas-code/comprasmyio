@@ -1,3 +1,5 @@
+import { applyMenuNames } from "@/components/cde/menu-names";
+import { useMenuNames } from "@/components/cde/use-menu-names";
 import { useAppMenuLayout } from "@/components/cde/cde-menu-type";
 import { AppNavigation } from "@/components/ui/app-navigation";
 import { useMenuOrders, sortByMenuOrder } from "@/components/cde/menu-order";
@@ -35,13 +37,14 @@ function CashFlowPage() {
   const ml = useAppMenuLayout("Finance");
   const user = Route.useRouteContext().user;
   const { data: menuOrders } = useMenuOrders();
+  const menuNames = useMenuNames().data;
   const [section, setSection] = useState("payables");
   const tabs = [
     { value: "payables", label: "Contas a pagar", icon: ReceiptText },
     { value: "accounts", label: "Plano de Contas", icon: ListTree },
     { value: "cash", label: "Caixa", icon: WalletCards },
   ];
-  const orderedTabs = sortByMenuOrder(tabs, menuOrders?.["Cash Flow|Barra inferior"]);
+  const orderedTabs = applyMenuNames(sortByMenuOrder(tabs, menuOrders?.["Cash Flow|Barra inferior"]), menuNames, "Finance", "Barra inferior");
   return (
     <div className="min-h-screen bg-background">
       <AppHeader manualApp="Finance" logo={<MyioCashFlowLogo className="text-xl sm:text-2xl" />} />

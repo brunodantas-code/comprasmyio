@@ -1,3 +1,5 @@
+import { applyMenuNames } from "@/components/cde/menu-names";
+import { useMenuNames } from "@/components/cde/use-menu-names";
 import { Suspense, useState } from "react";
 import { createFileRoute, Link, redirect, useRouter } from "@tanstack/react-router";
 import { Building2, FileText, Gauge, KanbanSquare, ListChecks, Settings, Tags, UserPlus } from "lucide-react";
@@ -37,7 +39,8 @@ function CrmPage() {
   const ml = useAppMenuLayout("CRM");
   const [section, setSection] = useState<CrmSection>("painel");
   const { data: menuOrders } = useMenuOrders();
-  const tabs = sortByMenuOrder([
+  const menuNames = useMenuNames().data;
+  const tabs = applyMenuNames(sortByMenuOrder([
     { value: "painel" as const, label: "Painel", icon: Gauge },
     { value: "leads" as const, label: "Leads", icon: UserPlus },
     { value: "empresas" as const, label: "Empresas", icon: Building2 },
@@ -46,7 +49,7 @@ function CrmPage() {
     { value: "propostas" as const, label: "Propostas", icon: FileText },
     { value: "precos" as const, label: "Preços", icon: Tags },
     { value: "config" as const, label: "Configurações", icon: Settings },
-  ], menuOrders?.["CRM|Barra inferior"]);
+  ], menuOrders?.["CRM|Barra inferior"]), menuNames, "CRM", "Barra inferior");
   return (
     <div className="min-h-screen bg-background">
       <AppHeader logo={<MyioAppLogo appName="CRM" className="text-xl sm:text-2xl" />} />

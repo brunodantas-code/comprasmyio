@@ -6,6 +6,8 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MENU_TYPES, resolveMenus, menuMainClasses, type MenuType, type MenuConfig } from "./menu-layout";
+import { applyMenuNames } from "./menu-names";
+import { useMenuNames } from "./use-menu-names";
 export { MENU_TYPES } from "./menu-layout";
 type Item = { label: string; icon: React.ComponentType<{ className?: string }> };
 const GROUP = "menu_type";
@@ -32,6 +34,8 @@ function Preview({ type, items }: { type: MenuType; items: Item[] }) {
 }
 export function CdeMenuType({ app, items, cards = false }: { app: string; items: Item[]; cards?: boolean }) {
   const qc = useQueryClient(); const { data } = useMenuTypes();
+  const { data: names } = useMenuNames();
+  const previewItems = applyMenuNames(items, names, app, app === "Projects" ? "Seções do projeto" : "Barra inferior");
   const [device, setDevice] = useState<"mobile" | "desktop">("mobile");
   const [draft, setDraft] = useState<Partial<Record<"mobile" | "desktop", MenuType>>>({}); const [busy,setBusy] = useState(false);
   const saved = resolveMenus(data ?? {}, app); const type = draft[device] ?? saved[device];
@@ -52,7 +56,7 @@ export function CdeMenuType({ app, items, cards = false }: { app: string; items:
   }
   return <div className="space-y-3">
     <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3"><div role="group" aria-label={`Versão do menu ${app}`} className="flex min-w-0 gap-2">{([{key:"mobile",label:"Mobile",icon:Smartphone},{key:"desktop",label:"Desktop",icon:Monitor}] as const).map(({key,label,icon:Icon})=><Button key={key} variant="ghost" aria-pressed={device===key} onClick={()=>setDevice(key)}><Icon />{label}{device===key && <Check className="size-3" />}</Button>)}</div><Button variant="ghost" size="compactIcon" aria-label={`Salvar menus ${app}`} title="Salvar menus Mobile e Desktop" disabled={busy || !dirty} onClick={save}><Save /></Button></div>
-    {cards ? <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">{MENU_TYPES.map(t=><div key={t.key} className={`flex min-w-0 flex-col gap-3 rounded-lg border p-3 ${type===t.key ? "border-primary bg-accent" : "border-border"}`}><Preview type={t.key} items={items} /><h3 className="text-sm">{t.label}</h3><Button variant="ghost" disabled={busy} aria-pressed={type===t.key} onClick={()=>setDraft(d=>({...d,[device]:t.key}))}>{type===t.key ? <><Check />Selecionado</> : "Selecionar"}</Button></div>)}</div> : <div className="flex flex-wrap items-start gap-4"><Select value={type} onValueChange={v=>{const t=MENU_TYPES.find(t=>t.key===v);if(t)setDraft(d=>({...d,[device]:t.key}));}}><SelectTrigger aria-label={`Tipo de menu ${device} ${app}`} className="w-64 max-w-full"><SelectValue /></SelectTrigger><SelectContent>{MENU_TYPES.map(t=><SelectItem key={t.key} value={t.key}>{t.label}</SelectItem>)}</SelectContent></Select><div className="w-60 max-w-full"><Preview type={type} items={items} /></div></div>}
+    {cards ? <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">{MENU_TYPES.map(t=><div key={t.key} className={`flex min-w-0 flex-col gap-3 rounded-lg border p-3 ${type===t.key ? "border-primary bg-accent" : "border-border"}`}><Preview type={t.key} items={previewItems} /><h3 className="text-sm">{t.label}</h3><Button variant="ghost" disabled={busy} aria-pressed={type===t.key} onClick={()=>setDraft(d=>({...d,[device]:t.key}))}>{type===t.key ? <><Check />Selecionado</> : "Selecionar"}</Button></div>)}</div> : <div className="flex flex-wrap items-start gap-4"><Select value={type} onValueChange={v=>{const t=MENU_TYPES.find(t=>t.key===v);if(t)setDraft(d=>({...d,[device]:t.key}));}}><SelectTrigger aria-label={`Tipo de menu ${device} ${app}`} className="w-64 max-w-full"><SelectValue /></SelectTrigger><SelectContent>{MENU_TYPES.map(t=><SelectItem key={t.key} value={t.key}>{t.label}</SelectItem>)}</SelectContent></Select><div className="w-60 max-w-full"><Preview type={type} items={previewItems} /></div></div>}
   </div>;
 }
 export function useAppMenuLayout(app: string) {

@@ -1,5 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { applyMenuNames } from "./menu-names";
+import { useMenuNames } from "./use-menu-names";
 
 /** Saved icon order per app menu: { "Supply|Barra inferior": ["Approvals", ...] }. Stored in cde_selected group menu_order. */
 export type MenuOrders = Record<string, string[]>;
@@ -23,5 +25,6 @@ export function sortByMenuOrder<T extends { label: string }>(items: T[], order?:
 }
 export function useOrderedMenu<T extends { label: string }>(app: string, group: string, items: T[]): T[] {
   const { data } = useMenuOrders();
-  return sortByMenuOrder(items, data?.[menuKey(app, group)]);
+  const { data: names } = useMenuNames();
+  return applyMenuNames(sortByMenuOrder(items, data?.[menuKey(app, group)]), names, app, group);
 }

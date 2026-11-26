@@ -1,3 +1,5 @@
+import { applyMenuNames } from "@/components/cde/menu-names";
+import { useMenuNames } from "@/components/cde/use-menu-names";
 import { useEffect, useMemo, useState } from "react";
 import { useAppDisplayName } from "@/components/cde/app-order-config";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
@@ -78,6 +80,7 @@ export function IndicadoresDashboard() {
   useEffect(() => { document.title = `myio ${appName}`; }, [appName]);
   const ml = useAppMenuLayout("Indicadores");
   const { data: menuOrders } = useMenuOrders();
+  const menuNames = useMenuNames().data;
   const [tab, setTab] = useState("okrs");
   const [view, setView] = useState("cards");
   const [mine, setMine] = useState(false);
@@ -322,7 +325,7 @@ export function IndicadoresDashboard() {
         );
       });
   }
-  const tabs = sortByMenuOrder(
+  const tabs = applyMenuNames(sortByMenuOrder(
     [
       { value: "okrs", label: "OKRs", icon: Target },
       { value: "kpis", label: "KPIs", icon: Gauge },
@@ -330,7 +333,7 @@ export function IndicadoresDashboard() {
       { value: "cycles", label: "Ciclos", icon: CalendarDays },
     ],
     menuOrders?.["Indicadores|Barra inferior"],
-  );
+  ), menuNames, "Indicadores", "Barra inferior");
   return (
     <div className="min-h-screen bg-background">
       <AppHeader logo={<MyioAppLogo appName={appName} />} />
