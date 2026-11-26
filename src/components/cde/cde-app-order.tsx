@@ -116,7 +116,7 @@ export function CdeAppOrder({ number, handle }: { number: number; handle?: impor
   }
   return <section className="cde-category-sections">
     <CdeCategoryHeader handle={handle} number={number} title="Home Page" hint="Faixa superior, apps, espaçamento e cores" open={open} onToggle={() => setOpen(!open)} />
-    {open && <div className="space-y-4"><CdeSection title="Ordenação dos Apps na Home Page" open={orderOpen} actions={<><Button variant="ghost" size="icon" title="Salvar ordem dos apps" aria-label="Salvar ordem dos apps" onClick={save} disabled={saving || !draft}><Save /></Button><CdeButton group="toggle" screen="components/cde/cde-app-order.tsx" aria-label={`${orderOpen ? "Recolher" : "Exibir"} ordenação dos apps`} title={`${orderOpen ? "Recolher" : "Exibir"} ordenação dos apps`} aria-expanded={orderOpen} onClick={() => setOrderOpen(!orderOpen)} /></>}><DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={move}><SortableContext items={order} strategy={verticalListSortingStrategy}>{order.map((id, i) => <Row key={id} id={id} index={i} displayName={appDisplay(tile, id).name} />)}</SortableContext></DndContext></CdeSection>
+    {open && <div><CdeSection title="Ordenação dos Apps na Home Page" open={orderOpen} actions={<><Button variant="ghost" size="icon" title="Salvar ordem dos apps" aria-label="Salvar ordem dos apps" onClick={save} disabled={saving || !draft}><Save /></Button><CdeButton group="toggle" screen="components/cde/cde-app-order.tsx" aria-label={`${orderOpen ? "Recolher" : "Exibir"} ordenação dos apps`} title={`${orderOpen ? "Recolher" : "Exibir"} ordenação dos apps`} aria-expanded={orderOpen} onClick={() => setOrderOpen(!orderOpen)} /></>}><DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={move}><SortableContext items={order} strategy={verticalListSortingStrategy}>{order.map((id, i) => <Row key={id} id={id} index={i} displayName={appDisplay(tile, id).name} />)}</SortableContext></DndContext></CdeSection>
       
       <CdeCodeApps />
       <CdeAppShortcuts tile={tile} />
@@ -138,38 +138,37 @@ export function CdeAppOrder({ number, handle }: { number: number; handle?: impor
         </div>
         <div className="max-w-xs"><ColorChoice kind="below" label="Cor padrão dos textos abaixo dos ícones" value={tile.below} onChange={below => setTileDraft({ ...tile, below })} /></div>
         <div className="max-w-[12rem] space-y-1"><Label>Tamanho do logo myio nos apps</Label><Select value={String(appLogoPx(tile))} onValueChange={value => setTileDraft({ ...tile, appLogoPx: Number(value) })}><SelectTrigger aria-label="Tamanho do logo myio nos apps" className="h-9"><SelectValue /></SelectTrigger><SelectContent>{[24, 28, 32, 36, 40, 44, 48, 56, 64].map(px => <SelectItem key={px} value={String(px)}>{px} px{px === 40 ? " (Home)" : ""}</SelectItem>)}</SelectContent></Select></div>
-        <div className="space-y-1"><Label>Prévia do cabeçalho dos apps</Label><HeaderPreview tile={tile} appName="CRM" display={appDisplay(tile, "crm", 16)} /></div>
       </CdeSection>
       <CdeSection title="Ícones da página principal" open={iconsOpen} actions={<><Button variant="ghost" size="icon" aria-label="Salvar Home Page" title="Salvar Home Page" onClick={saveTile} disabled={saving || !tileDraft}><Save /></Button><CdeButton group="toggle" screen="components/cde/cde-app-order.tsx" aria-label={`${iconsOpen ? "Recolher" : "Exibir"} ícones da página principal`} title={`${iconsOpen ? "Recolher" : "Exibir"} ícones da página principal`} aria-expanded={iconsOpen} onClick={() => setIconsOpen(!iconsOpen)} /></>}>
         
-        <div role="group" aria-label="Ajustes dos ícones da página principal" className="grid w-full max-w-5xl grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-6">
-          <div className="min-w-0 space-y-1"><Label className="flex min-h-10 items-end pb-1">Fonte do nome</Label><Select value={String(tile.labelPx)} onValueChange={(v) => setTileDraft({ ...tile, labelPx: Number(v) })}><SelectTrigger className="h-9"><SelectValue /></SelectTrigger><SelectContent>{[11, 12, 13, 14, 15, 16].map((n) => <SelectItem key={n} value={String(n)}>{n} px</SelectItem>)}</SelectContent></Select></div>
-          <FontFormatControl context="Nomes dos apps" value={tile.format ?? {}} onChange={format => setTileDraft({ ...tile, format })} />
+        <div role="group" aria-label="Ajustes dos ícones da página principal" className="grid w-full grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.25fr)_repeat(6,minmax(0,1fr))]">
+          <div className="min-w-0 space-y-3"><div className="space-y-1"><Label className="flex min-h-10 items-end pb-1">Fonte do nome</Label><Select value={String(tile.labelPx)} onValueChange={(v) => setTileDraft({ ...tile, labelPx: Number(v) })}><SelectTrigger className="h-9"><SelectValue /></SelectTrigger><SelectContent>{[11, 12, 13, 14, 15, 16].map((n) => <SelectItem key={n} value={String(n)}>{n} px</SelectItem>)}</SelectContent></Select></div>
+          <FontFormatControl context="Nomes dos apps" value={tile.format ?? {}} onChange={format => setTileDraft({ ...tile, format })} /></div>
           <div className="min-w-0 space-y-1"><Label className="flex min-h-10 items-end pb-1">Ícone Desktop</Label>
-            <div className="grid h-9 w-36 grid-cols-[2rem_5rem_2rem] items-center justify-items-center">
+            <div className="grid h-9 w-full max-w-36 grid-cols-[2rem_minmax(0,1fr)_2rem] items-center justify-items-center">
               <Button variant="outline" size="compactIcon" aria-label="Diminuir ícone Desktop" title="Diminuir ícone Desktop" disabled={tile.tilePct <= 70} onClick={() => setTileDraft({ ...tile, tilePct: tile.tilePct - 5 })}><Minus /></Button>
-              <span className="w-20 text-center text-sm tabular-nums">{tile.tilePct}%</span>
+              <span className="min-w-0 w-full text-center text-sm tabular-nums">{tile.tilePct}%</span>
               <Button variant="outline" size="compactIcon" aria-label="Aumentar ícone Desktop" title="Aumentar ícone Desktop" disabled={tile.tilePct >= 140} onClick={() => setTileDraft({ ...tile, tilePct: tile.tilePct + 5 })}><Plus /></Button>
-            </div><p className="w-36 text-center text-xs tabular-nums text-muted-foreground">{Number((112 * tile.tilePct / 100).toFixed(1))} × {Number((112 * tile.tilePct / 100).toFixed(1))} px</p></div>
-          <div className="min-w-0 space-y-1"><Label className="flex min-h-10 items-end pb-1">Ícone Mobile</Label><div className="grid h-9 w-36 grid-cols-[2rem_5rem_2rem] items-center justify-items-center">
+            </div><p className="w-full max-w-36 text-center text-xs tabular-nums text-muted-foreground">{Number((112 * tile.tilePct / 100).toFixed(1))} × {Number((112 * tile.tilePct / 100).toFixed(1))} px</p></div>
+          <div className="min-w-0 space-y-1"><Label className="flex min-h-10 items-end pb-1">Ícone Mobile</Label><div className="grid h-9 w-full max-w-36 grid-cols-[2rem_minmax(0,1fr)_2rem] items-center justify-items-center">
             <Button variant="outline" size="compactIcon" aria-label="Diminuir ícone Mobile" title="Diminuir ícone Mobile" disabled={tile.mobileTilePct <= 70} onClick={() => setTileDraft({ ...tile, mobileTilePct: tile.mobileTilePct - 5 })}><Minus /></Button>
-            <span className="w-20 text-center text-sm tabular-nums">{tile.mobileTilePct}%</span>
+            <span className="min-w-0 w-full text-center text-sm tabular-nums">{tile.mobileTilePct}%</span>
             <Button variant="outline" size="compactIcon" aria-label="Aumentar ícone Mobile" title="Aumentar ícone Mobile" disabled={tile.mobileTilePct >= 140} onClick={() => setTileDraft({ ...tile, mobileTilePct: tile.mobileTilePct + 5 })}><Plus /></Button>
-          </div><p className="w-36 text-center text-xs tabular-nums text-muted-foreground">{Number((80 * tile.mobileTilePct / 100).toFixed(1))} × {Number((80 * tile.mobileTilePct / 100).toFixed(1))} px</p></div>
+          </div><p className="w-full max-w-36 text-center text-xs tabular-nums text-muted-foreground">{Number((80 * tile.mobileTilePct / 100).toFixed(1))} × {Number((80 * tile.mobileTilePct / 100).toFixed(1))} px</p></div>
           <div className="min-w-0 space-y-1"><Label className="flex min-h-10 items-end pb-1">Símbolo Desktop</Label>
-            <div className="grid h-9 w-36 grid-cols-[2rem_5rem_2rem] items-center justify-items-center">
+            <div className="grid h-9 w-full max-w-36 grid-cols-[2rem_minmax(0,1fr)_2rem] items-center justify-items-center">
               <Button variant="outline" size="compactIcon" aria-label="Diminuir símbolo Desktop" title="Diminuir símbolo Desktop" disabled={tile.iconPct <= 60} onClick={() => setTileDraft({ ...tile, iconPct: tile.iconPct - 5 })}><Minus /></Button>
-              <span className="w-20 text-center text-sm tabular-nums">{tile.iconPct}%</span>
+              <span className="min-w-0 w-full text-center text-sm tabular-nums">{tile.iconPct}%</span>
               <Button variant="outline" size="compactIcon" aria-label="Aumentar símbolo Desktop" title="Aumentar símbolo Desktop" disabled={tile.iconPct >= 140} onClick={() => setTileDraft({ ...tile, iconPct: tile.iconPct + 5 })}><Plus /></Button>
             </div></div>
-          <div className="min-w-0 space-y-1"><Label className="flex min-h-10 items-end pb-1">Símbolo Mobile</Label><div className="grid h-9 w-36 grid-cols-[2rem_5rem_2rem] items-center justify-items-center">
+          <div className="min-w-0 space-y-1"><Label className="flex min-h-10 items-end pb-1">Símbolo Mobile</Label><div className="grid h-9 w-full max-w-36 grid-cols-[2rem_minmax(0,1fr)_2rem] items-center justify-items-center">
             <Button variant="outline" size="compactIcon" aria-label="Diminuir símbolo Mobile" title="Diminuir símbolo Mobile" disabled={tile.mobileIconPct <= 60} onClick={() => setTileDraft({ ...tile, mobileIconPct: tile.mobileIconPct - 5 })}><Minus /></Button>
-            <span className="w-20 text-center text-sm tabular-nums">{tile.mobileIconPct}%</span>
+            <span className="min-w-0 w-full text-center text-sm tabular-nums">{tile.mobileIconPct}%</span>
             <Button variant="outline" size="compactIcon" aria-label="Aumentar símbolo Mobile" title="Aumentar símbolo Mobile" disabled={tile.mobileIconPct >= 140} onClick={() => setTileDraft({ ...tile, mobileIconPct: tile.mobileIconPct + 5 })}><Plus /></Button>
           </div></div>
-          {([['gapX', 'Espaçamento horizontal'], ['gapY', 'Espaçamento vertical']] as const).map(([key, label]) => <div key={key} className="min-w-0 space-y-1"><Label className="flex min-h-10 items-end pb-1">{label}</Label><div className="grid h-9 w-36 grid-cols-[2rem_5rem_2rem] items-center justify-items-center">
+          {([['gapX', 'Espaçamento horizontal'], ['gapY', 'Espaçamento vertical']] as const).map(([key, label]) => <div key={key} className="min-w-0 space-y-1"><Label className="flex min-h-10 items-end pb-1">{label}</Label><div className="grid h-9 w-full max-w-36 grid-cols-[2rem_minmax(0,1fr)_2rem] items-center justify-items-center">
             <Button variant="outline" size="compactIcon" aria-label={`Diminuir ${label.toLowerCase()}`} title="Diminuir" disabled={tile[key] <= 8} onClick={() => setTileDraft({ ...tile, [key]: Math.max(8, tile[key] - 4) })}><Minus /></Button>
-            <span className="w-20 text-center text-sm tabular-nums">{tile[key]} px</span>
+            <span className="min-w-0 w-full text-center text-sm tabular-nums">{tile[key]} px</span>
             <Button variant="outline" size="compactIcon" aria-label={`Aumentar ${label.toLowerCase()}`} title="Aumentar" disabled={tile[key] >= 80} onClick={() => setTileDraft({ ...tile, [key]: Math.min(80, tile[key] + 4) })}><Plus /></Button>
           </div></div>)}
         </div>
@@ -179,6 +178,7 @@ export function CdeAppOrder({ number, handle }: { number: number; handle?: impor
           {COLOR_FIELDS.map(([kind, label]) => <ColorChoice key={kind} kind={kind} label={label} value={tile[kind]} onChange={(v) => setTileDraft({ ...tile, [kind]: v })} />)}
         </div>
         {appTileLowContrast(tile) && <p className="text-xs text-destructive">O texto abaixo dos ícones fica pouco visível neste fundo; escolha uma cor de texto contrastante.</p>}
+        <div className="space-y-1"><Label>Prévia do cabeçalho dos apps</Label><HeaderPreview tile={tile} appName="CRM" display={appDisplay(tile, "crm", 16)} /></div>
         <div className="space-y-1"><Label>Prévia desktop</Label>
           <HeaderPreview tile={tile} />
           <div aria-label="Prévia dos apps" style={{ columnGap: tile.gapX, rowGap: tile.gapY, ...appTileColorVars(tile) } as React.CSSProperties} className="flex w-full flex-wrap bg-[var(--portal-bg)] px-4 py-10 sm:py-14">

@@ -37,51 +37,38 @@ export function CdeAppShortcuts({ tile }: { tile: AppTileConfig }) {
     return { key: erpIconKey(choice.data), admin: Boolean(admin.data), apps: appIconChoices(apps.data) };
   } });
   const selected = draft ?? data?.key ?? "myio";
-  async function saveApps() {
-    if (!data?.admin || !appDraft) return;
+  const erpDirty = !!draft && draft !== data?.key;
+  const appsDirty = !!appDraft && JSON.stringify(appDraft) !== JSON.stringify(data?.apps ?? {});
+  async function save() {
+    if (!data?.admin || (!erpDirty && !appsDirty)) return;
     setSaving(true);
     try {
       const user = (await supabase.auth.getUser()).data.user;
       if (!user) throw new Error("Sessão não encontrada");
-      const existing = await supabase.from("cde_selected").select("variant_key").eq("group_key", "app_shortcut_icons").eq("is_primary", true).maybeSingle();
-      if (existing.error) throw existing.error;
-      const row = { variant_key: JSON.stringify(appDraft), chosen_by: user.id };
-      const result = existing.data
-        ? await supabase.from("cde_selected").update(row).eq("group_key", "app_shortcut_icons").eq("is_primary", true).eq("variant_key", existing.data.variant_key).select("variant_key").single()
-        : await supabase.from("cde_selected").insert({ ...row, group_key: "app_shortcut_icons", is_primary: true }).select("variant_key").single();
-      if (result.error) throw result.error;
-      if (result.data?.variant_key !== row.variant_key) throw new Error("O padrão não foi salvo");
+      const changes: { group: string; value: string }[] = [];
+      if (erpDirty && draft) changes.push({ group: "erp_icon", value: draft });
+      if (appsDirty && appDraft) changes.push({ group: "app_shortcut_icons", value: JSON.stringify(appDraft) });
+      for (const change of changes) {
+        const existing = await supabase.from("cde_selected").select("variant_key").eq("group_key", change.group).eq("is_primary", true).maybeSingle();
+        if (existing.error) throw existing.error;
+        const row = { variant_key: change.value, chosen_by: user.id };
+        const result = existing.data
+          ? await supabase.from("cde_selected").update(row).eq("group_key", change.group).eq("is_primary", true).eq("variant_key", existing.data.variant_key).select("variant_key").single()
+          : await supabase.from("cde_selected").insert({ ...row, group_key: change.group, is_primary: true }).select("variant_key").single();
+        if (result.error) throw result.error;
+        if (result.data?.variant_key !== change.value) throw new Error("O padrão não foi salvo");
+        if (change.group === "erp_icon") setDraft(null);
+        else setAppDraft(null);
+      }
       await qc.invalidateQueries({ queryKey: ["cde-erp-icon"] });
       await router.invalidate();
-      setAppDraft(null);
-      toast.success("Ícones dos apps atualizados");
+      toast.success("Ícones do ERP e dos apps atualizados");
     } catch { toast.error("Não foi possível salvar os ícones"); }
     finally { setSaving(false); }
   }
-  async function save() {
-    if (!data?.admin || !draft) return;
-    setSaving(true);
-    try {
-      const user = (await supabase.auth.getUser()).data.user;
-      if (!user) throw new Error("Sessão não encontrada");
-      const existing = await supabase.from("cde_selected").select("variant_key").eq("group_key", "erp_icon").eq("is_primary", true).maybeSingle();
-      if (existing.error) throw existing.error;
-      const row = { variant_key: draft, chosen_by: user.id };
-      const result = existing.data
-        ? await supabase.from("cde_selected").update(row).eq("group_key", "erp_icon").eq("is_primary", true).eq("variant_key", existing.data.variant_key).select("variant_key").single()
-        : await supabase.from("cde_selected").insert({ ...row, group_key: "erp_icon", is_primary: true }).select("variant_key").single();
-      if (result.error) throw result.error;
-      if (result.data?.variant_key !== draft) throw new Error("O padrão não foi salvo");
-      await qc.invalidateQueries({ queryKey: ["cde-erp-icon"] });
-      await router.invalidate();
-      setDraft(null);
-      toast.success("Ícone padrão do ERP atualizado");
-    } catch { toast.error("Não foi possível salvar o ícone"); }
-    finally { setSaving(false); }
-  }
-  return <div className="space-y-4">
+  return <div className="cde-shortcut-sections">
     
-    <CdeSection title="Favicons e ícones de atalhos" open={iconsOpen} actions={<><Button variant="ghost" size="compactIcon" aria-label="Salvar ícone padrão do ERP" title="Salvar ícone padrão do ERP" onClick={save} disabled={saving || !draft || draft === data?.key}><Save /></Button><Button variant="ghost" size="compactIcon" aria-label="Salvar ícones dos apps" title="Salvar ícones dos apps" onClick={saveApps} disabled={saving || !appDraft || JSON.stringify(appDraft) === JSON.stringify(data?.apps ?? {})}><Save /></Button><CdeButton group="toggle" screen="components/cde/cde-app-shortcuts.tsx" aria-label={`${iconsOpen ? "Recolher" : "Exibir"} favicons e ícones de atalhos`} title={`${iconsOpen ? "Recolher" : "Exibir"} favicons e ícones de atalhos`} aria-expanded={iconsOpen} onClick={() => setIconsOpen(!iconsOpen)} /></>}>
+    <CdeSection title="Favicons e ícones de atalhos" open={iconsOpen} actions={<><Button variant="ghost" size="icon" aria-label="Salvar ícones do ERP e dos apps" title="Salvar ícones do ERP e dos apps" onClick={save} disabled={saving || (!erpDirty && !appsDirty)}><Save /></Button><CdeButton group="toggle" screen="components/cde/cde-app-shortcuts.tsx" aria-label={`${iconsOpen ? "Recolher" : "Exibir"} favicons e ícones de atalhos`} title={`${iconsOpen ? "Recolher" : "Exibir"} favicons e ícones de atalhos`} aria-expanded={iconsOpen} onClick={() => setIconsOpen(!iconsOpen)} /></>}>
       <div role="group" aria-label="Favicons e ícones de atalhos" className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
       <figure className="flex min-w-0 flex-col items-center gap-2 text-center">
         <RadioGroup aria-label="Ícone padrão do ERP" value={selected} onValueChange={value => setDraft(erpIconKey(value))} disabled={!data?.admin || saving} className="grid grid-cols-2 gap-3">

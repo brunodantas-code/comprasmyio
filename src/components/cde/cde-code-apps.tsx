@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { PORTAL_APPS, useAppDisplayName } from "./app-order-config";
 import { useCodeAppExclusions } from "./code-apps-config";
+import { APP_ICONS } from "@/lib/app-icons";
 
 /** CDE list of apps served by Code; new portal apps are included automatically. */
 export function CdeCodeApps() {
@@ -38,7 +39,7 @@ export function CdeCodeApps() {
     
     <p className="text-xs text-muted-foreground">Novos apps entram automaticamente; desmarque para retirar do Code.</p>
     <div role="group" aria-label="Apps atendidos pelo Code" className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-6">
-      {PORTAL_APPS.map((app) => { const id = `code-app-${app.key}`; return <label key={app.key} htmlFor={id} className="flex min-h-9 items-center gap-2 text-sm"><Checkbox id={id} checked={!excluded.includes(app.key)} onCheckedChange={(v) => toggle(app.key, v === true)} />{nameOf(app.key) || app.name}</label>; })}
+      {PORTAL_APPS.map((app) => { const id = `code-app-${app.key}`; const Icon = APP_ICONS[app.key]?.[0]; return <label key={app.key} htmlFor={id} className="flex min-h-9 min-w-0 items-center gap-2 text-sm"><Checkbox id={id} className="shrink-0" checked={!excluded.includes(app.key)} onCheckedChange={(v) => toggle(app.key, v === true)} /><span aria-hidden="true" className="flex h-5 w-5 shrink-0 items-center justify-center text-primary">{Icon && <Icon className="h-5 w-5" />}</span><span className="min-w-0 break-words">{nameOf(app.key) || app.name}</span></label>; })}
     </div>
   </CdeSection>;
 }

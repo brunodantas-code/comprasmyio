@@ -1667,7 +1667,7 @@
   {
     "id": "components/cde/cde-app-order.tsx|44176bf082749ba2|1",
     "file": "components/cde/cde-app-order.tsx",
-    "line": 143,
+    "line": 142,
     "tag": "Button",
     "label": "Salvar Home Page",
     "dynamic": false,
@@ -1682,7 +1682,7 @@
   {
     "id": "components/cde/cde-app-order.tsx|f27909d180dd168a|0",
     "file": "components/cde/cde-app-order.tsx",
-    "line": 143,
+    "line": 142,
     "tag": "CdeButton",
     "label": "Sem nome fixo",
     "dynamic": false,
@@ -1697,7 +1697,7 @@
   {
     "id": "components/cde/cde-app-order.tsx|177dc411735fb3ef|0",
     "file": "components/cde/cde-app-order.tsx",
-    "line": 150,
+    "line": 149,
     "tag": "Button",
     "label": "Diminuir ícone Desktop",
     "dynamic": false,
@@ -1712,7 +1712,7 @@
   {
     "id": "components/cde/cde-app-order.tsx|48bbec4c0ebed6cc|0",
     "file": "components/cde/cde-app-order.tsx",
-    "line": 152,
+    "line": 151,
     "tag": "Button",
     "label": "Aumentar ícone Desktop",
     "dynamic": false,
@@ -1727,7 +1727,7 @@
   {
     "id": "components/cde/cde-app-order.tsx|198dd12baded6ff7|0",
     "file": "components/cde/cde-app-order.tsx",
-    "line": 155,
+    "line": 154,
     "tag": "Button",
     "label": "Diminuir ícone Mobile",
     "dynamic": false,
@@ -1742,7 +1742,7 @@
   {
     "id": "components/cde/cde-app-order.tsx|6c3ef558f54ab4c2|0",
     "file": "components/cde/cde-app-order.tsx",
-    "line": 157,
+    "line": 156,
     "tag": "Button",
     "label": "Aumentar ícone Mobile",
     "dynamic": false,
@@ -1757,7 +1757,7 @@
   {
     "id": "components/cde/cde-app-order.tsx|82b769d9d7316d50|0",
     "file": "components/cde/cde-app-order.tsx",
-    "line": 161,
+    "line": 160,
     "tag": "Button",
     "label": "Diminuir símbolo Desktop",
     "dynamic": false,
@@ -1772,7 +1772,7 @@
   {
     "id": "components/cde/cde-app-order.tsx|c955970c05460064|0",
     "file": "components/cde/cde-app-order.tsx",
-    "line": 163,
+    "line": 162,
     "tag": "Button",
     "label": "Aumentar símbolo Desktop",
     "dynamic": false,
@@ -1787,7 +1787,7 @@
   {
     "id": "components/cde/cde-app-order.tsx|c67b92acad162c6b|0",
     "file": "components/cde/cde-app-order.tsx",
-    "line": 166,
+    "line": 165,
     "tag": "Button",
     "label": "Diminuir símbolo Mobile",
     "dynamic": false,
@@ -1802,7 +1802,7 @@
   {
     "id": "components/cde/cde-app-order.tsx|f73734ec02f49d94|0",
     "file": "components/cde/cde-app-order.tsx",
-    "line": 168,
+    "line": 167,
     "tag": "Button",
     "label": "Aumentar símbolo Mobile",
     "dynamic": false,
@@ -1817,7 +1817,7 @@
   {
     "id": "components/cde/cde-app-order.tsx|a65dc8fefea0dfa3|0",
     "file": "components/cde/cde-app-order.tsx",
-    "line": 171,
+    "line": 170,
     "tag": "Button",
     "label": "Diminuir",
     "dynamic": false,
@@ -1832,7 +1832,7 @@
   {
     "id": "components/cde/cde-app-order.tsx|ab3c91cf9c74634a|0",
     "file": "components/cde/cde-app-order.tsx",
-    "line": 173,
+    "line": 172,
     "tag": "Button",
     "label": "Aumentar",
     "dynamic": false,
@@ -1845,39 +1845,24 @@
     "group": ""
   },
   {
-    "id": "components/cde/cde-app-shortcuts.tsx|886d52b016d797a5|0",
+    "id": "components/cde/cde-app-shortcuts.tsx|b84f16f37c0f6021|0",
     "file": "components/cde/cde-app-shortcuts.tsx",
-    "line": 84,
+    "line": 71,
     "tag": "Button",
-    "label": "Salvar ícone padrão do ERP",
+    "label": "Salvar ícones do ERP e dos apps",
     "dynamic": false,
     "visualCustom": false,
     "autoCdeSafe": true,
     "icon": "Save",
     "variant": "ghost",
-    "size": "compactIcon",
-    "className": "",
-    "group": ""
-  },
-  {
-    "id": "components/cde/cde-app-shortcuts.tsx|9b53d76ce98aa3ea|0",
-    "file": "components/cde/cde-app-shortcuts.tsx",
-    "line": 84,
-    "tag": "Button",
-    "label": "Salvar ícones dos apps",
-    "dynamic": false,
-    "visualCustom": false,
-    "autoCdeSafe": true,
-    "icon": "Save",
-    "variant": "ghost",
-    "size": "compactIcon",
+    "size": "icon",
     "className": "",
     "group": ""
   },
   {
     "id": "components/cde/cde-app-shortcuts.tsx|f27909d180dd168a|0",
     "file": "components/cde/cde-app-shortcuts.tsx",
-    "line": 84,
+    "line": 71,
     "tag": "CdeButton",
     "label": "Sem nome fixo",
     "dynamic": false,
@@ -1892,7 +1877,7 @@
   {
     "id": "components/cde/cde-app-shortcuts.tsx|c05d88c7da57a1ce|0",
     "file": "components/cde/cde-app-shortcuts.tsx",
-    "line": 111,
+    "line": 98,
     "tag": "CdeButton",
     "label": "Sem nome fixo",
     "dynamic": false,
@@ -2042,7 +2027,7 @@
   {
     "id": "components/cde/cde-code-apps.tsx|30d76f1050139d26|0",
     "file": "components/cde/cde-code-apps.tsx",
-    "line": 37,
+    "line": 38,
     "tag": "Button",
     "label": "Salvar apps do Code",
     "dynamic": false,
@@ -2057,7 +2042,7 @@
   {
     "id": "components/cde/cde-code-apps.tsx|e4b2da29c729debd|0",
     "file": "components/cde/cde-code-apps.tsx",
-    "line": 37,
+    "line": 38,
     "tag": "CdeButton",
     "label": "Sem nome fixo",
     "dynamic": false,

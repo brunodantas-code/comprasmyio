@@ -923,7 +923,7 @@ input[data-custom-calendar="true"]::-webkit-calendar-picker-indicator {
 .cde-category-list .cde-model-section > .cde-sub-band:has([aria-expanded="false"]) { border-bottom: 0; }
 .cde-app-menu-section > .cde-section-header { padding-block: 8px; }
 .cde-category-list .cde-category-sections > div:has(> .cde-section) { margin-block: 0; }
-.cde-category-list .cde-section + .cde-section { border-top: 1px solid var(--cde-sub-border, var(--border)); }
+.cde-category-list :is(.cde-section, .cde-shortcut-sections) + :is(.cde-section, .cde-shortcut-sections) { border-top: 1px solid var(--cde-sub-border, var(--border)); }
 .cde-category-list .cde-subcategory-list { padding: 0; }
 .cde-category-list .cde-subcategory-list > div + div { border-top: 1px solid var(--cde-sub-border, var(--border)); }
 

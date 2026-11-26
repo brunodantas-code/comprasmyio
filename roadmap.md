@@ -1,3 +1,8 @@
+- [x] CDE Apps atendidos pelo Code: símbolos oficiais de cada app incluídos entre seleção e nome, sem alterar configurações.
+- [x] CDE Home Page: Formatação da Fonte abaixo de Fonte do nome; espaçamentos horizontal e vertical à direita dos ajustes de tamanho no computador, com reorganização no celular.
+- [x] CDE: prévia do cabeçalho movida de Nomes e fontes dos apps para Ícones da página principal, junto das cores e demais prévias da faixa superior.
+- [x] CDE Home Page: espaço branco entre Arquivos oficiais da marca e Nomes e fontes dos apps removido; cabeçalhos contínuos com uma única divisória.
+- [x] CDE Home Page: divisória contínua entre Apps atendidos pelo Code e Favicons; um único disquete salva as alterações dos ícones do ERP e dos apps.
 - [x] CDE: título duplicado da aparência do menu removido; subtítulo e controles reunidos em Menu principal dos apps.
 - [x] CDE: cabeçalhos compartilhados e marcadores reservam posições de disquete, cancelar e seta; ausência de ação não desloca os demais ícones.
 - [x] CDE Alertas: numeração removida dos cabeçalhos Approvals e Atas; descrições abaixo dos títulos na tipografia compartilhada, mantendo prazos e controles.
