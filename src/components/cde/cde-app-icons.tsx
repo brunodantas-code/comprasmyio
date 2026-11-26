@@ -94,8 +94,8 @@ export function CdeAppIcons({ number, handle }: { number: number; handle?: impor
   return <section className="cde-category-sections">
     <CdeCategoryHeader handle={handle} number={number} title="Ícones dos Apps e menus" hint={`${APPS.length} apps · ícone do portal, barra inferior, submenus e ações para comparar padrões`} open={open} onToggle={() => setOpen(!open)} />
     {open ? <div className="space-y-4">
-      <CdeSection title="Regras para todos os apps">
-        <p className="text-xs text-muted-foreground">Cor, fundo, borda e arredondamento valem para os ícones da barra superior e dos menus de todos os apps.</p>
+      <CdeSection title="Regras para todos os apps" hint="Cor, fundo, borda e arredondamento valem para os ícones da barra superior e dos menus de todos os apps." open={false}>
+        {null}
       </CdeSection>
       <TopIconStyleEditor items={[...SHARED.slice(0, 2), ...(APPS[0]?.groups[0]?.items.slice(0, 3) ?? []).map((i) => ({ ...i, name: (i as { name?: string }).name ?? i.label }))]} />
       <ListItemStyleEditor />
