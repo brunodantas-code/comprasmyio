@@ -1,3 +1,4 @@
+- [x] CDE Cabeçalhos e Listas: formatações junto aos respectivos tamanhos de cabeçalhos/filtros e às cores de texto de listas, títulos, subtítulos e títulos dos campos; sem alterar escolhas salvas.
 - [x] CDE Apps atendidos pelo Code: símbolos oficiais de cada app incluídos entre seleção e nome, sem alterar configurações.
 - [x] CDE Home Page: Formatação da Fonte abaixo de Fonte do nome; espaçamentos horizontal e vertical à direita dos ajustes de tamanho no computador, com reorganização no celular.
 - [x] CDE: prévia do cabeçalho movida de Nomes e fontes dos apps para Ícones da página principal, junto das cores e demais prévias da faixa superior.

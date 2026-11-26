@@ -62,6 +62,7 @@ export function CdeTableFonts({ number, handle }: { number: number; handle?: imp
                 <SelectTrigger className="h-9" aria-label="Fonte dos cabeçalhos de tabela"><SelectValue /></SelectTrigger>
                 <SelectContent>{TABLE_HEADER_SIZES.map((n) => <SelectItem key={n} value={String(n)}>{n} px</SelectItem>)}</SelectContent>
               </Select>
+              <FontFormatControl context="Cabeçalhos de tabela" value={fonts.headerFormat ?? {}} onChange={format => setDraft({ ...fonts, headerFormat: format })} />
             </div>
             <div className="min-w-0 space-y-1">
               <Label>Filtros e buscas</Label>
@@ -69,9 +70,9 @@ export function CdeTableFonts({ number, handle }: { number: number; handle?: imp
                 <SelectTrigger className="h-9" aria-label="Fonte dos filtros e buscas"><SelectValue /></SelectTrigger>
                 <SelectContent>{TABLE_FILTER_SIZES.map((n) => <SelectItem key={n} value={String(n)}>{n} px</SelectItem>)}</SelectContent>
               </Select>
+              <FontFormatControl context="Filtros e buscas" value={fonts.filterFormat ?? {}} onChange={format => setDraft({ ...fonts, filterFormat: format })} />
             </div>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{([ ["headerFormat", "Cabeçalhos de tabela"], ["filterFormat", "Filtros e buscas"], ["cellFormat", "Listas"], ["titleFormat", "Títulos"], ["subFormat", "Subtítulos"], ["fieldFormat", "Títulos dos campos"] ] as const).map(([key, context]) => <FontFormatControl key={key} context={context} value={fonts[key] ?? {}} onChange={format => setDraft({ ...fonts, [key]: format })} />)}</div>
           <div role="group" aria-label="Alinhamento de cabeçalhos e listas" className="grid w-full max-w-5xl grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-4">
             {([["headerH", "Cabeçalhos — horizontal", ALIGN_H], ["headerV", "Cabeçalhos — vertical", ALIGN_V], ["cellH", "Listas — horizontal", ALIGN_H], ["cellV", "Listas — vertical", ALIGN_V]] as const).map(([k, l, opts]) => (
               <div key={k} className="min-w-0 space-y-1">
@@ -84,12 +85,15 @@ export function CdeTableFonts({ number, handle }: { number: number; handle?: imp
             ))}
           </div>
           <div role="group" aria-label="Cores dos cabeçalhos e listas" className="grid w-full max-w-5xl grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-3">
-            {([["headerBg", "Cabeçalhos — fundo"], ["headerText", "Cabeçalhos — texto"], ["headerBorder", "Cabeçalhos — borda"], ["cellBg", "Listas — fundo"], ["cellText", "Listas — texto"], ["cellBorder", "Listas — borda"], ["titleBg", "Títulos — fundo"], ["titleText", "Títulos — texto"], ["titleBorder", "Títulos — borda"], ["subBg", "Subtítulos — fundo"], ["subText", "Subtítulos — texto"], ["subBorder", "Subtítulos — borda"]] as [HeaderColorKind, string][]).map(([k, l]) => <ColorPick key={k} kind={k} label={l} value={fonts[k]} onChange={(v) => setDraft({ ...fonts, [k]: v })} />)}
+            {([["headerBg", "Cabeçalhos — fundo"], ["headerText", "Cabeçalhos — texto"], ["headerBorder", "Cabeçalhos — borda"], ["cellBg", "Listas — fundo"], ["cellText", "Listas — texto"], ["cellBorder", "Listas — borda"], ["titleBg", "Títulos — fundo"], ["titleText", "Títulos — texto"], ["titleBorder", "Títulos — borda"], ["subBg", "Subtítulos — fundo"], ["subText", "Subtítulos — texto"], ["subBorder", "Subtítulos — borda"]] as [HeaderColorKind, string][]).map(([k, l]) => {
+              const format = k === "cellText" ? { key: "cellFormat", context: "Listas" } as const : k === "titleText" ? { key: "titleFormat", context: "Títulos" } as const : k === "subText" ? { key: "subFormat", context: "Subtítulos" } as const : null;
+              return <div key={k} className="min-w-0 space-y-2"><ColorPick kind={k} label={l} value={fonts[k]} onChange={(v) => setDraft({ ...fonts, [k]: v })} />{format && <FontFormatControl context={format.context} value={fonts[format.key] ?? {}} onChange={value => setDraft({ ...fonts, [format.key]: value })} />}</div>;
+            })}
           </div>
           <div className="space-y-1">
             <h3 className="text-sm font-medium">Títulos dos campos</h3>
             <div role="group" aria-label="Formatação dos títulos dos campos" className="grid w-full max-w-5xl grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-3">
-              {([["fieldBg", "Títulos dos campos — fundo"], ["fieldText", "Títulos dos campos — texto"], ["fieldBorder", "Títulos dos campos — borda"]] as const).map(([k, l]) => <ColorPick key={k} kind={k} label={l} value={fonts[k]} onChange={(v) => setDraft({ ...fonts, [k]: v })} />)}
+              {([["fieldBg", "Títulos dos campos — fundo"], ["fieldText", "Títulos dos campos — texto"], ["fieldBorder", "Títulos dos campos — borda"]] as const).map(([k, l]) => <div key={k} className="min-w-0 space-y-2"><ColorPick kind={k} label={l} value={fonts[k]} onChange={(v) => setDraft({ ...fonts, [k]: v })} />{k === "fieldText" && <FontFormatControl context="Títulos dos campos" value={fonts.fieldFormat ?? {}} onChange={format => setDraft({ ...fonts, fieldFormat: format })} />}</div>)}
             </div>
             <div aria-label="Prévia dos títulos dos campos" style={tableAlignVars(fonts) as React.CSSProperties} className="flex flex-wrap gap-4 py-3"><Label>Nome</Label><Label>Responsável</Label><Label>Borda</Label></div>
           </div>
