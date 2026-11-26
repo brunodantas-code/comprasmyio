@@ -1,3 +1,5 @@
+- [x] CDE: cabeçalhos atuais medidos após carregar configurações; todas as 16 linhas têm 52 px no computador, incluindo linha 3.
+- [x] CDE menus: lápis centralizado abaixo de cada nome; Cronograma/Adiantamentos em uma linha, edição funcional e celular sem excesso lateral; nenhum nome salvo.
 - [x] CDE: subir a prévia indicada no print para não sobrepor os menus.
 - [x] Spend Categorias de despesas: cabeçalho cinza CDE, disquete alinhado às lixeiras e título único.
 - [x] CDE Biblioteca: mover texto cinza abaixo da linha verde da busca por nome do botão.

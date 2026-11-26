@@ -52,7 +52,7 @@ export function CdeMenuNameEdit({ app, group, identity, label = identity }: { ap
   }
 
   return <>
-    <span className="flex max-w-full items-start justify-center gap-1">
+    <span className="flex w-full max-w-full flex-col items-center justify-start gap-1">
       <span className="min-w-0 break-words text-[0.7rem] leading-tight">{displayName}</span>
       {admin ? <Button variant="ghost" size="compactIcon" className="shrink-0" aria-label={`Editar nome do menu ${label} de ${app}`} title={`Editar ${displayName}`} onClick={() => { setDraft(displayName); setOpen(true); }}><Pencil /></Button> : null}
     </span>
