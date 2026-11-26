@@ -29,7 +29,7 @@ export function ColorSelect({ value, inheritedColor, label, onChange }: { value?
   const cur = chosen.key === "padrao" ? inheritedColor : chosen;
   const options = TAG_COLORS.filter(o => o.key !== "padrao" && o.key !== inheritedColor?.key);
   if (inheritedColor) options.unshift(inheritedColor);
-  return <Select value={cur?.key ?? ""} onValueChange={v => onChange(v === inheritedColor?.key ? "padrao" : v)}><SelectTrigger className="h-8 w-36 text-xs" aria-label={label} title={cur?.label}><span className="inline-flex min-w-0 items-center gap-1.5">{cur && dot(cur)}<span className="truncate text-xs">{cur?.label ?? "Escolha uma cor"}</span></span></SelectTrigger>
+  return <Select value={cur?.key ?? ""} onValueChange={v => onChange(v === inheritedColor?.key ? "padrao" : v)}><SelectTrigger className="h-8 w-36 text-xs" aria-label={label} title={cur?.label}><div className="flex min-w-0 items-center gap-2">{cur && dot(cur)}<span className="truncate text-xs">{cur?.label ?? "Escolha uma cor"}</span></div></SelectTrigger>
     <SelectContent>{options.map((o) => <SelectItem key={o.key} value={o.key}><span className="inline-flex items-center gap-2 text-xs">{dot(o)}<span>{o.label}</span></span></SelectItem>)}</SelectContent></Select>;
 }
 
