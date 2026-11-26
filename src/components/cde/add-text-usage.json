@@ -87,11 +87,6 @@
   "label": "Adicionar produto"
  },
  {
-  "file": "routes/_authenticated/development.tsx",
-  "line": 297,
-  "label": "Novo ticket"
- },
- {
   "file": "routes/_authenticated/site-survey.tsx",
   "line": 1409,
   "label": "Técnico"

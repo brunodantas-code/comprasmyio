@@ -329,7 +329,7 @@ function NewTicketDialog({ open, onOpenChange, userId, onCreated }: { open: bool
      },
   });
   return <Dialog open={open} onOpenChange={onOpenChange}>
-    <DialogTrigger asChild><CdeButton group="plus" screen="routes/_authenticated/development.tsx">Novo ticket</CdeButton></DialogTrigger>
+    <DialogTrigger asChild><CdeButton group="plus" screen="routes/_authenticated/development.tsx" aria-label="Novo ticket" title="Novo ticket" /></DialogTrigger>
      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
       <form onSubmit={(event) => { event.preventDefault(); createTicket.mutate(event.currentTarget); }} className="space-y-4">
         <DialogHeader><DialogTitle>Novo ticket</DialogTitle><DialogDescription>Registre uma melhoria ou um problema encontrado.</DialogDescription></DialogHeader>
