@@ -11,6 +11,7 @@
   --appearance-reference-purple: #673ab6;
   --appearance-reference-gray: oklch(0.48 0 0);
   --appearance-reference-white: oklch(1 0 0);
+  --cde-palette-black: oklch(0 0 0);
 }
 .appearance-palette { --appearance-reference-base: var(--appearance-reference-green); }
 .appearance-palette[data-palette="purple"] { --appearance-reference-base: var(--appearance-reference-purple); }

@@ -22,12 +22,14 @@ import { SelectValue } from "@/components/ui/select";
 type Inv = { label: string; variant: string; className: string; apps: string[]; files: string[]; custom?: boolean };
 const PARTS: [TagPart, string][] = [["bg", "Fundo"], ["text", "Texto"], ["border", "Borda"]];
 
-export function ColorSelect({ value, label, onChange }: { value?: string; label: string; onChange: (v: string) => void }) {
+export function ColorSelect({ value, currentValue, label, onChange }: { value?: string; currentValue?: string; label: string; onChange: (v: string) => void }) {
   const swatch = useCdeSwatchStyle();
   const dot = (o: { key: string; value: string }) => <span aria-hidden="true" style={o.key === "padrao" ? undefined : { background: o.value, ...swatch.css }} className={cn("block h-4 w-4 shrink-0 rounded-full border border-border", o.key === "padrao" && "bg-[repeating-linear-gradient(45deg,var(--muted),var(--muted)_2px,transparent_2px,transparent_4px)]", swatch.cls)} />;
   const cur = tagColor(value);
-  return <Select value={cur.key} onValueChange={onChange}><SelectTrigger className="h-8 w-36 text-xs" aria-label={label} title={cur.label}><span style={{ display: "inline-flex", alignItems: "center", gap: 6, minWidth: 0, lineHeight: 1 }}>{dot(cur)}<span className="truncate text-xs" style={{ lineHeight: "16px" }}>{cur.label}</span></span></SelectTrigger>
-    <SelectContent>{TAG_COLORS.map((o) => <SelectItem key={o.key} value={o.key}><span style={{ display: "inline-flex", alignItems: "center", gap: 8 }} className="text-xs">{dot(o)}<span>{o.label}</span></span></SelectItem>)}</SelectContent></Select>;
+  const current = currentValue === undefined ? undefined : tagColor(currentValue);
+  const isCurrent = current?.key === cur.key;
+  return <Select value={isCurrent ? "current_saved" : cur.key} onValueChange={v => onChange(v === "current_saved" ? current?.key ?? "padrao" : v)}><SelectTrigger className="h-8 w-36 text-xs" aria-label={label} title={isCurrent ? `Atual: ${cur.label}` : cur.label}><span style={{ display: "inline-flex", alignItems: "center", gap: 6, minWidth: 0, lineHeight: 1 }}>{dot(cur)}<span className="truncate text-xs" style={{ lineHeight: "16px" }}>{isCurrent ? "Atual" : cur.label}</span></span></SelectTrigger>
+    <SelectContent>{current && <SelectItem value="current_saved"><span className="inline-flex items-center gap-2 text-xs">{dot(current)}<span>Atual</span></span></SelectItem>}{TAG_COLORS.map((o) => <SelectItem key={o.key} value={o.key}><span style={{ display: "inline-flex", alignItems: "center", gap: 8 }} className="text-xs">{dot(o)}<span>{current && o.key === "padrao" ? "Padrão original" : o.label}</span></span></SelectItem>)}</SelectContent></Select>;
 }
 
 /** CDE item Tags: every tag in use, each with independent background/text/border; "Atual" keeps the starting look. */

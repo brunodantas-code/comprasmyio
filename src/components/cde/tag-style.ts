@@ -15,7 +15,7 @@ export const TAG_COLORS: MessageColorOption[] = [
   { key: "cinza_claro", label: "Cinza claro", value: "color-mix(in oklab, var(--muted) 50%, transparent)" },
   { key: "cinza_escuro", label: "Cinza escuro", value: "oklch(0.86 0 0)" },
   { key: "cinza_texto", label: "Cinza (texto)", value: "var(--muted-foreground)" },
-  { key: "preto", label: "Preto", value: "var(--foreground)" },
+  { key: "preto", label: "Preto", value: "var(--cde-palette-black)" },
   { key: "vermelho", label: "Vermelho", value: "var(--destructive)" },
   ...BRAND.filter((o) => !["transparent", "var(--foreground)", "var(--destructive)"].includes(o.value)),
 ];
