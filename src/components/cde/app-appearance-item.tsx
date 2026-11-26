@@ -40,7 +40,7 @@ export function AppAppearanceItem({ number, handle }: { number: number; handle?:
   }
   return <section className="cde-category-sections">
     <CdeCategoryHeader number={number} handle={handle} title="Aparência" open={open} onToggle={() => setOpen(!open)} />
-    {open && <><CdeSection title="Padrão de exibição" actions={<>
+    {open && <><CdeSection title="Padrão de exibição do ERP" actions={<>
           <Button variant="ghost" size="icon" aria-label="Salvar aparência dos apps" title="Salvar aparência dos apps" onClick={save} disabled={saving || !draft || draft === saved.data || saved.isLoading}><Save /></Button>
           <Button variant="ghost" size="icon" aria-label="Cancelar aparência dos apps" title="Cancelar" onClick={() => setDraft(null)} disabled={saving}><X /></Button>
         </>}>
