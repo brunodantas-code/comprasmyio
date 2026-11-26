@@ -135,10 +135,10 @@ export function ErpAppAccessAdmin({ appKey }: { appKey?: string }) {
                     {apps.map((app) => {
                       const checked = accessSet.has(`${user.id}:${app.key}`);
                       return (
-                        <label key={app.key} className="flex min-w-0 items-center justify-start gap-3 text-sm">
-                          <span className="min-w-0 truncate">{nameOf(app.key)}</span>
+                        <label key={app.key} className="grid w-fit max-w-full grid-cols-[minmax(0,8rem)_auto] items-center gap-2 text-sm">
+                          <span className="min-w-0 truncate" title={nameOf(app.key)}>{nameOf(app.key)}</span>
                           <span className="flex shrink-0 items-center gap-2">
-                            <span className="text-xs text-muted-foreground">{checked ? "Ativo" : "Inativo"}</span>
+                            <span className="w-12 text-right text-xs text-muted-foreground">{checked ? "Ativo" : "Inativo"}</span>
                             <Switch
                               checked={checked}
                               disabled={update.isPending || !user.is_active}
