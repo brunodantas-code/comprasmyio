@@ -21,6 +21,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { MobileFavorites } from "@/components/mobile-favorites";
 import { AppAppearanceApplier } from "@/components/cde/app-appearance";
 import { appShortcutHead } from "@/lib/app-shortcuts";
+import { getErpIcon } from "@/lib/erp-icon.functions";
 
 function NotFoundComponent() {
   return (
@@ -82,7 +83,8 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  head: ({ matches }) => ({
+  loader: () => getErpIcon(),
+  head: ({ matches, loaderData }) => ({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
@@ -93,7 +95,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "theme-color", content: "#673ab6" },
-      ...appShortcutHead(matches.at(-1)?.pathname ?? "/").meta,
+      ...appShortcutHead(matches.at(-1)?.pathname ?? "/", loaderData?.erp, loaderData?.apps).meta,
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
@@ -111,7 +113,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: appCss,
       },
-      ...appShortcutHead(matches.at(-1)?.pathname ?? "/").links,
+      ...appShortcutHead(matches.at(-1)?.pathname ?? "/", loaderData?.erp, loaderData?.apps).links,
     ],
   }),
   shellComponent: RootShell,

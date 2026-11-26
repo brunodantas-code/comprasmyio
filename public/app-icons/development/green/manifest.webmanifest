@@ -1,0 +1,25 @@
+{
+  "name": "myio Code",
+  "short_name": "Code",
+  "id": "/development",
+  "start_url": "/development",
+  "scope": "/",
+  "display": "standalone",
+  "lang": "pt-BR",
+  "background_color": "#0fc482",
+  "theme_color": "#0fc482",
+  "icons": [
+    {
+      "src": "/app-icons/development/green/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/app-icons/development/green/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

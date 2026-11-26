@@ -13941,6 +13941,8 @@ export type Database = {
       }
       public_app_captions: { Args: never; Returns: Json }
       public_app_order: { Args: never; Returns: string }
+      public_app_shortcut_icons: { Args: never; Returns: Json }
+      public_erp_icon: { Args: never; Returns: string }
       reallocate_allocation_link: {
         Args: {
           _destination_id: string

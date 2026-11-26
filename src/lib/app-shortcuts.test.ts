@@ -15,4 +15,15 @@ describe("individual app shortcuts", () => {
       expect(appShortcutHead(path).links[0]?.href).toBe("/favicon.png");
     }
   });
+  for (const key of ["io-purple", "io-black"] as const) {
+    it(`applies ${key} to ERP only`, () => {
+      expect(appShortcutHead("/", key).links[0]?.href).toBe(`/erp-icons/${key}/favicon.png`);
+      expect(appShortcutHead("/portal", key).links[1]?.href).toBe(`/erp-icons/${key}/manifest.webmanifest`);
+      expect(appShortcutHead("/spend", key).links[0]?.href).toBe("/app-icons/spend/favicon.png");
+    });
+  }
+  it("applies green background independently for each app", () => {
+    expect(appShortcutHead("/spend", "myio", { spend: "green" }).links[0]?.href).toBe("/app-icons/spend/green/favicon.png");
+    expect(appShortcutHead("/crm", "myio", { spend: "green" }).links[0]?.href).toBe("/app-icons/crm/favicon.png");
+  });
 });

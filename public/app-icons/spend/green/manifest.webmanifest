@@ -1,0 +1,25 @@
+{
+  "name": "myio Spend",
+  "short_name": "Spend",
+  "id": "/spend",
+  "start_url": "/spend",
+  "scope": "/",
+  "display": "standalone",
+  "lang": "pt-BR",
+  "background_color": "#0fc482",
+  "theme_color": "#0fc482",
+  "icons": [
+    {
+      "src": "/app-icons/spend/green/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/app-icons/spend/green/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

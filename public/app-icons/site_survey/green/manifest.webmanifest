@@ -1,0 +1,25 @@
+{
+  "name": "myio Site Survey",
+  "short_name": "Site Survey",
+  "id": "/site-survey",
+  "start_url": "/site-survey",
+  "scope": "/",
+  "display": "standalone",
+  "lang": "pt-BR",
+  "background_color": "#0fc482",
+  "theme_color": "#0fc482",
+  "icons": [
+    {
+      "src": "/app-icons/site_survey/green/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/app-icons/site_survey/green/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

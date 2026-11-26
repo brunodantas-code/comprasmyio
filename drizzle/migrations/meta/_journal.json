@@ -2234,6 +2234,20 @@
       "when": 1795643453982,
       "tag": "0318_spend_reimbursement_order_without_receipt",
       "breakpoints": true
+    },
+    {
+      "idx": 319,
+      "version": "7",
+      "when": 1795705410891,
+      "tag": "0319_public_erp_icon_choice",
+      "breakpoints": true
+    },
+    {
+      "idx": 320,
+      "version": "7",
+      "when": 1795705523780,
+      "tag": "0320_public_app_shortcut_choices",
+      "breakpoints": true
     }
   ]
 }
