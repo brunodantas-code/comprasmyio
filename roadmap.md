@@ -1,3 +1,4 @@
+- [x] CDE item 10: Ações flutuantes e rápidas com cabeçalho compartilhado e seta à direita; Padrões de navegação e demais subitens recolhem somente seu próprio conteúdo. Conferidos com sessão no computador e celular; três testes passaram, sem erros de execução.
 - [x] Acessos: corrigido deslocamento do círculo dos alternadores nas tabelas; todos os seis perfis conferidos com círculo dentro do trilho, sem alterar ativações ou permissões.
 - [x] CDE item 10: largura lateral e altura dos botões editáveis com prévia; 280/48 px salvos e relidos no editor e no Supply, conteúdo com recuo de 296 px; escolhas originais restauradas. Celular limita a largura para preservar conteúdo; cinco testes passaram.
 - [x] Menus laterais: linhas compactas de 44 px e seleção verde-clara com texto escuro por padrão; escolhas explícitas de cor do CDE preservadas. Submenu dentro do painel, lados esquerdo/direito e medidas no celular conferidos, sem erros de execução.

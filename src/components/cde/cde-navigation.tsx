@@ -2,7 +2,7 @@ import { CdeSection } from "./cde-section";
 import { CdeButton } from "./cde-button";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Check, ChevronDown, ChevronUp } from "lucide-react";
+import { Check } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -55,7 +55,7 @@ function Sketch({ kind }: { kind: Pattern["sketch"] }) {
 
 export function CdeNavigation({ number, handle }: { number: number; handle?: import("react").ReactNode }) {
   const [open, setOpen] = useState(false);
-  const [contentOpen, setContentOpen] = useState(true);
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const qc = useQueryClient();
   const { data: chosen } = useQuery({
     queryKey: ["cde-nav"],
@@ -78,10 +78,12 @@ export function CdeNavigation({ number, handle }: { number: number; handle?: imp
     <section className="cde-category-sections">
       <CdeCategoryHeader handle={handle} number={number} title="Navegação (UI/UX)" hint="Tela x pop-up, menus superior, inferior e lateral, flutuantes e organização do conteúdo" open={open} onToggle={() => setOpen(!open)} />
       {open ? (
-        <CdeSection title="Padrões de navegação" open={contentOpen} actions={<CdeButton group="toggle" screen="components/cde/cde-navigation.tsx" aria-label={`${contentOpen ? "Recolher" : "Exibir"} padrões de navegação`} title={`${contentOpen ? "Recolher" : "Exibir"} padrões de navegação`} aria-expanded={contentOpen} onClick={() => setContentOpen(!contentOpen)} />}>
-          {DECISIONS.map((d) => (
-            <div key={d.key}>
-              <div className="mb-2 flex items-center gap-3 text-sm font-semibold">{d.title}</div>
+          DECISIONS.map((d) => {
+            const expanded = !collapsed[d.key];
+            const title = d.key === "nav_edit" ? "Padrões de navegação" : d.title;
+            const toggleLabel = `${expanded ? "Recolher" : "Exibir"} ${title}`;
+            return (
+            <CdeSection key={d.key} title={title} {...(d.key === "nav_edit" ? { hint: d.title } : {})} open={expanded} actions={<CdeButton group="toggle" screen="components/cde/cde-navigation.tsx" aria-label={toggleLabel} title={toggleLabel} aria-expanded={expanded} onClick={() => setCollapsed(current => ({ ...current, [d.key]: !current[d.key] }))} />}>
               {d.key === "nav_menu" ? <MenuLookEditor /> : <div className="flex flex-wrap gap-3">
                 {standardsFirst(d.patterns, p => chosen?.some(c => c.group_key === d.key && c.variant_key === p.key) ?? false).map((p) => {
                   const sel = chosen?.some((c) => c.group_key === d.key && c.variant_key === p.key);
@@ -94,9 +96,9 @@ export function CdeNavigation({ number, handle }: { number: number; handle?: imp
                   );
                 })}
               </div>}
-            </div>
-          ))}
-        </CdeSection>
+            </CdeSection>
+            );
+          })
       ) : null}
     </section>
   );
