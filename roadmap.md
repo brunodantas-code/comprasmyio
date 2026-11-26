@@ -1,3 +1,6 @@
+- [x] CDE Projects: Orçamento e Cores consolidados em Customizações do Projects, subitens com setas independentes e amostras circulares nos campos/opções; conferidos no computador/celular sem salvar escolhas.
+- [x] Spend: Categorias de despesas movidas do CDE para menu próprio, mantendo administração ERP e gravações existentes; tela carregada com categorias reais e disquete inativo sem alterações.
+- [x] CDE Biblioteca: seleção/exclusão junto de filtro/ordenação, alinhadas no computador e agrupadas no celular; seleção conferida sem excluir modelos.
 - [x] CDE: seção Ordem das colunas nas listas dos apps; lápis nos 22 itens principais com nome salvo por identidade, sem mudar ordem/numeração. Nome salvo e relido com sessão, original restaurado; quatro testes passaram.
 - [x] CDE Ordem das colunas: apps inicialmente recolhidos, setas independentes à direita, rascunhos mantidos; Central/Code conferidos no computador e celular sem excesso lateral nem erros.
 - [x] CDE Ordem das colunas: título duplicado removido, subtítulo no cabeçalho verde-claro e seções sem espaçamento extra, com divisória única; recolhimento conferido com sessão sem alterar escolhas.

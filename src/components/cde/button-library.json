@@ -2852,7 +2852,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|4df33b65fce17228|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 130,
+    "line": 128,
     "tag": "button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -2867,7 +2867,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|231a7abf9009e9c1|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 131,
+    "line": 129,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -2882,7 +2882,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|f857b332789216e5|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 353,
+    "line": 351,
     "tag": "CdeButton",
     "label": "Criar modelo",
     "dynamic": false,
@@ -2897,7 +2897,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|db9e9e32a7c38e11|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 354,
+    "line": 352,
     "tag": "Button",
     "label": "modelos ·",
     "dynamic": true,
@@ -2912,7 +2912,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|fa8c7d49a4be2739|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 360,
+    "line": 358,
     "tag": "CdeButton",
     "label": "Criar modelo",
     "dynamic": false,
@@ -2927,7 +2927,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|f791d685d80483f8|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 361,
+    "line": 359,
     "tag": "CdeButton",
     "label": "Sem nome fixo",
     "dynamic": false,
@@ -2942,7 +2942,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|bf4bc59b3127d3cb|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 376,
+    "line": 374,
     "tag": "Button",
     "label": "Editar modelo",
     "dynamic": false,
@@ -2957,7 +2957,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|bc74324fa1e657bf|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 377,
+    "line": 375,
     "tag": "Button",
     "label": "Trash2",
     "dynamic": false,
@@ -2972,7 +2972,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|266e760c60109aa6|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 382,
+    "line": 380,
     "tag": "Button",
     "label": "Padrão (remover) / Padrão principal (remover) / Adicionar como padrão / Tornar principal / Escolher como padrão",
     "dynamic": true,
@@ -2987,7 +2987,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|388711b738ca490e|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 386,
+    "line": 384,
     "tag": "Button",
     "label": "s / Padrão secundário por tela",
     "dynamic": true,
@@ -3002,7 +3002,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|ad4583041c4a5fe6|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 397,
+    "line": 395,
     "tag": "CdeButton",
     "label": "Sem nome fixo",
     "dynamic": false,
@@ -3017,7 +3017,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|957651bdfdf19f94|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 414,
+    "line": 412,
     "tag": "CdeButton",
     "label": "Sem nome fixo",
     "dynamic": false,
@@ -3032,7 +3032,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|b621c28901e39486|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 426,
+    "line": 424,
     "tag": "CdeButton",
     "label": "Sem nome fixo",
     "dynamic": false,
@@ -3047,7 +3047,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|fca6be028ea11516|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 436,
+    "line": 434,
     "tag": "CdeButton",
     "label": "Sem nome fixo",
     "dynamic": false,
@@ -3062,7 +3062,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|df7a84e1a6a84f82|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 442,
+    "line": 440,
     "tag": "Button",
     "label": "Restaurar modelo",
     "dynamic": false,
@@ -3077,7 +3077,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|ca37ea1739cd7ac2|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 460,
+    "line": 458,
     "tag": "Button",
     "label": "Recolher tudo",
     "dynamic": false,
@@ -3092,7 +3092,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|758d89a80b0968e2|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 571,
+    "line": 568,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -3107,7 +3107,7 @@
   {
     "id": "components/cde/cde-workspace.tsx|5bfeb96807f40237|0",
     "file": "components/cde/cde-workspace.tsx",
-    "line": 572,
+    "line": 569,
     "tag": "Button",
     "label": "Excluir",
     "dynamic": false,
@@ -12527,7 +12527,22 @@
   {
     "id": "components/spend/category-config.tsx|fe4e204f4678508c|0",
     "file": "components/spend/category-config.tsx",
-    "line": 34,
+    "line": 35,
+    "tag": "Button",
+    "label": "Salvar categorias do Spend",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "Save",
+    "variant": "ghost",
+    "size": "icon",
+    "className": "",
+    "group": ""
+  },
+  {
+    "id": "components/spend/category-config.tsx|fe4e204f4678508c|1",
+    "file": "components/spend/category-config.tsx",
+    "line": 36,
     "tag": "Button",
     "label": "Salvar categorias do Spend",
     "dynamic": false,
@@ -12542,7 +12557,7 @@
   {
     "id": "components/spend/category-config.tsx|9c0524925af53975|0",
     "file": "components/spend/category-config.tsx",
-    "line": 35,
+    "line": 36,
     "tag": "Button",
     "label": "Adicionar categoria do Spend",
     "dynamic": false,
@@ -12557,7 +12572,7 @@
   {
     "id": "components/spend/category-config.tsx|785ea6b9c84cb264|0",
     "file": "components/spend/category-config.tsx",
-    "line": 35,
+    "line": 36,
     "tag": "Button",
     "label": "Trash2",
     "dynamic": false,
@@ -12902,7 +12917,7 @@
   {
     "id": "components/spend/workspace.tsx|afa6df4980acf876|0",
     "file": "components/spend/workspace.tsx",
-    "line": 77,
+    "line": 78,
     "tag": "Button",
     "label": "Paperclip",
     "dynamic": false,
@@ -12917,7 +12932,7 @@
   {
     "id": "components/spend/workspace.tsx|0a3e249cdd07c5ce|0",
     "file": "components/spend/workspace.tsx",
-    "line": 106,
+    "line": 107,
     "tag": "Button",
     "label": "Anexar comprovante",
     "dynamic": false,
@@ -12932,7 +12947,7 @@
   {
     "id": "components/spend/workspace.tsx|ed7e53460e658bc9|0",
     "file": "components/spend/workspace.tsx",
-    "line": 107,
+    "line": 108,
     "tag": "Button",
     "label": "notify",
     "dynamic": true,
@@ -12947,7 +12962,7 @@
   {
     "id": "components/spend/workspace.tsx|f5c6ec5b8a74912f|0",
     "file": "components/spend/workspace.tsx",
-    "line": 108,
+    "line": 109,
     "tag": "Button",
     "label": "adjustment",
     "dynamic": true,
@@ -12962,7 +12977,7 @@
   {
     "id": "components/spend/workspace.tsx|c4619abc7ff99e7c|0",
     "file": "components/spend/workspace.tsx",
-    "line": 109,
+    "line": 110,
     "tag": "Button",
     "label": "Salvar classificação",
     "dynamic": false,
@@ -12977,7 +12992,7 @@
   {
     "id": "components/spend/workspace.tsx|355c8d74fb30a564|0",
     "file": "components/spend/workspace.tsx",
-    "line": 110,
+    "line": 111,
     "tag": "Button",
     "label": "Enviado ao Finance / Aprovar",
     "dynamic": true,
@@ -12992,7 +13007,7 @@
   {
     "id": "components/spend/workspace.tsx|db8d993d2e5eec29|0",
     "file": "components/spend/workspace.tsx",
-    "line": 120,
+    "line": 121,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -13007,7 +13022,7 @@
   {
     "id": "components/spend/workspace.tsx|aa6a36d41c90375c|0",
     "file": "components/spend/workspace.tsx",
-    "line": 247,
+    "line": 249,
     "tag": "Button",
     "label": "Pencil",
     "dynamic": false,
@@ -13022,7 +13037,7 @@
   {
     "id": "components/spend/workspace.tsx|fd49c1da5c5be286|0",
     "file": "components/spend/workspace.tsx",
-    "line": 247,
+    "line": 249,
     "tag": "Button",
     "label": "Pencil",
     "dynamic": false,
@@ -13037,7 +13052,7 @@
   {
     "id": "components/spend/workspace.tsx|e6d2e970560e7cb8|0",
     "file": "components/spend/workspace.tsx",
-    "line": 254,
+    "line": 256,
     "tag": "Button",
     "label": "Salvar vencimento",
     "dynamic": false,
@@ -13052,7 +13067,7 @@
   {
     "id": "components/spend/workspace.tsx|fe0fa09cc9ed0643|0",
     "file": "components/spend/workspace.tsx",
-    "line": 255,
+    "line": 257,
     "tag": "Button",
     "label": "Salvar Comprovante Fiscal",
     "dynamic": false,
@@ -13067,7 +13082,7 @@
   {
     "id": "components/spend/workspace.tsx|c973fb4a90ab00bf|0",
     "file": "components/spend/workspace.tsx",
-    "line": 255,
+    "line": 257,
     "tag": "Button",
     "label": "Registrar despesa sem comprovante",
     "dynamic": false,
@@ -13082,7 +13097,7 @@
   {
     "id": "components/spend/workspace.tsx|fe0fa09cc9ed0643|1",
     "file": "components/spend/workspace.tsx",
-    "line": 255,
+    "line": 257,
     "tag": "Button",
     "label": "Salvar Comprovante Fiscal",
     "dynamic": false,
@@ -13097,7 +13112,7 @@
   {
     "id": "components/spend/workspace.tsx|c973fb4a90ab00bf|1",
     "file": "components/spend/workspace.tsx",
-    "line": 255,
+    "line": 257,
     "tag": "Button",
     "label": "Registrar despesa sem comprovante",
     "dynamic": false,
@@ -13112,7 +13127,7 @@
   {
     "id": "components/spend/workspace.tsx|84108eaf3b9bc766|0",
     "file": "components/spend/workspace.tsx",
-    "line": 257,
+    "line": 259,
     "tag": "Button",
     "label": "Cadastrar cartão",
     "dynamic": false,
@@ -13127,7 +13142,7 @@
   {
     "id": "components/spend/workspace.tsx|c08c09db55ece5b8|0",
     "file": "components/spend/workspace.tsx",
-    "line": 259,
+    "line": 261,
     "tag": "Button",
     "label": "Responder sobre comprovante ausente",
     "dynamic": false,
@@ -13142,7 +13157,7 @@
   {
     "id": "components/spend/workspace.tsx|d9c1ed8a3a7121ff|0",
     "file": "components/spend/workspace.tsx",
-    "line": 270,
+    "line": 272,
     "tag": "Button",
     "label": "Pencil",
     "dynamic": false,
@@ -13157,7 +13172,7 @@
   {
     "id": "components/spend/workspace.tsx|fd49c1da5c5be286|1",
     "file": "components/spend/workspace.tsx",
-    "line": 270,
+    "line": 272,
     "tag": "Button",
     "label": "Pencil",
     "dynamic": false,
@@ -13172,7 +13187,7 @@
   {
     "id": "components/spend/workspace.tsx|96e16f593a4ab910|0",
     "file": "components/spend/workspace.tsx",
-    "line": 280,
+    "line": 282,
     "tag": "Button",
     "label": "PDF Fatura",
     "dynamic": false,
@@ -13187,7 +13202,7 @@
   {
     "id": "components/spend/workspace.tsx|1286d0a529993e2d|0",
     "file": "components/spend/workspace.tsx",
-    "line": 280,
+    "line": 282,
     "tag": "Button",
     "label": "Exportar ZIP",
     "dynamic": false,
@@ -13202,7 +13217,7 @@
   {
     "id": "components/spend/workspace.tsx|49704063d1da9c09|0",
     "file": "components/spend/workspace.tsx",
-    "line": 280,
+    "line": 282,
     "tag": "Button",
     "label": "Conciliar automaticamente",
     "dynamic": false,
@@ -13217,7 +13232,7 @@
   {
     "id": "components/spend/workspace.tsx|71a7608c2bbe7e4d|0",
     "file": "components/spend/workspace.tsx",
-    "line": 280,
+    "line": 282,
     "tag": "Button",
     "label": "Aprovar lote ( / )",
     "dynamic": true,
@@ -13232,7 +13247,7 @@
   {
     "id": "components/spend/workspace.tsx|d0425bb7cc25c69a|0",
     "file": "components/spend/workspace.tsx",
-    "line": 290,
+    "line": 293,
     "tag": "Button",
     "label": "Icon",
     "dynamic": true,
@@ -13247,7 +13262,7 @@
   {
     "id": "components/spend/workspace.tsx|ad5881bcd5f598cb|0",
     "file": "components/spend/workspace.tsx",
-    "line": 294,
+    "line": 297,
     "tag": "Button",
     "label": "Enviar aviso no app",
     "dynamic": false,

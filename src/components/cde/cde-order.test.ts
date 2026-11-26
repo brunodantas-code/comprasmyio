@@ -22,4 +22,9 @@ describe("ordem das subcategorias de numeração", () => {
     expect(result.titles).toEqual({ b: "Nome válido" });
     expect(result.cats).toEqual(["a", "b"]);
   });
+  it("consolida Projects mantendo sua posição e as demais categorias", () => {
+    const result = mergeCdeOrder(JSON.stringify({ cats: ["alerts", "project_budget", "project_appearance", "spend"], titles: { spend: "Despesas" } }), { cats: ["alerts", "project_budget", "spend"], subs: {} });
+    expect(result.cats).toEqual(["alerts", "project_budget", "spend"]);
+    expect(result.titles).toEqual({ spend: "Despesas" });
+  });
 });
