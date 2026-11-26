@@ -5,7 +5,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Palette } from "lucide-react";
 import { useCdeSwatchStyle } from "./cde-button";
 import { cn } from "@/lib/utils";
 import { TOP_ICON_DEFAULT, TOP_ICON_GROUP, topIconVars, useTopIconStyle, type TopIconStyle } from "./top-icon-style";
@@ -35,10 +34,6 @@ export function CdeColorSwatches({ label, value, onChange, inherited = "var(--fo
   return <div className="space-y-1"><div className="text-xs text-muted-foreground">{label}</div>
     <div className="flex flex-wrap items-center gap-1.5">{choices.map(({ value: c, label: name }) => <button key={c || "empty"} type="button" title={name} aria-label={`${label}: ${name}`} aria-pressed={selected === c} onClick={() => onChange(c)}
       className={cn("relative h-6 w-6 border", selected === c ? "ring-2 ring-primary ring-offset-1" : "border-border", swatch.cls)} style={{ ...swatch.css, background: c }}>{selected === c ? <Check className="absolute -right-1 -top-1 size-3 rounded-full bg-background text-foreground" /> : null}</button>)}
-      <label title="Cor personalizada" style={swatch.css} className={cn("relative flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center border border-border bg-background", swatch.cls)}>
-        <Palette className="h-4 w-4 text-foreground" />
-        <input type="color" aria-label={`${label} personalizada`} value={value.startsWith("#") ? value : "#000000"} onChange={(e) => onChange(e.target.value)} className="absolute inset-0 h-full w-full cursor-pointer opacity-0" />
-      </label>
       <span className="text-[0.6rem] text-muted-foreground/60">{current.label}</span></div></div>;
 }
 
