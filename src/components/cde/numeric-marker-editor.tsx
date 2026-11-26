@@ -9,10 +9,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
-import { CdeNumber, useCdeStandards } from "./cde-button";
+import { useCdeStandards } from "./cde-button";
 import { MARKER_COLORS, MARKER_DEFAULTS, NumericMarker, useMarkerLook } from "./numeric-markers";
 
-export function NumericMarkerEditor({ kind, number }: { kind: "record_number" | "alert_marker"; number: string }) {
+export function NumericMarkerEditor({ kind }: { kind: "record_number" | "alert_marker"; number: string }) {
   const saved = useMarkerLook(kind);
   const { data } = useCdeStandards();
   const qc = useQueryClient();
@@ -34,7 +34,7 @@ export function NumericMarkerEditor({ kind, number }: { kind: "record_number" | 
       setDirty(false); toast.success("Aparência atualizada nos apps");
     } catch (e) { toast.error(e instanceof Error ? e.message : "Não foi possível salvar"); } finally { setBusy(false); }
   }
-  return <CdeSection title={title} marker={<CdeNumber subcategory>{number}</CdeNumber>} actions={<><Button variant="ghost" size="icon" aria-label={`Salvar ${title}`} title="Salvar aparência" disabled={busy || !dirty || JSON.stringify(draft) === JSON.stringify(saved)} onClick={() => void save()}><Save /></Button></>}>
+  return <CdeSection title={title} actions={<><Button variant="ghost" size="icon" aria-label={`Salvar ${title}`} title="Salvar aparência" disabled={busy || !dirty || JSON.stringify(draft) === JSON.stringify(saved)} onClick={() => void save()}><Save /></Button></>}>
     
     <div className="grid gap-3 sm:grid-cols-3">
       {(["bg", "text", "border"] as const).map((key, i) => <div key={key} className="space-y-1"><Label>{["Fundo", "Texto", "Borda"][i]}</Label><Select value={look[key]} onValueChange={v => { setDraft({ ...look, [key]: v }); setDirty(true); }}><SelectTrigger aria-label={`${title} — ${["Fundo", "Texto", "Borda"][i]}`}><SelectValue /></SelectTrigger><SelectContent>{MARKER_COLORS.map(c => <SelectItem key={c.key} value={c.key}>{c.label}</SelectItem>)}</SelectContent></Select></div>)}

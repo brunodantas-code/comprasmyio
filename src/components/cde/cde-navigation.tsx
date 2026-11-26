@@ -6,7 +6,6 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { CdeNumber } from "./cde-button";
 import { CdeCategoryHeader } from "./cde-category-header";
 import { standardsFirst } from "./model-order";
 import { CdeMenuType } from "./cde-menu-type";
@@ -79,9 +78,9 @@ export function CdeNavigation({ number, handle }: { number: number; handle?: imp
       <CdeCategoryHeader handle={handle} number={number} title="Navegação (UI/UX)" hint="Tela x pop-up, menus superior, inferior e lateral, flutuantes e organização do conteúdo" open={open} onToggle={() => setOpen(!open)} />
       {open ? (
         <CdeSection title="Padrões de navegação">
-          {DECISIONS.map((d, di) => (
+          {DECISIONS.map((d) => (
             <div key={d.key}>
-              <div className="mb-2 flex items-center gap-3 text-sm font-semibold"><CdeNumber subcategory>{number}.{di + 1}</CdeNumber>{d.title}</div>
+              <div className="mb-2 flex items-center gap-3 text-sm font-semibold">{d.title}</div>
               {d.key === "nav_menu" ? <CdeMenuType app="*" cards items={[{label:"OKRs",icon:Target},{label:"KPIs",icon:Gauge},{label:"Check-ins",icon:CheckCheck},{label:"Ciclos",icon:CalendarDays}]} /> : <div className="flex flex-wrap gap-3">
                 {standardsFirst(d.patterns, p => chosen?.some(c => c.group_key === d.key && c.variant_key === p.key) ?? false).map((p) => {
                   const sel = chosen?.some((c) => c.group_key === d.key && c.variant_key === p.key);

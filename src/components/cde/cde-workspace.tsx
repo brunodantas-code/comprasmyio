@@ -29,7 +29,7 @@ import { ColorCode } from "./color-code";
 import { FONT_SIZES, FORMS, ICONS, TEXTS, WIDTHS, styleOf, type CdeStyle } from "./cde-render";
 import { CdeAppIcons } from "./cde-app-icons";
 import { CdeNavigation } from "./cde-navigation";
-import { CdeButton, CdeNumber, CdeToggleIcon, addTextKey } from "./cde-button";
+import { CdeButton, CdeToggleIcon, addTextKey } from "./cde-button";
 import { CdeMainMenu } from "./cde-main-menu";
 import { CdeProjectAppearance } from "./cde-project-appearance";
 import { CdeProjectBudget } from "./cde-project-budget";
@@ -337,9 +337,6 @@ export function CdeWorkspace() {
           <section className={cn(parent ? "cde-model-section min-w-0" : "min-w-0 cde-category-sections")}>
             {!parent ? <CdeCategoryHeader handle={handle} number={num} title={g.title.split(" ").slice(1).join(" ")} hint={`${list.length} modelos · ${g.hint}`} open={isOpen} onToggle={() => setOpen((s) => { const n = new Set(s); if (n.has(g.key)) n.delete(g.key); else n.add(g.key); return n; })} action={<CdeButton group="plus" screen="components/cde/cde-workspace.tsx" title="Criar modelo" aria-label={`Criar modelo em ${g.title}`} onClick={() => { setDraft({ ...emptyDraft, tag: (g.key === "box" || g.key === "confirm_dialog") ? "div" : "Button" }); setCreating(g.key); }} />} /> : <div className="cde-sub-band flex items-center gap-3 px-5 py-2">{handle}
               <Button cdeNative actionKind="specific" variant="ghost" type="button" aria-expanded={isOpen} onClick={() => setOpen((s) => { const n = new Set(s); if (n.has(g.key)) n.delete(g.key); else n.add(g.key); return n; })} className="!flex !h-auto !min-w-0 flex-1 items-center !justify-start gap-4 !bg-transparent !p-0 text-left whitespace-normal">
-                <span className="flex flex-col">
-                  <CdeNumber subcategory={!!parent}>{num}</CdeNumber>
-                </span>
                 <span className="min-w-0 flex-1">
                   <span className="cde-section-title block font-normal">{g.title.split(" ").slice(1).join(" ")}</span>
                   <span className="cde-sub-hint mt-0.5 block">{list.length} modelos · {g.hint}</span>

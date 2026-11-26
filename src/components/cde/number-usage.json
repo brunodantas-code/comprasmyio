@@ -1,23 +1,13 @@
 [
   {
     "file": "components/cde/cde-app-order.tsx",
-    "line": 32,
+    "line": 33,
     "group": "number_section"
   },
   {
     "file": "components/cde/cde-appearance-item.tsx",
-    "line": 53,
+    "line": 50,
     "group": "number_section"
-  },
-  {
-    "file": "components/cde/cde-appearance-item.tsx",
-    "line": 54,
-    "group": "number_subsection"
-  },
-  {
-    "file": "components/cde/cde-button-library.tsx",
-    "line": 150,
-    "group": "number_subsection"
   },
   {
     "file": "components/cde/cde-category-header.tsx",
@@ -30,24 +20,9 @@
     "group": "number_section"
   },
   {
-    "file": "components/cde/cde-navigation.tsx",
-    "line": 84,
-    "group": "number_subsection"
-  },
-  {
     "file": "components/cde/cde-sortable-icons.tsx",
     "line": 19,
     "group": "number_section"
-  },
-  {
-    "file": "components/cde/cde-workspace.tsx",
-    "line": 341,
-    "group": "number_subsection"
-  },
-  {
-    "file": "components/cde/numeric-marker-editor.tsx",
-    "line": 36,
-    "group": "number_subsection"
   },
   {
     "file": "components/indicadores/dashboard.tsx",

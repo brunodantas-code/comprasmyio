@@ -48,7 +48,7 @@ export function CdeAppearance() {
       <div className="space-y-1"><p className="text-sm font-medium">Prévia</p>
         <div style={cdeAppearanceVars(cfg)} className="rounded-md border border-border p-3">
           <div className="cde-cat-band flex items-center gap-3 border-b px-2 py-3"><CdeNumber>1</CdeNumber><span className="flex flex-wrap items-baseline gap-x-3"><span className="cde-cat-title">Campos para preenchimento</span><span className="cde-cat-hint">Descrição da categoria</span></span></div>
-          <div className="py-2 pl-8"><div className="cde-sub-band flex items-center gap-4 px-5 py-2"><CdeNumber subcategory>1.1</CdeNumber><span><span className="cde-sub-title block">Campos de texto e número</span><span className="cde-sub-hint mt-0.5 block">2 modelos · Caixas de uma linha</span></span></div></div>
+          <div className="py-2 pl-8"><div className="cde-sub-band flex items-center gap-4 px-5 py-2"><span><span className="cde-sub-title block">Campos de texto e número</span><span className="cde-sub-hint mt-0.5 block">2 modelos · Caixas de uma linha</span></span></div></div>
         </div></div>
     </CdeSection>{block("cat", "Categorias")}{block("sub", "Subcategorias")}</>;
 }
