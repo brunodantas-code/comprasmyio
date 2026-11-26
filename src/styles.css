@@ -898,5 +898,6 @@ input[data-custom-calendar="true"]::-webkit-calendar-picker-indicator {
 /* Monochrome branding only: attachment and application-icon pixels stay intact. */
 :root[data-app-appearance="grayscale"] [data-myio-logo-tone="dark"] { filter: brightness(0); }
 :root[data-app-appearance="grayscale"] [data-myio-logo-tone="light"] { filter: brightness(0) invert(1); }
-:root[data-app-appearance="grayscale"] [data-appearance-reference] { filter: grayscale(1); }
+/* Appearance choices are fixed references, not themed interface content. */
+[data-appearance-reference] { filter: none; }
 :root[data-app-appearance="grayscale"] .cde-section:is([aria-label="Favicons e ícones de atalhos"], [aria-label="Arquivos oficiais da marca"]) img { filter: grayscale(1); }
