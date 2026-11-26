@@ -2022,13 +2022,14 @@ function NewOrder({ userId, spendReceipts = '', canImport = false, canManageProd
               <div className="mt-2 space-y-3">
                 <ReimbursementAccounts userId={userId} value={reimbursementAccountId} onChange={setReimbursementAccountId} />
                 {reembolsoLegs.map((leg, i) => (
-                  <div key={i} className="rounded-md border p-3 space-y-3">
-                    <div className="flex items-center justify-between">
+                  <div key={i} className="overflow-hidden rounded-md border">
+                    <div className="flex items-center justify-between border-b bg-erp-section-head px-3 py-2">
                       <span className="text-sm font-semibold">{selectedTravelSubtype ? `${selectedTravelSubtype.name} ${i + 1}` : `Reembolso ${i + 1}`}</span>
                       {!spendDraft && reembolsoLegs.length > 1 && (
-                        <ConfirmDeleteButton title="Remover reembolso?" description={`Confirma a remoção do reembolso ${i + 1}?`} ariaLabel="Remover reembolso" confirmLabel="Remover" onConfirm={() => setReembolsoLegs((prev) => prev.filter((_, idx) => idx !== i))} trigger={<Button type="button" variant="ghost" size="compactIcon" className="text-destructive hover:text-destructive" title="Remover reembolso" aria-label="Remover reembolso"><Trash2 className="h-3.5 w-3.5" /></Button>} />
+                        <ConfirmDeleteButton title="Remover reembolso?" description={`Confirma a remoção do reembolso ${i + 1}?`} ariaLabel="Remover reembolso" confirmLabel="Remover" onConfirm={() => setReembolsoLegs((prev) => prev.filter((_, idx) => idx !== i))} trigger={<Button type="button" variant="ghost" size="compactIcon" title="Remover reembolso" aria-label="Remover reembolso"><Trash2 className="h-3.5 w-3.5" /></Button>} />
                       )}
                     </div>
+                    <div className="space-y-3 p-3">
                     <div className="grid gap-4 md:grid-cols-3 items-end">
                       <div className="space-y-2 md:col-span-1">
                         <Label htmlFor={`reembolso_desc_${i}`}>Descrição da despesa</Label>
@@ -2046,6 +2047,7 @@ function NewOrder({ userId, spendReceipts = '', canImport = false, canManageProd
                     <ReimbursementAllocationFields value={leg} onChange={(patch) => updateReembolsoLeg(i, patch)} options={allocationOptions} projects={projects ?? []} showCostCenter={!restrictedCc} />
                     {i === reembolsoLegs.length - 1 && !spendDraft && <div className="flex items-center gap-2 border-t pt-3"><CdeButton group="plus" screen="routes/_authenticated/dashboard.tsx" type="button" onClick={() => setReembolsoLegs((prev) => [...prev, newReembolsoLeg()])} aria-label="Adicionar"></CdeButton>
                   <span className="text-sm text-muted-foreground">Deseja adicionar outro reembolso a esta Solicitação?</span></div>}
+                    </div>
                   </div>
                 ))}
               </div>

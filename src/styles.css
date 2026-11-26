@@ -190,6 +190,7 @@ input[data-custom-calendar="true"]::-webkit-calendar-picker-indicator {
   --font-sans: "Nunito", ui-sans-serif, system-ui, sans-serif;
   --color-myio-green: var(--myio-green);
   --color-cde-number-soft: var(--cde-number-soft);
+  --color-erp-section-head: var(--erp-section-head);
   --color-myio-purple: var(--myio-purple);
   --color-mytosis-text-dark: var(--mytosis-text-dark);
   --color-mytosis-text-light: var(--mytosis-text-light);
@@ -225,6 +226,8 @@ input[data-custom-calendar="true"]::-webkit-calendar-picker-indicator {
   /* Pantones exatos da marca myio (Manual da Marca) */
   --myio-green: #0fc482;
   --cde-number-soft: color-mix(in oklab, var(--myio-green) 10%, var(--card));
+  /* Faixa de cabeçalho de grupos repetíveis (ex.: reembolsos) — verde-claro do padrão ERP */
+  --erp-section-head: color-mix(in oklab, var(--myio-green) 12%, var(--card));
   --whatsapp-green: #21a961;
   --whatsapp-border: #42d898;
   --myio-purple: #673ab6;

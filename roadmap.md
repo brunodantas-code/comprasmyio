@@ -715,3 +715,5 @@
 - [x] Spend: valores da lista de comprovantes com a borda direita alinhada em todas as linhas (slot fixo do lápis quando a edição não está liberada)
 
 - [x] Spend: veículo em Aluguel de Veículos e nome sem repetição no seletor de cartão.
+
+- [x] ERP: ícone da myio ao adicionar à tela inicial (iPhone/Android) — apple-touch-icon, manifest e favicon
