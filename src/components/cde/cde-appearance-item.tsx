@@ -1,3 +1,4 @@
+import { FontFormatControl } from "./font-format-control";
 import { CdeSection } from "./cde-section";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -20,7 +21,7 @@ export function CdeAppearance() {
   const saved = useCdeAppearance().data ?? CDE_APPEARANCE_DEFAULT;
   const [draft, setDraft] = useState<CdeAppearanceConfig | null>(null);
   const cfg = draft ?? saved;
-  const setLv = (lv: "cat" | "sub", k: keyof CdeLevel, v: string | number) => setDraft({ ...cfg, [lv]: { ...cfg[lv], [k]: v } });
+  const setLv = (lv: "cat" | "sub", k: keyof CdeLevel, v: string | number | import("./font-format").FontFormat) => setDraft({ ...cfg, [lv]: { ...cfg[lv], [k]: v } });
   async function save() {
     if (!draft) return; setSaving(true);
     try {
@@ -39,6 +40,8 @@ export function CdeAppearance() {
       {([["titlePx", "Tamanho do título"], ["hintPx", "Tamanho da descrição"]] as const).map(([k, l]) => <div key={k} className="space-y-1"><Label className="text-xs">{l}</Label>
         <Select value={String(cfg[lv][k])} onValueChange={(v) => setLv(lv, k, Number(v))}><SelectTrigger aria-label={`${l} — ${title}`} className="h-8 w-36 text-xs"><SelectValue /></SelectTrigger><SelectContent>{CDE_SIZES.map((s) => <SelectItem key={s} value={String(s)}>{s} px</SelectItem>)}</SelectContent></Select></div>)}
       <div className="space-y-1"><Label className="text-xs">Fonte</Label><Select value={cfg[lv].font} onValueChange={(v) => setLv(lv, "font", v)}><SelectTrigger aria-label={`Fonte — ${title}`} className="h-8 w-36 text-xs"><SelectValue /></SelectTrigger><SelectContent>{CDE_FONTS.map((f) => <SelectItem key={f.key} value={f.key}><span style={f.value ? { fontFamily: f.value } : undefined}>{f.label}</span></SelectItem>)}</SelectContent></Select></div>
+      <FontFormatControl context={`${title} — título`} value={cfg[lv].titleFormat ?? {}} defaultWeight={lv === "sub" ? "600" : "400"} onChange={v => setLv(lv, "titleFormat", v)} />
+      <FontFormatControl context={`${title} — descrição`} value={cfg[lv].hintFormat ?? {}} onChange={v => setLv(lv, "hintFormat", v)} />
     </div>
   </CdeSection>;
   return <><CdeSection title="Aparência do CDE" actions={<><Button variant="ghost" size="icon" aria-label="Salvar" title="Salvar aparência" onClick={save} disabled={saving || !draft || JSON.stringify(draft) === JSON.stringify(saved)}><Save /></Button><Button variant="ghost" size="icon" aria-label="Cancelar" title="Cancelar" onClick={() => setDraft(null)}><X /></Button></>}>

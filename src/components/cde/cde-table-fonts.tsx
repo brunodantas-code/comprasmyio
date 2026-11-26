@@ -1,3 +1,5 @@
+import { FontFormatControl } from "./font-format-control";
+import { fontFormatCss } from "./font-format";
 import { CdeSection } from "./cde-section";
 import type React from "react";
 import { useState } from "react";
@@ -68,6 +70,7 @@ export function CdeTableFonts({ number, handle }: { number: number; handle?: imp
               </Select>
             </div>
           </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{([ ["headerFormat", "Cabeçalhos de tabela"], ["filterFormat", "Filtros e buscas"], ["cellFormat", "Listas"], ["titleFormat", "Títulos"], ["subFormat", "Subtítulos"], ["fieldFormat", "Títulos dos campos"] ] as const).map(([key, context]) => <FontFormatControl key={key} context={context} value={fonts[key] ?? {}} onChange={format => setDraft({ ...fonts, [key]: format })} />)}</div>
           <div role="group" aria-label="Alinhamento de cabeçalhos e listas" className="grid w-full max-w-5xl grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-4">
             {([["headerH", "Cabeçalhos — horizontal", ALIGN_H], ["headerV", "Cabeçalhos — vertical", ALIGN_V], ["cellH", "Listas — horizontal", ALIGN_H], ["cellV", "Listas — vertical", ALIGN_V]] as const).map(([k, l, opts]) => (
               <div key={k} className="min-w-0 space-y-1">
@@ -93,7 +96,7 @@ export function CdeTableFonts({ number, handle }: { number: number; handle?: imp
             <Label>Prévia</Label>
             <div aria-label="Prévia das fontes" className="max-w-2xl rounded-md border border-border p-3" style={tableAlignVars(fonts) as React.CSSProperties}>
               <div className="mb-3 space-y-1"><CardTitle>Minhas Solicitações</CardTitle><CardDescription>Acompanhe o status de suas solicitações de Materiais, Serviços, Viagens, Reembolsos e Contratação de RH.</CardDescription></div>
-              <div className="mb-2 flex items-center justify-end gap-2" style={{ fontSize: fonts.filterPx }}>
+              <div className="mb-2 flex items-center justify-end gap-2" style={{ fontSize: fonts.filterPx, ...fontFormatCss(fonts.filterFormat) }}>
                 <span className="text-muted-foreground">Contém</span>
                 <span className="text-muted-foreground">Buscar</span>
                 <span className="text-muted-foreground">Filtros</span>

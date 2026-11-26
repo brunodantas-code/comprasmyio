@@ -1,3 +1,4 @@
+import { fontFormatCss, type FontFormat } from "./font-format";
 import { ArrowDown, ArrowDownUp, ArrowUp, ArrowUpDown, Blocks, Building2, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ClipboardCheck, Cog, ContactRound, DollarSign, FileSpreadsheet, FileText, Filter, Handshake, Layers3, LayoutDashboard, Lock, Network, Tag, PackagePlus, Paperclip, Pencil, Percent, Plane, Plus, Save, Send, Settings2, Trash2, Upload, UsersRound, Workflow, Wrench, X, type LucideIcon } from "lucide-react";
 import { BORDERS, FILLS } from "@/components/mytosis/shapes";
 
@@ -7,7 +8,7 @@ export const ICON_LABELS: Record<string, string> = {
   Blocks: "Módulos / ERP", Network: "Integração / ERP", LayoutDashboard: "Painel de gestão / ERP",
   Cog: "Engrenagem / Operação", Wrench: "Ferramenta / Operação", Workflow: "Fluxo de trabalho / Operação",
 };
-export type CdeStyle = { shape?: string; fill?: string; border?: string; borderWidth?: string; text?: string; fontSize?: string; description?: string; actionSpecific?: boolean };
+export type CdeStyle = { format?: FontFormat; shape?: string; fill?: string; border?: string; borderWidth?: string; text?: string; fontSize?: string; description?: string; actionSpecific?: boolean };
 export const FONT_SIZES = ["10px","11px","12px","13px","14px","16px","18px"];
 export const FORMS = [
   { key: "", label: "Padrão" }, { key: "square", label: "Quadrado", radius: "0" }, { key: "soft", label: "Arredondado", radius: "0.375rem" },
@@ -27,6 +28,11 @@ export function styleOf(st?: CdeStyle): { css: React.CSSProperties; cls: string 
   if (st.borderWidth && st.border !== "none") { css["--cde-bw"] = st.borderWidth; cls.push("!border-[length:var(--cde-bw)] !border-solid"); }
   if (st.text && st.text !== "default") { css["--cde-tx"] = TEXTS.find((t) => t.key === st.text)?.color ?? ""; cls.push("!text-[var(--cde-tx)]"); }
   if (st.fontSize) { css["--cde-fs"] = st.fontSize; cls.push("!text-[length:var(--cde-fs)]"); }
+  if (st.format) { Object.assign(css, fontFormatCss(st.format));
+    if (st.format.weight) cls.push("!font-[number:var(--cde-font-weight)]"), css["--cde-font-weight"] = st.format.weight;
+    if (st.format.italic !== undefined) cls.push(st.format.italic ? "!italic" : "!not-italic");
+    if (st.format.underline !== undefined) cls.push(st.format.underline ? "!underline" : "!no-underline");
+  }
   return { css: css as React.CSSProperties, cls: cls.join(" ") };
 }
 

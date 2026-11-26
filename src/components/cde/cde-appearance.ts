@@ -1,3 +1,4 @@
+import { parseFontFormat, fontFormatVars, type FontFormat } from "./font-format";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { tagColor } from "./tag-style";
@@ -11,7 +12,7 @@ export const CDE_FONTS = [
   { key: "mono", label: "Monoespaçada", value: "ui-monospace, Menlo, monospace" },
 ] as const;
 export const CDE_SIZES = [11, 12, 13, 14, 15, 16, 18, 20] as const;
-export type CdeLevel = { bg: string; text: string; border: string; hint: string; titlePx: number; hintPx: number; font: string };
+export type CdeLevel = { bg: string; text: string; border: string; hint: string; titlePx: number; hintPx: number; font: string; titleFormat?: FontFormat; hintFormat?: FontFormat };
 export type CdeAppearanceConfig = { cat: CdeLevel; sub: CdeLevel };
 export const CDE_APPEARANCE_DEFAULT: CdeAppearanceConfig = {
   cat: { bg: "padrao", text: "padrao", border: "padrao", hint: "padrao", titlePx: 14, hintPx: 12, font: "padrao" },
@@ -36,7 +37,7 @@ function level(p: unknown, d: CdeLevel): CdeLevel {
   const o = (p && typeof p === "object" ? p : {}) as Record<string, unknown>;
   const col = (v: unknown) => tagColor(typeof v === "string" ? v : undefined).key;
   const px = (v: unknown, dv: number) => ((CDE_SIZES as readonly number[]).includes(Number(v)) ? Number(v) : dv);
-  return { bg: col(o.bg), text: col(o.text), border: col(o.border), hint: col(o.hint), titlePx: px(o.titlePx, d.titlePx), hintPx: px(o.hintPx, d.hintPx), font: CDE_FONTS.some((f) => f.key === o.font) ? String(o.font) : "padrao" };
+  return { titleFormat: parseFontFormat(o["titleFormat"]), hintFormat: parseFontFormat(o["hintFormat"]), bg: col(o.bg), text: col(o.text), border: col(o.border), hint: col(o.hint), titlePx: px(o.titlePx, d.titlePx), hintPx: px(o.hintPx, d.hintPx), font: CDE_FONTS.some((f) => f.key === o.font) ? String(o.font) : "padrao" };
 }
 export function parseCdeAppearance(raw?: string | null): CdeAppearanceConfig {
   try { const p = JSON.parse(raw ?? "{}") ?? {}; return { cat: level(p.cat, CDE_APPEARANCE_DEFAULT.cat), sub: level(p.sub, CDE_APPEARANCE_DEFAULT.sub) }; } catch { return CDE_APPEARANCE_DEFAULT; }
@@ -46,6 +47,8 @@ export function cdeAppearanceVars(c: CdeAppearanceConfig): React.CSSProperties {
   const out: Record<string, string> = {};
   for (const [lv, l] of [["cat", c.cat], ["sub", c.sub]] as const) {
     const put = (name: string, key: string) => { if (key !== "padrao") out[`--cde-${lv}-${name}`] = tagColor(key).value; };
+    Object.assign(out, fontFormatVars(`--cde-${lv}-title`, l.titleFormat), fontFormatVars(`--cde-${lv}-hint`, l.hintFormat));
+    if (!l.titleFormat?.weight && lv === "sub") out["--cde-sub-title-weight"] = "600";
     put("bg", l.bg); put("text", l.text); put("border", l.border); put("hint-color", l.hint);
     out[`--cde-${lv}-title-fs`] = `${l.titlePx}px`; out[`--cde-${lv}-hint-fs`] = `${l.hintPx}px`;
     if (lv === "sub") out["--cde-section-title-fs"] = `${l.titlePx}px`;

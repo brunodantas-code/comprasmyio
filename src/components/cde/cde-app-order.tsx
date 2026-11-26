@@ -1,3 +1,4 @@
+import { FontFormatControl } from "./font-format-control";
 import { CdeSection } from "./cde-section";
 import { CdeNumber } from "@/components/cde/cde-button";
 import { useState } from "react";
@@ -122,10 +123,12 @@ export function CdeAppOrder({ number, handle }: { number: number; handle?: impor
           {PORTAL_APPS.map(app => { const display = appDisplay(tile, app.key); const caption = tile.apps?.[app.key]; return <div key={app.key} className="space-y-3"><div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_7rem_10rem] sm:items-end">
             <div className="min-w-0 space-y-1"><Label>Nome — {app.name}</Label><Input aria-label={`Nome do app ${app.name}`} maxLength={30} value={tile.apps?.[app.key]?.name ?? display.name} onChange={event => updateApp(app.key, { name: event.target.value })} /></div>
             <div className="min-w-0 space-y-1"><Label>Tamanho</Label><Select value={String(display.labelPx)} onValueChange={value => updateApp(app.key, { labelPx: Number(value) })}><SelectTrigger aria-label={`Tamanho da fonte de ${app.name}`} className="h-9"><SelectValue /></SelectTrigger><SelectContent>{[10, 11, 12, 13, 14, 15, 16, 18, 20, 24, 28, 32].map(px => <SelectItem key={px} value={String(px)}>{px} px</SelectItem>)}</SelectContent></Select></div>
+            <FontFormatControl context={`Nome de ${app.name}`} value={display.format ?? {}} onChange={format => updateApp(app.key, { format })} />
             <AppNameColorChoice appName={app.name} value={display.colorKey} onChange={color => updateApp(app.key, { color })} />
           </div><div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_7rem_10rem] sm:items-end">
             <div className="min-w-0 space-y-1"><Label>Texto abaixo do ícone — {app.name}</Label><Textarea aria-label={`Texto abaixo do ícone de ${app.name}`} rows={2} value={appDescription(tile, app.key)} onChange={event => updateApp(app.key, { description: event.target.value })} /></div>
             <div className="min-w-0 space-y-1"><Label>Tamanho</Label><Select value={String(caption?.descriptionPx ?? "padrao")} onValueChange={value => { const { descriptionPx: _old, ...rest } = caption ?? {}; setTileDraft({ ...tile, apps: { ...tile.apps, [app.key]: { ...rest, ...(value !== "padrao" ? { descriptionPx: Number(value) } : {}) } } }); }}><SelectTrigger aria-label={`Tamanho da legenda de ${app.name}`} className="h-9"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="padrao">Atual</SelectItem>{[10, 11, 12, 13, 14, 15, 16, 18, 20, 24, 28, 32].map(px => <SelectItem key={px} value={String(px)}>{px} px</SelectItem>)}</SelectContent></Select></div>
+            <FontFormatControl context={`Legenda de ${app.name}`} value={caption?.descriptionFormat ?? {}} onChange={descriptionFormat => updateApp(app.key, { descriptionFormat })} />
             <AppNameColorChoice appName={`legenda de ${app.name}`} value={caption?.descriptionColor ?? "padrao"} onChange={descriptionColor => updateApp(app.key, { descriptionColor })} />
           </div>
           </div>; })}
@@ -138,6 +141,7 @@ export function CdeAppOrder({ number, handle }: { number: number; handle?: impor
         
         <div role="group" aria-label="Ajustes dos ícones da página principal" className="grid w-full max-w-5xl grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-6">
           <div className="min-w-0 space-y-1"><Label className="flex min-h-10 items-end pb-1">Fonte do nome</Label><Select value={String(tile.labelPx)} onValueChange={(v) => setTileDraft({ ...tile, labelPx: Number(v) })}><SelectTrigger className="h-9"><SelectValue /></SelectTrigger><SelectContent>{[11, 12, 13, 14, 15, 16].map((n) => <SelectItem key={n} value={String(n)}>{n} px</SelectItem>)}</SelectContent></Select></div>
+          <FontFormatControl context="Nomes dos apps" value={tile.format ?? {}} onChange={format => setTileDraft({ ...tile, format })} />
           <div className="min-w-0 space-y-1"><Label className="flex min-h-10 items-end pb-1">Ícone Desktop</Label>
             <div className="grid h-9 w-36 grid-cols-[2rem_5rem_2rem] items-center justify-items-center">
               <Button variant="outline" size="compactIcon" aria-label="Diminuir ícone Desktop" title="Diminuir ícone Desktop" disabled={tile.tilePct <= 70} onClick={() => setTileDraft({ ...tile, tilePct: tile.tilePct - 5 })}><Minus /></Button>

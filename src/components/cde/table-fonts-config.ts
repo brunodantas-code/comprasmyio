@@ -1,3 +1,4 @@
+import { parseFontFormat, fontFormatVars, type FontFormat } from "./font-format";
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,7 +31,7 @@ export const HEADER_COLORS = {
 } as const;
 export type HeaderColorKind = keyof typeof HEADER_COLORS;
 export const headerColor = (kind: HeaderColorKind, key: string): MessageColorOption => (HEADER_COLORS[kind] as readonly MessageColorOption[]).find((o) => o.key === key) ?? HEADER_COLORS[kind][0];
-export type TableFontsConfig = { fieldBg: string; fieldText: string; fieldBorder: string; headerPx: number; filterPx: number; headerH: AlignH; headerV: AlignV; cellH: AlignH; cellV: AlignV; headerBg: string; headerText: string; headerBorder: string; cellBg: string; cellText: string; cellBorder: string; titleBg: string; titleText: string; titleBorder: string; subBg: string; subText: string; subBorder: string };
+export type TableFontsConfig = { headerFormat?: FontFormat; filterFormat?: FontFormat; cellFormat?: FontFormat; titleFormat?: FontFormat; subFormat?: FontFormat; fieldFormat?: FontFormat;  fieldBg: string; fieldText: string; fieldBorder: string; headerPx: number; filterPx: number; headerH: AlignH; headerV: AlignV; cellH: AlignH; cellV: AlignV; headerBg: string; headerText: string; headerBorder: string; cellBg: string; cellText: string; cellBorder: string; titleBg: string; titleText: string; titleBorder: string; subBg: string; subText: string; subBorder: string };
 export const TABLE_FONTS_DEFAULT: TableFontsConfig = { fieldBg: "padrao", fieldText: "padrao", fieldBorder: "padrao", headerPx: 11, filterPx: 12, headerH: "left", headerV: "middle", cellH: "left", cellV: "middle", headerBg: "padrao", headerText: "padrao", headerBorder: "padrao", cellBg: "padrao", cellText: "padrao", cellBorder: "padrao", titleBg: "padrao", titleText: "padrao", titleBorder: "padrao", subBg: "padrao", subText: "padrao", subBorder: "padrao" };
 const pickH = (v: unknown, d: AlignH): AlignH => (ALIGN_H.some((o) => o.key === v) ? (v as AlignH) : d);
 const pickV = (v: unknown, d: AlignV): AlignV => (ALIGN_V.some((o) => o.key === v) ? (v as AlignV) : d);
@@ -38,7 +39,7 @@ const JUSTIFY: Record<AlignH, string> = { left: "flex-start", center: "center", 
 /** CSS variables read by .cde-th / .cde-td (styles.css). */
 export function tableAlignVars(c: TableFontsConfig): Record<string, string> {
   const decorated = [c.fieldBg, c.fieldBorder].some((key) => key !== "padrao" && key !== "transparente");
-  return { "--field-title-bg": tagColor(c.fieldBg).value || "transparent", "--field-title-color": tagColor(c.fieldText).value || "inherit", "--field-title-border": tagColor(c.fieldBorder).value || "transparent", "--field-title-border-width": c.fieldBorder !== "padrao" && c.fieldBorder !== "transparente" ? "1px" : "0px", "--field-title-padding": decorated ? "2px 8px" : "0px", "--field-title-radius": decorated ? "6px" : "0px", "--th-bg": headerColor("headerBg", c.headerBg).value, "--th-color": headerColor("headerText", c.headerText).value, "--th-border": headerColor("headerBorder", c.headerBorder).value, "--td-bg": headerColor("cellBg", c.cellBg).value, "--td-color": headerColor("cellText", c.cellText).value, "--td-border": headerColor("cellBorder", c.cellBorder).value, "--title-bg": headerColor("titleBg", c.titleBg).value, "--title-color": headerColor("titleText", c.titleText).value, "--title-border": headerColor("titleBorder", c.titleBorder).value, "--sub-bg": headerColor("subBg", c.subBg).value, "--sub-color": headerColor("subText", c.subText).value, "--sub-border": headerColor("subBorder", c.subBorder).value, "--th-align": c.headerH, "--th-valign": c.headerV, "--th-justify": JUSTIFY[c.headerH], "--td-align": c.cellH, "--td-valign": c.cellV, "--td-justify": JUSTIFY[c.cellH] };
+  return { ...fontFormatVars("--th", c.headerFormat), ...fontFormatVars("--filter", c.filterFormat), ...fontFormatVars("--td", c.cellFormat), ...fontFormatVars("--title", c.titleFormat), ...fontFormatVars("--sub", c.subFormat), ...fontFormatVars("--field-title", c.fieldFormat), "--field-title-bg": tagColor(c.fieldBg).value || "transparent", "--field-title-color": tagColor(c.fieldText).value || "inherit", "--field-title-border": tagColor(c.fieldBorder).value || "transparent", "--field-title-border-width": c.fieldBorder !== "padrao" && c.fieldBorder !== "transparente" ? "1px" : "0px", "--field-title-padding": decorated ? "2px 8px" : "0px", "--field-title-radius": decorated ? "6px" : "0px", "--th-bg": headerColor("headerBg", c.headerBg).value, "--th-color": headerColor("headerText", c.headerText).value, "--th-border": headerColor("headerBorder", c.headerBorder).value, "--td-bg": headerColor("cellBg", c.cellBg).value, "--td-color": headerColor("cellText", c.cellText).value, "--td-border": headerColor("cellBorder", c.cellBorder).value, "--title-bg": headerColor("titleBg", c.titleBg).value, "--title-color": headerColor("titleText", c.titleText).value, "--title-border": headerColor("titleBorder", c.titleBorder).value, "--sub-bg": headerColor("subBg", c.subBg).value, "--sub-color": headerColor("subText", c.subText).value, "--sub-border": headerColor("subBorder", c.subBorder).value, "--th-align": c.headerH, "--th-valign": c.headerV, "--th-justify": JUSTIFY[c.headerH], "--td-align": c.cellH, "--td-valign": c.cellV, "--td-justify": JUSTIFY[c.cellH] };
 }
 export const TABLE_HEADER_SIZES = [10, 11, 12, 13, 14] as const;
 export const TABLE_FILTER_SIZES = [11, 12, 13, 14] as const;
@@ -49,6 +50,7 @@ export function parseTableFonts(raw?: string | null): TableFontsConfig {
     const headerPx = Number(p.headerPx);
     const filterPx = Number(p.filterPx);
     return {
+      headerFormat: parseFontFormat(p.headerFormat), filterFormat: parseFontFormat(p.filterFormat), cellFormat: parseFontFormat(p.cellFormat), titleFormat: parseFontFormat(p.titleFormat), subFormat: parseFontFormat(p.subFormat), fieldFormat: parseFontFormat(p.fieldFormat),
       fieldBg: tagColor(p.fieldBg).key, fieldText: tagColor(p.fieldText).key, fieldBorder: tagColor(p.fieldBorder).key,
       headerPx: (TABLE_HEADER_SIZES as readonly number[]).includes(headerPx) ? headerPx : TABLE_FONTS_DEFAULT.headerPx,
       filterPx: (TABLE_FILTER_SIZES as readonly number[]).includes(filterPx) ? filterPx : TABLE_FONTS_DEFAULT.filterPx,
@@ -83,5 +85,5 @@ export function useApplyTableFonts() {
     root.style.setProperty("--th-fs", `${cfg.headerPx}px`);
     root.style.setProperty("--filter-fs", `${cfg.filterPx}px`);
     for (const [k, v] of Object.entries(tableAlignVars(cfg))) root.style.setProperty(k, v);
-  }, [cfg.fieldBg, cfg.fieldText, cfg.fieldBorder, cfg.headerPx, cfg.filterPx, cfg.headerH, cfg.headerV, cfg.cellH, cfg.cellV, cfg.headerBg, cfg.headerText, cfg.headerBorder, cfg.cellBg, cfg.cellText, cfg.cellBorder, cfg.titleBg, cfg.titleText, cfg.titleBorder, cfg.subBg, cfg.subText, cfg.subBorder]);
+  }, [cfg.headerFormat, cfg.filterFormat, cfg.cellFormat, cfg.titleFormat, cfg.subFormat, cfg.fieldFormat, cfg.fieldBg, cfg.fieldText, cfg.fieldBorder, cfg.headerPx, cfg.filterPx, cfg.headerH, cfg.headerV, cfg.cellH, cfg.cellV, cfg.headerBg, cfg.headerText, cfg.headerBorder, cfg.cellBg, cfg.cellText, cfg.cellBorder, cfg.titleBg, cfg.titleText, cfg.titleBorder, cfg.subBg, cfg.subText, cfg.subBorder]);
 }

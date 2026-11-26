@@ -902,3 +902,15 @@ input[data-custom-calendar="true"]::-webkit-calendar-picker-indicator {
 /* Appearance choices are fixed references, not themed interface content. */
 [data-appearance-reference] { filter: none; }
 :root[data-app-appearance="grayscale"] .cde-section:is([aria-label="Favicons e ícones de atalhos"], [aria-label="Arquivos oficiais da marca"]) img { filter: grayscale(1); }
+
+/* Saved font formatting stays independent for each CDE typography scope. */
+.cde-cat-title { font-weight: var(--cde-cat-title-weight, inherit); font-style: var(--cde-cat-title-style, normal); text-decoration-line: var(--cde-cat-title-decoration, none); }
+.cde-sub-title, .cde-section-title { font-weight: var(--cde-sub-title-weight, 600); font-style: var(--cde-sub-title-style, normal); text-decoration-line: var(--cde-sub-title-decoration, none); }
+.cde-cat-hint { font-weight: var(--cde-cat-hint-weight, inherit); font-style: var(--cde-cat-hint-style, normal); text-decoration-line: var(--cde-cat-hint-decoration, none); }
+.cde-sub-hint { font-weight: var(--cde-sub-hint-weight, inherit); font-style: var(--cde-sub-hint-style, normal); text-decoration-line: var(--cde-sub-hint-decoration, none); }
+.cde-th { font-weight: var(--th-weight, inherit); font-style: var(--th-style, normal); text-decoration-line: var(--th-decoration, none); }
+.cde-td { font-weight: var(--td-weight, inherit); font-style: var(--td-style, normal); text-decoration-line: var(--td-decoration, none); }
+.cde-title { font-weight: var(--title-weight, inherit); font-style: var(--title-style, normal); text-decoration-line: var(--title-decoration, none); }
+.cde-subtitle { font-weight: var(--sub-weight, inherit); font-style: var(--sub-style, normal); text-decoration-line: var(--sub-decoration, none); }
+.cde-field-title { font-weight: var(--field-title-weight, inherit); font-style: var(--field-title-style, normal); text-decoration-line: var(--field-title-decoration, none); }
+[class*="text-[length:var(--filter-fs)]"] { font-weight: var(--filter-weight, inherit); font-style: var(--filter-style, normal); text-decoration-line: var(--filter-decoration, none); }

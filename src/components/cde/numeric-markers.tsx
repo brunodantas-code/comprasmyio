@@ -1,8 +1,9 @@
+import { fontFormatCss, parseFontFormat, type FontFormat } from "./font-format";
 import type { CSSProperties, ComponentProps } from "react";
 import { useCdeStandards } from "./cde-button";
 import { cn } from "@/lib/utils";
 
-export type MarkerLook = { bg: string; text: string; border: string; shape: string; size: number; font: number };
+export type MarkerLook = { format?: FontFormat; bg: string; text: string; border: string; shape: string; size: number; font: number };
 export const MARKER_DEFAULTS: Record<string, MarkerLook> = {
   record_number: { bg: "black", text: "white", border: "none", shape: "circle", size: 22, font: 11 },
   alert_marker: { bg: "red", text: "white", border: "none", shape: "circle", size: 28, font: 12 },
@@ -22,7 +23,7 @@ export function parseMarkerLook(raw: string | undefined, kind: string): MarkerLo
   try {
     const p = JSON.parse(raw ?? "{}");
     const color = (key: string) => MARKER_COLORS.some(c => c.key === p[key]) ? p[key] : fallback[key as "bg" | "text" | "border"];
-    return { bg: color("bg"), text: color("text"), border: color("border"), shape: ["circle", "square", "rounded"].includes(p.shape) ? p.shape : fallback.shape, size: Number.isFinite(p.size) ? Math.min(48, Math.max(16, p.size)) : fallback.size, font: Number.isFinite(p.font) ? Math.min(20, Math.max(9, p.font)) : fallback.font };
+    return { format: parseFontFormat(p.format), bg: color("bg"), text: color("text"), border: color("border"), shape: ["circle", "square", "rounded"].includes(p.shape) ? p.shape : fallback.shape, size: Number.isFinite(p.size) ? Math.min(48, Math.max(16, p.size)) : fallback.size, font: Number.isFinite(p.font) ? Math.min(20, Math.max(9, p.font)) : fallback.font };
   } catch { return fallback; }
 }
 export function markerVars(look: MarkerLook, value: string, fixedSize = false): CSSProperties {
@@ -30,7 +31,7 @@ export function markerVars(look: MarkerLook, value: string, fixedSize = false): 
   // Numeric identifiers are never truncated: grow the circle for longer identifiers.
   const diameter = fixedSize ? look.size : Math.max(look.size, Math.ceil(value.length * look.font * 0.65 + 8));
   const font = fixedSize ? Math.min(look.font, (diameter - 6) / Math.max(1, value.length * 0.65)) : look.font;
-  return { "--marker-bg": color(look.bg), "--marker-text": color(look.text), "--marker-border": color(look.border), "--marker-size": `${diameter}px`, "--marker-font": `${font}px`, "--marker-radius": look.shape === "circle" ? "50%" : look.shape === "square" ? "0" : "4px" } as CSSProperties;
+  return { ...fontFormatCss(look.format), "--marker-bg": color(look.bg), "--marker-text": color(look.text), "--marker-border": color(look.border), "--marker-size": `${diameter}px`, "--marker-font": `${font}px`, "--marker-radius": look.shape === "circle" ? "50%" : look.shape === "square" ? "0" : "4px" } as CSSProperties;
 }
 export function useMarkerLook(kind: string) {
   const { data } = useCdeStandards();

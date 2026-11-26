@@ -1,3 +1,4 @@
+import { FontFormatControl } from "./font-format-control";
 import { CdeSection } from "./cde-section";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -40,6 +41,7 @@ export function NumericMarkerEditor({ kind, number }: { kind: "record_number" | 
       <div className="space-y-1"><Label>Formato</Label><Select value={look.shape} onValueChange={v => { setDraft({ ...look, shape: v }); setDirty(true); }}><SelectTrigger aria-label={`${title} — Formato`}><SelectValue /></SelectTrigger><SelectContent><SelectItem value="circle">Circular</SelectItem><SelectItem value="square">Quadrado</SelectItem><SelectItem value="rounded">Arredondado</SelectItem></SelectContent></Select></div>
       <div className="space-y-1"><Label htmlFor={`${kind}-size`}>Tamanho (px)</Label><Input id={`${kind}-size`} type="number" min={16} max={48} value={look.size} onChange={e => { setDraft({ ...look, size: Math.min(48, Math.max(16, Number(e.target.value))) }); setDirty(true); }} /></div>
       <div className="space-y-1"><Label htmlFor={`${kind}-font`}>Texto (px)</Label><Input id={`${kind}-font`} type="number" min={9} max={20} value={look.font} onChange={e => { setDraft({ ...look, font: Math.min(20, Math.max(9, Number(e.target.value))) }); setDirty(true); }} /></div>
+      <FontFormatControl context={title} value={look.format ?? {}} onChange={format => { setDraft({ ...look, format }); setDirty(true); }} />
     </div>
     <div className="flex items-center gap-3"><span className="text-xs text-muted-foreground">Prévia</span>{["7", "59", "99+"].map(v => <NumericMarker key={v} kind={kind} look={look}>{v}</NumericMarker>)}<Button variant="ghost" size="compactIcon" aria-label={`Restaurar padrão de ${title}`} title="Restaurar padrão" onClick={() => { setDraft(MARKER_DEFAULTS[kind]); setDirty(true); }}><RotateCcw /></Button></div>
   </CdeSection>;

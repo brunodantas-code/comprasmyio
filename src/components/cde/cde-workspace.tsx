@@ -1,3 +1,4 @@
+import { FontFormatControl } from "./font-format-control";
 import { SpendCategoryConfig } from "@/components/spend/category-config";
 import { AppAppearanceItem } from "./app-appearance-item";
 import { CdeCardBorders } from "./cde-card-borders";
@@ -528,6 +529,7 @@ export function CdeWorkspace() {
             <div className="space-y-1"><Label>{creating === "fields_select" ? "Fonte do campo e das opções" : "Tamanho da fonte"}</Label>
               <Select value={draft.style.fontSize || "none"} onValueChange={(v) => setDraft({ ...draft, style: { ...draft.style, fontSize: v === "none" ? "" : v } })}><SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent><SelectItem value="none">Padrão</SelectItem>{FONT_SIZES.map((f) => <SelectItem key={f} value={f}>{f.replace("px", " px")}</SelectItem>)}</SelectContent></Select></div>
+            <FontFormatControl context="Modelo" value={draft.style.format ?? {}} onChange={format => setDraft({ ...draft, style: { ...draft.style, format } })} />
             <div className="sm:col-span-2"><FormatColorOptions label="Fundo" value={draft.style.fill ?? "none"} options={FILLS} showCode onChange={(fill) => setDraft({ ...draft, style: { ...draft.style, fill } })} /></div>
             <div className="sm:col-span-2"><FormatColorOptions label="Borda" value={draft.style.border ?? ""} options={[{ key: "none", label: "Sem borda", color: "transparent" }, ...BORDERS] as typeof BORDERS} showCode onChange={(border) => setDraft({ ...draft, style: { ...draft.style, border } })} border /></div>
             <div className="sm:col-span-2"><FormatColorOptions label="Cor do texto e ícone" value={draft.style.text ?? "default"} options={TEXTS} onChange={(text) => setDraft({ ...draft, style: { ...draft.style, text } })} /></div>

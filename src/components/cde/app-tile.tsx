@@ -1,3 +1,4 @@
+import { fontFormatCss } from "./font-format";
 import type React from "react";
 import { CodeXml } from "lucide-react";
 import { APP_ICONS } from "@/lib/app-icons";
@@ -22,6 +23,7 @@ export function AppTileDescription({ appKey, tile, mobile = false }: { appKey: s
   const saved = tile.apps?.[appKey];
   const color = APP_NAME_COLORS.find(option => option.key === saved?.descriptionColor);
   const vars = {
+    ...fontFormatCss(saved?.descriptionFormat),
     "--app-caption-size": `${saved?.descriptionPx ?? (mobile ? 10.88 : 14)}px`,
     "--app-caption-color": color && color.key !== "padrao" ? color.value : "var(--tile-below,var(--muted-foreground))",
   } as React.CSSProperties;
@@ -34,7 +36,7 @@ export function AppTileFace({ appKey, name, tile, mobile = false }: { appKey: st
   const display = appDisplay(tile, appKey, tile.labelPx, name);
   const scale = ((mobile ? tile.mobileIconPct : tile.iconPct) / 100) * (APP_ICON_OPTICAL[appKey] ?? 1);
   return <><span className={`flex w-full items-center justify-center ${mobile ? "translate-y-0.5 h-[length:var(--mobile-symbol-box,44px)]" : "h-16 translate-y-1"}`} aria-hidden="true"><Icon className={`text-[color:var(--tile-symbol,currentColor)] max-w-[65%] ${mobile ? "h-[length:var(--mobile-symbol-box,44px)] w-[length:var(--mobile-symbol-box,44px)]" : "h-16 w-16"}`} style={{ strokeWidth: stroke, transform: `scale(${mobile ? Math.min(scale, 1.4) : scale})` }} /></span>
-    <span className={`max-w-full whitespace-normal break-words text-center font-normal leading-none text-[color:var(--tile-inside,currentColor)] ${mobile ? "text-[length:var(--tile-fs-m)]" : "text-[length:var(--tile-fs)]"}`} style={{ "--tile-fs": `${display.labelPx}px`, "--tile-fs-m": `${Math.min(display.labelPx - 2, 11)}px`, ...(display.color ? { color: display.color } : {}) } as React.CSSProperties}>{display.name}</span></>;
+    <span className={`max-w-full whitespace-normal break-words text-center font-normal leading-none text-[color:var(--tile-inside,currentColor)] ${mobile ? "text-[length:var(--tile-fs-m)]" : "text-[length:var(--tile-fs)]"}`} style={{ ...fontFormatCss(display.format), "--tile-fs": `${display.labelPx}px`, "--tile-fs-m": `${Math.min(display.labelPx - 2, 11)}px`, ...(display.color ? { color: display.color } : {}) } as React.CSSProperties}>{display.name}</span></>;
 }
 
 const APP_NAME_KEYS: Record<string, string> = { Spend: "spend", Supply: "supply", "Finance": "cash_flow", CRM: "crm", Legal: "legal", RH: "rh", "Site Survey": "site_survey", Chamados: "chamados", OpDesk: "chamados", CDE: "cde", Mytosis: "mytosis", Code: "development", Wishlist: "wishlist", Projects: "projects", Indicadores: "indicadores" };

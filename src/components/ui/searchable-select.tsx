@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { resolveCdeModel, useCdeStandards } from "@/components/cde/cde-button";
 import { styleOf } from "@/components/cde/cde-render";
 import { fieldClassWithoutHeight } from "@/components/ui/select";
+import { fontFormatCss } from "@/components/cde/font-format";
 
 export type SearchableOption = {
   value: string;
@@ -132,7 +133,7 @@ export function SearchableSelect({ value, onChange, options, placeholder = "Digi
         </div>
       </PopoverAnchor>
       <PopoverContent
-        style={{ fontSize: optionFontSize }}
+        style={{ fontSize: optionFontSize, ...fontFormatCss(hasStandard ? model.style?.format : undefined) }}
         align="start"
         className="w-[var(--radix-popover-trigger-width)] min-w-[16rem] p-1"
         onOpenAutoFocus={(e) => e.preventDefault()}

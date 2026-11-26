@@ -1,3 +1,4 @@
+import { fontFormatCss } from "@/components/cde/font-format";
 import { cn } from "@/lib/utils";
 import logoDark from "@/assets/myio-logo-dark.png.asset.json";
 import logoLightSrc from "@/assets/myio-logo-light.svg";
@@ -27,7 +28,7 @@ export function MyioAppLogo({ appName, className, tone = "auto", display, logoPx
       <span aria-hidden="true" className="h-6 w-px shrink-0 bg-current opacity-30 sm:h-7" />
       <span
         className={cn("min-w-0 select-none break-words font-normal leading-tight tracking-normal", toneClass)}
-        style={{ fontSize: `${current.labelPx}px`, ...(current.color ? { color: current.color } : {}) }}
+        style={{ ...fontFormatCss(current.format), fontSize: `${current.labelPx}px`, ...(current.color ? { color: current.color } : {}) }}
       >
         {current.name}
       </span>

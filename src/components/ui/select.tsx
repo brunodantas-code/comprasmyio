@@ -8,10 +8,11 @@ import { cn } from "@/lib/utils";
 import { resolveCdeModel, useCdeStandards } from "@/components/cde/cde-button";
 import { styleOf } from "@/components/cde/cde-render";
 
-const SelectFontContext = React.createContext<{ fontSize: string; setFontSize: (value: string) => void }>({ fontSize: "14px", setFontSize: () => {} });
+const SelectFontContext = React.createContext<{ format: React.CSSProperties; setFormat: (value: React.CSSProperties) => void; fontSize: string; setFontSize: (value: string) => void }>({ format: {}, setFormat: () => {}, fontSize: "14px", setFontSize: () => {} });
 function Select(props: React.ComponentProps<typeof SelectPrimitive.Root>) {
+  const [format, setFormat] = React.useState<React.CSSProperties>({});
   const [fontSize, setFontSize] = React.useState("14px");
-  return <SelectFontContext.Provider value={{ fontSize, setFontSize }}><SelectPrimitive.Root {...props} /></SelectFontContext.Provider>;
+  return <SelectFontContext.Provider value={{ fontSize, setFontSize, format, setFormat }}><SelectPrimitive.Root {...props} /></SelectFontContext.Provider>;
 }
 
 const SelectGroup = SelectPrimitive.Group;
@@ -27,10 +28,17 @@ const SelectTrigger = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger>
 >(({ className, children, style, ...props }, ref) => {
-  const { setFontSize } = React.useContext(SelectFontContext);
+  const { setFontSize, setFormat } = React.useContext(SelectFontContext);
+  const formatRef = React.useRef("");
+  const setFormatPrevious = (next: React.CSSProperties) => { const key = JSON.stringify(next); if (key !== formatRef.current) { formatRef.current = key; setFormat(next); } };
   const triggerRef = React.useRef<HTMLButtonElement | null>(null);
   React.useLayoutEffect(() => {
-    if (triggerRef.current) setFontSize(getComputedStyle(triggerRef.current).fontSize);
+    if (triggerRef.current) {
+      const css = getComputedStyle(triggerRef.current);
+      setFontSize(css.fontSize);
+      const next = { fontWeight: css.fontWeight, fontStyle: css.fontStyle, textDecorationLine: css.textDecorationLine };
+      setFormatPrevious(next);
+    }
   });
   const { data } = useCdeStandards();
   const model = resolveCdeModel(data, "fields_select");
@@ -90,7 +98,7 @@ const SelectContent = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content>
 >(({ className, children, position = "popper", style, ...props }, ref) => {
-  const { fontSize } = React.useContext(SelectFontContext);
+  const { fontSize, format } = React.useContext(SelectFontContext);
   return (
   <SelectPrimitive.Portal>
     <SelectPrimitive.Content
@@ -101,7 +109,7 @@ const SelectContent = React.forwardRef<
           "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
         className,
       )}
-      style={{ ...style, fontSize }}
+      style={{ ...format, ...style, fontSize }}
       position={position}
       {...props}
     >
