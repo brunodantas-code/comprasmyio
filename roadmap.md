@@ -1,3 +1,4 @@
+- [x] Acessos: dois participantes de teste de Projects excluídos dos acessos, com referências históricas preservadas; customização de perfis mostra somente Nome com funil, sem E-mail/Perfil. Computador e celular conferidos, sem erros.
 - [x] CDE Ícones dos Apps e menus: nomes técnicos removidos, 14 linhas com 48 px e uma única divisória; computador e celular conferidos, sem erros.
 - [x] CDE Ícones dos Apps e menus: CRM exibe os oito menus reais com ordem personalizável e opções Mobile/Desktop; abertura e recolhimento conferidos.
 - [x] CDE Ícones dos Apps e menus: Code tem opções Mobile/Desktop e navegação real Tickets/Novo ticket; ordem legada preservada, abertura do novo ticket e 390 px conferidos.

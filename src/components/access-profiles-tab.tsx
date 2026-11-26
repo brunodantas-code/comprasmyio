@@ -33,7 +33,7 @@ export function AccessProfilesTab() {
     queryKey: ["custom-access-profiles", activeRequestTypeCodes],
     queryFn: async () => {
       const [{ data: profiles, error: profilesError }, { data: access, error: accessError }, { data: permissions, error: permissionsError }, { data: individualTypes, error: individualTypesError }, { data: additionalTitles, error: additionalTitlesError }] = await Promise.all([
-        supabase.from("profiles").select("id, full_name, email").order("full_name"),
+        supabase.from("profiles").select("id, full_name, email").is("deleted_at", null).order("full_name"),
         supabase.from("user_access_profiles").select("user_id,is_customized,access_profile_definitions(name,base_profile,access_profile_permissions(menu_key,allowed),access_profile_request_types(request_type_code))"),
         supabase.from("user_menu_permissions").select("user_id,menu_key,allowed"),
         supabase.from("user_request_type_permissions").select("user_id,request_type_code"),
@@ -80,8 +80,6 @@ export function AccessProfilesTab() {
 
   const userFilters = useTableFilters(data ?? [], [
     { key: "name", label: "Nome", value: u => u.full_name },
-    { key: "email", label: "E-mail", value: u => u.email },
-    { key: "profile", label: "Perfil", value: u => u.profileName },
   ]);
   const filteredUsers = userFilters.filtered;
 
@@ -120,7 +118,7 @@ export function AccessProfilesTab() {
         <CardDescription>Adicione ou remova acessos do perfil atual de cada usuário.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">{["name", "email", "profile"].map(key => <span key={key}>{userFilters.header(key)}</span>)}</div>
+        <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">{userFilters.header("name")}</div>
         {userFilters.summary}
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> : null}
         {!isLoading && data?.length === 0 ? <p className="text-sm text-muted-foreground">Nenhum usuário cadastrado.</p> : null}
