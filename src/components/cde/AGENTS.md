@@ -14,7 +14,7 @@
 - Confirmations never use window.confirm: call confirmAction() (ConfirmDialogHost in __root) or ConfirmDeleteButton; AlertDialogContent reads the CDE confirm_dialog standard.
 - `add-text-usage.json` lists current + buttons with text (shown in CDE 4.2); regenerate by scanning CdeButton group="plus"/<Plus/> with text when such buttons change.
 - Edited + button texts live in cde_selected group add_text (JSON map "screen|original"→text); CdeButton group=plus and CdeAddLabel apply them.
-- CDE category/subcategory order lives in cde_selected group cde_order ({cats, subs}); numbers are derived from position, never hardcoded.
+- CDE order/titles use cde_selected cde_order ({cats, subs, titles}), keyed by stable IDs through sortable context; renaming preserves numbering and bindings.
 - Linked + buttons share one add_text key via "shared" in add-text-usage.json.
 - App menu icon order lives in cde_selected group menu_order ("App|Group"→labels); apps sort tabs via sortByMenuOrder/useOrderedMenu (menu-order.ts).
 - Saved CDE choices take effect in the apps immediately; menu_type is edited only per app (item 8), since a global save would overwrite every app; the stored "*" entry stays an unread fallback. Menu-layout helpers keep legacy floating bases; useAppMenuLayout and shared navigation CSS apply responsive geometry without changing items or permissions.

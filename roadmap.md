@@ -1,3 +1,5 @@
+- [x] CDE: seção Ordem das colunas nas listas dos apps; lápis nos 22 itens principais com nome salvo por identidade, sem mudar ordem/numeração. Nome salvo e relido com sessão, original restaurado; quatro testes passaram.
+- [x] CDE Ordem das colunas: apps inicialmente recolhidos, setas independentes à direita, rascunhos mantidos; Central/Code conferidos no computador e celular sem excesso lateral nem erros.
 - [x] CDE Ordem das colunas: título duplicado removido, subtítulo no cabeçalho verde-claro e seções sem espaçamento extra, com divisória única; recolhimento conferido com sessão sem alterar escolhas.
 - [x] CDE Cabeçalhos e Listas: formatações junto aos respectivos tamanhos de cabeçalhos/filtros e às cores de texto de listas, títulos, subtítulos e títulos dos campos; sem alterar escolhas salvas.
 - [x] CDE Apps atendidos pelo Code: símbolos oficiais de cada app incluídos entre seleção e nome, sem alterar configurações.

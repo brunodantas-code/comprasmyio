@@ -52,6 +52,7 @@ function TableRowEditor({ site, order, onChange }: { site: Site; order: number[]
 export function CdeTableOrder({ number, handle, embedded }: { number?: number; handle?: import("react").ReactNode; embedded?: boolean }) {
   const [open, setOpen] = useState(!!embedded);
   const [contentOpen, setContentOpen] = useState(true);
+  const [expandedApps, setExpandedApps] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState("");
   const [draft, setDraft] = useState<TableColumnOrders | null>(null);
   const [saving, setSaving] = useState(false);
@@ -89,14 +90,17 @@ export function CdeTableOrder({ number, handle, embedded }: { number?: number; h
   }
   return <section className={embedded ? "cde-category-sections cde-shortcut-sections" : "cde-category-sections"}>
     {!embedded && <CdeCategoryHeader handle={handle} number={number ?? 0} title="Ordenação de cabeçalhos" hint="Arraste as colunas de cada lista de dados" open={open} onToggle={() => setOpen(!open)} />}
-    {open && <CdeSection title="Ordem das colunas" hint="Arraste as colunas de cada lista de dados" open={contentOpen} actions={<><Button variant="ghost" size="icon" aria-label="Salvar" title="Salvar ordem dos cabeçalhos" onClick={save} disabled={saving || !draft || JSON.stringify(draft) === JSON.stringify(saved)}><Save /></Button><CdeButton group="toggle" screen="components/cde/cde-table-order.tsx" aria-label={`${contentOpen ? "Recolher" : "Exibir"} ordem das colunas`} title={`${contentOpen ? "Recolher" : "Exibir"} ordem das colunas`} aria-expanded={contentOpen} onClick={() => setContentOpen(!contentOpen)} /></>}>
+    {open && <CdeSection title="Ordem das colunas nas listas dos apps" hint="Arraste as colunas de cada lista de dados" open={contentOpen} actions={<><Button variant="ghost" size="icon" aria-label="Salvar" title="Salvar ordem dos cabeçalhos" onClick={save} disabled={saving || !draft || JSON.stringify(draft) === JSON.stringify(saved)}><Save /></Button><CdeButton group="toggle" screen="components/cde/cde-table-order.tsx" aria-label={`${contentOpen ? "Recolher" : "Exibir"} ordem das colunas`} title={`${contentOpen ? "Recolher" : "Exibir"} ordem das colunas`} aria-expanded={contentOpen} onClick={() => setContentOpen(!contentOpen)} /></>}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar app, menu ou coluna" className="max-w-xs text-[length:var(--filter-fs)]" />
 
       </div>
       {groups.map(([app, items]) => <div key={app} className="space-y-3">
-        <p className="text-sm font-medium">{app}</p>
-        {items.map(({ site, path }) => <div key={site.id} className="space-y-1 border-l-2 border-border pl-3">
+        <div className="flex min-w-0 items-center justify-between gap-3">
+          <h4 className="min-w-0 text-sm font-medium">{app}</h4>
+          <CdeButton group="toggle" screen="components/cde/cde-table-order.tsx" aria-label={`${expandedApps.has(app) ? "Recolher" : "Exibir"} colunas de ${app}`} title={`${expandedApps.has(app) ? "Recolher" : "Exibir"} colunas de ${app}`} aria-expanded={expandedApps.has(app)} onClick={() => setExpandedApps(current => { const next = new Set(current); if (next.has(app)) next.delete(app); else next.add(app); return next; })} />
+        </div>
+        {expandedApps.has(app) && items.map(({ site, path }) => <div key={site.id} className="space-y-1 border-l-2 border-border pl-3">
           <div className="flex items-center gap-2"><p className="text-xs text-muted-foreground">{path}</p>
             {orders[site.id] && <Button variant="ghost" size="compactIcon" aria-label="Restaurar ordem original" title="Restaurar ordem original" onClick={() => { const { [site.id]: _, ...rest } = orders; setDraft(rest); }}><RotateCcw /></Button>}
           </div>

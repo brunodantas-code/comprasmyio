@@ -140,7 +140,7 @@ export function CdeWorkspace() {
   const [collapseKey, setCollapseKey] = useState(0);
   const appearance = useCdeAppearance().data ?? CDE_APPEARANCE_DEFAULT;
   const { order: cdeOrder, save: saveCdeOrder } = useCdeOrder(CDE_DEFAULT_ORDER);
-  const catLabel = (c: string) => c === "card_borders" ? "Bordas de classificação dos cards" : c === "app_appearance" ? "Aparência" : c.startsWith("p:") ? PARENTS[c.slice(2)] : EXTRA_LABELS[c] ?? baseTitle(GROUPS.find((x) => x.key === c)?.title ?? c);
+  const catLabel = (c: string) => cdeOrder.titles?.[c] ?? (c === "card_borders" ? "Bordas de classificação dos cards" : c === "app_appearance" ? "Aparência" : c.startsWith("p:") ? PARENTS[c.slice(2)] : EXTRA_LABELS[c] ?? baseTitle(GROUPS.find((x) => x.key === c)?.title ?? c));
   const groupTitle = (key: string) => {
     const g = GROUPS.find((x) => x.key === key); if (!g) return "";
     const p = groupParent(g.title);
@@ -462,7 +462,7 @@ export function CdeWorkspace() {
         </div>
         <p className="text-sm text-muted-foreground">Modelos de UI/UX utilizados em todos os apps, agrupados por tipo. Crie e exclua modelos e selecione os que devem ser utilizados como padrão.</p>
       </div>
-      <CdeSortableList className="cde-category-list space-y-0" ids={cdeOrder.cats} labelOf={catLabel} onMove={(cats) => saveCdeOrder({ ...cdeOrder, cats })}>
+      <CdeSortableList className="cde-category-list space-y-0" ids={cdeOrder.cats} labelOf={catLabel} onMove={(cats) => saveCdeOrder({ ...cdeOrder, cats })} onRename={(id, title) => saveCdeOrder({ ...cdeOrder, titles: { ...cdeOrder.titles, [id]: title } })}>
         {(cat, ci, handle) => {
           const n = String(ci + 1);
           if (cat.startsWith("p:")) {
@@ -508,7 +508,8 @@ export function CdeWorkspace() {
             setCreating(group);
           }} />;
           if (cat === "deadline_alerts") return <CdeDeadlineAlerts key={`CdeDeadlineAlerts-${collapseKey}`} number={ci + 1} handle={handle} />;
-          return renderGroup(GROUPS.find((x) => x.key === cat)!, n, null, handle);
+          const group = GROUPS.find((x) => x.key === cat);
+          return group ? renderGroup(group, n, null, handle) : null;
         }}
       </CdeSortableList>
       </section>

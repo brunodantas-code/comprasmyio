@@ -6,9 +6,10 @@ import { CSS } from "@dnd-kit/utilities";
 import { GripVertical } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { CdeCategoryNameContext } from "./cde-category-name";
 
 /** Display order of CDE categories/subcategories; numbers are derived from position. */
-export type CdeOrder = { cats: string[]; subs: Record<string, string[]> };
+export type CdeOrder = { cats: string[]; subs: Record<string, string[]>; titles?: Record<string, string> };
 
 export function mergeCdeOrder(raw: string | null | undefined, defaults: CdeOrder): CdeOrder {
   let saved: Partial<CdeOrder> = {};
@@ -22,7 +23,13 @@ export function mergeCdeOrder(raw: string | null | undefined, defaults: CdeOrder
   // New categories enter at their default position (e.g. a new first item stays first) instead of the end.
   const cats = Array.isArray(saved.cats) ? saved.cats.filter((x): x is string => typeof x === "string" && defaults.cats.includes(x)) : [];
   defaults.cats.forEach((k, i) => { if (!cats.includes(k)) cats.splice(Math.min(i, cats.length), 0, k); });
-  return { cats: [...new Set(cats)], subs };
+  const titles: Record<string, string> = {};
+  if (saved.titles && typeof saved.titles === "object") {
+    for (const [id, title] of Object.entries(saved.titles)) {
+      if (defaults.cats.includes(id) && typeof title === "string" && title.trim()) titles[id] = title.trim();
+    }
+  }
+  return { cats: [...new Set(cats)], subs, titles };
 }
 
 export function useCdeOrder(defaults: CdeOrder) {
@@ -44,12 +51,15 @@ export function useCdeOrder(defaults: CdeOrder) {
       const user = (await supabase.auth.getUser()).data.user;
       if (!user) throw new Error("Sessão não encontrada");
       const result = prev !== null
-        ? await supabase.from("cde_selected").update({ variant_key: value, chosen_by: user.id }).eq("group_key", "cde_order").eq("variant_key", prev)
-        : await supabase.from("cde_selected").insert({ group_key: "cde_order", variant_key: value, chosen_by: user.id });
+        ? await supabase.from("cde_selected").update({ variant_key: value, chosen_by: user.id }).eq("group_key", "cde_order").eq("is_primary", true).eq("variant_key", prev).select("variant_key").single()
+        : await supabase.from("cde_selected").insert({ group_key: "cde_order", variant_key: value, chosen_by: user.id }).select("variant_key").single();
       if (result.error) throw result.error;
+      if (result.data?.variant_key !== value) throw new Error("Configuração não foi salva");
+      return true;
     } catch {
       qc.setQueryData(["cde-order"], prev);
-      toast.error("Não foi possível salvar a nova ordem.");
+      toast.error("Não foi possível salvar a configuração dos itens.");
+      return false;
     }
   }
   return { order, save };
@@ -71,7 +81,7 @@ function SortableItem({ id, label, children }: { id: string; label: string; chil
 }
 
 /** Vertical drag list; each item receives its drag handle to place beside its number. */
-export function CdeSortableList({ ids, labelOf, onMove, className, children }: { ids: string[]; labelOf: (id: string) => string; onMove: (ids: string[]) => void; className?: string; children: (id: string, index: number, handle: ReactNode) => ReactNode }) {
+export function CdeSortableList({ ids, labelOf, onMove, onRename, className, children }: { ids: string[]; labelOf: (id: string) => string; onMove: (ids: string[]) => void; onRename?: (id: string, title: string) => Promise<boolean>; className?: string; children: (id: string, index: number, handle: ReactNode) => ReactNode }) {
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }), useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }));
   const onDragEnd = (e: DragEndEvent) => {
     if (!e.over || e.active.id === e.over.id) return;
@@ -80,7 +90,7 @@ export function CdeSortableList({ ids, labelOf, onMove, className, children }: {
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
       <SortableContext items={ids} strategy={verticalListSortingStrategy}>
-        <div className={className}>{ids.map((id, i) => <SortableItem key={id} id={id} label={labelOf(id)}>{(h) => children(id, i, h)}</SortableItem>)}</div>
+        <div className={className}>{ids.map((id, i) => <SortableItem key={id} id={id} label={labelOf(id)}>{(h) => onRename ? <CdeCategoryNameContext.Provider value={{ number: String(i + 1), title: labelOf(id), onSave: title => onRename(id, title) }}>{children(id, i, h)}</CdeCategoryNameContext.Provider> : children(id, i, h)}</SortableItem>)}</div>
       </SortableContext>
     </DndContext>
   );
