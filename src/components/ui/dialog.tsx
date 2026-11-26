@@ -48,7 +48,7 @@ const DialogContent = React.forwardRef<
       {...props}
       onCloseAutoFocus={(event) => { setExpanded(false); onCloseAutoFocus?.(event); }}
     >
-      <div data-popup-toolbar className="pointer-events-none sticky top-0 z-30 flex h-0 items-start justify-end gap-2 [.grid>&]:-mb-4">
+      <div data-popup-toolbar className="pointer-events-none sticky top-0 z-30 flex min-h-8 shrink-0 items-start justify-end gap-2">
         <div className="flex shrink-0 items-center gap-2">
         {topActions ? <div className="pointer-events-auto flex shrink-0 items-center gap-2">{topActions}</div> : null}
         <PopupExpandButton expanded={expanded} onToggle={() => setExpanded(value => !value)} />

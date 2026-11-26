@@ -1,6 +1,6 @@
 export const CARD_BORDER_GROUP = "card_classification_border";
 export const CARD_BORDER_APPS = [{ key: "indicadores", label: "Indicadores" }, { key: "crm", label: "CRM" }] as const;
-export const CARD_BORDER_MODES = [{ key: "none", label: "Padrão atual" }, { key: "department", label: "Departamento/Setor" }, { key: "status", label: "Status" }, { key: "responsible", label: "Responsável" }] as const;
+export const CARD_BORDER_MODES = [{ key: "none", label: "Sem classificação" }, { key: "department", label: "Departamento/Setor" }, { key: "status", label: "Status" }, { key: "responsible", label: "Responsável" }] as const;
 export const CARD_BORDER_COLORS = [
   { key: "verde", label: "Verde myio" }, { key: "verde_claro", label: "Verde claro myio" },
   { key: "roxo", label: "Roxo myio" }, { key: "lilas", label: "Lilás myio" },

@@ -7,7 +7,7 @@ import { CdeFilterStandard } from "./cde-filter-standard";
 import { NumericMarkerEditor } from "./numeric-marker-editor";
 import { CDE_APPEARANCE_DEFAULT, cdeAppearanceVars, useCdeAppearance } from "./cde-appearance";
 import { CdeCorporateMessages } from "./cde-corporate-messages";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowDown, ArrowDownUp, ArrowUp, ArrowUpDown, Building2, Check, ChevronDown, ChevronsDownUp, ChevronLeft, ChevronRight, ChevronUp, ClipboardCheck, Filter, PackagePlus, Pencil, Percent, Plus, RotateCcw, Save, Settings2, Trash2, X, type LucideIcon } from "lucide-react";
 import { toast } from "sonner";
@@ -51,8 +51,8 @@ import { CdeDraftSave } from "./cde-draft-save";
 type Variant = { key: string; name?: string; custom?: boolean; tag: string; variant: string; size: string; className: string; icon: string; iconClass: string; label: string; count: number; files: string[]; uses?: { file: string; n: number }[]; style?: CdeStyle };
 
 
-const VARIANTS = ["", "default", "outline", "ghost", "action", "secondary", "destructive", "link"];
-const SIZES = ["", "default", "sm", "lg", "icon", "compactIcon"];
+const VARIANTS = ["default", "outline", "ghost", "action", "secondary", "destructive", "link"];
+const SIZES = ["default", "sm", "lg", "icon", "compactIcon"];
 
 type GroupKey = string;
 /** Subgrupos dos campos, separados pelo tipo do componente. */
@@ -112,7 +112,7 @@ const baseTitle = (t: string) => t.split(" ").slice(1).join(" ");
 const groupParent = (t: string) => { const n = t.split(" ")[0].replace(/\.$/, ""); return n.includes(".") ? n.split(".")[0] : null; };
 const CDE_DEFAULT_ORDER: CdeOrder = {
   cats: ["app_appearance", ...[...new Set(GROUPS.map((g) => groupParent(g.title) ? `p:${groupParent(g.title)}` : g.key))], "card_borders", "icons", "nav", "menu", "apps", "table_fonts", "title_texts", "tags", "corporate_messages", "button_library", "deadline_alerts", "project_budget", "project_appearance", "spend_categories"],
-  subs: Object.fromEntries(Object.keys(PARENTS).map((p) => [p, GROUPS.filter((g) => groupParent(g.title) === p).map((g) => g.key)])),
+  subs: Object.fromEntries(Object.keys(PARENTS).map((p) => [p, [...GROUPS.filter((g) => groupParent(g.title) === p).map((g) => g.key), ...(p === "6" ? ["record_number"] : [])]])),
 };
 const EXTRA_LABELS: Record<string, string> = { spend_categories: "Spend — categorias de despesas", project_appearance: "Cores do Projects", project_budget: "Orçamento do Projects", cde_appearance: "Aparência do CDE", icons: "Ícones dos Apps e menus", nav: "Navegação (UI/UX)", menu: "Menu principal", apps: "Home Page", table_fonts: "Cabeçalhos e Listas", tags: "Tags", title_texts: "Títulos e Subtítulos", corporate_messages: "Mensagens corporativas", button_library: "Biblioteca de botões em uso", deadline_alerts: "Alertas de Prazo" };
 
@@ -153,6 +153,21 @@ export function CdeWorkspace() {
   const [creating, setCreating] = useState<GroupKey | null>(null);
   const [editing, setEditing] = useState<Variant | null>(null);
   const [draft, setDraft] = useState(emptyDraft);
+  const previewRef = useRef<HTMLDivElement>(null);
+  const [measured, setMeasured] = useState({ font: "14px", radius: "6px", border: "1px" });
+  useEffect(() => {
+    if (!creating) return;
+    const frame = requestAnimationFrame(() => {
+      const element = previewRef.current?.firstElementChild;
+      if (!element) return;
+      const css = getComputedStyle(element);
+      setMeasured({ font: css.fontSize, radius: css.borderTopLeftRadius, border: css.borderTopWidth });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [creating, draft]);
+  const effectiveShape = draft.style.shape || ({ "0px": "square", "6px": "soft", "12px": "round", "9999px": "pill" } as Record<string, string>)[measured.radius] || "none";
+  const effectiveWidth = draft.style.borderWidth || (measured.border === "0px" ? "0" : measured.border);
+  const effectiveFont = draft.style.fontSize || measured.font;
   const [deleting, setDeleting] = useState<{ group: GroupKey; model: Variant; label: string } | null>(null);
   const [replacement, setReplacement] = useState("");
   const [secondary, setSecondary] = useState<{ group: GroupKey; key: string; label: string; screens: string[] } | null>(null);
@@ -457,11 +472,14 @@ export function CdeWorkspace() {
               <div>
                 <CdeCategoryHeader handle={handle} number={n} title={PARENTS[pk]} open={!collapsedCategories.has(pk)} onToggle={() => setCollapsedCategories((s) => { const next = new Set(s); if (next.has(pk)) next.delete(pk); else next.add(pk); return next; })} />
                 {!collapsedCategories.has(pk) ? (
-                  <CdeSortableList className="cde-subcategory-list space-y-0" ids={subs} labelOf={(k) => baseTitle(GROUPS.find((x) => x.key === k)?.title ?? k)} onMove={(ids) => saveCdeOrder({ ...cdeOrder, subs: { ...cdeOrder.subs, [pk]: ids } })}>
-                    {(key, si, subHandle) => renderGroup(GROUPS.find((x) => x.key === key)!, `${n}.${si + 1}`, n, subHandle)}
+                  <CdeSortableList className="cde-subcategory-list space-y-0" ids={subs} labelOf={(k) => k === "record_number" ? "Números de chamados e tickets" : baseTitle(GROUPS.find((x) => x.key === k)?.title ?? k)} onMove={(ids) => saveCdeOrder({ ...cdeOrder, subs: { ...cdeOrder.subs, [pk]: ids } })}>
+                    {(key, si, subHandle) => {
+                      if (key === "record_number") return <NumericMarkerEditor key={`record-number-${collapseKey}`} kind="record_number" number={`${n}.${si + 1}`} handle={subHandle} />;
+                      const group = GROUPS.find(x => x.key === key);
+                      return group ? renderGroup(group, `${n}.${si + 1}`, n, subHandle) : null;
+                    }}
                   </CdeSortableList>
                 ) : null}
-                {pk === "6" && !collapsedCategories.has(pk) ? <div className="pl-4 sm:pl-8"><NumericMarkerEditor kind="record_number" number={`${n}.${subs.length + 1}`} /></div> : null}
               </div>
             );
           }
@@ -497,7 +515,7 @@ export function CdeWorkspace() {
 
       <Dialog open={!!creating} onOpenChange={(o) => { if (!o) { setCreating(null); setEditing(null); setLibraryEdit(null); } }}>
         <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto" topActions={<CdeDraftSave value={draft} disabled={create.isPending} label="Salvar modelo" onSave={() => { if (creating) create.mutate(creating); }} />}>
-          <DialogHeader className="flex-row items-center justify-between gap-3 space-y-0 pr-8"><DialogTitle>{editing ? "Editar modelo" : "Criar modelo"} · {creating ? groupTitle(creating) : ""}</DialogTitle><div className="flex min-h-12 min-w-24 items-center justify-center px-3 py-2"><Preview v={draft} /></div></DialogHeader>
+          <DialogHeader className="items-stretch gap-3 space-y-0 pr-0"><DialogTitle>{editing ? "Editar modelo" : "Criar modelo"} · {creating ? groupTitle(creating) : ""}</DialogTitle><div ref={previewRef} className="flex min-h-12 min-w-0 max-w-full items-center justify-start overflow-x-auto px-3 py-2"><Preview v={draft} /></div></DialogHeader>
           <div className="grid gap-3 sm:grid-cols-2 [&_:is(input,textarea,button[role=combobox])]:!rounded-none [&_:is(input,textarea,button[role=combobox])]:!border-0 [&_:is(input,textarea,button[role=combobox])]:!border-b [&_:is(input,textarea,button[role=combobox])]:!border-myio-green [&_:is(input,textarea,button[role=combobox])]:!bg-transparent [&_:is(input,textarea,button[role=combobox])]:!px-0 [&_:is(input,textarea,button[role=combobox])]:!shadow-none [&_:is(input,textarea,button[role=combobox])]:!ring-0 [&_textarea]:!border-solid">
             <div className="space-y-1 sm:col-span-2"><Label>Nome do modelo</Label><Input value={draft.name} maxLength={60} onChange={(e) => setDraft({ ...draft, name: e.target.value })} placeholder="Ex.: Campo de busca" /></div>
             <div className="space-y-1"><Label>Tipo</Label>
@@ -505,11 +523,11 @@ export function CdeWorkspace() {
                 <SelectContent>{(creating && FIELD_TAGS[creating] ? FIELD_TAGS[creating] : (creating && NUMBER_MODELS[creating] ? ["span"] : (creating === "box" || creating === "confirm_dialog") ? ["div"] : ["Button", "button"])).map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent></Select></div>
             {!(creating && (FIELD_TAGS[creating] || NUMBER_MODELS[creating])) ? <>
               <div className="space-y-1"><Label>Estilo</Label>
-                <Select value={draft.variant || "none"} onValueChange={(v) => setDraft({ ...draft, variant: v === "none" ? "" : v })}><SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>{VARIANTS.map((v) => <SelectItem key={v || "none"} value={v || "none"}>{v || "Padrão"}</SelectItem>)}</SelectContent></Select></div>
+                <Select value={draft.variant || "default"} onValueChange={(v) => setDraft({ ...draft, variant: v })}><SelectTrigger aria-label="Estilo do modelo"><SelectValue /></SelectTrigger>
+                  <SelectContent>{VARIANTS.map((v) => <SelectItem key={v} value={v}>{v}</SelectItem>)}</SelectContent></Select></div>
               <div className="space-y-1"><Label>Tamanho</Label>
-                <Select value={draft.size || "none"} onValueChange={(v) => setDraft({ ...draft, size: v === "none" ? "" : v })}><SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>{SIZES.map((v) => <SelectItem key={v || "none"} value={v || "none"}>{v || "Padrão"}</SelectItem>)}</SelectContent></Select></div>
+                <Select value={draft.size || "default"} onValueChange={(v) => setDraft({ ...draft, size: v })}><SelectTrigger aria-label="Tamanho do modelo"><SelectValue /></SelectTrigger>
+                  <SelectContent>{SIZES.map((v) => <SelectItem key={v} value={v}>{v}</SelectItem>)}</SelectContent></Select></div>
               <div className="space-y-1"><Label>Ícone</Label>
                 <Select value={draft.icon || "none"} onValueChange={(v) => setDraft({ ...draft, icon: v === "none" ? "" : v })}><SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent><SelectItem value="none">Sem ícone</SelectItem>{Object.keys(ICONS).map((v) => <SelectItem key={v} value={v}>{v}</SelectItem>)}</SelectContent></Select></div>
@@ -518,14 +536,14 @@ export function CdeWorkspace() {
             </> : null}
             {creating && COMMON_ACTION_GROUPS.has(creating) && creating !== "action_standard" ? <div className="space-y-1 sm:col-span-2"><Label>Classificação visual</Label><Select value={draft.style.actionSpecific || (creating === "confirm" && draft.style.actionSpecific !== false) ? "specific" : "standard"} onValueChange={v => setDraft({ ...draft, style: { ...draft.style, actionSpecific: v === "specific" } })}><SelectTrigger aria-label="Classificação visual"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="standard">Padrão visual comum</SelectItem><SelectItem value="specific">Botão de função específica</SelectItem></SelectContent></Select></div> : null}
             <div className="space-y-1"><Label>Forma</Label>
-              <Select value={draft.style.shape || "none"} onValueChange={(v) => setDraft({ ...draft, style: { ...draft.style, shape: v === "none" ? "" : v } })}><SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{FORMS.map((f) => <SelectItem key={f.key || "none"} value={f.key || "none"}>{f.label}</SelectItem>)}</SelectContent></Select></div>
+              <Select value={effectiveShape} onValueChange={(v) => setDraft({ ...draft, style: { ...draft.style, shape: v === "none" ? "" : v } })}><SelectTrigger aria-label="Forma do modelo"><SelectValue /></SelectTrigger>
+                <SelectContent>{effectiveShape === "none" && <SelectItem value="none">{measured.radius} de arredondamento</SelectItem>}{FORMS.filter(f => f.key).map((f) => <SelectItem key={f.key} value={f.key}>{f.label}</SelectItem>)}</SelectContent></Select></div>
             <div className="space-y-1"><Label>Espessura da borda</Label>
-              <Select value={draft.style.borderWidth || "none"} onValueChange={(v) => setDraft({ ...draft, style: { ...draft.style, borderWidth: v === "none" ? "" : v } })}><SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{WIDTHS.map((f) => <SelectItem key={f.key || "none"} value={f.key || "none"}>{f.label}</SelectItem>)}</SelectContent></Select></div>
+              <Select value={effectiveWidth} onValueChange={(v) => setDraft({ ...draft, style: { ...draft.style, borderWidth: v } })}><SelectTrigger aria-label="Espessura da borda do modelo"><SelectValue /></SelectTrigger>
+                <SelectContent>{!WIDTHS.some(f => f.key === effectiveWidth) && <SelectItem value={effectiveWidth}>{effectiveWidth}</SelectItem>}{WIDTHS.filter(f => f.key).map((f) => <SelectItem key={f.key} value={f.key}>{f.label}</SelectItem>)}</SelectContent></Select></div>
             <div className="space-y-1"><Label>{creating === "fields_select" ? "Fonte do campo e das opções" : "Tamanho da fonte"}</Label>
-              <Select value={draft.style.fontSize || "none"} onValueChange={(v) => setDraft({ ...draft, style: { ...draft.style, fontSize: v === "none" ? "" : v } })}><SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent><SelectItem value="none">Padrão</SelectItem>{FONT_SIZES.map((f) => <SelectItem key={f} value={f}>{f.replace("px", " px")}</SelectItem>)}</SelectContent></Select></div>
+              <Select value={effectiveFont} onValueChange={(v) => setDraft({ ...draft, style: { ...draft.style, fontSize: v } })}><SelectTrigger aria-label="Tamanho da fonte do modelo"><SelectValue /></SelectTrigger>
+                <SelectContent>{[...new Set([effectiveFont, ...FONT_SIZES])].map((f) => <SelectItem key={f} value={f}>{f.replace("px", " px")}</SelectItem>)}</SelectContent></Select></div>
             <FontFormatControl context="Modelo" value={draft.style.format ?? {}} onChange={format => setDraft({ ...draft, style: { ...draft.style, format } })} />
             <div className="sm:col-span-2"><FormatColorOptions label="Fundo" value={draft.style.fill ?? "none"} options={FILLS} showCode onChange={(fill) => setDraft({ ...draft, style: { ...draft.style, fill } })} /></div>
             <div className="sm:col-span-2"><FormatColorOptions label="Borda" value={draft.style.border ?? ""} options={[{ key: "none", label: "Sem borda", color: "transparent" }, ...BORDERS] as typeof BORDERS} showCode onChange={(border) => setDraft({ ...draft, style: { ...draft.style, border } })} border /></div>

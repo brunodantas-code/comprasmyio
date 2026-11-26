@@ -1,3 +1,6 @@
+- [x] CDE: opções genéricas Padrão retiradas de estilo, tamanho, forma, borda, fonte, cores dos ícones e altura da Home; valores efetivos exibidos sem modificar escolhas salvas. Listas conferidas no editor real.
+- [x] Pop-ups CDE e demais apps: controles superiores com espaço próprio em Dialog/AlertDialog/Sheet; prévia do modelo abaixo do título. CDE e To Dos conferidos no computador e celular.
+- [x] CDE item 7.3: arraste, fundo, borda, subtítulo e seta de exibir/recolher padronizados; integrado à lista ordenável. Arraste salvo/relido e ordem original restaurada; 27 testes passaram.
 - [x] CDE: formatos ativos destacados; segundo clique remove o formato e pesos retornam ao normal, preservando os demais formatos.
 - [x] CDE: Formatação da Fonte em aparência, modelos, cabeçalhos/listas, títulos dos campos, nomes/legendas dos apps e marcadores; Semi-Negrito, Negrito, Itálico e Sublinhado. Salvamento/reabertura conferidos e aparência original restaurada; 119 testes passaram.
 - [x] CDE: remover Atual/Padrão das listas de aparência e marcar diretamente a opção selecionada, preservando escolhas salvas.

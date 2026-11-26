@@ -64,7 +64,7 @@ const SheetContent = React.forwardRef<
   <SheetPortal>
     <SheetOverlay />
     <SheetPrimitive.Content ref={ref} className={cn(sheetVariants({ side }), className, expanded && popupExpandedClass)} {...props} onCloseAutoFocus={(event) => { setExpanded(false); onCloseAutoFocus?.(event); }}>
-      <div className="sticky top-0 z-30 float-right -mt-2 -mr-2 flex shrink-0 self-end items-start gap-2">
+      <div data-popup-toolbar className="sticky top-0 z-30 mb-4 flex min-h-8 w-full shrink-0 self-end items-start justify-end gap-2">
       <PopupExpandButton expanded={expanded} onToggle={() => setExpanded(value => !value)} />
       <SheetPrimitive.Close className="rounded-sm bg-background p-0.5 outline-none ring-0 focus:ring-0 border-0 shadow-none cursor-pointer opacity-70 transition-opacity hover:opacity-100 focus:outline-none disabled:pointer-events-none">
         <CdeCloseIcon />

@@ -48,7 +48,7 @@ const AlertDialogContent = React.forwardRef<
       {...props}
       onCloseAutoFocus={(event) => { setExpanded(false); onCloseAutoFocus?.(event); }}
     >
-      <div className="pointer-events-none sticky top-0 z-30 -mb-4 flex h-0 items-start justify-end gap-2">
+      <div data-popup-toolbar className="pointer-events-none sticky top-0 z-30 flex min-h-8 shrink-0 items-start justify-end gap-2">
         <PopupExpandButton expanded={expanded} onToggle={() => setExpanded(value => !value)} />
         <AlertDialogPrimitive.Cancel className="pointer-events-auto rounded-sm bg-background p-0.5 opacity-70 transition-opacity hover:opacity-100" aria-label="Fechar" title="Fechar"><CdeCloseIcon /></AlertDialogPrimitive.Cancel>
       </div>
