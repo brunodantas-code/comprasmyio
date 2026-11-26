@@ -5,7 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, arrayMove, horizontalListSortingStrategy, sortableKeyboardCoordinates, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, RotateCcw, Save } from "lucide-react";
+import { GripVertical, RotateCcw, Save, LayoutGrid, ListChecks } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { CdeCategoryHeader } from "./cde-category-header";
 import { TABLE_ORDER_GROUP, useTableColumnOrders, type TableColumnOrders } from "./table-column-order";
 import library from "./table-library.json";
+import { AppSymbol } from "./app-tile";
 
 type Site = { id: string; file: string; line: number; context: string; headers: string[] };
 
@@ -97,7 +98,12 @@ export function CdeTableOrder({ number, handle, embedded }: { number?: number; h
       </div>
       {groups.map(([app, items]) => <div key={app} className="space-y-3">
         <div className="flex min-w-0 items-center justify-between gap-3">
-          <h4 className="min-w-0 text-sm font-medium">{app}</h4>
+          <div className="flex min-w-0 items-center gap-3">
+            <span aria-hidden="true" className="flex h-5 w-5 shrink-0 items-center justify-center text-[var(--cde-palette-black)]">
+              {app === "Central" ? <ListChecks className="h-5 w-5" /> : app === "ERP" ? <LayoutGrid className="h-5 w-5" /> : <AppSymbol name={app} className="h-5 w-5" />}
+            </span>
+            <h4 className="min-w-0 text-sm font-medium">{app}</h4>
+          </div>
           <CdeButton group="toggle" screen="components/cde/cde-table-order.tsx" aria-label={`${expandedApps.has(app) ? "Recolher" : "Exibir"} colunas de ${app}`} title={`${expandedApps.has(app) ? "Recolher" : "Exibir"} colunas de ${app}`} aria-expanded={expandedApps.has(app)} onClick={() => setExpandedApps(current => { const next = new Set(current); if (next.has(app)) next.delete(app); else next.add(app); return next; })} />
         </div>
         {expandedApps.has(app) && items.map(({ site, path }) => <div key={site.id} className="space-y-1 border-l-2 border-border pl-3">
