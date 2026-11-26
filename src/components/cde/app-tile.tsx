@@ -1,19 +1,7 @@
 import type React from "react";
-import { CodeXml, DollarSign, FileSignature, FolderKanban, Lightbulb, Phone, Search, Settings, UsersRound, ChartNoAxesCombined } from "lucide-react";
-import { CrmFunnelIcon } from "@/components/crm-funnel-icon";
-import { MytosisIcon } from "@/components/mytosis-icon";
-import { CdeIcon } from "@/components/cde-icon";
-import { SpendIcon } from "@/components/spend/icons";
+import { CodeXml } from "lucide-react";
+import { APP_ICONS } from "@/lib/app-icons";
 import { APP_ICON_OPTICAL, APP_NAME_COLORS, APP_TILE_DEFAULT, appDisplay, appKeyForName, useAppTile, type AppTileConfig } from "./app-order-config";
-
-const APP_ICONS: Record<string, [React.ComponentType<{ className?: string; style?: React.CSSProperties }>, number]> = {
-  spend: [SpendIcon, 2],
-  supply: [Settings, 1.7], cash_flow: [DollarSign, 3.5], crm: [CrmFunnelIcon, 3], legal: [FileSignature, 1.8], rh: [UsersRound, 1.8],
-  site_survey: [Search, 2.8], chamados: [Phone, 2.4], cde: [CdeIcon, 1.8], mytosis: [MytosisIcon, 1.8], development: [CodeXml, 2.8],
-  wishlist: [Lightbulb, 2],
-  projects: [FolderKanban, 2],
-  indicadores: [ChartNoAxesCombined, 2],
-};
 
 export const APP_DESCRIPTIONS: Record<string, string[]> = {
   spend: ["Gestão de cartões", "e despesas"],

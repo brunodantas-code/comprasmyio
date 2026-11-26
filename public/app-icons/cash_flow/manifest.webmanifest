@@ -1,0 +1,25 @@
+{
+  "name": "myio Finance",
+  "short_name": "Finance",
+  "id": "/cash-flow",
+  "start_url": "/cash-flow",
+  "scope": "/",
+  "display": "standalone",
+  "lang": "pt-BR",
+  "background_color": "#ffffff",
+  "theme_color": "#0fc482",
+  "icons": [
+    {
+      "src": "/app-icons/cash_flow/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/app-icons/cash_flow/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

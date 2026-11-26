@@ -20,6 +20,7 @@ import { useApplyTableFonts } from "@/components/cde/table-fonts-config";
 import { supabase } from "@/integrations/supabase/client";
 import { MobileFavorites } from "@/components/mobile-favorites";
 import { AppAppearanceApplier } from "@/components/cde/app-appearance";
+import { appShortcutHead } from "@/lib/app-shortcuts";
 
 function NotFoundComponent() {
   return (
@@ -81,7 +82,7 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  head: () => ({
+  head: ({ matches }) => ({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
@@ -92,14 +93,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "theme-color", content: "#673ab6" },
-      { name: "apple-mobile-web-app-title", content: "myio ERP" },
+      ...appShortcutHead(matches.at(-1)?.pathname ?? "/").meta,
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
       { name: "twitter:title", content: "Myio Supply — Gestão de Materiais" },
       { name: "twitter:description", content: "Sistema de solicitações de materiais, serviços, viagens e reembolsos com fluxo solicitante, supply e admin." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/89313d40-dc00-4a78-acc5-c6ab73936ae8/id-preview-2de70354--a171bcb5-b49c-49b5-9d4d-a891eb8e614f.lovable.app-1784000007084.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/89313d40-dc00-4a78-acc5-c6ab73936ae8/id-preview-2de70354--a171bcb5-b49c-49b5-9d4d-a891eb8e614f.lovable.app-1784000007084.png" },
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -112,11 +111,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "icon", href: "/favicon.png", type: "image/png" },
-      { rel: "manifest", href: "/manifest.webmanifest" },
-      { rel: "apple-touch-icon", href: "/apple-touch-icon.png", sizes: "180x180" },
-      { rel: "apple-touch-icon", href: "/icon-192.png", sizes: "192x192" },
-      { rel: "apple-touch-icon", href: "/icon-512.png", sizes: "512x512" },
+      ...appShortcutHead(matches.at(-1)?.pathname ?? "/").links,
     ],
   }),
   shellComponent: RootShell,

@@ -1,0 +1,25 @@
+{
+  "name": "myio Mytosis",
+  "short_name": "Mytosis",
+  "id": "/mytosis",
+  "start_url": "/mytosis",
+  "scope": "/",
+  "display": "standalone",
+  "lang": "pt-BR",
+  "background_color": "#ffffff",
+  "theme_color": "#0fc482",
+  "icons": [
+    {
+      "src": "/app-icons/mytosis/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/app-icons/mytosis/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
