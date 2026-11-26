@@ -224,6 +224,8 @@ function DevelopmentPage() {
     <div className="min-h-screen bg-background">
       <AppHeader manualApp="Code" logo={<MyioAppLogo appName="Code" className="text-base sm:text-2xl" />} />
       <main className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6">
+        <Card>
+          <CardHeader>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h1 className="flex items-center gap-2 text-3xl font-extrabold"><CodeXml className="h-8 w-8" />Tickets</h1>
@@ -232,8 +234,6 @@ function DevelopmentPage() {
           <NewTicketDialog open={createOpen} onOpenChange={setCreateOpen} userId={data?.userId} onCreated={() => queryClient.invalidateQueries({ queryKey: ["development-tickets"] })} />
         </div>
 
-        <Card>
-          <CardHeader>
             <CardTitle>Acompanhamento</CardTitle>
             <CardDescription>{data?.isAdmin ? "Todos os tickets abertos na plataforma." : "Tickets abertos por você ou atribuídos a você."}</CardDescription>
           </CardHeader>

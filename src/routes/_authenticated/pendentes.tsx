@@ -44,6 +44,7 @@ function PendentesPage() {
     <div className="min-h-screen bg-background">
       <AppHeader logo={<MyioLogo className="text-xl sm:text-2xl" label={null} />} />
       <main className="mx-auto max-w-7xl px-3 py-5 sm:px-6 sm:py-8">
+        <section className="erp-screen-block">
         <div className="mb-6">
           <h1 className="flex min-w-0 items-center gap-2 break-words text-2xl font-bold"><Bell className="h-6 w-6 shrink-0" />Central de Pendências</h1>
           <p className="mt-1 text-sm text-muted-foreground">Ações que dependem de você...</p>
@@ -75,6 +76,7 @@ function PendentesPage() {
           </div>
         )}
         </>}
+        </section>
       </main>
     </div>
   );

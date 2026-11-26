@@ -804,6 +804,10 @@ input[data-custom-calendar="true"]::-webkit-calendar-picker-indicator {
   overflow: clip;
 }
 .cde-category-list > div + div { border-top: 1px solid var(--border); }
+.cde-category-block { min-width: 0; border: 1px solid var(--border); border-radius: 8px; overflow: clip; background: var(--card); }
+.cde-category-block > .cde-category-list { border: 0; border-top: 1px solid var(--border); border-radius: 0; }
+.erp-screen-block { min-width: 0; border: 1px solid var(--border); border-radius: 8px; background: var(--card); padding: 16px; }
+@media (min-width: 640px) { .erp-screen-block { padding: 24px; } }
 .cde-cat-band { background: var(--cde-cat-bg, transparent); border-color: var(--cde-cat-border, var(--border)); }
 .cde-category-list .cde-cat-band:has([aria-expanded="false"]) { border-bottom-width: 0; }
 .cde-cat-title { color: var(--cde-cat-text, inherit); font-size: var(--cde-cat-title-fs, 0.875rem); font-family: var(--cde-cat-font, inherit); }
@@ -829,8 +833,8 @@ input[data-custom-calendar="true"]::-webkit-calendar-picker-indicator {
 .cde-section-title {
   margin: 0;
   color: var(--cde-sub-text, var(--foreground));
-  font-family: var(--cde-sub-font, inherit);
-  font-size: var(--cde-section-title-fs, 1rem);
+  font-family: var(--cde-cat-font, inherit);
+  font-size: var(--cde-cat-title-fs, 0.875rem);
   font-weight: 400;
   line-height: 1.5;
 }
@@ -875,6 +879,24 @@ input[data-custom-calendar="true"]::-webkit-calendar-picker-indicator {
 
 .cde-model-section { border: 1px solid var(--cde-sub-border, var(--border)); border-radius: 6px; background: var(--card); }
 .cde-model-section > .cde-sub-band { border-bottom: 1px solid var(--cde-sub-border, var(--border)); border-radius: 5px 5px 0 0; background: var(--cde-sub-bg, var(--erp-section-head)); box-shadow: none; }
-.cde-model-section + .cde-model-section { margin-top: 16px; }
-.cde-category-sections > .cde-cat-band + div > .cde-section:first-child { border-top: 0; border-radius: 0 0 6px 6px; }
-.cde-category-sections > .cde-cat-band + div > .cde-section:first-child > .cde-section-header { border-radius: 0; }
+/* The outer list owns the continuous outline. Internal sections own only one
+   divider per boundary, never another side outline or rounded corner. */
+.cde-category-list .cde-section,
+.cde-category-list .cde-model-section {
+  border: 0;
+  border-radius: 0;
+  margin-block: 0;
+}
+.cde-category-list .cde-section-header,
+.cde-category-list .cde-model-section > .cde-sub-band { border-radius: 0; }
+.cde-category-list .cde-model-section > .cde-sub-band:has([aria-expanded="false"]) { border-bottom: 0; }
+.cde-category-list .cde-category-sections > div:has(> .cde-section) { margin-block: 0; }
+.cde-category-list .cde-section + .cde-section { border-top: 1px solid var(--cde-sub-border, var(--border)); }
+.cde-category-list .cde-subcategory-list { padding: 0; }
+.cde-category-list .cde-subcategory-list > div + div { border-top: 1px solid var(--cde-sub-border, var(--border)); }
+
+/* Monochrome branding only: attachment and application-icon pixels stay intact. */
+:root[data-app-appearance="grayscale"] [data-myio-logo-tone="dark"] { filter: brightness(0); }
+:root[data-app-appearance="grayscale"] [data-myio-logo-tone="light"] { filter: brightness(0) invert(1); }
+:root[data-app-appearance="grayscale"] [data-appearance-reference] { filter: grayscale(1); }
+:root[data-app-appearance="grayscale"] .cde-section:is([aria-label="Favicons e ícones de atalhos"], [aria-label="Arquivos oficiais da marca"]) img { filter: grayscale(1); }

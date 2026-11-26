@@ -336,7 +336,7 @@ export function CdeWorkspace() {
         return (
           <section className={cn(parent ? "cde-model-section min-w-0" : "min-w-0 cde-category-sections")}>
             {!parent ? <CdeCategoryHeader handle={handle} number={num} title={g.title.split(" ").slice(1).join(" ")} hint={`${list.length} modelos · ${g.hint}`} open={isOpen} onToggle={() => setOpen((s) => { const n = new Set(s); if (n.has(g.key)) n.delete(g.key); else n.add(g.key); return n; })} action={<CdeButton group="plus" screen="components/cde/cde-workspace.tsx" title="Criar modelo" aria-label={`Criar modelo em ${g.title}`} onClick={() => { setDraft({ ...emptyDraft, tag: (g.key === "box" || g.key === "confirm_dialog") ? "div" : "Button" }); setCreating(g.key); }} />} /> : <div className="cde-sub-band flex items-center gap-3 px-5 py-2">{handle}
-              <button type="button" aria-expanded={isOpen} onClick={() => setOpen((s) => { const n = new Set(s); if (n.has(g.key)) n.delete(g.key); else n.add(g.key); return n; })} className="flex min-w-0 flex-1 items-center gap-4 text-left">
+              <Button cdeNative actionKind="specific" variant="ghost" type="button" aria-expanded={isOpen} onClick={() => setOpen((s) => { const n = new Set(s); if (n.has(g.key)) n.delete(g.key); else n.add(g.key); return n; })} className="!flex !h-auto !min-w-0 flex-1 items-center !justify-start gap-4 !bg-transparent !p-0 text-left whitespace-normal">
                 <span className="flex flex-col">
                   <CdeNumber subcategory={!!parent}>{num}</CdeNumber>
                 </span>
@@ -344,7 +344,7 @@ export function CdeWorkspace() {
                   <span className="cde-section-title block font-normal">{g.title.split(" ").slice(1).join(" ")}</span>
                   <span className="cde-sub-hint mt-0.5 block">{list.length} modelos · {g.hint}</span>
                 </span>
-              </button>
+              </Button>
               <CdeButton group="plus" screen="components/cde/cde-workspace.tsx" title="Criar modelo" aria-label={`Criar modelo em ${g.title}`} onClick={() => { setDraft({ ...emptyDraft, tag: FIELD_TAGS[g.key]?.[0] ?? (NUMBER_MODELS[g.key] ? "span" : (g.key === "box" || g.key === "confirm_dialog") ? "div" : "Button"), label: NUMBER_MODELS[g.key] ? "1" : "" }); setCreating(g.key); }} />
               <CdeButton group="toggle" screen="components/cde/cde-workspace.tsx" title={`${isOpen ? "Recolher" : "Exibir"} ${g.title}`} aria-label={`${isOpen ? "Recolher" : "Exibir"} ${g.title}`} aria-expanded={isOpen} onClick={() => setOpen((s) => { const n = new Set(s); if (n.has(g.key)) n.delete(g.key); else n.add(g.key); return n; })} />
             </div>}
@@ -440,9 +440,10 @@ export function CdeWorkspace() {
 
   return (
     <main style={cdeAppearanceVars(appearance)} className="app-workspace mx-auto max-w-7xl space-y-4 overflow-x-clip px-4 py-6 sm:px-6">
-      <div>
-        <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-xl font-semibold">Ambiente de Desenvolvimento Colaborativo</h1>
+      <section className="cde-category-block" aria-label="Ambiente de Desenvolvimento Colaborativo">
+      <div className="p-4 sm:p-6">
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+        <h1 className="min-w-0 break-words text-xl font-semibold">Ambiente de Desenvolvimento Colaborativo</h1>
         <div className="flex min-w-0 items-center gap-3">
         <Button type="button" variant="ghost" size="sm" className="shrink-0 gap-1 text-xs" title="Recolher tudo" aria-label="Recolher tudo" onClick={() => { setOpen(new Set()); setCollapsedCategories(new Set(Object.keys(PARENTS))); setExpandedWhere(new Set()); setExpandedHistory(new Set()); setCollapseKey((k) => k + 1); }}><ChevronsDownUp className="h-4 w-4" />Recolher tudo</Button>
         </div>
@@ -459,7 +460,7 @@ export function CdeWorkspace() {
               <div>
                 <CdeCategoryHeader handle={handle} number={n} title={PARENTS[pk]} open={!collapsedCategories.has(pk)} onToggle={() => setCollapsedCategories((s) => { const next = new Set(s); if (next.has(pk)) next.delete(pk); else next.add(pk); return next; })} />
                 {!collapsedCategories.has(pk) ? (
-                  <CdeSortableList className="space-y-0 py-2 pl-4 sm:pl-8" ids={subs} labelOf={(k) => baseTitle(GROUPS.find((x) => x.key === k)?.title ?? k)} onMove={(ids) => saveCdeOrder({ ...cdeOrder, subs: { ...cdeOrder.subs, [pk]: ids } })}>
+                  <CdeSortableList className="cde-subcategory-list space-y-0" ids={subs} labelOf={(k) => baseTitle(GROUPS.find((x) => x.key === k)?.title ?? k)} onMove={(ids) => saveCdeOrder({ ...cdeOrder, subs: { ...cdeOrder.subs, [pk]: ids } })}>
                     {(key, si, subHandle) => renderGroup(GROUPS.find((x) => x.key === key)!, `${n}.${si + 1}`, n, subHandle)}
                   </CdeSortableList>
                 ) : null}
@@ -496,6 +497,7 @@ export function CdeWorkspace() {
           return renderGroup(GROUPS.find((x) => x.key === cat)!, n, null, handle);
         }}
       </CdeSortableList>
+      </section>
 
       <Dialog open={!!creating} onOpenChange={(o) => { if (!o) { setCreating(null); setEditing(null); setLibraryEdit(null); } }}>
         <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto" topActions={<CdeDraftSave value={draft} disabled={create.isPending} label="Salvar modelo" onSave={() => { if (creating) create.mutate(creating); }} />}>

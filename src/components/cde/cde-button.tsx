@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import addTextUsage from "./add-text-usage.json";
 import { ICONS, styleOf, type CdeStyle } from "./cde-render";
 import { COMMON_ACTION_GROUPS, isSpecificAction } from "./action-standard";
+import { sequentialNumberIsPlain } from "./number-display";
 
 /** Grupos do CDE que já trocam ao vivo nas telas. */
 export type CdeGroup = "action_standard" | "filter" | "plus" | "box" | "number_section" | "number_subsection" | "fields_select" | "confirm_dialog" | "close" | "toggle" | "color_swatch" | "send" | "attach" | "clear" | "organize" | "restricted";
@@ -163,21 +164,20 @@ export function useCdeNumberStyle(screen?: string, subcategory = false) {
   const { data } = useCdeStandards();
   const m = resolveCdeModel(data, subcategory ? "number_subsection" : "number_section", screen);
   const { css, cls } = styleOf(m.style);
-  return { css, className: cn("inline-flex h-7 min-w-7 shrink-0 items-center justify-center px-1 text-sm font-bold tabular-nums", subcategory && "text-xs", m.className, cls) };
+  const circular = m.style?.shape === "circle" || (!m.style?.shape && m.className.includes("rounded-full"));
+  return { css, className: cn("inline-flex h-7 min-w-7 shrink-0 items-center justify-center px-1 text-sm font-bold tabular-nums", subcategory && "text-xs", m.className, cls, circular && "!size-7 !min-w-7 !p-0") };
 }
 
 export function CdeNumber({ children, subcategory = false, unframed = false, screen = "components/cde/cde-workspace.tsx", className, ...props }: React.ComponentProps<"span"> & { subcategory?: boolean; unframed?: boolean; screen?: string }) {
   const look = useCdeNumberStyle(screen, subcategory);
-  if(unframed)return <span {...props} data-cde-number-plain="" className={cn("inline-flex shrink-0 items-center text-sm font-normal text-foreground tabular-nums",className)}>{children}</span>;
-  const sequence=typeof children==="string"&&/^\d+(?:\.\d+)+$/.test(children)?children:null;
-  if(sequence){const separator=sequence.indexOf(".");return <span {...props} data-cde-number-sequence="" className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap tabular-nums"><span data-cde-number="" style={look.css} className={cn(look.className,className)}>{sequence.slice(0,separator)}</span><span className="text-sm font-normal text-foreground">{sequence.slice(separator)}</span></span>;}
+  if (unframed || sequentialNumberIsPlain(children)) return <span {...props} data-cde-number-plain="" className={cn("inline-flex shrink-0 items-center whitespace-nowrap text-sm font-normal text-foreground tabular-nums", className)}>{children}</span>;
   return <span {...props} data-cde-number="" style={look.css} className={cn(look.className, className)}>{children}</span>;
 }
 
 /** Numeric drag/edit controls keep their behavior but use the same look as passive numbers. */
 export function CdeNumberButton({ children, screen, subcategory = false, className, ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { screen: string; subcategory?: boolean }) {
   const look = useCdeNumberStyle(screen, subcategory);
-  if(typeof children==="string"&&/^\d+(?:\.\d+)+$/.test(children))return <Button {...props} type={props.type??"button"} variant="ghost" className="!h-auto !min-w-0 !bg-transparent !p-0"><CdeNumber screen={screen} subcategory={subcategory} className={className}>{children}</CdeNumber></Button>;
+  if (sequentialNumberIsPlain(children)) return <Button {...props} type={props.type ?? "button"} variant="ghost" data-cde-number-plain="" className={cn("!h-auto !min-w-0 !bg-transparent !p-0 whitespace-nowrap text-sm font-normal text-foreground tabular-nums", className)}>{children}</Button>;
   return <Button {...props} type={props.type ?? "button"} variant="ghost" data-cde-number="" style={look.css} className={cn(look.className, "p-0", className)}>{children}</Button>;
 }
 

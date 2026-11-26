@@ -14,3 +14,4 @@
 
 - DialogContent topActions holds existing upper Save controls in the same sticky row as expand/close; preserve form targets and leave inline/footer saves in place.
 - Shared Button `link` variant never paints a filled background: transparent surface, foreground text, underlined name, green only on hover — the Supply "Anexos" standard. Attachment and file-name lists follow it instead of green pills; a filled action look comes only from a CDE action standard.
+- Badge exposes data-cde-tag so the reversible appearance overlay can distinguish tag colour exceptions from ordinary interface text.

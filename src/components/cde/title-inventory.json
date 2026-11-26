@@ -73,16 +73,16 @@
  },
  {
   "kind": "subtitulo",
-  "text": "Approvals concluídos no myio supply.",
+  "text": "Approvals criados por você que ainda aguardam a conclusão da aprovação.",
   "files": [
-   "components/cash-flow/payables-tab.tsx"
+   "components/approval-workflow.tsx"
   ]
  },
  {
   "kind": "subtitulo",
-  "text": "Approvals criados por você que ainda aguardam a conclusão da aprovação.",
+  "text": "Approvals do Supply e despesas aprovadas no Spend.",
   "files": [
-   "components/approval-workflow.tsx"
+   "components/cash-flow/payables-tab.tsx"
   ]
  },
  {

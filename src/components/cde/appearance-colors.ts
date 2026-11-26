@@ -15,14 +15,20 @@ export function isContextualAppearanceColor(value: string): boolean {
 }
 const toOklch = converter("oklch");
 const BASES = { green: toOklch("#0fc482"), purple: toOklch("#673ab6") };
+export function isRedAppearanceColor(value: string): boolean {
+  const parsed = parse(value);
+  if (!parsed) return false;
+  const color = toOklch(parsed);
+  const minChroma = color.l >= 0.85 ? 0.004 : 0.025;
+  return color.h !== undefined && color.c >= minChroma && (color.h <= 32 || color.h >= 345);
+}
 /** Always convert the original colour, never the previous display conversion. */
-export function convertAppearanceColor(value: string, appearance: AppAppearance): string {
+export function convertAppearanceColor(value: string, appearance: AppAppearance, preserveRed = true): string {
   const parsed = parse(value);
   if (!parsed) return value;
   const color = toOklch(parsed);
   const minChroma = color.l >= 0.85 ? 0.004 : 0.025;
-  const isRedAlert = color.h !== undefined && color.c >= minChroma && (color.h <= 45 || color.h >= 345);
-  if (isRedAlert) return value;
+  if (preserveRed && isRedAppearanceColor(value)) return value;
   if (appearance === "grayscale") {
     const isDarkLandingPurple = color.h !== undefined && color.h >= 265 && color.h <= 330 && color.c >= minChroma && color.l < 0.32;
     return formatCss({ ...color, l: isDarkLandingPurple ? 0 : color.l, c: 0 });

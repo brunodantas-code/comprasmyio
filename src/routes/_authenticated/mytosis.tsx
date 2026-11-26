@@ -71,8 +71,10 @@ function MytosisPage() {
     <div className="min-h-screen bg-background">
       <AppHeader manualApp="Mytosis" logo={<MyioAppLogo appName="Mytosis" className="text-xl sm:text-2xl" />} />
       <main className={`mx-auto max-w-[1500px] px-4 pb-28 pt-6 sm:px-6 ${ml.main}`}>
+        <section className="erp-screen-block space-y-5">
         {section === "flow" ? <Flowchart process data={data} canEdit={canEdit} objectiveId={currentObjective} onObjectiveChange={setObjectiveId} focusLocator={focusLocator} onFocusHandled={() => setFocusLocator(null)} openDialog={setDialog} /> : null}
         {section === "processes" ? <ProcessesTab data={data} canEdit={canEdit} /> : null}
+        </section>
       </main>
       <BoxTaskDialog selection={pendingTask} onSelect={setPendingTask} onClose={() => setPendingTask(null)} data={data} canEdit={canEdit} />
       <NodeDialog state={dialog} onClose={() => setDialog(null)} data={data} canEdit={canEdit} />

@@ -46,12 +46,14 @@ function CashFlowPage() {
     <div className="min-h-screen bg-background">
       <AppHeader manualApp="Finance" logo={<MyioCashFlowLogo className="text-xl sm:text-2xl" />} />
       <main className={`mx-auto max-w-[1500px] px-4 pb-28 pt-6 sm:px-6 ${ml.main}`}>
+        <section className="erp-screen-block">
         <p className="mb-6 text-muted-foreground">Planejamento, pagamentos e posição bancária em um só lugar.</p>
         <Tabs value={section} onValueChange={setSection} className="space-y-5">
           <TabsContent value="payables"><PayablesTab userId={user.id} /></TabsContent>
           <TabsContent value="accounts"><ChartOfAccountsTab userId={user.id} /></TabsContent>
           <TabsContent value="cash"><CashRegisterTab userId={user.id} /></TabsContent>
         </Tabs>
+        </section>
       </main>
       <AppNavigation className={ml.nav} aria-label="Navegação do Finance">
         <div className={`mx-auto grid max-w-md grid-cols-3 items-stretch rounded-[1.75rem] border border-border bg-card/95 p-1.5 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-card/90 ${ml.grid}`}>

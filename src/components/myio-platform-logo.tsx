@@ -11,13 +11,14 @@ export function MyioPlatformLogo({ className, tone = "auto" }: Props) {
   if (tone === "auto") {
     return (
       <span className={cn("inline-flex items-center", className)}>
-        <img src={logoLightSrc} alt="myio" className="h-full w-auto select-none dark:hidden" draggable={false} />
-        <img src={logoDark.url} alt="myio" className="hidden h-full w-auto select-none dark:block" draggable={false} />
+        <img data-myio-logo-tone="dark" src={logoLightSrc} alt="myio" className="h-full w-auto select-none dark:hidden" draggable={false} />
+        <img data-myio-logo-tone="light" src={logoDark.url} alt="myio" className="hidden h-full w-auto select-none dark:block" draggable={false} />
       </span>
     );
   }
   return (
     <img
+      data-myio-logo-tone={tone}
       src={tone === "light" ? logoDark.url : logoLightSrc}
       alt="myio"
       className={cn("h-auto w-auto select-none", className)}

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { APP_APPEARANCE_GROUP, convertAppearanceColor, isContextualAppearanceColor, parseAppAppearance, type AppAppearance } from "./appearance-colors";
+import { APP_APPEARANCE_GROUP, convertAppearanceColor, isContextualAppearanceColor, isRedAppearanceColor, parseAppAppearance, type AppAppearance } from "./appearance-colors";
 
 export const APP_APPEARANCE_QUERY = ["cde-app-appearance"];
 export function useAppAppearance() {
@@ -31,15 +31,18 @@ export function mountAppAppearance(appearance: AppAppearance) {
     sheet.textContent = "";
     const styles = getComputedStyle(root);
     const rules: string[] = [];
+    const redRules: string[] = [];
     for (const name of styles) {
       if (!name.startsWith("--") || name.startsWith("--appearance-reference")) continue;
       const original = styles.getPropertyValue(name).trim();
       if (!original || isContextualAppearanceColor(original) || !CSS.supports("color", original)) continue;
+      const source = resolve(original);
+      if (appearance === "grayscale" && isRedAppearanceColor(source)) redRules.push(`${name}:${source} !important`);
       const converted = appearance === "purple" && ["--primary-foreground", "--sidebar-primary-foreground"].includes(name)
-        ? "oklch(1 0 0)" : convertAppearanceColor(resolve(original), appearance);
+        ? "oklch(1 0 0)" : convertAppearanceColor(source, appearance, appearance !== "grayscale");
       rules.push(`${name}:${converted} !important`);
     }
-    sheet.textContent = `:root{${rules.join(";")}}`;
+    sheet.textContent = `:root{${rules.join(";")}}${redRules.length ? `:root[data-app-appearance="grayscale"] :is([data-cde-tag], [data-numeric-marker="alert_marker"]){${redRules.join(";")}}` : ""}`;
   };
   refreshTokens();
   const originals = new Map<Element, Map<string, { source: string; output: string }>>();
@@ -54,7 +57,8 @@ export function mountAppAppearance(appearance: AppAppearance) {
       if (records.get(key)?.output === current) continue;
       records.delete(key);
       if (!current || isContextualAppearanceColor(current) || current.includes("var(") || !CSS.supports("color", current)) continue;
-      const output = convertAppearanceColor(resolve(current), appearance);
+      const preserveRed = appearance !== "grayscale" || Boolean(element.closest('[data-cde-tag], [data-numeric-marker="alert_marker"]'));
+      const output = convertAppearanceColor(resolve(current), appearance, preserveRed);
       if (output === current) continue;
       // Browsers may normalize assigned CSS; compare the actual serialized output on the next mutation.
       if (attr) element.setAttribute(name, output);

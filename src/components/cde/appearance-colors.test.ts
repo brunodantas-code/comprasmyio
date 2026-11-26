@@ -44,6 +44,19 @@ describe("De-Para de Aparência", () => {
     }
     expect(rgb(convertAppearanceColor("rgba(15,196,130,0.4)", "grayscale"))?.alpha).toBe(0.4);
   });
+  it("P&B preserves red only for tags and notification markers", () => {
+    expect(convertAppearanceColor("#dc2626", "grayscale", true)).toBe("#dc2626");
+    const ordinary = rgb(convertAppearanceColor("#dc2626", "grayscale", false));
+    expect(ordinary?.r).toBeCloseTo(ordinary?.g ?? -1, 5);
+    expect(ordinary?.g).toBeCloseTo(ordinary?.b ?? -1, 5);
+  });
+  it("P&B never preserves orange, green or purple as alert exceptions", () => {
+    for (const color of ["#c2410c", "#0fc482", "#673ab6"]) {
+      const result = rgb(convertAppearanceColor(color, "grayscale", true));
+      expect(result?.r).toBeCloseTo(result?.g ?? -1, 5);
+      expect(result?.g).toBeCloseTo(result?.b ?? -1, 5);
+    }
+  });
   it("P&B transforma o roxo escuro da landing em preto sem apagar o roxo myio comum", () => {
     for (const value of ["#0b0023", "oklch(0.18 0.09 300)", "oklch(0.27 0.12 300)"]) {
       const result = rgb(convertAppearanceColor(value, "grayscale"));

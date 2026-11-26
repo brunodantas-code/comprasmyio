@@ -35,8 +35,10 @@ function AccessPage() {
   return <div className="min-h-screen bg-background">
     <AppHeader logo={<MyioPlatformLogo className="h-10" />} />
     <main className="mx-auto max-w-7xl space-y-6 px-3 py-6 sm:px-6 sm:py-8">
+      <section className="erp-screen-block space-y-6">
       <h1 className="flex items-center gap-2 text-2xl font-bold"><ShieldCheck className="size-6 shrink-0" />Acessos</h1>
       <AccessWorkspace capabilities={capabilities} section={search.section} app={search.app} onChange={change => void navigate({ search: change })} />
+      </section>
     </main>
   </div>;
 }

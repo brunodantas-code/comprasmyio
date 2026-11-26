@@ -40,8 +40,8 @@ export function PendingGroups({ items, leading }: { items: PendingGroupItem[]; l
   }, [items, groupBy]);
   const toggle = (k: string) => setOpen((s) => { const n = new Set(s); if (n.has(k)) n.delete(k); else n.add(k); return n; });
   const changeGroup = (value: GroupBy) => { setGroupBy(value); setOpen(new Set()); };
-  return <div className="space-y-2">
-    <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:flex sm:justify-between">
+  return <div className="overflow-hidden rounded-md border border-border bg-card">
+    <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b border-border p-4 sm:flex sm:justify-between">
       <h2 id="pending-title" className="flex min-w-0 items-center gap-2 text-xl font-bold"><Bell className="h-5 w-5 shrink-0" /><span className="min-w-0 break-words">Minhas pendências</span></h2>
       <div className="sm:hidden"><DropdownMenu><DropdownMenuTrigger asChild><Button type="button" variant="ghost" size="compactIcon" aria-label="Agrupar pendências" title="Agrupar por"><ListFilter /></Button></DropdownMenuTrigger><DropdownMenuContent align="end"><DropdownMenuRadioGroup value={groupBy} onValueChange={value => { if (value === "app" || value === "requester") changeGroup(value); }}><DropdownMenuRadioItem value="app">App</DropdownMenuRadioItem><DropdownMenuRadioItem value="requester">Solicitante</DropdownMenuRadioItem></DropdownMenuRadioGroup></DropdownMenuContent></DropdownMenu></div>
     <div className="hidden shrink-0 items-center justify-end gap-2 text-xs text-muted-foreground sm:flex">
@@ -51,7 +51,7 @@ export function PendingGroups({ items, leading }: { items: PendingGroupItem[]; l
       ))}
     </div>
     </header>
-    <div className="divide-y divide-border overflow-hidden rounded-md border border-border bg-card">
+    <div className="divide-y divide-border">
       {leading}
       {groups.map(([name, rows]) => {
         const isOpen = open.has(name);

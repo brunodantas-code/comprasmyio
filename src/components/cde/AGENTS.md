@@ -3,7 +3,7 @@
 - Live swap: screens render finalized groups through CdeButton (cde-button.tsx), which reads cde_selected at runtime (readable by all authenticated users); convert a group's screens to CdeButton once its standard is chosen and others excluded, and add the group to CdeGroup.
 - CDE numbering uses separate number_section/number_subsection standards through CdeNumber; main_menu stores ordered/hidden action IDs in cde_selected.variant_key and AppHeader reads them without changing action permissions or the standalone home button.
 - Use CdeCategoryHeader for every top-level CDE category so titles stay unframed and only subcategories use green bands.
-- Internal CDE configuration groups use CdeSection and live cde_appearance subcategory tokens; dialog saves use topActions with CdeDraftSave to keep the close/save row aligned and unchanged drafts disabled.
+- CdeSection uses live cde_appearance tokens and category typography; the category list owns the outline and gapless dividers. Dialog saves use topActions/CdeDraftSave for aligned close/save and unchanged-draft disabling.
 - Filter usage counts expand shared controls into logical consumer sites using filter-usage.json; exclude embedded editors and unused definitions, and validate this ledger against source when filter sites change.
 - useTableFilters consumers render the shared summary outside headers; ActiveFilterTags identifies/removes each condition without changing predicates or exports, and CDE previews the same control.
 - Model edits update custom IDs in place; inventory edits become custom models while preserving selected references and replacement history; UPDATE policies remain ERP-admin-only.
@@ -26,6 +26,7 @@
 - Library bindings use cde_selected.button_bindings keyed by stable source-site ID (legacy label fallback); explicit modelKey replaces appearance per use or chosen set, while dynamic content remains intact.
 - Inventory and Vite instrumentation share the same TSX site parser; native controls keep their original rendering until explicitly bound, preventing unrelated visual changes.
 - Numbering counts come from scan-cde-numbering.ts and number-usage.json; count actual source sites per hierarchy, not fabricated repetitions from rendered records.
+- CdeNumber/CdeNumberButton share number-display.ts; preserve full values and independent record/alert markers.
 - Library descriptions/counts use library-details.ts: distinguish one source site from equal-label/group sites and never estimate runtime row repetitions.
 - library-models.ts groups matching content/appearance/model identities, preserves unknown custom styles separately, and expands card edits/selections to every member ID.
 - Landing and portal share app ordering via public_app_order(), a narrow public read exposing only the order array, never other CDE records.

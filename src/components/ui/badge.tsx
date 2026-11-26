@@ -41,7 +41,7 @@ function Badge({ className, variant, style, children, cdeLook, ...props }: Badge
   const greenBase = !variant || variant === "default" || variant === "status" || /\bbg-(?:primary|myio-green|code-attended|status|green|emerald)(?:\b|\/)/.test(className ?? "");
   const look = greenBase ? { bg: "transparente", text: "preto", ...savedLook } : savedLook;
   const shown = r && cdeLook === undefined && r.text !== plain && (typeof children === "string" || typeof children === "number" || Array.isArray(children)) ? r.text : children;
-  return <div className={cn(badgeVariants({ variant }), className)} style={look ? { ...style, ...tagCss(look) } : style} {...props}>{shown}</div>;
+  return <div data-cde-tag="" className={cn(badgeVariants({ variant }), className)} style={look ? { ...style, ...tagCss(look) } : style} {...props}>{shown}</div>;
 }
 
 export { Badge, badgeVariants };

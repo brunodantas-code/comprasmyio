@@ -17,9 +17,9 @@ export function MyioLogo({ className, tone = "auto", label = "supply" }: Props) 
   return (
     <span className={cn("inline-flex items-end", className)}>
       {tone === "auto" ? <>
-        <img src={logoLightSrc} alt="myio" className="h-auto w-auto select-none dark:hidden" style={{ height: "1.5em" }} draggable={false} />
-        <img src={logoDark.url} alt="myio" className="hidden h-auto w-auto select-none dark:block" style={{ height: "1.5em" }} draggable={false} />
-      </> : <img src={tone === "light" ? logoDark.url : logoLightSrc} alt="myio" className="h-auto w-auto select-none" style={{ height: "1.5em" }} draggable={false} />}
+        <img data-myio-logo-tone="dark" src={logoLightSrc} alt="myio" className="h-auto w-auto select-none dark:hidden" style={{ height: "1.5em" }} draggable={false} />
+        <img data-myio-logo-tone="light" src={logoDark.url} alt="myio" className="hidden h-auto w-auto select-none dark:block" style={{ height: "1.5em" }} draggable={false} />
+      </> : <img data-myio-logo-tone={tone} src={tone === "light" ? logoDark.url : logoLightSrc} alt="myio" className="h-auto w-auto select-none" style={{ height: "1.5em" }} draggable={false} />}
     </span>
   );
 }

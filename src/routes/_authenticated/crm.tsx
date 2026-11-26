@@ -51,7 +51,7 @@ function CrmPage() {
     <div className="min-h-screen bg-background">
       <AppHeader logo={<MyioAppLogo appName="CRM" className="text-xl sm:text-2xl" />} />
       <main className={`mx-auto max-w-[1500px] px-4 pb-28 pt-6 sm:px-6 ${ml.main}`}>
-        <Suspense fallback={<p className="text-muted-foreground">Carregando...</p>}><CrmWorkspace section={section} /></Suspense>
+        <section className="erp-screen-block"><Suspense fallback={<p className="text-muted-foreground">Carregando...</p>}><CrmWorkspace section={section} /></Suspense></section>
       </main>
       <AppNavigation className={ml.nav} aria-label="Navegação do CRM">
         <div className={`mx-auto grid max-w-3xl grid-cols-8 items-stretch rounded-[1.75rem] border border-border bg-card/95 p-1.5 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-card/90 ${ml.grid}`}>

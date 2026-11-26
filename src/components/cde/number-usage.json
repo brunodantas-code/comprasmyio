@@ -1,22 +1,22 @@
 [
   {
     "file": "components/cde/cde-app-order.tsx",
-    "line": 28,
+    "line": 32,
     "group": "number_section"
   },
   {
     "file": "components/cde/cde-appearance-item.tsx",
-    "line": 55,
+    "line": 53,
     "group": "number_section"
   },
   {
     "file": "components/cde/cde-appearance-item.tsx",
-    "line": 56,
+    "line": 54,
     "group": "number_subsection"
   },
   {
     "file": "components/cde/cde-button-library.tsx",
-    "line": 149,
+    "line": 150,
     "group": "number_subsection"
   },
   {
@@ -26,12 +26,12 @@
   },
   {
     "file": "components/cde/cde-corporate-messages.tsx",
-    "line": 28,
+    "line": 29,
     "group": "number_section"
   },
   {
     "file": "components/cde/cde-navigation.tsx",
-    "line": 83,
+    "line": 84,
     "group": "number_subsection"
   },
   {
@@ -41,7 +41,7 @@
   },
   {
     "file": "components/cde/cde-workspace.tsx",
-    "line": 336,
+    "line": 341,
     "group": "number_subsection"
   },
   {
@@ -50,13 +50,23 @@
     "group": "number_subsection"
   },
   {
-    "file": "components/legal/legal-workspace.tsx",
-    "line": 149,
+    "file": "components/indicadores/dashboard.tsx",
+    "line": 192,
+    "group": "number_subsection"
+  },
+  {
+    "file": "components/indicadores/dashboard.tsx",
+    "line": 254,
     "group": "number_section"
   },
   {
     "file": "components/legal/legal-workspace.tsx",
-    "line": 157,
+    "line": 150,
+    "group": "number_section"
+  },
+  {
+    "file": "components/legal/legal-workspace.tsx",
+    "line": 159,
     "group": "number_section"
   },
   {
@@ -136,7 +146,17 @@
   },
   {
     "file": "components/site-survey-screen-summary.tsx",
-    "line": 215,
+    "line": 214,
+    "group": "number_subsection"
+  },
+  {
+    "file": "components/site-survey-screen-summary.tsx",
+    "line": 214,
+    "group": "number_subsection"
+  },
+  {
+    "file": "components/site-survey-screen-summary.tsx",
+    "line": 214,
     "group": "number_subsection"
   },
   {
@@ -147,16 +167,6 @@
   {
     "file": "components/site-survey-screen-summary.tsx",
     "line": 215,
-    "group": "number_subsection"
-  },
-  {
-    "file": "components/site-survey-screen-summary.tsx",
-    "line": 216,
-    "group": "number_subsection"
-  },
-  {
-    "file": "components/site-survey-screen-summary.tsx",
-    "line": 216,
     "group": "number_subsection"
   },
   {
@@ -180,23 +190,18 @@
     "group": "number_section"
   },
   {
-    "file": "components/indicadores/dashboard.tsx",
-    "line": 263,
+    "file": "routes/_authenticated/site-survey.tsx",
+    "line": 421,
     "group": "number_section"
   },
   {
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 420,
-    "group": "number_section"
-  },
-  {
-    "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1674,
+    "line": 1680,
     "group": "number_subsection"
   },
   {
     "file": "routes/_authenticated/site-survey.tsx",
-    "line": 1935,
+    "line": 1941,
     "group": "number_subsection"
   }
 ]

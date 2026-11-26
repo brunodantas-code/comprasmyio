@@ -29,6 +29,7 @@ export function WishlistWorkspace({ userId }: { userId: string }) {
   const shown = [...filters.filtered].filter(idea => terms.every(term => normalize(`${idea.title} ${idea.description} ${name(idea.idealizer_id)} ${status(idea.status)}`).includes(term))).sort((a, b) => alphabetical ? a.title.localeCompare(b.title, "pt-BR") : b.created_at.localeCompare(a.created_at));
   const selectedIdea = data.ideas.find(idea => idea.id === selected) ?? null;
   return <main className="mx-auto max-w-7xl space-y-5 px-4 py-6 sm:px-6 sm:py-8">
+    <section className="erp-screen-block space-y-5">
     <div className="flex flex-wrap items-center justify-between gap-3">
       <div className="flex items-center gap-3"><h1 className="flex items-center gap-2 text-2xl font-bold"><Lightbulb className="size-6" />Wishlist</h1><span className="text-sm text-muted-foreground">{shown.length} desejos</span></div>
       <div className="flex shrink-0 items-center gap-2">{filters.menu}<Button variant="ghost" size="compactIcon" aria-label="Ordenar desejos" title={alphabetical ? "Ordenar por mais recentes" : "Ordenar por título"} onClick={() => setAlphabetical(!alphabetical)}>{alphabetical ? <ArrowUpAZ /> : <ArrowDownAZ />}</Button><CdeButton group="plus" screen="components/wishlist/workspace.tsx" aria-label="Novo desejo" title="Novo desejo" onClick={() => setSelected("new")} /></div>
@@ -50,5 +51,6 @@ export function WishlistWorkspace({ userId }: { userId: string }) {
       {!shown.length && <p className="py-10 text-center text-sm text-muted-foreground">{search || filters.active ? "Nenhum desejo nesta seleção." : "Nenhum desejo registrado."}</p>}
     </section>
     {selected && <WishlistIdeaDialog key={selected} idea={selectedIdea} messages={data.messages} steps={data.steps} users={data.users} userId={userId} isAdmin={data.isAdmin} onClose={() => setSelected(null)} />}
+    </section>
   </main>;
 }

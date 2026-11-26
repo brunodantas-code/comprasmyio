@@ -137,6 +137,17 @@
   ]
  },
  {
+  "label": "Ajuste solicitado",
+  "variant": "default",
+  "className": "max-w-full whitespace-normal text-right",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/spend/workspace.tsx"
+  ]
+ },
+ {
   "label": "Alerta",
   "variant": "default",
   "className": "",
@@ -184,6 +195,17 @@
   ]
  },
  {
+  "label": "Arquivado",
+  "variant": "default",
+  "className": "",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/indicadores/dashboard.tsx"
+  ]
+ },
+ {
   "label": "Atenção",
   "variant": "default",
   "className": "",
@@ -214,6 +236,28 @@
   ],
   "files": [
    "components/opdesk/legacy-calls.tsx"
+  ]
+ },
+ {
+  "label": "Ativo",
+  "variant": "default",
+  "className": "",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/indicadores/dashboard.tsx"
+  ]
+ },
+ {
+  "label": "Atualizado",
+  "variant": "default",
+  "className": "",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/indicadores/dashboard.tsx"
   ]
  },
  {
@@ -528,6 +572,17 @@
   ],
   "files": [
    "components/myio-demand.tsx"
+  ]
+ },
+ {
+  "label": "Enviado ao Finance",
+  "variant": "default",
+  "className": "max-w-full whitespace-normal text-right",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/spend/workspace.tsx"
   ]
  },
  {
@@ -1096,6 +1151,17 @@
   ],
   "files": [
    "components/crm/crm-custos.tsx"
+  ]
+ },
+ {
+  "label": "Vinculado · aguardando aprovação",
+  "variant": "default",
+  "className": "max-w-full whitespace-normal text-right",
+  "apps": [
+   "Supply"
+  ],
+  "files": [
+   "components/spend/workspace.tsx"
   ]
  },
  {

@@ -335,6 +335,7 @@ export function IndicadoresDashboard() {
     <div className="min-h-screen bg-background">
       <AppHeader logo={<MyioAppLogo appName={appName} />} />
       <main className={`mx-auto max-w-[1500px] space-y-5 px-4 pb-28 pt-6 sm:px-6 ${ml.main}`}>
+        <section className="erp-screen-block space-y-5">
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:flex sm:justify-between">
           <h1 className="min-w-0 text-xl font-normal">
             {tab === "okrs"
@@ -565,6 +566,7 @@ export function IndicadoresDashboard() {
             )}
           </div>
         )}
+        </section>
       </main>
       {focusedObjective && (() => { const o = data.objectives.find(x => x.id === focusedObjective.id); if (!o) return null; const rows = data.metrics.filter(m => m.objective_id === o.id && focusedObjective.metricIds.includes(m.id)); return <Dialog open onOpenChange={open => { if (!open) setFocusedObjective(null); }}><DialogContent defaultExpanded className="content-start"><DialogHeader><DialogTitle>{o.title}</DialogTitle></DialogHeader><p className="text-sm text-muted-foreground">{importedField(o.source_metadata,'responsible_name') || userName(o.responsible_id)} · {data.cycles.find(c => c.id === o.cycle_id)?.name ?? 'Sem ciclo'}</p>{o.description && <p className="whitespace-pre-wrap text-sm">{o.description}</p>}<div className="max-w-xl"><Advance value={progress.get(o.id) ?? 0} /></div><header className="flex items-center justify-between gap-3"><h2 className="text-base">Key Results · {rows.length}</h2>{canEdit && !isArchived(o) && <CdeButton group="plus" screen={screen} title="Novo Key Result" aria-label={`Novo KR em ${o.title}`} onClick={() => setEdit({ type:'metric',kind:'kr',objective:o })} />}</header><div className="divide-y divide-border">{rows.map(metricRow)}{!rows.length && <p className="py-6 text-sm text-muted-foreground">Nenhum Key Result neste objetivo.</p>}</div></DialogContent></Dialog>; })()}
       <AppNavigation className={ml.nav} aria-label={`Navegação de ${appName}`}>
