@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { BRAND, type MessageColorOption } from "@/components/corporate/message-style";
+import { type MessageColorOption } from "@/components/corporate/message-style";
+import { COLOR_LEGACY, COLOR_PALETTE, PADRAO_COLOR, colorOption } from "./color-palette";
 
 /** Per-tag look (background, text, border) saved in cde_selected group tag_style as JSON { [tagKey]: { bg, text, border } }; "padrao" keeps the current look. */
 export const TAG_STYLE_GROUP = "tag_style";
@@ -8,18 +9,11 @@ export type TagPart = "bg" | "text" | "border";
 export type TagLook = Partial<Record<TagPart, string>>;
 export type TagStyles = Record<string, TagLook>;
 
-export const TAG_COLORS: MessageColorOption[] = [
-  { key: "padrao", label: "Atual (padrão)", value: "" },
-  { key: "transparente", label: "Sem cor", value: "transparent" },
-  { key: "branco", label: "Branco", value: "var(--background)" },
-  { key: "cinza_claro", label: "Cinza claro", value: "color-mix(in oklab, var(--muted) 50%, transparent)" },
-  { key: "cinza_escuro", label: "Cinza escuro", value: "oklch(0.86 0 0)" },
-  { key: "cinza_texto", label: "Cinza (texto)", value: "var(--muted-foreground)" },
-  { key: "preto", label: "Preto", value: "var(--cde-palette-black)" },
-  { key: "vermelho", label: "Vermelho", value: "var(--destructive)" },
-  ...BRAND.filter((o) => !["transparent", "var(--foreground)", "var(--destructive)"].includes(o.value)).map(o => ({ ...o, label: o.label.replace(/^Atual: branco \/ verde claro$/, "Branco").replace(/^Atual: /, "") })),
-];
-export const tagColor = (key?: string) => TAG_COLORS.find((o) => o.key === key) ?? TAG_COLORS[0];
+/** Full resolution table: every key ever saved, so no saved look is lost. */
+export const TAG_COLORS: MessageColorOption[] = [PADRAO_COLOR, ...COLOR_PALETTE, ...COLOR_LEGACY];
+/** The colours actually offered in the pickers: one entry per colour, no duplicated name or value. */
+export const TAG_COLOR_CHOICES: MessageColorOption[] = COLOR_PALETTE;
+export const tagColor = (key?: string) => colorOption(key);
 
 /** Same label = same tag in every app (case/space-insensitive). */
 export const tagKey = (label: string) => label.trim().replace(/\s+/g, " ").toLowerCase();

@@ -1,25 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { APP_TILE_COLORS } from "@/components/cde/app-order-config";
+import { COLOR_PALETTE, withDefault as paletteWithDefault, type ColorOption } from "@/components/cde/color-palette";
 
-/** Corporate message look, saved in cde_selected group message_style; colours reuse the brand palette offered for app tiles. */
+/** Corporate message look, saved in cde_selected group message_style; colours come from the single CDE palette. */
 export const MESSAGE_STYLE_GROUP = "message_style";
-export type MessageColorOption = { key: string; label: string; value: string };
-export const BRAND: MessageColorOption[] = (() => {
-  const seen = new Map<string, MessageColorOption>();
-  for (const list of Object.values(APP_TILE_COLORS)) for (const o of list) {
-    if (o.value === "var(--background)" || o.value === "var(--muted-foreground)") continue;
-    const key = o.label.replace(/ \(.*\)$/, "").replace(/ myio$/, "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/g, "_");
-    if (![...seen.values()].some((v) => v.value === o.value)) seen.set(key, { key, label: o.label.replace(" (igual ao ícone)", ""), value: o.value });
-  }
-  return [...seen.values()];
-})();
-export const withDefault = (label: string, value: string) => [{ key: "padrao", label, value }, ...BRAND.filter((o) => o.value !== value)];
+export type MessageColorOption = ColorOption;
+export const BRAND: MessageColorOption[] = COLOR_PALETTE;
+export const withDefault = paletteWithDefault;
 export const MESSAGE_COLORS = {
-  fill: withDefault("Verde claro myio", "var(--myio-green-tint)"),
-  border: withDefault("Verde myio suave", "color-mix(in srgb, var(--myio-green) 40%, transparent)"),
-  symbol: withDefault("Verde myio", "var(--myio-green)"),
-  text: withDefault("Escuro myio", "var(--myio-dark)"),
+  fill: withDefault("Verde claro", "var(--myio-green-tint)"),
+  border: withDefault("Verde suave", "color-mix(in srgb, var(--myio-green) 40%, transparent)"),
+  symbol: withDefault("Verde", "var(--myio-green)"),
+  text: withDefault("Escuro", "var(--myio-dark)"),
 } as const;
 export type MessageColorKind = keyof typeof MESSAGE_COLORS;
 export type MessageStyle = Record<MessageColorKind, string>;

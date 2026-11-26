@@ -2,8 +2,9 @@ import { parseFontFormat, fontFormatVars, type FontFormat } from "./font-format"
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { withDefault, type MessageColorOption } from "@/components/corporate/message-style";
-import { TAG_COLORS, tagColor } from "./tag-style";
+import { type MessageColorOption } from "@/components/corporate/message-style";
+import { COLOR_PALETTE, paletteExtras, withDefault } from "./color-palette";
+import { tagColor } from "./tag-style";
 
 /** Font standard for table headers and filter bars, customizable in the CDE (group table_fonts). */
 export type AlignH = "left" | "center" | "right";
@@ -11,23 +12,26 @@ export type AlignV = "top" | "middle" | "bottom";
 export const ALIGN_H: { key: AlignH; label: string }[] = [{ key: "left", label: "À esquerda" }, { key: "center", label: "Centralizado" }, { key: "right", label: "À direita" }];
 export const ALIGN_V: { key: AlignV; label: string }[] = [{ key: "top", label: "No topo" }, { key: "middle", label: "Centralizado" }, { key: "bottom", label: "Na base" }];
 /** Headers and list rows align independently; screens with an explicit alignment class keep it. */
-/** Header colours use the brand palette (same options as app icons); "padrao" keeps today's look. */
+/** Header colours use the single CDE palette; "padrao" keeps today's look and no colour is offered twice. */
+const BG_HEAD = [{ key: "padrao", label: "Sem fundo", value: "transparent" }, { key: "cinza_claro", label: "Cinza claro", value: "color-mix(in oklab, var(--muted) 50%, transparent)" }, { key: "cinza_escuro", label: "Cinza escuro", value: "oklch(0.86 0 0)" }] as const;
+const NO_BORDER = [{ key: "padrao", label: "Sem borda", value: "transparent" }] as const;
+const FIELD_TITLE = [{ key: "padrao", label: "Sem cor", value: "" }, ...COLOR_PALETTE.filter((o) => o.key !== "transparente")] as const;
 export const HEADER_COLORS = {
-  headerBg: [{ key: "padrao", label: "Sem fundo", value: "transparent" }, { key: "cinza_claro", label: "Cinza claro (atual)", value: "color-mix(in oklab, var(--muted) 50%, transparent)" }, { key: "cinza_escuro", label: "Cinza escuro", value: "oklch(0.86 0 0)" }, ...withDefault("", "transparent").slice(1)],
-  headerText: withDefault("Cinza (atual)", "var(--muted-foreground)"),
-  headerBorder: withDefault("Cinza claro (atual)", "var(--border)"),
-  cellBg: [{ key: "padrao", label: "Sem fundo", value: "transparent" }, { key: "cinza_claro", label: "Cinza claro (atual)", value: "color-mix(in oklab, var(--muted) 50%, transparent)" }, { key: "cinza_escuro", label: "Cinza escuro", value: "oklch(0.86 0 0)" }, ...withDefault("", "transparent").slice(1)],
-  cellText: withDefault("Preto (atual)", "var(--foreground)"),
-  cellBorder: withDefault("Cinza claro (atual)", "var(--border)"),
-  titleBg: [{ key: "padrao", label: "Sem fundo", value: "transparent" }, { key: "cinza_claro", label: "Cinza claro", value: "color-mix(in oklab, var(--muted) 50%, transparent)" }, { key: "cinza_escuro", label: "Cinza escuro", value: "oklch(0.86 0 0)" }, ...withDefault("", "transparent").slice(1)],
-  titleText: withDefault("Preto (atual)", "var(--foreground)"),
-  titleBorder: [{ key: "padrao", label: "Sem borda (atual)", value: "transparent" }, ...withDefault("", "transparent").slice(1)],
-  subBg: [{ key: "padrao", label: "Sem fundo", value: "transparent" }, { key: "cinza_claro", label: "Cinza claro", value: "color-mix(in oklab, var(--muted) 50%, transparent)" }, { key: "cinza_escuro", label: "Cinza escuro", value: "oklch(0.86 0 0)" }, ...withDefault("", "transparent").slice(1)],
-  subText: withDefault("Cinza (atual)", "var(--muted-foreground)"),
-  subBorder: [{ key: "padrao", label: "Sem borda (atual)", value: "transparent" }, ...withDefault("", "transparent").slice(1)],
-  fieldBg: TAG_COLORS,
-  fieldText: TAG_COLORS,
-  fieldBorder: TAG_COLORS,
+  headerBg: [...BG_HEAD, ...paletteExtras(BG_HEAD)],
+  headerText: withDefault("Cinza (texto)", "var(--muted-foreground)"),
+  headerBorder: withDefault("Cinza da borda", "var(--border)"),
+  cellBg: [...BG_HEAD, ...paletteExtras(BG_HEAD)],
+  cellText: withDefault("Texto", "var(--foreground)"),
+  cellBorder: withDefault("Cinza da borda", "var(--border)"),
+  titleBg: [...BG_HEAD, ...paletteExtras(BG_HEAD)],
+  titleText: withDefault("Texto", "var(--foreground)"),
+  titleBorder: [...NO_BORDER, ...paletteExtras(NO_BORDER)],
+  subBg: [...BG_HEAD, ...paletteExtras(BG_HEAD)],
+  subText: withDefault("Cinza (texto)", "var(--muted-foreground)"),
+  subBorder: [...NO_BORDER, ...paletteExtras(NO_BORDER)],
+  fieldBg: FIELD_TITLE,
+  fieldText: FIELD_TITLE,
+  fieldBorder: FIELD_TITLE,
 } as const;
 export type HeaderColorKind = keyof typeof HEADER_COLORS;
 export const headerColor = (kind: HeaderColorKind, key: string): MessageColorOption => (HEADER_COLORS[kind] as readonly MessageColorOption[]).find((o) => o.key === key) ?? HEADER_COLORS[kind][0];

@@ -22,14 +22,14 @@ export const CDE_APPEARANCE_DEFAULT: CdeAppearanceConfig = {
 export const CDE_INHERITED_COLORS = {
   cat: {
     bg: { key: "transparente", label: "Sem cor", value: "transparent" },
-    border: { key: "cde_border", label: "Cinza claro", value: "var(--border)" },
-    text: { key: "cde_text", label: "Escuro", value: "var(--foreground)" },
+    border: { key: "cde_border", label: "Cinza da borda", value: "var(--border)" },
+    text: { key: "cde_text", label: "Texto", value: "var(--foreground)" },
     hint: { key: "cinza_texto", label: "Cinza (texto)", value: "var(--muted-foreground)" },
   },
   sub: {
-    bg: { key: "cde_section_bg", label: "Verde claro", value: "var(--erp-section-head)" },
-    border: { key: "cde_border", label: "Cinza claro", value: "var(--border)" },
-    text: { key: "cde_text", label: "Escuro", value: "var(--foreground)" },
+    bg: { key: "cde_section_bg", label: "Verde da seção", value: "var(--erp-section-head)" },
+    border: { key: "cde_border", label: "Cinza da borda", value: "var(--border)" },
+    text: { key: "cde_text", label: "Texto", value: "var(--foreground)" },
     hint: { key: "cinza_texto", label: "Cinza (texto)", value: "var(--muted-foreground)" },
   },
 } as const;

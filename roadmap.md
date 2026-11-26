@@ -740,3 +740,4 @@
 - [x] Informado: títulos dos boxes verdes ajustados em 1. Aparência → Subcategorias → Tamanho do título, com salvamento no disquete de Aparência do CDE.
 - [x] Localizado no print: Subcategorias, segunda linha à esquerda, campo Tamanho do título exibindo 13 px; não há menu separado chamado Títulos nesse bloco.
 - [x] CDE: categorias, subcategorias, cabeçalhos verdes e prévia respeitam o tamanho escolhido; 14/18 px medidos na tela, consumidores conferidos por código e 14 testes passaram, sem mudar escolhas salvas.
+- [x] CDE: paleta de cores simplificada em src/components/cde/color-palette.ts — um único "Branco", nomes e valores sem repetição em todos os seletores (Aparência, Cabeçalhos e Listas, Títulos dos campos, Mensagens corporativas); cores já salvas continuam valendo; 11 testes passaram e as listas foram conferidas na tela.

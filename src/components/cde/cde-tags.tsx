@@ -14,7 +14,7 @@ import { CdeCategoryHeader } from "./cde-category-header";
 import { useCdeSwatchStyle } from "./cde-button";
 import inventory from "./tag-inventory.json";
 import { TAG_LOCATIONS } from "./tag-locations";
-import { TAG_COLORS, TAG_STYLE_GROUP, refreshTagStyles, tagColor, tagKey, useTagConfig, type TagConfig, type TagLook, type TagPart } from "./tag-style";
+import { TAG_COLOR_CHOICES, TAG_STYLE_GROUP, refreshTagStyles, tagColor, tagKey, useTagConfig, type TagConfig, type TagLook, type TagPart } from "./tag-style";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { SelectValue } from "@/components/ui/select";
@@ -27,7 +27,7 @@ export function ColorSelect({ value, inheritedColor, label, onChange }: { value?
   const dot = (o: { key: string; value: string }) => <span aria-hidden="true" style={{ background: o.value, ...swatch.css }} className={cn("block h-4 w-4 shrink-0 rounded-full border border-border", swatch.cls)} />;
   const chosen = tagColor(value);
   const cur = chosen.key === "padrao" ? inheritedColor : chosen;
-  const options = TAG_COLORS.filter(o => o.key !== "padrao" && o.key !== inheritedColor?.key);
+  const options = TAG_COLOR_CHOICES.filter(o => o.key !== inheritedColor?.key);
   if (inheritedColor) options.unshift(inheritedColor);
   return <Select value={cur?.key ?? ""} onValueChange={v => onChange(v === inheritedColor?.key ? "padrao" : v)}><SelectTrigger className="h-8 w-36 text-xs" aria-label={label} title={cur?.label}><div className="flex min-w-0 items-center gap-2">{cur && dot(cur)}<span className="truncate text-xs">{cur?.label ?? "Escolha uma cor"}</span></div></SelectTrigger>
     <SelectContent>{options.map((o) => <SelectItem key={o.key} value={o.key}><span className="inline-flex items-center gap-2 text-xs">{dot(o)}<span>{o.label}</span></span></SelectItem>)}</SelectContent></Select>;
