@@ -42,6 +42,7 @@ export type MenuLook = {
   border: MenuLookBorder;
   shadow: MenuLookShadow;
   sideWidth: number | null;
+  flexible: boolean;
   buttonHeight: number;
 };
 
@@ -53,6 +54,7 @@ export const MENU_LOOK_DEFAULT: MenuLook = {
   border: "padrao",
   shadow: "padrao",
   sideWidth: null,
+  flexible: false,
   buttonHeight: 44,
 };
 
@@ -77,6 +79,7 @@ export function parseMenuLook(raw?: string | null): MenuLook {
       border: borderKey(p.border),
       shadow: shadowKey(p.shadow),
       sideWidth: typeof p.sideWidth === "number" ? measure(p.sideWidth, 240, 160, 400) : null,
+      flexible: p.flexible === true,
       buttonHeight: measure(p.buttonHeight, 44, 36, 80),
     };
   } catch {

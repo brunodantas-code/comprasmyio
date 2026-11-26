@@ -656,6 +656,21 @@ input[data-custom-calendar="true"]::-webkit-calendar-picker-indicator {
 }
 .app-navigation[data-menu-layout="left"] { left: 0 !important; right: auto !important; }
 .app-navigation[data-menu-layout="right"] { right: 0 !important; left: auto !important; }
+.app-menu-resize-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  display: block;
+  width: 10px;
+  cursor: col-resize;
+  touch-action: none;
+  user-select: none;
+  z-index: 2;
+  background: transparent;
+  outline-offset: -2px;
+}
+.app-navigation[data-menu-layout="left"] .app-menu-resize-handle { right: 0; border-right: 1px solid var(--border); }
+.app-navigation[data-menu-layout="right"] .app-menu-resize-handle { left: 0; border-left: 1px solid var(--border); }
 /* Submenu do menu lateral: abre abaixo do item, dentro do próprio painel. */
 .app-navigation:is([data-menu-layout="left"], [data-menu-layout="right"]) .app-nav-group { display: flex; flex-direction: column; gap: .25rem; }
 .app-navigation:is([data-menu-layout="left"], [data-menu-layout="right"]) .app-nav-sub { display: flex; flex-direction: column; gap: .125rem; padding-left: 1rem; }

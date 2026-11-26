@@ -2327,7 +2327,7 @@
   {
     "id": "components/cde/cde-menu-look.tsx|85c5d81c426bec43|0",
     "file": "components/cde/cde-menu-look.tsx",
-    "line": 77,
+    "line": 78,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -2342,7 +2342,7 @@
   {
     "id": "components/cde/cde-menu-look.tsx|fff24dcd715b500e|0",
     "file": "components/cde/cde-menu-look.tsx",
-    "line": 77,
+    "line": 78,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -2357,7 +2357,7 @@
   {
     "id": "components/cde/cde-menu-look.tsx|e4b2da29c729debd|0",
     "file": "components/cde/cde-menu-look.tsx",
-    "line": 77,
+    "line": 78,
     "tag": "CdeButton",
     "label": "Sem nome fixo",
     "dynamic": false,

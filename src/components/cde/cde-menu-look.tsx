@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { CdeButton, useCdeSwatchStyle } from "./cde-button";
@@ -84,7 +85,10 @@ export function MenuLookEditor() {
         <Select value={style.shadow} onValueChange={(v) => setDraft({ ...style, shadow: v as MenuLook["shadow"] })}><SelectTrigger className="h-9" aria-label="Sombreamento do painel"><SelectValue /></SelectTrigger>
           <SelectContent>{MENU_LOOK_SHADOWS.map((s) => <SelectItem key={s.key} value={s.key}>{s.label}</SelectItem>)}</SelectContent></Select></div>
       <div className="min-w-0 space-y-1"><Label htmlFor="menu-side-width" className="flex min-h-10 items-end pb-1">Largura do menu lateral (px)</Label>
-        <Input bufferedNumber id="menu-side-width" type="number" min={160} max={400} step={1} value={style.sideWidth ?? 240} onChange={(event) => { const value = event.currentTarget.valueAsNumber; if (Number.isFinite(value)) setDraft({ ...style, sideWidth: Math.max(160, Math.min(400, value)) }); }} />
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+          <Input bufferedNumber id="menu-side-width" type="number" min={160} max={400} step={1} value={style.sideWidth ?? 240} onChange={(event) => { const value = event.currentTarget.valueAsNumber; if (Number.isFinite(value)) setDraft({ ...style, sideWidth: Math.max(160, Math.min(400, value)) }); }} />
+          <span className="flex shrink-0 items-center gap-2"><Checkbox id="menu-flexible" checked={style.flexible} onCheckedChange={checked => setDraft({ ...style, flexible: checked === true })} /><Label htmlFor="menu-flexible">Flexível</Label></span>
+        </div>
       </div>
       <div className="min-w-0 space-y-1"><Label htmlFor="menu-button-height" className="flex min-h-10 items-end pb-1">Altura dos botões (px)</Label>
         <Input bufferedNumber id="menu-button-height" type="number" min={36} max={80} step={1} value={style.buttonHeight} onChange={(event) => { const value = event.currentTarget.valueAsNumber; if (Number.isFinite(value)) setDraft({ ...style, buttonHeight: Math.max(36, Math.min(80, value)) }); }} />
