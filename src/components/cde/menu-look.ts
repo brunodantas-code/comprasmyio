@@ -14,8 +14,8 @@ export const MENU_LOOK_GROUP = "menu_look";
 export const MENU_LOOK_COLORS = {
   background: withDefault("Verde (atual)", "var(--primary)"),
   text: withDefault("Branco (atual)", "var(--myio-white)"),
-  selected: withDefault("Escuro (atual)", "var(--myio-dark)"),
-  selectedText: withDefault("Branco (atual)", "var(--myio-white)"),
+  selected: withDefault("Verde claro", "var(--dropdown-highlight)"),
+  selectedText: withDefault("Texto escuro", "var(--dropdown-highlight-foreground)"),
 } as const;
 
 export type MenuLookKind = keyof typeof MENU_LOOK_COLORS;
@@ -41,6 +41,8 @@ export type MenuLook = {
   selectedText: string;
   border: MenuLookBorder;
   shadow: MenuLookShadow;
+  sideWidth: number | null;
+  buttonHeight: number;
 };
 
 export const MENU_LOOK_DEFAULT: MenuLook = {
@@ -50,6 +52,8 @@ export const MENU_LOOK_DEFAULT: MenuLook = {
   selectedText: "padrao",
   border: "padrao",
   shadow: "padrao",
+  sideWidth: null,
+  buttonHeight: 44,
 };
 
 /** Resolve a saved colour key inside its own picker list (the default entry holds today's value). */
@@ -60,6 +64,7 @@ export function menuLookColor(kind: MenuLookKind, key: string): ColorOption {
 
 const borderKey = (v: unknown): MenuLookBorder => (MENU_LOOK_BORDERS.some((b) => b.key === v) ? (v as MenuLookBorder) : "padrao");
 const shadowKey = (v: unknown): MenuLookShadow => (MENU_LOOK_SHADOWS.some((s) => s.key === v) ? (v as MenuLookShadow) : "padrao");
+const measure = (value: unknown, fallback: number, min: number, max: number) => typeof value === "number" && Number.isFinite(value) ? Math.max(min, Math.min(max, Math.round(value))) : fallback;
 
 export function parseMenuLook(raw?: string | null): MenuLook {
   try {
@@ -71,6 +76,8 @@ export function parseMenuLook(raw?: string | null): MenuLook {
       selectedText: menuLookColor("selectedText", String(p.selectedText ?? "")).key,
       border: borderKey(p.border),
       shadow: shadowKey(p.shadow),
+      sideWidth: typeof p.sideWidth === "number" ? measure(p.sideWidth, 240, 160, 400) : null,
+      buttonHeight: measure(p.buttonHeight, 44, 36, 80),
     };
   } catch {
     return MENU_LOOK_DEFAULT;
@@ -91,6 +98,8 @@ export function menuLookVars(look: MenuLook): React.CSSProperties {
   put("foreground", "text");
   put("selected", "selected");
   put("selected-foreground", "selectedText");
+  if (look.sideWidth !== null) out["--app-menu-side-custom-width"] = `${look.sideWidth}px`;
+  out["--app-menu-side-button-height"] = `${look.buttonHeight}px`;
   if (look.border === "cinza") out["--app-menu-fixed-border"] = "1px solid var(--border)";
   if (look.shadow === "suave") out["--app-menu-fixed-shadow"] = "0 8px 24px rgb(0 0 0 / 0.12)";
   if (look.shadow === "destacada") out["--app-menu-fixed-shadow"] = "0 18px 45px rgb(0 0 0 / 0.28)";

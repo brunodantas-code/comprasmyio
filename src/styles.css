@@ -579,10 +579,10 @@ input[data-custom-calendar="true"]::-webkit-calendar-picker-indicator {
 :root {
   --app-menu-fixed-background: var(--primary);
   --app-menu-fixed-foreground: var(--myio-white);
-  --app-menu-fixed-selected: var(--myio-dark);
-  --app-menu-fixed-selected-foreground: var(--myio-white);
-  --app-menu-side-width: 15rem;
-  --app-menu-side-offset: 16rem;
+  --app-menu-fixed-selected: var(--dropdown-highlight);
+  --app-menu-fixed-selected-foreground: var(--dropdown-highlight-foreground);
+  --app-menu-side-width: var(--app-menu-side-custom-width, 15rem);
+  --app-menu-side-offset: calc(var(--app-menu-side-width) + 1rem);
 }
 @layer base {
 .app-menu-fixed-preview,
@@ -660,6 +660,14 @@ input[data-custom-calendar="true"]::-webkit-calendar-picker-indicator {
   align-items: stretch !important;
 }
 .app-navigation:is([data-menu-layout="left"], [data-menu-layout="right"]) > div :is(button, a) { flex: none !important; }
+.app-navigation:is([data-menu-layout="left"], [data-menu-layout="right"]) > div :is(button, a) {
+  height: var(--app-menu-side-button-height, 2.75rem) !important;
+  min-height: var(--app-menu-side-button-height, 2.75rem) !important;
+  padding-block: .5rem !important;
+}
+.app-navigation:is([data-menu-layout="left"], [data-menu-layout="right"]) > div :is(button, a) > span:has(.menu-icon) {
+  min-height: 0 !important;
+}
 .app-navigation[data-menu-layout="bottom"] {
   left: 0 !important;
   right: 0 !important;
@@ -673,7 +681,8 @@ input[data-custom-calendar="true"]::-webkit-calendar-picker-indicator {
 .app-navigation[data-menu-layout="bottom"] > div :is(button, a) { flex: 1 0 auto; max-width: 16rem; }
 }
 @media (max-width: 1023px) {
-  :root { --app-menu-side-width: 10rem; --app-menu-side-offset: 11rem; }
+  :root { --app-menu-side-width: min(var(--app-menu-side-custom-width, 10rem), calc(100vw - 10rem)); }
+  .app-navigation:is([data-menu-layout="left"], [data-menu-layout="right"]) { --app-menu-side-width: min(var(--app-menu-side-custom-width, 10rem), calc(100vw - 10rem)); }
   .app-navigation[data-menu-layout="bottom"] > div { justify-content: flex-start; padding: .375rem !important; }
   .app-navigation.menu-mobile-top_tabs { left: 0 !important; right: 0 !important; bottom: auto !important; top: 4.5rem !important; }
   .app-navigation.menu-mobile-top_tabs > div { max-width: none !important; border-radius: 0 !important; box-shadow: none !important; }

@@ -9,6 +9,12 @@ export function AppNavigation({ className = "", ...props }: ComponentProps<"nav"
   const ref = useRef<HTMLElement>(null);
   // Look saved in the CDE (group menu_look): background, text, selected item, border and shadow.
   const { data: look } = useMenuLook();
+  useEffect(() => {
+    const root = document.documentElement.style;
+    if (look?.sideWidth != null) root.setProperty("--app-menu-side-custom-width", `${look.sideWidth}px`);
+    else root.removeProperty("--app-menu-side-custom-width");
+    return () => { root.removeProperty("--app-menu-side-custom-width"); };
+  }, [look?.sideWidth]);
   useEffect(() => { setMounted(true); }, []);
   useEffect(() => {
     const breakpoint = window.matchMedia("(min-width: 1024px)");

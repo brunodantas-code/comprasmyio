@@ -5,6 +5,7 @@ import { Save, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { CdeButton, useCdeSwatchStyle } from "./cde-button";
@@ -83,10 +84,16 @@ export function MenuLookEditor() {
       <div className="min-w-0 space-y-1"><Label className="flex min-h-10 items-end pb-1">Sombreamento</Label>
         <Select value={style.shadow} onValueChange={(v) => setDraft({ ...style, shadow: v as MenuLook["shadow"] })}><SelectTrigger className="h-9" aria-label="Sombreamento do painel"><SelectValue /></SelectTrigger>
           <SelectContent>{MENU_LOOK_SHADOWS.map((s) => <SelectItem key={s.key} value={s.key}>{s.label}</SelectItem>)}</SelectContent></Select></div>
+      <div className="min-w-0 space-y-1"><Label htmlFor="menu-side-width" className="flex min-h-10 items-end pb-1">Largura do menu lateral (px)</Label>
+        <Input id="menu-side-width" type="number" min={160} max={400} step={1} value={style.sideWidth ?? 240} onChange={(event) => { const value = event.currentTarget.valueAsNumber; if (Number.isFinite(value)) setDraft({ ...style, sideWidth: Math.max(160, Math.min(400, value)) }); }} />
+      </div>
+      <div className="min-w-0 space-y-1"><Label htmlFor="menu-button-height" className="flex min-h-10 items-end pb-1">Altura dos botões (px)</Label>
+        <Input id="menu-button-height" type="number" min={36} max={80} step={1} value={style.buttonHeight} onChange={(event) => { const value = event.currentTarget.valueAsNumber; if (Number.isFinite(value)) setDraft({ ...style, buttonHeight: Math.max(36, Math.min(80, value)) }); }} />
+      </div>
     </div>
     <div className="space-y-1"><p className="text-xs text-muted-foreground">Prévia</p>
-      <div style={{ ...menuLookVars(style), ...menuLookBox(style) }} className="app-menu-fixed-preview w-44 rounded-md p-2">
-        {PREVIEW_ITEMS.map((label, i) => <div key={label} className={`app-menu-fixed-preview-item flex items-center gap-2 rounded px-2 py-1.5 text-xs ${i === 0 ? "app-menu-fixed-preview-active font-semibold" : ""}`}>{label}</div>)}
+      <div style={{ ...menuLookVars(style), ...menuLookBox(style), width: "var(--app-menu-side-custom-width, 240px)" }} className="app-menu-fixed-preview max-w-full rounded-md p-2">
+        {PREVIEW_ITEMS.map((label, i) => <div key={label} style={{ height: "var(--app-menu-side-button-height, 44px)" }} className={`app-menu-fixed-preview-item flex items-center gap-2 rounded px-2 text-xs ${i === 0 ? "app-menu-fixed-preview-active font-semibold" : ""}`}>{label}</div>)}
       </div>
     </div>
   </CdeSection>;
