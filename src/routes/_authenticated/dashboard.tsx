@@ -705,7 +705,7 @@ function Dashboard() {
 
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="erp-supply-workspace min-h-screen bg-background">
       <AppHeader supplyManual logo={<MyioLogo className="text-xl sm:text-2xl" />}>
       </AppHeader>
 

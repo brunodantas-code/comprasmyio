@@ -2,9 +2,14 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 import { useCdeLook } from "@/components/cde/cde-look";
+import { finishNumberInputDraft, numberInputDraftValue } from "./number-input-draft";
 
-const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
-  ({ className, type, style, ...props }, ref) => {
+const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input"> & { bufferedNumber?: boolean }>(
+  ({ className, type, style, bufferedNumber = false, ...props }, ref) => {
+    const [numberDraft, setNumberDraft] = React.useState<string | null>(null);
+    const buffered = bufferedNumber && type === "number" && props.value !== undefined;
+    const min = props.min === undefined ? undefined : Number(props.min);
+    const max = props.max === undefined ? undefined : Number(props.max);
     const look = useCdeLook(type === "password" ? "fields_password" : type === "checkbox" || type === "radio" || type === "file" || type === "hidden" ? undefined : "fields_input", true);
     const isSearch = type === "search" || /^(buscar|pesquisar|filtrar|search)\b/i.test(props.placeholder ?? "") || /^(buscar|pesquisar)\b/i.test(props["aria-label"] ?? "");
     return (
@@ -19,6 +24,21 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
         style={{ ...look.style, ...style }}
         ref={ref}
         {...props}
+        {...(buffered ? {
+          value: numberDraft ?? props.value,
+          onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
+            setNumberDraft(event.currentTarget.value);
+            if (numberInputDraftValue(event.currentTarget.value, min, max) !== null) props.onChange?.(event);
+          },
+          onBlur: (event: React.FocusEvent<HTMLInputElement>) => {
+            if (numberDraft !== null) {
+              event.currentTarget.value = finishNumberInputDraft(numberDraft, String(props.value ?? ""), min, max);
+              props.onChange?.({ ...event, type: "change", target: event.currentTarget });
+            }
+            setNumberDraft(null);
+            props.onBlur?.(event);
+          },
+        } : {})}
       />
     );
   },

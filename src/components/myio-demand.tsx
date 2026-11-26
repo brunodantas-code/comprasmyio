@@ -74,6 +74,7 @@ function DeliverItemDialog({
           <div className="space-y-2">
             <Label htmlFor="deliver-qty">Quantidade</Label>
             <Input
+              bufferedNumber
               id="deliver-qty"
               type="number"
               min={1}
@@ -194,6 +195,7 @@ function ResolveItemDialog({
         <div className="space-y-2">
           <Label htmlFor="resolve-qty">Quantidade</Label>
           <Input
+            bufferedNumber
             id="resolve-qty"
             type="number"
             min={1}

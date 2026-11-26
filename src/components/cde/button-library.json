@@ -7172,7 +7172,7 @@
   {
     "id": "components/myio-demand.tsx|ee10d9fe9cc44951|0",
     "file": "components/myio-demand.tsx",
-    "line": 110,
+    "line": 111,
     "tag": "Button",
     "label": "Câmera",
     "dynamic": false,
@@ -7187,7 +7187,7 @@
   {
     "id": "components/myio-demand.tsx|aed85e647f274abf|0",
     "file": "components/myio-demand.tsx",
-    "line": 114,
+    "line": 115,
     "tag": "Button",
     "label": "Galeria",
     "dynamic": false,
@@ -7202,7 +7202,7 @@
   {
     "id": "components/myio-demand.tsx|66a9844ce1e02999|0",
     "file": "components/myio-demand.tsx",
-    "line": 138,
+    "line": 139,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -7217,7 +7217,7 @@
   {
     "id": "components/myio-demand.tsx|4535f7a3642ed5e1|0",
     "file": "components/myio-demand.tsx",
-    "line": 141,
+    "line": 142,
     "tag": "Button",
     "label": "Dar baixa",
     "dynamic": true,
@@ -7232,7 +7232,7 @@
   {
     "id": "components/myio-demand.tsx|66a9844ce1e02999|1",
     "file": "components/myio-demand.tsx",
-    "line": 205,
+    "line": 207,
     "tag": "Button",
     "label": "Cancelar",
     "dynamic": false,
@@ -7247,7 +7247,7 @@
   {
     "id": "components/myio-demand.tsx|17f31f548137eda9|0",
     "file": "components/myio-demand.tsx",
-    "line": 209,
+    "line": 211,
     "tag": "Button",
     "label": "Produzir",
     "dynamic": false,
@@ -7262,7 +7262,7 @@
   {
     "id": "components/myio-demand.tsx|90ae54a2137cce49|0",
     "file": "components/myio-demand.tsx",
-    "line": 214,
+    "line": 216,
     "tag": "Button",
     "label": "Comprar",
     "dynamic": false,
@@ -7277,7 +7277,7 @@
   {
     "id": "components/myio-demand.tsx|a280e428daae0192|0",
     "file": "components/myio-demand.tsx",
-    "line": 539,
+    "line": 541,
     "tag": "Button",
     "label": "Resolver",
     "dynamic": true,
@@ -7292,7 +7292,7 @@
   {
     "id": "components/myio-demand.tsx|34885b76114f1ab5|0",
     "file": "components/myio-demand.tsx",
-    "line": 581,
+    "line": 583,
     "tag": "button",
     "label": "Disponível",
     "dynamic": false,
@@ -7307,7 +7307,7 @@
   {
     "id": "components/myio-demand.tsx|e393087609bb39fe|0",
     "file": "components/myio-demand.tsx",
-    "line": 606,
+    "line": 608,
     "tag": "button",
     "label": "Produzir / Faltam",
     "dynamic": true,
@@ -15557,7 +15557,7 @@
   {
     "id": "components/wishlist/workspace.tsx|724137594f328c37|0",
     "file": "components/wishlist/workspace.tsx",
-    "line": 37,
+    "line": 39,
     "tag": "CdeButton",
     "label": "Novo desejo",
     "dynamic": false,
@@ -15572,7 +15572,7 @@
   {
     "id": "components/wishlist/workspace.tsx|b3b7337e1d17ac8f|0",
     "file": "components/wishlist/workspace.tsx",
-    "line": 44,
+    "line": 49,
     "tag": "Button",
     "label": "Limpar busca",
     "dynamic": false,
@@ -15585,33 +15585,18 @@
     "group": ""
   },
   {
-    "id": "components/wishlist/workspace.tsx|de538ddb421f7d88|0",
+    "id": "components/wishlist/workspace.tsx|568efb632cea9966|0",
     "file": "components/wishlist/workspace.tsx",
-    "line": 46,
+    "line": 61,
     "tag": "Button",
-    "label": "Ordenar desejos",
+    "label": "Sem nome fixo",
     "dynamic": true,
     "visualCustom": false,
     "autoCdeSafe": true,
     "icon": "",
-    "variant": "ghost",
-    "size": "compactIcon",
-    "className": "",
-    "group": ""
-  },
-  {
-    "id": "components/wishlist/workspace.tsx|297b7ee894a38d2d|0",
-    "file": "components/wishlist/workspace.tsx",
-    "line": 53,
-    "tag": "Button",
-    "label": "pt-BR",
-    "dynamic": true,
-    "visualCustom": true,
-    "autoCdeSafe": true,
-    "icon": "",
-    "variant": "",
+    "variant": "link",
     "size": "",
-    "className": "grid h-auto w-full min-w-0 grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1 rounded-none bg-transparent px-3 py-3 text-left whitespace-normal text-foreground cursor-pointer hover:bg-cde-number-soft focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring md:grid-cols-[12rem_6rem_minmax(0,1fr)_8rem_2rem] md:gap-4",
+    "className": "h-auto max-w-full whitespace-normal p-0 text-left",
     "group": ""
   },
   {

@@ -1,5 +1,7 @@
 - Shared SelectTrigger/SearchableSelect drop height utilities from the fields_select model (caller or h-9 default, like Input) so side-by-side green underlines share one base line; SelectTrigger resolves fields_select standards dynamically; chosen appearance follows caller layout classes so selections update existing droplists without changing values or actions.
 - Shared Input marks search fields from search type or search-labelled props; global CSS constrains their width and erp-search-row keeps adjacent icons together without changing CDE appearance or ordinary form inputs.
+- Inputs with immediate numeric clamping use bufferedNumber: preserve partial keyboard text, emit in-range values and apply existing bounds on blur without changing persistence or permissions.
+- Workspace width inherits the original global limit; only the Supply root sets erp-supply-workspace for its larger table layout, keeping other apps and headers aligned.
 - Dialog/Sheet X renders CdeCloseIcon (CDE group close); keep position in ui/, look in CDE.
 - Dialog/Sheet X is sticky at the top so it stays visible while long content scrolls.
 - Dialog, AlertDialog and Sheet share PopupExpandButton and viewport sizing; toggle only geometry without remounting children to preserve drafts, and reset on close while forwarding focus callbacks.

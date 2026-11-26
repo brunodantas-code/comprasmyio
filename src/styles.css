@@ -445,8 +445,11 @@ input[data-custom-calendar="true"]::-webkit-calendar-picker-indicator {
 
 /* One frame for authenticated page content and its brand header; dialogs stay independent. */
 .erp-shell {
-  --erp-workspace-width: calc(100rem + 2cm);
+  --erp-workspace-width: calc(80rem + 2cm);
   --erp-workspace-gutter: 1rem;
+}
+.erp-shell .erp-supply-workspace {
+  --erp-workspace-width: calc(100rem + 2cm);
 }
 .erp-shell main:not(main main),
 .erp-shell .app-header-workspace,
