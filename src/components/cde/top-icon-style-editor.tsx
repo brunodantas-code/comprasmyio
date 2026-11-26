@@ -1,4 +1,4 @@
-import { Save, X } from "lucide-react";
+import { Check, Save, X } from "lucide-react";
 import { CdeSection } from "./cde-section";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -9,29 +9,37 @@ import { Palette } from "lucide-react";
 import { useCdeSwatchStyle } from "./cde-button";
 import { cn } from "@/lib/utils";
 import { TOP_ICON_DEFAULT, TOP_ICON_GROUP, topIconVars, useTopIconStyle, type TopIconStyle } from "./top-icon-style";
+import { COLOR_PALETTE } from "./color-palette";
 
 type Item = { label: string; icon: React.ComponentType<{ className?: string }>; name: string };
 const COLORS = [
-  { value: "", label: "Sem cor" }, { value: "var(--foreground)", label: "Preto" },
-  { value: "var(--whatsapp-green)", label: "Verde myio" }, { value: "var(--whatsapp-border)", label: "Verde médio" },
+  ...COLOR_PALETTE,
+  { value: "var(--foreground)", label: "Texto" },
+  { value: "var(--border)", label: "Cinza da borda" },
+  { value: "var(--color-dropdown-highlight, var(--accent))", label: "Verde de interação" },
+];
+const LEGACY_COLORS = [
+  { value: "var(--whatsapp-green)", label: "Verde" },
+  { value: "var(--whatsapp-border)", label: "Verde médio" },
   { value: "var(--mytosis-green-soft)", label: "Verde claro" },
-  { value: "var(--myio-purple)", label: "Roxo myio" }, { value: "var(--mytosis-purple-mid)", label: "Lilás myio" },
+  { value: "var(--mytosis-purple-mid)", label: "Lilás" },
   { value: "var(--mytosis-purple-soft)", label: "Lilás claro" },
-  { value: "var(--card)", label: "Branco" }, { value: "var(--muted-foreground)", label: "Cinza" }, { value: "var(--border)", label: "Cinza claro" },
+  { value: "var(--card)", label: "Branco" },
 ];
 
-export function CdeColorSwatches({ label, value, onChange, inherited = "" }: { label: string; value: string; onChange: (v: string) => void; inherited?: string }) {
+export function CdeColorSwatches({ label, value, onChange, inherited = "var(--foreground)" }: { label: string; value: string; onChange: (v: string) => void; inherited?: string }) {
   const swatch = useCdeSwatchStyle();
   const selected = value || inherited;
-  const choices = inherited ? COLORS.filter(c => c.value) : COLORS;
+  const current = COLORS.find(c => c.value === selected) ?? LEGACY_COLORS.find(c => c.value === selected) ?? { value: selected, label: "Cor personalizada" };
+  const choices = COLORS.some(c => c.value === selected) ? COLORS : [current, ...COLORS.filter(c => c.label !== current.label)];
   return <div className="space-y-1"><div className="text-xs text-muted-foreground">{label}</div>
     <div className="flex flex-wrap items-center gap-1.5">{choices.map(({ value: c, label: name }) => <button key={c || "empty"} type="button" title={name} aria-label={`${label}: ${name}`} aria-pressed={selected === c} onClick={() => onChange(c)}
-      className={cn("h-6 w-6 border", selected === c ? "ring-2 ring-primary ring-offset-1" : "border-border", swatch.cls)} style={{ ...swatch.css, ...(c ? { background: c } : {}) }}>{c ? null : <span className="text-[9px]">∅</span>}</button>)}
+      className={cn("relative h-6 w-6 border", selected === c ? "ring-2 ring-primary ring-offset-1" : "border-border", swatch.cls)} style={{ ...swatch.css, background: c }}>{selected === c ? <Check className="absolute -right-1 -top-1 size-3 rounded-full bg-background text-foreground" /> : null}</button>)}
       <label title="Cor personalizada" style={swatch.css} className={cn("relative flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center border border-border bg-background", swatch.cls)}>
         <Palette className="h-4 w-4 text-foreground" />
         <input type="color" aria-label={`${label} personalizada`} value={value.startsWith("#") ? value : "#000000"} onChange={(e) => onChange(e.target.value)} className="absolute inset-0 h-full w-full cursor-pointer opacity-0" />
       </label>
-      <span className="text-[0.6rem] text-muted-foreground/60">{COLORS.find(c => c.value === selected)?.label || selected}</span></div></div>;
+      <span className="text-[0.6rem] text-muted-foreground/60">{current.label}</span></div></div>;
 }
 
 export function TopIconStyleEditor({ items }: { items: Item[] }) {
@@ -60,7 +68,7 @@ export function TopIconStyleEditor({ items }: { items: Item[] }) {
       <span className="text-[0.7rem] leading-tight">{it.label}</span><span className="text-[0.6rem] text-muted-foreground/70">{it.name}</span></div>; })}</div>
     <div className="grid gap-3 sm:grid-cols-3">
       <CdeColorSwatches label="Cor do símbolo" value={s.fg} inherited="var(--foreground)" onChange={(fg) => set({ fg })} />
-      <CdeColorSwatches label="Cor de fundo" value={s.bg} onChange={(bg) => set({ bg })} />
+      <CdeColorSwatches label="Cor de fundo" value={s.bg} inherited="transparent" onChange={(bg) => set({ bg })} />
       <CdeColorSwatches label="Cor da borda" value={s.border} inherited="var(--border)" onChange={(border) => set({ border })} />
     </div>
     <div className="flex flex-wrap items-center gap-4 text-xs">

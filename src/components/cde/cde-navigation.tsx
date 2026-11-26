@@ -88,7 +88,7 @@ export function CdeNavigation({ number, handle }: { number: number; handle?: imp
                     <div key={p.key} className={cn("flex w-56 flex-col gap-2 rounded-lg border p-3", sel ? "border-primary bg-accent" : "border-border")}>
                       <div className="flex items-center gap-3"><Sketch kind={p.sketch} /><div className="min-w-0"><div className="text-sm font-semibold">{p.label}</div><div className="text-xs text-muted-foreground">{p.detail}</div></div></div>
                       <div className="text-[0.7rem] text-muted-foreground"><b>Onde:</b> {p.uses}</div>
-                      <Button type="button" variant="action" size="sm" disabled={sel} onClick={() => choose(d.key, p.key)} className="mt-auto">{sel ? <><Check className="h-4 w-4" />Padrão</> : "Escolher como padrão"}</Button>
+                      <Button type="button" variant="action" size="sm" disabled={sel} onClick={() => choose(d.key, p.key)} className="mt-auto">{sel ? <><Check className="h-4 w-4" />Selecionado</> : "Selecionar"}</Button>
                     </div>
                   );
                 })}

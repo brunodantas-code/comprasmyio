@@ -61,7 +61,7 @@ export function ListItemStyleEditor() {
     <div className="grid gap-3 sm:grid-cols-3">
       <CdeColorSwatches label="Cor do símbolo" value={s.fg} onChange={(fg) => set({ fg })} />
       <CdeColorSwatches label="Cor do texto" value={s.text} onChange={(text) => set({ text })} />
-      <CdeColorSwatches label="Destaque da linha" value={s.hl} onChange={(hl) => set({ hl })} />
+      <CdeColorSwatches label="Destaque da linha" value={s.hl} inherited="var(--color-dropdown-highlight, var(--accent))" onChange={(hl) => set({ hl })} />
     </div>
     
   </CdeSection>;
