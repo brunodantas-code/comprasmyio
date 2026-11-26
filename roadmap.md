@@ -803,3 +803,4 @@
 - [x] CDE item 8: Admin edita nomes dos menus e submenus com lápis e disquete; aplicado nos apps sem alterar ordem, ações ou permissões. Salvamento e abertura no Spend conferidos, nome original restaurado.
 - [x] CDE: checkbox Flexível junto à largura; arraste pessoal por usuário/app/dispositivo, conteúdo acompanhando e preferência preservada ao recarregar, padrão geral intacto.
 - [x] Arraste limitado a 160–400px e ao espaço disponível (reserva de 800px no desktop); não altera configurações de colunas. Limite, teclado e celular conferidos.
+- [x] CDE prazos: setas independentes Approvals/Atas, subtítulos compartilhados e divisórias cinza únicas, inclusive entre Prazos e Bolinhas; conferidos desktop/mobile sem salvar prazos.
