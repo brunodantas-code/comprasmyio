@@ -10,7 +10,7 @@ import { CrmFunnelIcon } from "@/components/crm-funnel-icon";
 import { MytosisIcon } from "@/components/mytosis-icon";
 import { CdeIcon } from "@/components/cde-icon";
 import { SpendIcon } from "@/components/spend/icons";
-import { CdeToggleIcon } from "./cde-button";
+import { CdeButton } from "./cde-button";
 import { useAppDisplayName } from "./app-order-config";
 import { CdeCategoryHeader } from "./cde-category-header";
 import { CdeSortableIcons } from "./cde-sortable-icons";
@@ -100,16 +100,15 @@ export function CdeAppIcons({ number, handle }: { number: number; handle?: impor
       <TopIconStyleEditor items={[...SHARED.slice(0, 2), ...(APPS[0]?.groups[0]?.items.slice(0, 3) ?? []).map((i) => ({ ...i, name: (i as { name?: string }).name ?? i.label }))]} />
       <ListItemStyleEditor />
       <CdeSection title="Ícones e menus por app" hint="Menu superior compartilhado e ícones dos menus, submenus e ações de cada app.">
-      <div className="space-y-2"><button type="button" aria-expanded={topOpen} onClick={() => setTopOpen(!topOpen)} className="flex w-full items-center gap-3 text-left"><span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary"><Menu className="h-5 w-5" /></span><span className="text-sm font-semibold">Menu superior comum a todos os apps</span><CdeToggleIcon open={topOpen} /></button>{topOpen ? <div className="rounded-lg border border-border p-3"><div className="flex flex-wrap gap-3">{SHARED.slice(0, 2).map((it) => <Tile key={it.label} it={it} />)}</div><div className="mt-3 mb-1 text-xs text-muted-foreground">Ações dentro do menu</div><div className="flex flex-wrap gap-3">{menuItems.map((it) => <Tile key={it.label} it={it} />)}</div></div> : null}</div>
-      {APPS.map((a) => { const AppIcon = a.icon; const isOpen = openApps.has(a.name); return <div key={a.name} className="space-y-2">
-        <button type="button" aria-expanded={isOpen} onClick={() => setOpenApps((p) => { const n = new Set(p); if (n.has(a.name)) n.delete(a.name); else n.add(a.name); return n; })} className="flex w-full items-center gap-3 text-left">
-          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary"><AppIcon className="h-5 w-5" /></span>
-          <span className="text-sm font-semibold">{nameOf(a.name)}</span><span className="text-[0.6rem] text-muted-foreground/70">{a.iconName}</span>
-          <CdeToggleIcon open={isOpen} />
-        </button>
-        {isOpen ? <div className="space-y-2 rounded-lg border border-border p-3">{a.groups.filter((g) => !(g.title === "Submenus" && SUB_PARENT[a.name])).map((g) => <div key={g.title}><div className="mb-1 text-xs text-muted-foreground">{g.title === "Barra inferior" ? "Menu principal do app" : g.title}</div>{g.title === "Barra inferior" ? <div className="mb-2"><CdeMenuType app={a.name} items={g.items} /></div> : null}
-          {g.items.length ? g.title === "Seções do projeto" ? <div className="flex flex-wrap gap-3">{g.items.map(it => <Tile key={it.label} it={it} />)}</div> : <CdeSortableIcons app={a.name} group={g.title} items={g.items} /> : <span className="text-xs text-muted-foreground">—</span>}</div>)}{SUB_PARENT[a.name] ? <div><div className="mb-1 text-xs text-muted-foreground">Menus e seus submenus</div><MenuTree app={a.name} groups={a.groups} /></div> : null}</div> : null}
-      </div>; })}
+      <CdeSection title="Menu superior comum a todos os apps" open={topOpen} marker={<span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary"><Menu className="h-5 w-5" /></span>} actions={<CdeButton group="toggle" screen="components/cde/cde-app-icons.tsx" aria-label={`${topOpen ? "Recolher" : "Exibir"} menu superior comum`} title={`${topOpen ? "Recolher" : "Exibir"} menu superior comum`} aria-expanded={topOpen} onClick={() => setTopOpen(!topOpen)} />}>
+        <div className="flex flex-wrap gap-3">{SHARED.slice(0, 2).map((it) => <Tile key={it.label} it={it} />)}</div><div className="mt-3 mb-1 text-xs text-muted-foreground">Ações dentro do menu</div><div className="flex flex-wrap gap-3">{menuItems.map((it) => <Tile key={it.label} it={it} />)}</div>
+      </CdeSection>
+      {APPS.map((a) => { const AppIcon = a.icon; const isOpen = openApps.has(a.name); return <CdeSection key={a.name} title={nameOf(a.name)} hint={a.iconName} open={isOpen}
+        marker={<span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary"><AppIcon className="h-5 w-5" /></span>}
+        actions={<CdeButton group="toggle" screen="components/cde/cde-app-icons.tsx" aria-label={`${isOpen ? "Recolher" : "Exibir"} ${nameOf(a.name)}`} title={`${isOpen ? "Recolher" : "Exibir"} ${nameOf(a.name)}`} aria-expanded={isOpen} onClick={() => setOpenApps((p) => { const n = new Set(p); if (n.has(a.name)) n.delete(a.name); else n.add(a.name); return n; })} />}>
+        <div className="space-y-2">{a.groups.filter((g) => !(g.title === "Submenus" && SUB_PARENT[a.name])).map((g) => <div key={g.title}><div className="mb-1 text-xs text-muted-foreground">{g.title === "Barra inferior" ? "Menu principal do app" : g.title}</div>{g.title === "Barra inferior" ? <div className="mb-2"><CdeMenuType app={a.name} items={g.items} /></div> : null}
+          {g.items.length ? g.title === "Seções do projeto" ? <div className="flex flex-wrap gap-3">{g.items.map(it => <Tile key={it.label} it={it} />)}</div> : <CdeSortableIcons app={a.name} group={g.title} items={g.items} /> : <span className="text-xs text-muted-foreground">—</span>}</div>)}{SUB_PARENT[a.name] ? <div><div className="mb-1 text-xs text-muted-foreground">Menus e seus submenus</div><MenuTree app={a.name} groups={a.groups} /></div> : null}</div>
+      </CdeSection>; })}
       </CdeSection>
     </div> : null}
   </section>;
