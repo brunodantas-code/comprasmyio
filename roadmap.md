@@ -735,3 +735,4 @@
 - [x] CDE: opções de exibição simplificadas para Verde, Roxo e P&B, preservando as cores originais.
 - [x] CDE: opção Atual selecionável com check para a cor salva e Preto verdadeiro na paleta; seleção/restauração conferidas sem gravar mudanças, 14 testes passaram.
 - [x] Informado: títulos dos boxes verdes ajustados em 1. Aparência → Subcategorias → Tamanho do título, com salvamento no disquete de Aparência do CDE.
+- [x] Localizado no print: Subcategorias, segunda linha à esquerda, campo Tamanho do título exibindo 13 px; não há menu separado chamado Títulos nesse bloco.
