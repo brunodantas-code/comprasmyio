@@ -1,3 +1,4 @@
+- [x] Spend: Anexar Comprovante Fiscal preservado; botão principal desktop/clipe aceitam .pdf e imagens. PDF selecionado na conta autenticada abriu a forma de pagamento, sem gravar despesa; três testes passaram. Falta publicar.
 - [x] Spend Categorias: 12 alças de arraste, ordem alterada e disquete habilitado sem salvar o teste; ícones, vínculos e identidades preservados.
 - [x] Code anexos: rótulo externo duplicado removido; uma única frase “Prints e arquivos...” conferida no ticket.
 - [x] OpDesk: cabeçalho centralizado pelo CDE e dez alças de largura sem divisória visual.

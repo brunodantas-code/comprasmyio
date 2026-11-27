@@ -36,3 +36,5 @@
 - Reconciliation PDF and lines share subgrid header tracks so tools and wrapping keep their reading surfaces aligned; totals and competence retain their existing calculations and filters.
 
 - Camera and document pickers are separate entry points into the same capture flow; PDF originals and image cleanup retain existing private storage and evidence validation.
+
+- Desktop receipt entry opens the document picker; receipt pickers include explicit extensions plus MIME types, while the mobile camera remains image-only.
