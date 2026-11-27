@@ -1,6 +1,10 @@
 export function classificationAccess(busy: boolean, approved: boolean, hasReceipt: boolean, account: string, center: string, receiptNotApplicable = false) {
   return { canSave: !busy && !approved, canApprove: !busy && !approved && (hasReceipt || receiptNotApplicable) && !!account && !!center };
 }
+export function lineActionVisibility(hasReceipt: boolean, receiptNotApplicable: boolean) {
+  const waived = !hasReceipt && receiptNotApplicable;
+  return { attach: !hasReceipt && !waived, notify: !hasReceipt && !waived, requestAdjustment: !waived };
+}
 export function showReceiptCnpj(receiptId: string | null) {
   return !!receiptId;
 }

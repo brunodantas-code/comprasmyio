@@ -1,5 +1,5 @@
 import { expect, it } from "vitest";
-import { classificationAccess, showReceiptCnpj, classificationTargets, toggleFilteredSelection, bulkClassificationPatch, bulkClassificationTargets } from "./classification";
+import { classificationAccess, showReceiptCnpj, lineActionVisibility, classificationTargets, toggleFilteredSelection, bulkClassificationPatch, bulkClassificationTargets } from "./classification";
 it("CNPJ aparece somente com comprovante anexado", () => {
   expect(showReceiptCnpj(null)).toBe(false);
   expect(showReceiptCnpj("comprovante")).toBe(true);
@@ -18,6 +18,15 @@ it("não altera lançamentos aprovados nem salva durante outra ação", () => {
 it("permite conciliar IOF sem comprovante com dispensa explícita e classificação completa", () => {
   expect(classificationAccess(false, false, false, "IOF", "Administração", true).canApprove).toBe(true);
   expect(classificationAccess(false, false, false, "IOF", "", true).canApprove).toBe(false);
+});
+it("dispensa do comprovante oculta anexo, notificação e pedido de ajuste", () => {
+  expect(lineActionVisibility(false, true)).toEqual({ attach: false, notify: false, requestAdjustment: false });
+});
+it("lançamento sem comprovante e sem dispensa mantém anexo, notificação e ajuste", () => {
+  expect(lineActionVisibility(false, false)).toEqual({ attach: true, notify: true, requestAdjustment: true });
+});
+it("comprovante anexado mantém o pedido de ajuste e retira anexo e notificação", () => {
+  expect(lineActionVisibility(true, false)).toEqual({ attach: false, notify: false, requestAdjustment: true });
 });
 it("seleciona somente os filtrados editáveis e preserva seleções fora do filtro", () => {
   const lines = [{ id: "iof1", status: "pending" }, { id: "iof2", status: "approved" }];

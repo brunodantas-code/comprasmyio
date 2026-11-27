@@ -27,7 +27,7 @@ import { SpendStatementPreview } from "./statement-preview";
 import { SpendReceiptPdfPreview } from "./receipt-pdf-preview";
 import { receiptBelongsToView } from "./receipt-visibility";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
-import { classificationAccess, showReceiptCnpj, classificationTargets, toggleFilteredSelection, bulkClassificationTargets, type bulkClassificationPatch } from "./classification";
+import { classificationAccess, showReceiptCnpj, lineActionVisibility, classificationTargets, toggleFilteredSelection, bulkClassificationTargets, type bulkClassificationPatch } from "./classification";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -95,6 +95,7 @@ function Audit({ line, data, busy, expanded, approve, save, notify, attach, link
   const locked = line.status === 'approved';
   const sent=(kind:string)=>data.logs.some(log=>log.action===kind&&log.details&&typeof log.details==='object'&&!Array.isArray(log.details)&&log.details['line_id']===line.id);
   const access = classificationAccess(busy,locked,!!receipt,account,center,notApplicable && line.receipt_not_applicable);
+  const actions = lineActionVisibility(!!receipt, notApplicable);
   useEffect(() => {
     function keydown(e: KeyboardEvent) {
       const editing = e.target instanceof HTMLElement && !!e.target.closest('input,textarea,[role=combobox],[role=dialog],button,[contenteditable=true]');
@@ -109,9 +110,9 @@ function Audit({ line, data, busy, expanded, approve, save, notify, attach, link
     {(()=>{const response=data.logs.find(log=>log.action==='receipt_missing_response'&&log.details&&typeof log.details==='object'&&!Array.isArray(log.details)&&log.details['line_id']===line.id);if(!response||!response.details||typeof response.details!=='object'||Array.isArray(response.details))return null;const reason=missingReceiptReason.safeParse(response.details['reason']);return reason.success?<p className="text-sm text-muted-foreground">Portador informou: {missingReceiptLabels[reason.data]}</p>:null;})()}
     {!receipt && <label className="flex items-center gap-2 text-xs"><Checkbox aria-label="Comprovante não se aplica" checked={notApplicable} disabled={busy || locked} onCheckedChange={v=>setNotApplicable(v===true)} /><span>Comprovante: Não se aplica</span></label>}
     <div className="flex items-center gap-2" aria-label="Ações do lançamento">
-      {!receipt && <TooltipProvider><Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" aria-label="Anexar comprovante" title={notApplicable ? "Anexar comprovante" : "Sem comprovante"} className={notApplicable ? "shrink-0" : "shrink-0 !text-destructive"} disabled={busy || locked} onClick={attach}><Paperclip className={notApplicable ? undefined : "!text-destructive"} /></Button></TooltipTrigger><TooltipContent>{notApplicable ? "Anexar comprovante" : "Sem comprovante"}</TooltipContent></Tooltip></TooltipProvider>}
-      {!receipt && !notApplicable && <Button variant="ghost" size="icon" title="Notificar Portador" aria-label="Notificar Portador" disabled={busy || locked} className="relative" onClick={() => notify('notify')}><Bell />{sent('notify')&&<Check className="absolute -right-1 -top-1 size-3 text-primary"/>}</Button>}
-      <Button variant="ghost" size="icon" title="Rejeitar / Pedir ajuste" aria-label="Rejeitar / Pedir ajuste" disabled={busy || locked} className="relative" onClick={() => notify('adjustment')}><MessageSquareWarning />{sent('adjustment')&&<Check className="absolute -right-1 -top-1 size-3 text-primary"/>}</Button>
+      {actions.attach && <TooltipProvider><Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" aria-label="Anexar comprovante" title="Sem comprovante" className="shrink-0 !text-destructive" disabled={busy || locked} onClick={attach}><Paperclip className="!text-destructive" /></Button></TooltipTrigger><TooltipContent>Sem comprovante</TooltipContent></Tooltip></TooltipProvider>}
+      {actions.notify && <Button variant="ghost" size="icon" title="Notificar Portador" aria-label="Notificar Portador" disabled={busy || locked} className="relative" onClick={() => notify('notify')}><Bell />{sent('notify')&&<Check className="absolute -right-1 -top-1 size-3 text-primary"/>}</Button>}
+      {actions.requestAdjustment && <Button variant="ghost" size="icon" title="Rejeitar / Pedir ajuste" aria-label="Rejeitar / Pedir ajuste" disabled={busy || locked} className="relative" onClick={() => notify('adjustment')}><MessageSquareWarning />{sent('adjustment')&&<Check className="absolute -right-1 -top-1 size-3 text-primary"/>}</Button>}
       <Button variant="ghost" size="icon" aria-label="Salvar classificação" title="Salvar classificação" disabled={!access.canSave} onClick={() => save(line,account,center,project,cnpj,notApplicable)}><Save /></Button>
       <SpendLineDetailsEditor line={line} disabled={busy || locked} />
       <Button className="ml-0 shrink-0 sm:ml-auto" disabled={!access.canApprove} onClick={() => approve(line,account,center,project)}><Check />{locked ? 'Enviado ao Finance' : 'Aprovar'}</Button>
