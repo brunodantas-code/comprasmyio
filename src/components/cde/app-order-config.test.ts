@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 vi.mock("@/integrations/supabase/client", () => ({ supabase: {} }));
-import { appDisplay, appKeyForName, appTileColorVars, appTileLowContrast, homeHeaderVars, homeHeaderLogoTone, mobileTileVars, parseAppTile } from "./app-order-config";
+import { appDisplay, appKeyForName, appTileColorVars, scopedAppTileVars, resolveAppTile, appTileScope, updateAppTileProfile, appTileLowContrast, homeHeaderVars, homeHeaderLogoTone, mobileTileVars, parseAppTile } from "./app-order-config";
 
 describe("app spacing configuration", () => {
   it("stores desktop header height without changing mobile icon dimensions", () => {
@@ -120,4 +120,55 @@ describe("app display names saved in the CDE", () => {
     expect(appKeyForName("Acessos", tile)).toBe("Acessos");
     expect(appDisplay(tile, appKeyForName("Acessos", tile)).name).toBe("Acessos");
   });
+});
+
+describe('minimalista independente por tema e dispositivo', () => {
+  it('Roxo Desktop minimalista preserva Verde Desktop', () => {
+    const tile = parseAppTile('{"tileStyles":{"purple_desktop":"flat"}}');
+    expect(scopedAppTileVars(tile, 'purple', false)['--tile-fill']).toBe('transparent');
+    expect(scopedAppTileVars(tile, 'green', false)).toEqual(appTileColorVars(tile));
+  });
+  it('Roxo Desktop minimalista preserva Mobile preenchido', () => {
+    const tile = parseAppTile('{"tileStyles":{"purple_desktop":"flat","purple_mobile":"filled"}}');
+    expect(scopedAppTileVars(tile, 'purple', true)['--tile-fill']).toBe('var(--myio-green)');
+    expect(scopedAppTileVars(tile, 'purple', true)['--tile-border']).toBe('var(--myio-green)');
+  });
+  it('Verde Mobile minimalista não altera Desktop nem Roxo Mobile', () => {
+    const tile = parseAppTile('{"tileStyles":{"green_mobile":"flat"}}');
+    expect(scopedAppTileVars(tile, 'green', true)['--tile-fill']).toBe('transparent');
+    expect(scopedAppTileVars(tile, 'green', false)).toEqual(appTileColorVars(tile));
+    expect(scopedAppTileVars(tile, 'purple', true)).toEqual(appTileColorVars(tile));
+  });
+  it('preserva configurações antigas e descarta escopos inválidos', () => {
+    const tile = parseAppTile('{"fill":"roxo","tileStyles":{"purple_desktop":"invalid","unknown":"flat"}}');
+    expect(tile.tileStyles).toBeUndefined();
+    expect(scopedAppTileVars(tile, 'purple', false)).toEqual(appTileColorVars(tile));
+  });
+});
+
+describe('customizações completas por versão', () => {
+  it('salvar Roxo Desktop não altera Verde nem Mobile', () => {
+    const base = parseAppTile('{"fill":"padrao","gapX":32}');
+    const next = updateAppTileProfile(base, 'purple_desktop', { ...base, fill: 'lilas', border: 'roxo', gapX: 48, labelPx: 16 });
+    const saved = parseAppTile(JSON.stringify(next));
+    expect(resolveAppTile(saved, 'purple', false)).toMatchObject({ fill: 'lilas', border: 'roxo', gapX: 48, labelPx: 16 });
+    expect(resolveAppTile(saved, 'purple', true).fill).toBe('padrao');
+    expect(resolveAppTile(saved, 'green', false).gapX).toBe(32);
+    expect(resolveAppTile(saved, 'green', true).labelPx).toBe(14);
+  });
+  it('cada versão mantém suas cores, dimensões e fontes após novo salvamento', () => {
+    const base = parseAppTile('{}');
+    const first = updateAppTileProfile(base, 'green_mobile', { ...base, fill: 'verde_claro', mobileTilePct: 90, labelPx: 12 });
+    const next = updateAppTileProfile(first, 'purple_desktop', { ...base, fill: 'flat', tilePct: 110 });
+    const saved = parseAppTile(JSON.stringify(next));
+    expect(resolveAppTile(saved, 'green', true)).toMatchObject({ fill: 'verde_claro', mobileTilePct: 90, labelPx: 12 });
+    expect(resolveAppTile(saved, 'purple', false)).toMatchObject({ fill: 'flat', tilePct: 110 });
+  });
+});
+
+it('vincula salvamento automaticamente ao tema e dispositivo atuais', () => {
+  expect(appTileScope('purple', false)).toBe('purple_desktop');
+  expect(appTileScope('purple', true)).toBe('purple_mobile');
+  expect(appTileScope('green', false)).toBe('green_desktop');
+  expect(appTileScope('green', true)).toBe('green_mobile');
 });

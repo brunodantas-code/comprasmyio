@@ -1,7 +1,7 @@
 import { FontFormatControl } from "./font-format-control";
 import { CdeSection } from "./cde-section";
 import { CdeNumber } from "@/components/cde/cde-button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type React from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
@@ -15,7 +15,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { CdeCategoryHeader } from "./cde-category-header";
-import { APP_NAME_COLORS, APP_TILE_DEFAULT, PORTAL_APPS, appDisplay, appLogoPx, appTileColor, appTileColorList, appTileColorVars, appTileLowContrast, homeHeaderVars, homeHeaderLogoTone, mobileTileVars, parseAppOrder, useAppOrder, useAppTile, type AppDisplayOverride, type AppTileColorKind, type AppTileConfig } from "./app-order-config";
+import { APP_NAME_COLORS, APP_TILE_DEFAULT, PORTAL_APPS, appDisplay, appLogoPx, appTileColor, appTileColorList, appTileColorVars, scopedAppTileVars, appTileLowContrast, homeHeaderVars, homeHeaderLogoTone, mobileTileVars, parseAppOrder, useAppOrder, useAppTile, resolveAppTile, appTileScope, updateAppTileProfile, type TileStyleScope, type AppDisplayOverride, type AppTileColorKind, type AppTileConfig } from "./app-order-config";
 import { CdeButton, useCdeSwatchStyle } from "./cde-button";
 import { themedColorOptions } from "./appearance-names";
 import { useActiveAppearance } from "./app-appearance";
@@ -79,9 +79,26 @@ export function CdeAppOrder({ number, handle }: { number: number; handle?: impor
   const [saving, setSaving] = useState(false);
   const { data } = useAppOrder();
   const qc = useQueryClient();
-  const savedTile = useAppTile().data ?? APP_TILE_DEFAULT;
-  const [tileDraft, setTileDraft] = useState<AppTileConfig | null>(null);
-  const tile = tileDraft ?? savedTile;
+  const savedTile = useAppTile(true).data ?? APP_TILE_DEFAULT;
+  const [tileDraft, setRawTileDraft] = useState<AppTileConfig | null>(null);
+  const appearance = useActiveAppearance();
+  const [onMobile, setOnMobile] = useState(false);
+  useEffect(() => {
+    const media = window.matchMedia('(max-width: 639px)');
+    const sync = () => { setOnMobile(media.matches); setRawTileDraft(null); };
+    sync(); media.addEventListener('change', sync);
+    return () => media.removeEventListener('change', sync);
+  }, []);
+  useEffect(() => { setRawTileDraft(null); }, [appearance]);
+  const editingScope: TileStyleScope = appTileScope(appearance === 'purple' ? 'purple' : 'green', onMobile);
+  const baseTile = tileDraft ?? savedTile;
+  const targetAppearance = editingScope.startsWith('purple') ? 'purple' : 'green';
+  const tile = appearance === 'grayscale' ? baseTile : resolveAppTile(baseTile, targetAppearance, onMobile);
+  const desktopTile = resolveAppTile(baseTile, targetAppearance, false);
+  const mobileTile = resolveAppTile(baseTile, targetAppearance, true);
+  function setTileDraft(next: AppTileConfig | null) {
+    setRawTileDraft(next ? (appearance === 'grayscale' ? next : updateAppTileProfile(baseTile, editingScope, next)) : null);
+  }
   function updateApp(key: string, patch: Partial<AppDisplayOverride>) {
     const existing = tile.apps?.[key] ?? {};
     setTileDraft({ ...tile, apps: { ...tile.apps, [key]: { ...existing, ...patch } } });
@@ -93,7 +110,7 @@ export function CdeAppOrder({ number, handle }: { number: number; handle?: impor
       if (!user) throw new Error("Sessão não encontrada");
       const existing = await supabase.from("cde_selected").select("variant_key").eq("group_key", "app_tile").eq("is_primary", true).maybeSingle();
       if (existing.error) throw existing.error;
-      const row = { variant_key: JSON.stringify(tile), chosen_by: user.id };
+      const row = { variant_key: JSON.stringify(baseTile), chosen_by: user.id };
       const result = existing.data ? await supabase.from("cde_selected").update(row).eq("group_key", "app_tile").eq("is_primary", true).eq("variant_key", existing.data.variant_key).select("variant_key").single() : await supabase.from("cde_selected").insert({ ...row, group_key: "app_tile" }).select("variant_key").single();
       if (result.error) throw result.error;
       if (result.data?.variant_key !== row.variant_key) throw new Error("O padrão não foi salvo. Recarregue e tente novamente.");
@@ -123,7 +140,7 @@ export function CdeAppOrder({ number, handle }: { number: number; handle?: impor
   }
   return <section className="cde-category-sections">
     <CdeCategoryHeader handle={handle} number={number} title="Home Page" hint="Faixa superior, apps, espaçamento e cores" open={open} onToggle={() => setOpen(!open)} />
-    {open && <div><CdeSection title="Ordenação dos Apps na Home Page" open={orderOpen} actions={<><Button variant="ghost" size="icon" title="Salvar ordem dos apps" aria-label="Salvar ordem dos apps" onClick={save} disabled={saving || !draft}><Save /></Button><CdeButton group="toggle" screen="components/cde/cde-app-order.tsx" aria-label={`${orderOpen ? "Recolher" : "Exibir"} ordenação dos apps`} title={`${orderOpen ? "Recolher" : "Exibir"} ordenação dos apps`} aria-expanded={orderOpen} onClick={() => setOrderOpen(!orderOpen)} /></>}><DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={move}><SortableContext items={order} strategy={verticalListSortingStrategy}>{order.map((id, i) => <Row key={id} id={id} index={i} displayName={appDisplay(tile, id).name} />)}</SortableContext></DndContext></CdeSection>
+    {open && <div><div className="py-3 text-sm text-muted-foreground" aria-label="Versão da Home em edição">{appearance === 'purple' ? 'Roxo' : appearance === 'green' ? 'Verde' : 'P&B'} — {onMobile ? 'Mobile' : 'Desktop'}</div><CdeSection title="Ordenação dos Apps na Home Page" open={orderOpen} actions={<><Button variant="ghost" size="icon" title="Salvar ordem dos apps" aria-label="Salvar ordem dos apps" onClick={save} disabled={saving || !draft}><Save /></Button><CdeButton group="toggle" screen="components/cde/cde-app-order.tsx" aria-label={`${orderOpen ? "Recolher" : "Exibir"} ordenação dos apps`} title={`${orderOpen ? "Recolher" : "Exibir"} ordenação dos apps`} aria-expanded={orderOpen} onClick={() => setOrderOpen(!orderOpen)} /></>}><DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={move}><SortableContext items={order} strategy={verticalListSortingStrategy}>{order.map((id, i) => <Row key={id} id={id} index={i} displayName={appDisplay(tile, id).name} />)}</SortableContext></DndContext></CdeSection>
       
       <CdeCodeApps />
       <CdeAppShortcuts tile={tile} />
@@ -152,11 +169,11 @@ export function CdeAppOrder({ number, handle }: { number: number; handle?: impor
         <div className="space-y-1"><Label className="flex min-h-10 items-end pb-1">Altura da faixa superior — Desktop</Label><Select value={String(tile.desktopHeaderPx ?? 0)} onValueChange={v => { const { desktopHeaderPx: _old, ...rest } = tile; setTileDraft({ ...rest, ...(Number(v) ? { desktopHeaderPx: Number(v) } : {}) }); }}><SelectTrigger aria-label="Altura da faixa superior Desktop"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="0">Ajustar ao conteúdo</SelectItem>{[80, 90, 100, 110, 120, 140, 160, 180, 200, 240].map(px => <SelectItem key={px} value={String(px)}>{px} px</SelectItem>)}</SelectContent></Select></div>
           <ColorChoice kind="headerBg" label="Fundo da faixa superior" value={tile.headerBg} onChange={headerBg => setTileDraft({ ...tile, headerBg })} />
         </div>
-        <div className="space-y-1"><Label>Prévia da faixa dos apps — Desktop</Label><HeaderPreview tile={tile} appName="CRM" display={appDisplay(tile, "crm", 16)} /></div>
-        <div className="space-y-1"><Label>Prévia da faixa da Home — Desktop</Label><HeaderPreview tile={tile} /></div>
+        <div className="space-y-1"><Label>Prévia da faixa dos apps — Desktop</Label><HeaderPreview tile={desktopTile} appName="CRM" display={appDisplay(desktopTile, "crm", 16)} /></div>
+        <div className="space-y-1"><Label>Prévia da faixa da Home — Desktop</Label><HeaderPreview tile={desktopTile} /></div>
         <div className="grid gap-4 sm:grid-cols-2">
-          <div className="min-w-0 max-w-[390px] space-y-1"><Label>Prévia da faixa dos apps — Mobile</Label><HeaderPreview tile={tile} mobile appName="CRM" display={appDisplay(tile, "crm", 16)} /></div>
-          <div className="min-w-0 max-w-[390px] space-y-1"><Label>Prévia da faixa da Home — Mobile</Label><HeaderPreview tile={tile} mobile /></div>
+          <div className="min-w-0 max-w-[390px] space-y-1"><Label>Prévia da faixa dos apps — Mobile</Label><HeaderPreview tile={mobileTile} mobile appName="CRM" display={appDisplay(mobileTile, "crm", 16)} /></div>
+          <div className="min-w-0 max-w-[390px] space-y-1"><Label>Prévia da faixa da Home — Mobile</Label><HeaderPreview tile={mobileTile} mobile /></div>
         </div>
       </CdeSection>
       <CdeSection title="Ícones da página principal" open={iconsOpen} actions={<><Button variant="ghost" size="icon" aria-label="Salvar Home Page" title="Salvar Home Page" onClick={saveTile} disabled={saving || !tileDraft}><Save /></Button><CdeButton group="toggle" screen="components/cde/cde-app-order.tsx" aria-label={`${iconsOpen ? "Recolher" : "Exibir"} ícones da página principal`} title={`${iconsOpen ? "Recolher" : "Exibir"} ícones da página principal`} aria-expanded={iconsOpen} onClick={() => setIconsOpen(!iconsOpen)} /></>}>
@@ -193,23 +210,25 @@ export function CdeAppOrder({ number, handle }: { number: number; handle?: impor
           </div></div>)}
         </div>
 
+        <div className="min-w-0 space-y-1"><Label>Estilo dos ícones</Label><Select value={tile.fill === 'flat' && tile.border === 'flat' ? 'flat' : 'filled'} onValueChange={value => { if (value === 'flat') setTileDraft({ ...tile, fill: 'flat', border: 'flat', symbol: 'verde', inside: 'verde' }); else setTileDraft({ ...tile, fill: tile.fill === 'flat' ? 'padrao' : tile.fill, border: tile.border === 'flat' ? 'padrao' : tile.border }); }}><SelectTrigger aria-label="Estilo dos ícones da versão selecionada"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="filled">Preenchido com borda</SelectItem><SelectItem value="flat">Flat minimalista</SelectItem></SelectContent></Select></div>
+
         <p className="pt-2 text-sm font-medium">Cores da página principal (Manual da Marca myio)</p>
         <div role="group" aria-label="Cores da página principal" className="grid w-full max-w-5xl grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-5">
           {COLOR_FIELDS.map(([kind, label]) => <ColorChoice key={kind} kind={kind} label={label} value={tile[kind]} onChange={(v) => setTileDraft({ ...tile, [kind]: v })} />)}
         </div>
         {appTileLowContrast(tile) && <p className="text-xs text-destructive">O texto abaixo dos ícones fica pouco visível neste fundo; escolha uma cor de texto contrastante.</p>}
         <div className="space-y-1"><Label>Prévia desktop</Label>
-          <div aria-label="Prévia dos apps" style={{ columnGap: tile.gapX, rowGap: tile.gapY, ...appTileColorVars(tile) } as React.CSSProperties} className="flex w-full flex-wrap bg-[var(--portal-bg)] px-4 py-10 sm:py-14">
-            {order.map((key) => { const app = PORTAL_APPS.find((a) => a.key === key); return app ? <div key={key} style={{ zoom: tile.tilePct / 100 }} className="flex w-28 min-w-0 flex-col items-center text-center">
-              <div className="relative flex h-28 w-28 flex-col items-center justify-between rounded-3xl border-2 border-[color:var(--tile-border)] bg-[var(--tile-fill)] px-2 pb-2 pt-1.5 text-primary-foreground"><AppTileFace appKey={key} name={app.name} tile={tile} /></div>
-              <AppTileDescription appKey={key} tile={tile} />
+          <div aria-label="Prévia dos apps" style={{ columnGap: desktopTile.gapX, rowGap: desktopTile.gapY, ...scopedAppTileVars(baseTile, targetAppearance, false) } as React.CSSProperties} className="flex w-full flex-wrap bg-[var(--portal-bg)] px-4 py-10 sm:py-14">
+            {order.map((key) => { const app = PORTAL_APPS.find((a) => a.key === key); return app ? <div key={key} style={{ zoom: desktopTile.tilePct / 100 }} className="flex w-28 min-w-0 flex-col items-center text-center">
+              <div className="relative flex h-28 w-28 flex-col items-center justify-between rounded-3xl border-2 border-[color:var(--tile-border)] bg-[var(--tile-fill)] px-2 pb-2 pt-1.5 text-primary-foreground"><AppTileFace appKey={key} name={app.name} tile={desktopTile} /></div>
+              <AppTileDescription appKey={key} tile={desktopTile} />
             </div> : null; })}
           </div></div>
         <div className="space-y-1"><Label>Prévia mobile</Label>
-          <div aria-label="Prévia mobile dos apps" style={{ ...appTileColorVars(tile), ...mobileTileVars(tile) } as React.CSSProperties} className="mobile-app-grid grid w-full max-w-[390px] bg-[var(--portal-bg)] px-3 py-8">
+          <div aria-label="Prévia mobile dos apps" style={{ ...scopedAppTileVars(baseTile, targetAppearance, true), ...mobileTileVars(mobileTile) } as React.CSSProperties} className="mobile-app-grid grid w-full max-w-[390px] bg-[var(--portal-bg)] px-3 py-8">
             {order.map(key => { const app = PORTAL_APPS.find(a => a.key === key); return app ? <div key={key} className="flex min-w-0 flex-col items-center text-center">
-              <div className="mobile-app-tile relative flex flex-col items-center justify-between rounded-2xl border-2 border-[color:var(--tile-border)] bg-[var(--tile-fill)] px-1 pb-2 pt-1 text-primary-foreground"><AppTileFace appKey={key} name={app.name} tile={tile} mobile /></div>
-              <AppTileDescription appKey={key} tile={tile} mobile />
+              <div className="mobile-app-tile relative flex flex-col items-center justify-between rounded-2xl border-2 border-[color:var(--tile-border)] bg-[var(--tile-fill)] px-1 pb-2 pt-1 text-primary-foreground"><AppTileFace appKey={key} name={app.name} tile={mobileTile} mobile /></div>
+              <AppTileDescription appKey={key} tile={mobileTile} mobile />
             </div> : null; })}
           </div>
         </div>

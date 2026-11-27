@@ -49,4 +49,4 @@
 
 - Field-title size uses optional table_fonts.fieldPx and --field-title-fs in shared Label spans; missing values inherit existing sizes, so older saved configurations retain their appearance.
 - CDE colour pickers name every brand colour in the theme the user is seeing (themedColorOptions in appearance-names.ts): under Roxo the theme token reads "Roxo myio (do tema)" and under P&B the brand colours read as greys, so a swatch never shows a colour the name denies.
-- Home Page tiles offer "Minimalista (sem fundo)" and "Minimalista (sem borda)" (transparent) plus the theme colour for symbol and text, so the flat look is selectable in every theme without touching stored values.
+- Home app_tile profiles store full independent theme/device customizations; resolveAppTile and scopedAppTileVars serve portal/previews, while missing profiles preserve legacy appearance; saves target the active theme/viewport automatically and leave other profiles unchanged.

@@ -1,6 +1,7 @@
 import { parseFontFormat, fontFormatCss, type FontFormat } from "./font-format";
-import { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useActiveAppearance } from "./app-appearance";
 import { supabase } from "@/integrations/supabase/client";
 
 export const PORTAL_APPS = [
@@ -126,7 +127,10 @@ export function appTileColorList(kind: AppTileColorKind): { key: string; label: 
 }
 export type AppDisplayOverride = { format?: FontFormat; descriptionFormat?: FontFormat; name?: string; labelPx?: number; color?: string; description?: string; descriptionPx?: number; descriptionColor?: string };
 export type AppDisplay = { format?: FontFormat; name: string; labelPx: number; colorKey: string; color?: string };
-export type AppTileConfig = { format?: FontFormat; desktopHeaderPx?: number; appLogoPx?: number; labelPx: number; iconPct: number; tilePct: number; mobileTilePct: number; mobileIconPct: number; gapX: number; gapY: number; headerBg: string; bg: string; fill: string; border: string; symbol: string; inside: string; below: string; apps?: Record<string, AppDisplayOverride> };
+export type TileStyleScope = 'purple_desktop' | 'purple_mobile' | 'green_desktop' | 'green_mobile';
+export type TileStyleMode = 'filled' | 'flat';
+export type AppTileProfile = Omit<AppTileConfig, "profiles" | "tileStyles">;
+export type AppTileConfig = { profiles?: Partial<Record<TileStyleScope, AppTileProfile>>; tileStyles?: Partial<Record<TileStyleScope, TileStyleMode>>; format?: FontFormat; desktopHeaderPx?: number; appLogoPx?: number; labelPx: number; iconPct: number; tilePct: number; mobileTilePct: number; mobileIconPct: number; gapX: number; gapY: number; headerBg: string; bg: string; fill: string; border: string; symbol: string; inside: string; below: string; apps?: Record<string, AppDisplayOverride> };
 export const APP_TILE_DEFAULT: AppTileConfig = { labelPx: 14, iconPct: 100, tilePct: 100, mobileTilePct: 100, mobileIconPct: 100, gapX: 32, gapY: 40, headerBg: "padrao", bg: "padrao", fill: "padrao", border: "padrao", symbol: "padrao", inside: "padrao", below: "padrao" };
 export function appTileColor(kind: AppTileColorKind, key: string) {
   const list = APP_TILE_COLORS[kind] as readonly { key: string; label: string; value: string; dark: boolean }[];
@@ -162,6 +166,28 @@ export function appDisplay(tile: AppTileConfig, key: string, fallbackPx = tile.l
 export function appTileColorVars(tile: AppTileConfig): Record<string, string> {
   return { "--portal-bg": appTileColor("bg", tile.bg).value, "--tile-fill": appTileColor("fill", tile.fill).value, "--tile-border": appTileColor("border", tile.border).value, "--tile-symbol": appTileColor("symbol", tile.symbol).value, "--tile-inside": appTileColor("inside", tile.inside).value, "--tile-below": appTileColor("below", tile.below).value };
 }
+export function appTileScope(appearance: 'purple' | 'green', mobile: boolean): TileStyleScope {
+  return `${appearance}_${mobile ? 'mobile' : 'desktop'}`;
+}
+export function resolveAppTile(tile: AppTileConfig, appearance: string, mobile: boolean): AppTileConfig {
+  if (appearance !== 'purple' && appearance !== 'green') return tile;
+  const profile = tile.profiles?.[`${appearance}_${mobile ? 'mobile' : 'desktop'}`];
+  return profile ? { ...tile, ...profile } : tile;
+}
+export function updateAppTileProfile(tile: AppTileConfig, scope: TileStyleScope, profile: AppTileConfig): AppTileConfig {
+  const { profiles: _profiles, tileStyles: _styles, ...values } = profile;
+  return { ...tile, profiles: { ...tile.profiles, [scope]: values } };
+}
+export function scopedAppTileVars(tile: AppTileConfig, appearance: string, mobile: boolean): Record<string, string> {
+  const resolved = resolveAppTile(tile, appearance, mobile);
+  const vars = appTileColorVars(resolved);
+  if (appearance !== 'purple' && appearance !== 'green') return vars;
+  if (resolved !== tile) return vars;
+  const mode = tile.tileStyles?.[`${appearance}_${mobile ? 'mobile' : 'desktop'}`];
+  if (mode === 'flat') return { ...vars, '--tile-fill': 'transparent', '--tile-border': 'transparent', '--tile-symbol': 'var(--myio-green)', '--tile-inside': 'var(--myio-green)' };
+  if (mode === 'filled') return { ...vars, '--tile-fill': appTileColor('fill', tile.fill === 'flat' ? 'padrao' : tile.fill).value, '--tile-border': appTileColor('border', tile.border === 'flat' ? 'padrao' : tile.border).value };
+  return vars;
+}
 export function homeHeaderVars(tile: AppTileConfig): Record<string, string> {
   const selected = appTileColor("headerBg", tile.headerBg);
   const height: Record<string, string> = tile.desktopHeaderPx ? { "--home-header-desktop-height": `${tile.desktopHeaderPx}px` } : {};
@@ -188,6 +214,17 @@ export function parseAppTile(raw?: string): AppTileConfig {
     const labelPx = Number(p.labelPx), iconPct = Number(p.iconPct), tilePct = Number(p.tilePct);
     const mobileTilePct = Number(p.mobileTilePct), mobileIconPct = Number(p.mobileIconPct);
     const gapX = Number(p.gapX), gapY = Number(p.gapY);
+    const profiles: Partial<Record<TileStyleScope, AppTileProfile>> = {};
+    const tileStyles: Partial<Record<TileStyleScope, TileStyleMode>> = {};
+    for (const scope of ['purple_desktop', 'purple_mobile', 'green_desktop', 'green_mobile'] as const) {
+      const rawProfile = p.profiles?.[scope];
+      if (rawProfile && typeof rawProfile === 'object' && !Array.isArray(rawProfile)) {
+        const { profiles: _nested, tileStyles: _styles, ...flatProfile } = rawProfile;
+        profiles[scope] = parseAppTile(JSON.stringify(flatProfile));
+      }
+      const mode = p.tileStyles?.[scope];
+      if (mode === 'flat' || mode === 'filled') tileStyles[scope] = mode;
+    }
     const rawApps: Record<string, unknown> = p.apps && typeof p.apps === "object" && !Array.isArray(p.apps) ? p.apps as Record<string, unknown> : {};
     const apps: Record<string, AppDisplayOverride> = {};
     for (const app of PORTAL_APPS) {
@@ -206,7 +243,7 @@ export function parseAppTile(raw?: string): AppTileConfig {
       if (APP_NAME_COLORS.some(option => option.key === value.descriptionColor)) parsed.descriptionColor = String(value.descriptionColor);
       if (Object.keys(parsed).length) apps[app.key] = parsed;
     }
-    return { ...(p.format ? { format: parseFontFormat(p.format) } : {}), labelPx: labelPx >= 10 && labelPx <= 18 ? labelPx : APP_TILE_DEFAULT.labelPx, iconPct: iconPct >= 60 && iconPct <= 140 ? iconPct : APP_TILE_DEFAULT.iconPct, tilePct: tilePct >= 70 && tilePct <= 140 ? tilePct : APP_TILE_DEFAULT.tilePct,
+    return { ...(Object.keys(profiles).length ? { profiles } : {}), ...(Object.keys(tileStyles).length ? { tileStyles } : {}), ...(p.format ? { format: parseFontFormat(p.format) } : {}), labelPx: labelPx >= 10 && labelPx <= 18 ? labelPx : APP_TILE_DEFAULT.labelPx, iconPct: iconPct >= 60 && iconPct <= 140 ? iconPct : APP_TILE_DEFAULT.iconPct, tilePct: tilePct >= 70 && tilePct <= 140 ? tilePct : APP_TILE_DEFAULT.tilePct,
       mobileTilePct: mobileTilePct >= 70 && mobileTilePct <= 140 ? mobileTilePct : APP_TILE_DEFAULT.mobileTilePct,
       mobileIconPct: mobileIconPct >= 60 && mobileIconPct <= 140 ? mobileIconPct : (iconPct >= 60 && iconPct <= 140 ? iconPct : APP_TILE_DEFAULT.mobileIconPct),
       gapX: Number.isFinite(gapX) && gapX >= 8 && gapX <= 80 ? gapX : APP_TILE_DEFAULT.gapX,
@@ -219,10 +256,19 @@ export function parseAppTile(raw?: string): AppTileConfig {
       ...(Object.keys(apps).length ? { apps } : {}) };
   } catch { return APP_TILE_DEFAULT; }
 }
-export function useAppTile() {
-  return useQuery({ queryKey: ["cde-app-tile"], queryFn: async () => {
+export function useAppTile(raw = false) {
+  const appearance = useActiveAppearance();
+  const [mobile, setMobile] = useState(false);
+  useEffect(() => {
+    const media = window.matchMedia('(max-width: 639px)');
+    const sync = () => setMobile(media.matches);
+    sync(); media.addEventListener('change', sync);
+    return () => media.removeEventListener('change', sync);
+  }, []);
+  const query = useQuery({ queryKey: ["cde-app-tile"], queryFn: async () => {
     const { data, error } = await supabase.from("cde_selected").select("variant_key").eq("group_key", "app_tile").eq("is_primary", true).maybeSingle();
     if (error) throw error;
     return parseAppTile(data?.variant_key);
   } });
+  return { ...query, data: query.data && !raw ? resolveAppTile(query.data, appearance, mobile) : query.data };
 }

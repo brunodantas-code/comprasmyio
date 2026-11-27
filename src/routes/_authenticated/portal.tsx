@@ -7,7 +7,7 @@ import { TopIconStyleVars } from "@/components/cde/top-icon-style";
 import {projectPendingItems} from "@/components/projects/pending-items";
 import { inventoryPendingItems } from '@/components/inventory-pending-items';
 import { PendingGroups, PendingRowContent } from "@/components/pending-groups";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type React from "react";
 import { createFileRoute, Link, useNavigate, redirect } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -16,7 +16,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { MyioPlatformLogo } from "@/components/myio-platform-logo";
-import { useAppOrder, useAppTile, APP_TILE_DEFAULT, appDisplay, appLogoPx, appTileColorVars, homeHeaderVars, homeHeaderLogoTone, mobileTileVars } from "@/components/cde/app-order-config";
+import { useAppOrder, useAppTile, APP_TILE_DEFAULT, appDisplay, appLogoPx, scopedAppTileVars, resolveAppTile, homeHeaderVars, homeHeaderLogoTone, mobileTileVars } from "@/components/cde/app-order-config";
+import { useActiveAppearance } from "@/components/cde/app-appearance";
 import { AppTileFace, AppTileDescription } from "@/components/cde/app-tile";
 import { partitionMobileApps, useMobileFavorites } from "@/components/mobile-favorites-config";
 import { mobileDockVars, useMobileDockStyle } from "@/components/cde/mobile-dock-style";
@@ -57,7 +58,16 @@ function PortalPage() {
   const { data: pendingActions } = usePendingActions();
   const { data: criticalPending } = useCriticalPending();
   const { data: appOrder } = useAppOrder();
-  const tile = useAppTile().data ?? APP_TILE_DEFAULT;
+  const savedTile = useAppTile(true).data ?? APP_TILE_DEFAULT;
+  const appearance = useActiveAppearance();
+  const [mobileTiles, setMobileTiles] = useState(false);
+  useEffect(() => {
+    const media = window.matchMedia('(max-width: 639px)');
+    const sync = () => setMobileTiles(media.matches);
+    sync(); media.addEventListener('change', sync);
+    return () => media.removeEventListener('change', sync);
+  }, []);
+  const tile = resolveAppTile(savedTile, appearance, mobileTiles);
   const favorites = useMobileFavorites().data;
   const favoriteStyle = useMobileDockStyle().data;
   const portalSections = usePortalSections().data ?? DEFAULT_PORTAL_SECTIONS;
@@ -139,7 +149,7 @@ function PortalPage() {
   );
 
   return (
-    <div style={activeView === "apps" ? appTileColorVars(tile) as React.CSSProperties : undefined} className="flex h-dvh flex-col overflow-hidden bg-[var(--portal-bg,var(--background))] sm:block sm:h-auto sm:min-h-screen sm:overflow-visible">
+    <div style={activeView === "apps" ? scopedAppTileVars(tile, appearance, mobileTiles) as React.CSSProperties : undefined} className="flex h-dvh flex-col overflow-hidden bg-[var(--portal-bg,var(--background))] sm:block sm:h-auto sm:min-h-screen sm:overflow-visible">
       <header style={homeHeaderVars(tile) as React.CSSProperties} className="home-page-header sticky top-0 z-40 shrink-0 sm:border-b sm:border-border">
       <TopIconStyleVars /><ListItemStyleVars />
         <div className="app-header-workspace mx-auto max-w-7xl px-4 pb-9 pt-5 sm:flex sm:items-center sm:justify-between sm:gap-4 sm:px-6 sm:py-4">
