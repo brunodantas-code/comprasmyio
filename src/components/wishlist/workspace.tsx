@@ -56,8 +56,8 @@ export function WishlistWorkspace({ userId }: { userId: string }) {
           const questionForMe = pending.some(q => q.idea_id === idea.id && q.recipient_id === userId);
           const waiting = pending.some(q => q.idea_id === idea.id && q.author_id === userId);
           return <TableRow key={idea.id} className="cursor-pointer" onClick={() => setSelected(idea.id)}>
-            <TableCell>{name(idea.idealizer_id)}</TableCell>
-            <TableCell><time>{new Date(idea.created_at).toLocaleDateString("pt-BR")}</time></TableCell>
+            <TableCell className="text-xs">{name(idea.idealizer_id)}</TableCell>
+            <TableCell className="text-xs"><time>{new Date(idea.created_at).toLocaleDateString("pt-BR")}</time></TableCell>
             <TableCell className="min-w-0"><div className="min-w-0"><Button cdeIgnore variant="link" className="h-auto max-w-full whitespace-normal p-0 text-left" aria-label={`Abrir desejo ${idea.title}`} onClick={event => { event.stopPropagation(); setSelected(idea.id); }}>{idea.title}</Button><span className="block text-xs font-normal text-muted-foreground">{wishlistSummary(idea.description)}</span></div></TableCell>
             <TableCell>{status(idea.status)}</TableCell><TableCell>{questionForMe ? <MessageCircleQuestion className="size-5 text-destructive" aria-label="Mensagem aguardando sua resposta" /> : waiting ? <MessageCircleMore className="size-5 text-muted-foreground" aria-label="Aguardando resposta" /> : null}</TableCell>
           </TableRow>;
