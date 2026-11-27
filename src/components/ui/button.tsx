@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { detectButtonGroup, useCdeLook, useButtonBinding, type AutoGroup } from "@/components/cde/cde-look";
 import { ICONS } from "@/components/cde/cde-render";
 import { isSpecificAction } from "@/components/cde/action-standard";
+import { FileFormatIcon } from './file-format-icon';
 
 const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
@@ -87,6 +88,20 @@ function iconsWithoutText(node: React.ReactNode): React.ReactNode {
   });
 }
 
+function formatIconContent(node: React.ReactNode, format: 'pdf' | 'excel'): React.ReactNode {
+  let replaced = false;
+  const visit = (children: React.ReactNode): React.ReactNode => React.Children.map(children, child => {
+    if (!React.isValidElement<{ children?: React.ReactNode; className?: string }>(child)) return child;
+    if (child.props.children !== undefined) return React.cloneElement(child, {}, visit(child.props.children));
+    if (!replaced && typeof child.type !== 'string' && !child.props.className?.includes('animate-spin')) {
+      replaced = true;
+      return <FileFormatIcon format={format} className={child.props.className ?? 'h-4 w-4'} />;
+    }
+    return child;
+  });
+  return visit(node);
+}
+
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, children, style, actionKind, cdeId, cdeNative, cdeIgnore, ...props }, ref) => {
     const Comp = asChild ? Slot : "button";
@@ -116,7 +131,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     // Keep confirmation choices and progress explicit; ordinary intuitive actions use icons with accessible descriptions.
     const intuitiveAction = !asChild && !cdeIgnore && !progress && (group === "save" || group === "pencil" || group === "sort" || group === "trash" && !/\be\s+(manter|excluir|chamados)\b/i.test(visibleText));
     const IntuitiveIcon = ICONS[look.icon || (group === "pencil" ? "Pencil" : group === "sort" ? "ArrowUpDown" : group === "trash" ? "Trash2" : "Save")];
-    const content = intuitiveAction ? IntuitiveIcon ? <IntuitiveIcon className={look.iconClass || "h-4 w-4"} /> : iconsWithoutText(renderedContent) : renderedContent;
+    const baseContent = intuitiveAction ? IntuitiveIcon ? <IntuitiveIcon className={look.iconClass || "h-4 w-4"} /> : iconsWithoutText(renderedContent) : renderedContent;
+    const exportFormat = /\bpdf\b/i.test(accessibleLabel) ? 'pdf' : /\b(excel|xlsx)\b/i.test(accessibleLabel) ? 'excel' : undefined;
+    const content = group === 'export' && exportFormat && !asChild ? formatIconContent(baseContent, exportFormat) : baseContent;
     // Icon-only buttons keep the icon's own box: a CDE model's padding must never squeeze it.
     const iconOnly = !buttonText(content).trim();
     const cdeVariant = look.variant ? look.variant as VariantProps<typeof buttonVariants>["variant"] : resolvedVariant;

@@ -416,7 +416,7 @@ export function IndicadoresDashboard() {
         </CardHeader>
         {tab !== "cycles" && tab !== "areas" && (
           <>
-            <div className="flex flex-wrap items-end gap-3">
+            <div className="erp-list-controls-row flex flex-wrap items-end gap-3">
               <div className="w-44">
                 <Choice
                   label="Visibilidade"
@@ -487,7 +487,7 @@ export function IndicadoresDashboard() {
               />
             )}
               </div>
-              <div className="max-[1400px]:ml-auto">
+              <div className="erp-list-trailing-widget max-[1400px]:ml-auto">
               <UserPendingBars
                 data={userBars}
                 title="OKRs e KPIs por usuário"

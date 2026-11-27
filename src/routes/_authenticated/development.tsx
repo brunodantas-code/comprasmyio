@@ -238,12 +238,12 @@ function DevelopmentPage() {
           </CardHeader>
           <CardContent>
             <div className="mb-3 flex flex-wrap items-center justify-start gap-2 text-[length:var(--filter-fs)] erp-list-toolbar">
+              {ticketFilters.menu}
+              <TableSortMenu columns={ticketColumns.map(c => ({ key: c.key, label: c.label }))} value={sorting} onChange={setSorting} />
               <div className="flex min-w-0 flex-wrap items-center gap-2">
                 <Select value={searchOp} onValueChange={value => setSearchOp(value as FilterOp)}><SelectTrigger aria-label="Condição da busca" className="h-8 w-36 text-[length:var(--filter-fs)]"><SelectValue /></SelectTrigger><SelectContent>{OP_LABELS.text.map(option => <SelectItem key={option.op} value={option.op}>{option.label}</SelectItem>)}</SelectContent></Select>
                 {searchOp !== "empty" && searchOp !== "not_empty" ? <div className="relative w-56 max-w-full"><Input aria-label="Buscar tickets" placeholder="Buscar ticket" value={searchText} onChange={event => setSearchText(event.target.value)} className="h-8 pr-8 text-[length:var(--filter-fs)] md:text-[length:var(--filter-fs)]" />{searchText ? <Button type="button" variant="ghost" size="compactIcon" className="absolute right-0 top-1/2 -translate-y-1/2" aria-label="Limpar busca" title="Limpar busca" onClick={() => setSearchText("")}><X /></Button> : null}</div> : null}
               </div>
-              {ticketFilters.menu}
-              <TableSortMenu columns={ticketColumns.map(c => ({ key: c.key, label: c.label }))} value={sorting} onChange={setSorting} />
             </div>
             {ticketFilters.summary}
             {isLoading ? <p className="py-8 text-center text-sm text-muted-foreground">Carregando tickets...</p> : (

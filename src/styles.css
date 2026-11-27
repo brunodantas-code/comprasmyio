@@ -43,6 +43,27 @@ input[data-search-field="true"] {
 
 /* List tools share left alignment without changing column geometry or action looks. */
 .erp-list-toolbar { justify-content: flex-start !important; align-items: center; gap: 0.5rem; margin-inline-start: 0 !important; flex-wrap: wrap; }
+/* Actions lead; compact fields follow without stretching their wrapper across the row.
+   Do not touch controls inside a field (clear, calendar, password eye). */
+.erp-list-controls-row { align-items: center !important; gap: 0.5rem !important; }
+.erp-list-controls-row > .erp-list-toolbar { flex: 0 1 auto !important; width: fit-content; max-width: 100%; }
+.erp-list-controls-row > .erp-list-trailing-widget { order: 2 !important; }
+:is(.erp-list-toolbar, .erp-list-controls-row, .flex:has(> [data-list-filter], > [data-list-sort])) > * {
+  order: 0;
+}
+:is(.erp-list-toolbar, .erp-list-controls-row, .flex:has(> [data-list-filter], > [data-list-sort])) > :is(label[for], input:not([type="hidden"]):not([type="file"]):not([type="checkbox"]):not([type="radio"]), [role="combobox"], [data-password-field], :has(input:not([type="hidden"]):not([type="file"]):not([type="checkbox"]):not([type="radio"]), [role="combobox"])) {
+  order: 1;
+  flex: 0 1 auto !important;
+  width: fit-content !important;
+  max-width: 100%;
+  min-width: 0;
+  margin-inline: 0 !important;
+}
+.erp-list-toolbar > :not(:has(input, [role="combobox"])) { flex-shrink: 0; }
+.erp-list-toolbar :is(.flex, .grid):has(> input, > [role="combobox"]) {
+  justify-content: flex-start;
+  gap: 0.5rem;
+}
 .erp-list-toolbar > .ml-auto, .erp-list-toolbar > .sm\:ml-auto { margin-inline-start: 0 !important; }
 .erp-list-tools-header { flex-wrap: wrap !important; }
 .erp-list-tools-header > .erp-list-toolbar { flex-basis: 100%; }

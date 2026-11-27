@@ -12,6 +12,7 @@ export function FilteredListExports({ report }: { report: TableReport }) {
     if (!element || element.closest('[role="dialog"] [role="dialog"]')) return;
     const toolbar = element.closest('.erp-list-toolbar,.erp-list-tools-header');
     if (!toolbar) return;
+    if (toolbar.querySelector('[data-auto-table-export]')) return;
     let scope = toolbar.parentElement;
     for (let depth = 0; scope && depth < 4; depth++, scope = scope.parentElement) {
       if (scope.querySelector('table')) return;
@@ -19,7 +20,9 @@ export function FilteredListExports({ report }: { report: TableReport }) {
       if (heading) {
         const actions = Array.from(toolbar.querySelectorAll('button,a')).filter(node => !element.contains(node));
         if (actions.some(node => /PDF|Excel|xlsx/i.test(`${node.getAttribute('aria-label')} ${node.getAttribute('title')} ${node.textContent}`))) return;
-        setTitle(heading.textContent?.trim() || 'Lista'); setEnabled(true); return;
+        element.dataset['filteredListExport'] = 'true';
+        setTitle(heading.textContent?.trim() || 'Lista'); setEnabled(true);
+        return () => { delete element.dataset['filteredListExport']; };
       }
     }
   }, []);

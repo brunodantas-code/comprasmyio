@@ -20,7 +20,7 @@ export function TableAutoExports({ tableRef }: { tableRef: RefObject<HTMLTableEl
       if (toolbar) break;
       if (container.matches('main,[role="dialog"]')) break;
     }
-    if (!container || !toolbar || toolbar.querySelector('[data-auto-table-export]')) return;
+    if (!container || !toolbar || toolbar.querySelector('[data-auto-table-export],[data-filtered-list-export],[data-table-report-actions]')) return;
     const actions = Array.from(toolbar.querySelectorAll('button,a')).map(el => `${el.getAttribute('aria-label') ?? ''} ${el.getAttribute('title') ?? ''} ${el.textContent ?? ''}`);
     const missing: ('pdf' | 'xlsx')[] = [];
     if (!actions.some(text => /pdf/i.test(text))) missing.push('pdf');

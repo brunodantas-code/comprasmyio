@@ -11,9 +11,11 @@ export function compactFieldRows(field: HTMLElement) {
     if (children.length < 2 || children.length > 8) continue;
     if (row.querySelector('textarea,table,h1,h2,h3,h4,[role="radiogroup"],[role="tablist"],img')) continue;
     const fieldBranches = children.filter(child => child.matches('[data-compact-field]') || child.querySelector('[data-compact-field]'));
-    if (fieldBranches.length < 2) continue;
-    if (children.some(child => !fieldBranches.includes(child) && !child.matches('button') && !child.matches('[data-cde-action]'))) continue;
+    const hasToolbar = children.some(child => child.matches('.erp-list-toolbar'));
+    if (fieldBranches.length < (hasToolbar ? 1 : 2)) continue;
+    if (children.some(child => !fieldBranches.includes(child) && !child.matches('button,[data-cde-action],.erp-list-toolbar'))) continue;
     if (children.some(child => child.querySelectorAll('[data-compact-field]').length > 2)) continue;
+    if (hasToolbar && style.display === 'flex' && style.flexDirection === 'row') row.classList.add('erp-list-controls-row');
     for (const child of fieldBranches) {
       child.style.setProperty('min-width', '0');
       child.style.setProperty('max-width', '100%');
