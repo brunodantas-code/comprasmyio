@@ -40,3 +40,5 @@
 - Desktop receipt entry opens the document picker; receipt pickers include explicit extensions plus MIME types, while the mobile camera remains image-only.
 
 - Statement description edits use line-locked Finance RPC log revisions resolved separately from bank originals, preserving evidence, classifications, concurrent drafts and immutable approvals.
+
+- Spend classification shares synchronized code/name selectors for one canonical account ID; filters and sorting split presentation labels, and fullscreen keeps editors mounted to preserve drafts.

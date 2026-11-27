@@ -931,3 +931,5 @@
 - [ ] Home Roxo: aplicar opção minimalista somente após aprovação de Leonardo.
 - [x] CDE Home Page: nomes das cores acompanham o tema ativo (Roxo: "Roxo myio (do tema)", P&B: cinzas); conferido com sessão nos três temas, sem nome repetido em nenhum seletor; falta publicar.
 - [x] CDE Home Page: "Minimalista (sem fundo)" e "Minimalista (sem borda)" com símbolo e texto na cor do tema; salvo e relido na Home em Roxo e Verde, apresentação anterior devolvida; falta publicar.
+
+- [x] Spend: Código/Nome da conta sincronizados, Centro de Custo terceiro e Projeto abaixo; filtros/ordenação/lote e expansão com Data/Descrição separadas; sessão real e desktop/mobile conferidos sem salvar alterações financeiras; 135 testes passaram; falta publicar.

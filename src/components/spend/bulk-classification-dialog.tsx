@@ -2,8 +2,7 @@ import { useState } from 'react';
 import { ListChecks, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { SearchableSelect } from '@/components/ui/searchable-select';
+import { SpendClassificationFields } from './classification-fields';
 import { BRL } from '@/components/cash-flow/shared';
 import { bulkClassificationPatch } from './classification';
 import type { Line, SpendData } from './data';
@@ -22,11 +21,7 @@ export function SpendBulkClassificationDialog({ data, targets, busy, apply }: { 
         <DialogHeader className="min-w-0 text-left pr-0"><DialogTitle className="break-words">Classificação em lote</DialogTitle></DialogHeader>
         <p className="text-sm text-muted-foreground">{targets.length} lançamentos selecionados · {BRL.format(targets.reduce((total, line) => total + line.amount, 0))}</p>
         {!sameStatement && <p role="alert" className="text-sm text-destructive">Selecione lançamentos da mesma fatura.</p>}
-        <div className="flex flex-wrap items-end gap-4">
-          <div className="min-w-0 space-y-1"><Label>Centro de Custo</Label><SearchableSelect aria-label="Centro de Custo em lote" value={center} onChange={setCenter} options={data.centers.map(item => ({ value: item.id, label: item.name }))} placeholder="Manter Centro de Custo atual" disabled={busy}/></div>
-          <div className="min-w-0 space-y-1"><Label>Plano de Contas</Label><SearchableSelect aria-label="Plano de Contas em lote" value={account} onChange={setAccount} options={data.accounts.map(item => ({ value: item.id, label: item.name }))} placeholder="Manter Plano de Contas atual" disabled={busy}/></div>
-          <div className="min-w-0 space-y-1"><Label>Projeto</Label><SearchableSelect aria-label="Projeto em lote" value={project} onChange={setProject} options={data.projects.map(item => ({ value: item.id, label: item.name }))} placeholder="Manter Projeto atual" disabled={busy}/></div>
-        </div>
+        <SpendClassificationFields data={data} account={account} center={center} project={project} setAccount={setAccount} setCenter={setCenter} setProject={setProject} disabled={busy} bulk />
       </DialogContent>
     </Dialog>
   </>;

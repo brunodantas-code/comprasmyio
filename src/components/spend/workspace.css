@@ -269,3 +269,30 @@ header > div.grid:has(> .erp-list-toolbar) > .erp-list-toolbar { grid-column: 1 
   .spend-reconciliation-table .spend-line-row > td { padding-inline: 0.25rem; }
   .spend-reconciliation-table .spend-line-row .spend-line-status { overflow-wrap: anywhere; }
 }
+
+/* Keep account identity selectors together and project below the third field. */
+.spend-classification-primary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) !important;
+  align-items: end;
+  gap: 0.75rem;
+}
+@media (min-width: 640px) {
+  .spend-classification-primary { grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr) minmax(0, 1fr) !important; }
+  .spend-classification-project { grid-column: 3; }
+}
+.spend-classification-full > header { flex-shrink: 0; }
+.spend-classification-full .spend-invoice-actions { flex-wrap: wrap; }
+@media (min-width: 768px) {
+  .spend-classification-full .spend-reconciliation-table th:nth-child(1) { width: 4%; }
+  .spend-classification-full .spend-reconciliation-table th:nth-child(2) { width: 16%; }
+  .spend-classification-full .spend-reconciliation-table th:nth-child(3) { width: 38%; }
+  .spend-classification-full .spend-reconciliation-table th:nth-child(4) { width: 15%; }
+  .spend-classification-full .spend-reconciliation-table th:nth-child(5) { width: 21%; }
+  .spend-classification-full .spend-reconciliation-table th:nth-child(6) { width: 6%; }
+  .spend-classification-full .spend-line-merchant { overflow-wrap: anywhere; }
+}
+@media (max-width: 767px) {
+  .spend-classification-full .spend-line-date-cell { display: contents; }
+  .spend-classification-full .spend-line-date-cell::before { content: none; }
+}

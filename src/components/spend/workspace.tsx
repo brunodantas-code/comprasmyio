@@ -4,6 +4,8 @@ import { SpendCategoryConfig } from "./category-config";
 import { SpendNoticeHistory } from "./notice-history";
 import { SpendLineDetailsEditor } from './line-details-editor';
 import { SpendBulkClassificationDialog } from './bulk-classification-dialog';
+import { SpendClassificationFields } from './classification-fields';
+import { spendAccountDisplay } from './account-display';
 import { MissingReceiptDialog } from "./missing-receipt-dialog";
 import { canDeclareMissingReceipt, missingReceiptLabels, missingReceiptReason } from "./missing-receipt";
 import { activeSpendNotices, type SpendAdjustment } from "./pending";
@@ -14,7 +16,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSearch, Link } from '@tanstack/react-router';
 import { useServerFn } from '@tanstack/react-start';
 import { useSuspenseQuery, useQueryClient, useQuery } from "@tanstack/react-query";
-import { Camera, Check, CheckCheck, CreditCard, DollarSign, Upload, Download, Bell, Paperclip, History, ReceiptText, WandSparkles, Loader2, Save, MessageSquareWarning, ChevronDown, ChevronUp, Pencil, FileX2, CameraOff } from "lucide-react";
+import { Camera, Check, CheckCheck, CreditCard, DollarSign, Upload, Download, Bell, Paperclip, History, ReceiptText, WandSparkles, Loader2, Save, MessageSquareWarning, ChevronDown, ChevronUp, Pencil, FileX2, CameraOff, Maximize2, Minimize2 } from "lucide-react";
 import { toast } from "sonner";
 import { AppHeader } from "@/components/app-header";
 import { MyioAppLogo } from "@/components/myio-app-logo";
@@ -106,7 +108,7 @@ function Audit({ line, data, busy, expanded, approve, save, notify, attach, link
   }, [busy, locked, receipt, account, center, project, line, approve, access.canApprove, expanded]);
   return <section aria-label={`Classificação de ${line.merchant}`} className="min-w-0 space-y-3 py-2 text-left" tabIndex={0}>
     <h3 className="text-sm text-muted-foreground">Classificação financeira</h3>
-    <div className="grid grid-cols-1 items-end gap-3 sm:grid-cols-3"><label className="block min-w-0 space-y-1"><Label>Plano de Contas</Label><SearchableSelect aria-label="Plano de Contas do lançamento" disabled={locked} value={account} onChange={setAccount} options={data.accounts.map(a=>({value:a.id,label:a.name}))} placeholder="Selecionar conta contábil" /></label><label className="block min-w-0 space-y-1"><Label>Centro de Custo</Label><SearchableSelect aria-label="Centro de Custo do lançamento" disabled={locked} value={center} onChange={setCenter} options={data.centers.map(a=>({value:a.id,label:a.name}))} placeholder="Selecionar Centro de Custo" /></label><label className="block min-w-0 space-y-1"><Label>Projeto</Label><SearchableSelect aria-label="Projeto do lançamento" disabled={locked} value={project} onChange={setProject} options={data.projects.map(a=>({value:a.id,label:a.name}))} placeholder="Projeto (opcional)" /></label></div>
+    <SpendClassificationFields data={data} account={account} center={center} project={project} setAccount={setAccount} setCenter={setCenter} setProject={setProject} disabled={locked} />
     {(()=>{const response=data.logs.find(log=>log.action==='receipt_missing_response'&&log.details&&typeof log.details==='object'&&!Array.isArray(log.details)&&log.details['line_id']===line.id);if(!response||!response.details||typeof response.details!=='object'||Array.isArray(response.details))return null;const reason=missingReceiptReason.safeParse(response.details['reason']);return reason.success?<p className="text-sm text-muted-foreground">Portador informou: {missingReceiptLabels[reason.data]}</p>:null;})()}
     {!receipt && <label className="flex items-center gap-2 text-xs"><Checkbox aria-label="Comprovante não se aplica" checked={notApplicable} disabled={busy || locked} onCheckedChange={v=>setNotApplicable(v===true)} /><span>Comprovante: Não se aplica</span></label>}
     <div className="flex items-center gap-2" aria-label="Ações do lançamento">
@@ -125,9 +127,9 @@ function Audit({ line, data, busy, expanded, approve, save, notify, attach, link
 
   </section>;
 }
-function LineRows(props: React.ComponentProps<typeof Audit> & { sentenceCase:boolean; selected:boolean; toggle:()=>void; select:(v:boolean)=>void }) {
+function LineRows(props: React.ComponentProps<typeof Audit> & { sentenceCase:boolean; full:boolean; selected:boolean; toggle:()=>void; select:(v:boolean)=>void }) {
   const {line:l,expanded}=props;
-  return <><TableRow className="spend-line-row"><TableCell className="spend-line-select"><Checkbox aria-label={`Selecionar ${l.merchant}`} checked={props.selected} disabled={l.status==='approved'} onCheckedChange={v=>props.select(v===true)}/></TableCell><TableCell className="spend-line-detail max-w-56"><span className="spend-line-date block text-xs text-muted-foreground"><span className="spend-line-date-label">Data</span><span>{formatDate(l.date)}{l.installment?` · Parcela ${l.installment}`:''}{l.installment_source_line_id?' · comprovante da parcela anterior':''}</span></span><span className="spend-line-merchant block min-w-0 truncate" title={l.display_description ?? l.merchant}><span className="spend-line-merchant-label">Descrição</span><span className="spend-line-merchant-text">{spendDescription(l.display_description ?? l.merchant,props.sentenceCase)}</span></span></TableCell><TableCell className="spend-line-amount whitespace-nowrap tabular-nums">{BRL.format(l.amount)}</TableCell><TableCell className="spend-line-status">{l.receipt_id || l.receipt_not_applicable?<><Badge>{statusNames[l.status]}</Badge>{l.receipt_not_applicable && <span className="block text-xs text-muted-foreground">Comprovante: Não se aplica</span>}</>:!expanded&&<span className="text-xs text-destructive">Sem comprovante</span>}{l.receipt_id&&l.myio_cnpj!==null&&<Badge>{l.myio_cnpj?'Com CNPJ myio':'Sem CNPJ myio'}</Badge>}</TableCell><TableCell className="spend-line-actions"><Button variant="ghost" size="icon" title={expanded?'Recolher classificação':'Exibir classificação'} aria-label={`${expanded?'Recolher':'Exibir'} classificação de ${l.merchant}`} aria-expanded={expanded} onClick={props.toggle}>{expanded?<ChevronUp/>:<ChevronDown/>}</Button></TableCell></TableRow><TableRow className="spend-audit-row" hidden={!expanded}><TableCell colSpan={5}><Audit {...props}/></TableCell></TableRow></>;
+  return <><TableRow className="spend-line-row"><TableCell className="spend-line-select"><Checkbox aria-label={`Selecionar ${l.merchant}`} checked={props.selected} disabled={l.status==='approved'} onCheckedChange={v=>props.select(v===true)}/></TableCell><TableCell className={props.full ? "spend-line-date-cell" : "spend-line-detail max-w-56"}><span className="spend-line-date block text-xs text-muted-foreground"><span className="spend-line-date-label">Data</span><span>{formatDate(l.date)}{l.installment?` · Parcela ${l.installment}`:''}{l.installment_source_line_id?' · comprovante da parcela anterior':''}</span></span>{!props.full && <span className="spend-line-merchant block min-w-0 truncate" title={l.display_description ?? l.merchant}><span className="spend-line-merchant-label">Descrição</span><span className="spend-line-merchant-text">{spendDescription(l.display_description ?? l.merchant,props.sentenceCase)}</span></span>}</TableCell>{props.full && <TableCell className="spend-line-detail"><span className="spend-line-merchant block min-w-0" title={l.display_description ?? l.merchant}><span className="spend-line-merchant-label">Descrição</span><span className="spend-line-merchant-text">{spendDescription(l.display_description ?? l.merchant,props.sentenceCase)}</span></span></TableCell>}<TableCell className="spend-line-amount whitespace-nowrap tabular-nums">{BRL.format(l.amount)}</TableCell><TableCell className="spend-line-status">{l.receipt_id || l.receipt_not_applicable?<><Badge>{statusNames[l.status]}</Badge>{l.receipt_not_applicable && <span className="block text-xs text-muted-foreground">Comprovante: Não se aplica</span>}</>:!expanded&&<span className="text-xs text-destructive">Sem comprovante</span>}{l.receipt_id&&l.myio_cnpj!==null&&<Badge>{l.myio_cnpj?'Com CNPJ myio':'Sem CNPJ myio'}</Badge>}</TableCell><TableCell className="spend-line-actions"><Button variant="ghost" size="icon" title={expanded?'Recolher classificação':'Exibir classificação'} aria-label={`${expanded?'Recolher':'Exibir'} classificação de ${l.merchant}`} aria-expanded={expanded} onClick={props.toggle}>{expanded?<ChevronUp/>:<ChevronDown/>}</Button></TableCell></TableRow><TableRow className="spend-audit-row" hidden={!expanded}><TableCell colSpan={props.full ? 6 : 5}><Audit {...props}/></TableCell></TableRow></>;
 }
 function NoPhotoIcon(){return <span aria-hidden className="inline-flex size-5 shrink-0 items-center justify-center rounded-full border border-foreground text-foreground"><CameraOff className="size-3"/></span>;}
 export function SpendWorkspace() {
@@ -178,6 +180,17 @@ export function SpendWorkspace() {
     const receipt=data.receipts.find(r=>r.id===line.receipt_id);
     return projectReview.confirmProject(line.merchant,line.receipt_id,receipt?.project_id??null,project||null);
   }
+  const [classificationFull, setClassificationFull] = useState(false);
+  useEffect(() => {
+    if (!classificationFull) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const escape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !document.querySelector('[role="dialog"],[data-radix-popper-content-wrapper]')) setClassificationFull(false);
+    };
+    window.addEventListener('keydown', escape);
+    return () => { document.body.style.overflow = previousOverflow; window.removeEventListener('keydown', escape); };
+  }, [classificationFull]);
   const [competence,setCompetence]=useState('statement');
   const [editingDue,setEditingDue]=useState(false);
   const myCards=receiptCardsFor(data.user_id,data.cards,data.delegations,new Date().toLocaleDateString('sv-SE')); const ownCard=myCards.find(c=>c.holder_id===data.user_id); const receiptCardChoices=finance?receiptDisplayCardsFor(data.user_id,data.cards):myCards; const card=tab==='receipts'?(receiptCardChoices.find(c=>c.id===cardId)??ownCard??receiptCardChoices[0]):data.cards.find(c=>c.id===cardId)??data.cards[0]; const hasAdvanceOnly=!card&&data.advances.some(a=>a.holder_id===data.user_id&&a.status==='open'); const canSubmitWithoutCard=!card&&tab==='receipts'; const statement=data.statements.find(s=>s.card_id===card?.id && statementMonth(s)===period);
@@ -203,18 +216,23 @@ export function SpendWorkspace() {
   const receiptSortColumn = receiptColumns.find(c => c.key === receiptSorting?.key);
   const visibleReceipts = receiptSortColumn && receiptSorting ? [...receiptFilters.filtered].sort((a,b) => compareColumnValues(('kind' in receiptSortColumn ? receiptSortColumn.kind : undefined) ?? 'text', receiptSortColumn.value(a), receiptSortColumn.value(b), receiptSorting.direction)) : receiptFilters.filtered;
   const receiptNotices = activeSpendNotices(data.notices.filter(n=>n.card_id===card?.id),pending?.spendItems??[]).slice(0,5);
-  const filters=useTableFilters(lines,[{key:'merchant',label:'Estabelecimento',value:l=>l.display_description ?? l.merchant},{key:'status',label:'Situação',value:l=>l.receipt_not_applicable?'Comprovante não se aplica':l.status==='pending'?'Sem comprovante':statusNames[l.status] ?? l.status},{key:'amount',label:'Valor',kind:'number',value:l=>l.amount},{key:'date',label:'Data',kind:'date',value:l=>l.date}]);
+  const accountDisplays = data.accounts.map(spendAccountDisplay);
+  const lineColumns = [
+    { key: 'merchant', label: 'Descrição', value: (line: Line) => line.display_description ?? line.merchant },
+    { key: 'status', label: 'Situação', value: (line: Line) => line.receipt_not_applicable ? 'Comprovante não se aplica' : line.status === 'pending' ? 'Sem comprovante' : statusNames[line.status] ?? line.status },
+    { key: 'amount', label: 'Valor', kind: 'number' as const, value: (line: Line) => line.amount },
+    { key: 'date', label: 'Data', kind: 'date' as const, value: (line: Line) => line.date },
+    { key: 'account_code', label: 'Código da conta', value: (line: Line) => accountDisplays.find(account => account.id === line.account_id)?.code ?? '' },
+    { key: 'account_name', label: 'Nome da conta', value: (line: Line) => accountDisplays.find(account => account.id === line.account_id)?.name ?? '' },
+    { key: 'cost_center', label: 'Centro de Custo', value: (line: Line) => data.centers.find(center => center.id === line.cost_center_id)?.name ?? '' },
+    { key: 'project', label: 'Projeto', value: (line: Line) => data.projects.find(project => project.id === line.project_id)?.name ?? '' },
+  ];
+  const filters=useTableFilters(lines,lineColumns);
   const selectable=filters.filtered.filter(l=>l.status!=='approved');
   const [lineSorting, setLineSorting] = useState<TableSorting | undefined>();
-  const lineSortColumns = [{ key: 'date', label: 'Data' }, { key: 'amount', label: 'Valor' }, { key: 'status', label: 'Situação' }];
-  const visibleLines = lineSorting ? [...filters.filtered].sort((a, b) => {
-    if (lineSorting.key === 'amount') return compareColumnValues('number', a.amount, b.amount, lineSorting.direction);
-    if (lineSorting.key === 'status') {
-      const label = (line: Line) => line.receipt_not_applicable ? 'Comprovante não se aplica' : line.status === 'pending' ? 'Sem comprovante' : statusNames[line.status] ?? line.status;
-      return compareColumnValues('text', label(a), label(b), lineSorting.direction);
-    }
-    return compareColumnValues('date', a.date, b.date, lineSorting.direction);
-  }) : filters.filtered;
+  const lineSortColumns = lineColumns.map(column => ({ key: column.key, label: column.label }));
+  const lineSortColumn = lineColumns.find(column => column.key === lineSorting?.key);
+  const visibleLines = lineSorting && lineSortColumn ? [...filters.filtered].sort((a,b) => compareColumnValues(('kind' in lineSortColumn ? lineSortColumn.kind : undefined) ?? 'text', lineSortColumn.value(a), lineSortColumn.value(b), lineSorting.direction)) : filters.filtered;
   const selectedVisible=selectable.filter(l=>selected.has(l.id)).length;
   const refresh=async()=>{ await Promise.all([qc.invalidateQueries({queryKey:['spend']}),qc.invalidateQueries({queryKey:['cash-flow-payables']}),qc.invalidateQueries({queryKey:['pending-actions']}),qc.invalidateQueries({queryKey:['central-admin']})]); };
   useEffect(()=>{setLineId('');setSelected(new Set());},[card?.id,period,competence]); const [dueDraft,setDueDraft]=useState(''); useEffect(()=>{setDueDraft(statement?.due_date??'');},[statement?.id,statement?.due_date]); async function saveDue(){if(!statement||!dueDraft)return;setBusy(true);try{const {error}=await supabase.rpc('spend_set_statement_due',{_statement_id:statement.id,_due_date:dueDraft});if(error)throw error;await refresh();setPeriod(dueDraft.slice(0,7));setEditingDue(false);toast.success(`Fatura movida para ${dueDraft.slice(5,7)}/${dueDraft.slice(0,4)}`);}catch(e){toast.error(e instanceof Error?e.message:'Não foi possível salvar o vencimento');}finally{setBusy(false);}}
@@ -322,7 +340,7 @@ export function SpendWorkspace() {
     </>}
     {card&&finance&&tab==='reconcile'&&<>{filters.summary}<div className="spend-reconcile-columns grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
       {statement?<SpendStatementPreview key={statement.id} path={statement.file_path} metadata={<span className="inline-flex flex-wrap items-center gap-1 text-sm text-muted-foreground"><span>| Vencimento: {formatDate(statement.due_date??'')}</span><Button variant="ghost" size="icon" aria-label="Editar vencimento da fatura" title="Editar vencimento da fatura" onClick={()=>setEditingDue(true)}><Pencil /></Button></span>}/>:<p className="py-10 text-sm text-muted-foreground">Nenhuma fatura importada neste mês.</p>}
-      <section className="spend-invoice-lines min-w-0 space-y-3" aria-label="Lançamentos da fatura">
+      <section className={classificationFull ? "spend-invoice-lines spend-classification-full fixed inset-0 z-50 flex min-w-0 flex-col gap-3 bg-background p-4" : "spend-invoice-lines min-w-0 space-y-3"} aria-label="Lançamentos da fatura">
         <header className="spend-invoice-toolbar min-w-0">
           <div className="spend-bulk-action min-w-0"><SpendBulkClassificationDialog data={data} targets={lines.filter(line => selected.has(line.id) && line.status !== 'approved')} busy={busy} apply={classifyBatch}/></div>
           <div className="spend-invoice-actions" aria-label="Ações da conciliação">
@@ -330,6 +348,7 @@ export function SpendWorkspace() {
             <Button variant="ghost" size="icon" aria-label="Enviar PDF da fatura" title="Enviar PDF da fatura" disabled={busy} onClick={()=>setImporting(true)}><Upload /></Button>
             <Button title="Exportar para contabilidade" aria-label="Exportar ZIP" variant="ghost" size="icon" disabled={busy} onClick={exportZip}><Download /></Button>
             {statement&&<Button title="Conciliar automaticamente" aria-label="Conciliar automaticamente" variant="ghost" size="icon" disabled={busy} onClick={()=>action('automatch',{statement_id:statement.id})}><WandSparkles /></Button>}
+            <Button variant="ghost" size="icon" aria-label={classificationFull ? 'Sair da classificação em tela cheia' : 'Ver classificação em tela cheia'} title={classificationFull ? 'Sair da tela cheia' : 'Tela cheia'} onClick={()=>setClassificationFull(value=>!value)}>{classificationFull ? <Minimize2/> : <Maximize2/>}</Button>
           </div>
           <div className="spend-invoice-progress" title={`${pct}% Conciliado · ${BRL.format(matched)} / ${BRL.format(total)}`}>
             <p className="text-right text-xs tabular-nums"><span>{pct}% Conciliado</span><span className="spend-invoice-progress-values"> · {BRL.format(matched)} / {BRL.format(total)}</span></p>
@@ -337,9 +356,9 @@ export function SpendWorkspace() {
           </div>
           {selected.size>0&&<div className="col-span-full flex justify-end"><Button disabled={busy} onClick={batch}><CheckCheck/>Aprovar lote ({selected.size})</Button></div>}
         </header>
-        <div className="min-w-0 space-y-3">
-        <Table className="spend-reconciliation-table"><TableHeader><TableRow><TableHead className="w-10"><Checkbox aria-label="Marcar todos os filtrados" title="Marcar todos os filtrados" disabled={busy || !selectable.length} checked={selectedVisible===0?false:selectedVisible===selectable.length?true:"indeterminate"} onCheckedChange={v=>setSelected(prev=>toggleFilteredSelection(filters.filtered,prev,v===true))}/></TableHead><TableHead>Data / Descrição</TableHead><TableHead>Valor</TableHead><TableHead>Situação</TableHead><TableHead className="w-10">Ações</TableHead></TableRow></TableHeader><TableBody>
-          {visibleLines.map(l=><LineRows key={l.id} line={l} data={data} busy={busy} expanded={lineId===l.id} sentenceCase={sentenceCase} selected={selected.has(l.id)} toggle={()=>setLineId(lineId===l.id?'':l.id)} select={v=>setSelected(prev=>{const n=new Set(prev);if(v)n.add(l.id);else n.delete(l.id);return n;})} approve={approve} save={save} notify={t=>{setLineId(l.id);setNotice(t);setMessage(`${t==='notify'?'Envie o comprovante':'Confira e ajuste o comprovante'}: ${l.merchant} · ${BRL.format(l.amount)}`);}} attach={()=>setCapture({line:l})} link={id=>action('link',{line_id:l.id,receipt_id:id})}/>)}
+        <div className={classificationFull ? "min-h-0 min-w-0 flex-1 space-y-3 overflow-auto" : "min-w-0 space-y-3"}>
+        <Table className="spend-reconciliation-table"><TableHeader><TableRow><TableHead className="w-10"><Checkbox aria-label="Marcar todos os filtrados" title="Marcar todos os filtrados" disabled={busy || !selectable.length} checked={selectedVisible===0?false:selectedVisible===selectable.length?true:"indeterminate"} onCheckedChange={v=>setSelected(prev=>toggleFilteredSelection(filters.filtered,prev,v===true))}/></TableHead>{classificationFull ? <><TableHead>Data</TableHead><TableHead>Descrição</TableHead></> : <TableHead>Data / Descrição</TableHead>}<TableHead>Valor</TableHead><TableHead>Situação</TableHead><TableHead className="w-10">Ações</TableHead></TableRow></TableHeader><TableBody>
+          {visibleLines.map(l=><LineRows key={l.id} line={l} data={data} busy={busy} full={classificationFull} expanded={lineId===l.id} sentenceCase={sentenceCase} selected={selected.has(l.id)} toggle={()=>setLineId(lineId===l.id?'':l.id)} select={v=>setSelected(prev=>{const n=new Set(prev);if(v)n.add(l.id);else n.delete(l.id);return n;})} approve={approve} save={save} notify={t=>{setLineId(l.id);setNotice(t);setMessage(`${t==='notify'?'Envie o comprovante':'Confira e ajuste o comprovante'}: ${l.merchant} · ${BRL.format(l.amount)}`);}} attach={()=>setCapture({line:l})} link={id=>action('link',{line_id:l.id,receipt_id:id})}/>)}
         </TableBody></Table>
         {!filters.filtered.length&&<p className="py-10 text-center text-sm text-muted-foreground">Nenhum gasto encontrado para os filtros selecionados.</p>}
         </div>
