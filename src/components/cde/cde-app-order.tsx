@@ -15,8 +15,10 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { CdeCategoryHeader } from "./cde-category-header";
-import { APP_NAME_COLORS, APP_TILE_COLORS, APP_TILE_DEFAULT, PORTAL_APPS, appDisplay, appLogoPx, appTileColor, appTileColorVars, appTileLowContrast, homeHeaderVars, homeHeaderLogoTone, mobileTileVars, parseAppOrder, useAppOrder, useAppTile, type AppDisplayOverride, type AppTileColorKind, type AppTileConfig } from "./app-order-config";
+import { APP_NAME_COLORS, APP_TILE_DEFAULT, PORTAL_APPS, appDisplay, appLogoPx, appTileColor, appTileColorList, appTileColorVars, appTileLowContrast, homeHeaderVars, homeHeaderLogoTone, mobileTileVars, parseAppOrder, useAppOrder, useAppTile, type AppDisplayOverride, type AppTileColorKind, type AppTileConfig } from "./app-order-config";
 import { CdeButton, useCdeSwatchStyle } from "./cde-button";
+import { themedColorOptions } from "./appearance-names";
+import { useActiveAppearance } from "./app-appearance";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -50,18 +52,21 @@ function HeaderPreview({ tile, mobile = false, appName, display }: { tile: AppTi
 /** Brand-only colour picker: options come from APP_TILE_COLORS, swatch shape follows CDE color_swatch. */
 function ColorChoice({ kind, label, value, onChange }: { kind: AppTileColorKind; label: string; value: string; onChange: (v: string) => void }) {
   const swatch = useCdeSwatchStyle();
+  const options = themedColorOptions(appTileColorList(kind), useActiveAppearance());
   const dot = (color: string) => <span aria-hidden="true" style={{ background: color, ...swatch.css }} className={`block h-4 w-4 shrink-0 rounded-full border border-border ${swatch.cls}`} />;
   const current = appTileColor(kind, value);
+  const currentLabel = options.find((o) => o.key === current.key)?.label ?? current.label;
   return <div className="min-w-0 space-y-1"><Label className="flex min-h-10 items-end pb-1">{label}</Label>
-    <Select value={current.key} onValueChange={onChange}><SelectTrigger className="h-9" aria-label={label}><span style={{ display: "inline-flex", alignItems: "center", gap: 10, lineHeight: 1 }} className="min-w-0">{dot(current.value)}<span className="truncate" style={{ lineHeight: "16px" }}>{current.label}</span></span></SelectTrigger>
-      <SelectContent>{APP_TILE_COLORS[kind].map((o) => <SelectItem key={o.key} value={o.key}><span style={{ display: "inline-flex", alignItems: "center", gap: 10, lineHeight: "16px" }}>{dot(o.value)}<span>{o.label}</span></span></SelectItem>)}</SelectContent></Select></div>;
+    <Select value={current.key} onValueChange={onChange}><SelectTrigger className="h-9" aria-label={label}><span style={{ display: "inline-flex", alignItems: "center", gap: 10, lineHeight: 1 }} className="min-w-0">{dot(current.value)}<span className="truncate" style={{ lineHeight: "16px" }}>{currentLabel}</span></span></SelectTrigger>
+      <SelectContent>{options.map((o) => <SelectItem key={o.key} value={o.key}><span style={{ display: "inline-flex", alignItems: "center", gap: 10, lineHeight: "16px" }}>{dot(o.value)}<span>{o.label}</span></span></SelectItem>)}</SelectContent></Select></div>;
 }
 
 function AppNameColorChoice({ appName, value, onChange }: { appName: string; value: string; onChange: (value: string) => void }) {
   const swatch = useCdeSwatchStyle();
-  const current = APP_NAME_COLORS.find(option => option.key === value) ?? APP_NAME_COLORS[0];
+  const options = themedColorOptions(APP_NAME_COLORS, useActiveAppearance());
+  const current = options.find(option => option.key === value) ?? options[0];
   const dot = (color: string) => <span aria-hidden="true" style={{ background: color, ...swatch.css }} className={`block h-4 w-4 shrink-0 rounded-full border border-border ${swatch.cls}`} />;
-  return <div className="min-w-0 space-y-1"><Label>Cor da fonte</Label><Select value={current.key} onValueChange={onChange}><SelectTrigger aria-label={`Cor da fonte de ${appName}`} className="h-9"><div className="flex min-w-0 flex-1 items-center gap-2 text-left">{dot(current.value)}<span className="truncate">{current.label}</span></div></SelectTrigger><SelectContent>{APP_NAME_COLORS.map(option => <SelectItem key={option.key} value={option.key}><span className="flex items-center gap-2">{dot(option.value)}<span>{option.label}</span></span></SelectItem>)}</SelectContent></Select></div>;
+  return <div className="min-w-0 space-y-1"><Label>Cor da fonte</Label><Select value={current.key} onValueChange={onChange}><SelectTrigger aria-label={`Cor da fonte de ${appName}`} className="h-9"><div className="flex min-w-0 flex-1 items-center gap-2 text-left">{dot(current.value)}<span className="truncate">{current.label}</span></div></SelectTrigger><SelectContent>{options.map(option => <SelectItem key={option.key} value={option.key}><span className="flex items-center gap-2">{dot(option.value)}<span>{option.label}</span></span></SelectItem>)}</SelectContent></Select></div>;
 }
 
 export function CdeAppOrder({ number, handle }: { number: number; handle?: import("react").ReactNode }) {

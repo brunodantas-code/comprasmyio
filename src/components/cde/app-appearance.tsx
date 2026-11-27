@@ -114,8 +114,7 @@ export function setPersonalAppearance(value: AppAppearance) {
   window.dispatchEvent(new Event(PERSONAL_EVENT));
 }
 export function usePersonalAppearance() {
-  const [value, setValue] = useState<AppAppearance | null>(null);
-  useEffect(() => {
+  const [value, setValue] = useState<AppAppearance | null>(null);  useEffect(() => {
     const sync = () => setValue(readPersonalAppearance());
     sync();
     window.addEventListener(PERSONAL_EVENT, sync);
@@ -123,6 +122,11 @@ export function usePersonalAppearance() {
     return () => { window.removeEventListener(PERSONAL_EVENT, sync); window.removeEventListener("storage", sync); };
   }, []);
   return value;
+}
+/** The theme the user is really seeing: personal choice first, then the CDE default. */
+export function useActiveAppearance(): AppAppearance {
+  const { data: cde } = useAppAppearance();
+  return usePersonalAppearance() ?? cde ?? "green";
 }
 export function AppAppearanceApplier() {
   const { data: cde } = useAppAppearance();

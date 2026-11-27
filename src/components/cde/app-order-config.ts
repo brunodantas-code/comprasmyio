@@ -63,6 +63,7 @@ export const APP_TILE_COLORS = {
   ],
   fill: [
     { key: "padrao", label: "Verde myio", value: "var(--myio-green)", dark: false },
+    { key: "flat", label: "Minimalista (sem fundo)", value: "transparent", dark: false },
     { key: "roxo", label: "Roxo myio", value: "var(--myio-purple)", dark: true },
     { key: "escuro", label: "Escuro myio", value: "var(--myio-dark)", dark: true },
     { key: "branco", label: "Branco", value: "var(--myio-white)", dark: false },
@@ -73,6 +74,7 @@ export const APP_TILE_COLORS = {
   ],
   border: [
     { key: "padrao", label: "Verde myio (igual ao ícone)", value: "var(--myio-green)", dark: false },
+    { key: "flat", label: "Minimalista (sem borda)", value: "transparent", dark: false },
     { key: "escuro", label: "Escuro myio", value: "var(--myio-dark)", dark: true },
     { key: "roxo", label: "Roxo myio", value: "var(--myio-purple)", dark: true },
     { key: "branco", label: "Branco", value: "var(--myio-white)", dark: false },
@@ -93,6 +95,7 @@ export const APP_TILE_COLORS = {
   inside: [
     { key: "padrao", label: "Escuro myio", value: "var(--myio-dark)", dark: true },
     { key: "branco", label: "Branco", value: "var(--myio-white)", dark: false },
+    { key: "verde", label: "Verde myio", value: "var(--myio-green)", dark: false },
     { key: "roxo", label: "Roxo myio", value: "var(--myio-purple)", dark: true },
     { key: "lilas_suave", label: "Lilás suave myio (tela de acesso)", value: "var(--erp-landing-muted)", dark: false },
   ],
@@ -117,6 +120,10 @@ export const APP_NAME_COLORS = [
   { key: "cinza", label: "Cinza", value: "var(--muted-foreground)" },
 ] as const;
 export type AppTileColorKind = keyof typeof APP_TILE_COLORS;
+/** The picker list of one kind, with a plain element type so it can be re-labelled per theme. */
+export function appTileColorList(kind: AppTileColorKind): { key: string; label: string; value: string; dark: boolean }[] {
+  return (APP_TILE_COLORS[kind] as readonly { key: string; label: string; value: string; dark: boolean }[]).map((o) => ({ ...o }));
+}
 export type AppDisplayOverride = { format?: FontFormat; descriptionFormat?: FontFormat; name?: string; labelPx?: number; color?: string; description?: string; descriptionPx?: number; descriptionColor?: string };
 export type AppDisplay = { format?: FontFormat; name: string; labelPx: number; colorKey: string; color?: string };
 export type AppTileConfig = { format?: FontFormat; desktopHeaderPx?: number; appLogoPx?: number; labelPx: number; iconPct: number; tilePct: number; mobileTilePct: number; mobileIconPct: number; gapX: number; gapY: number; headerBg: string; bg: string; fill: string; border: string; symbol: string; inside: string; below: string; apps?: Record<string, AppDisplayOverride> };
