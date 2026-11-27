@@ -45,3 +45,4 @@
 - Code app list derives from PORTAL_APPS minus CDE code_apps exclusions, so new apps join Code automatically.
 
 - Menu display names use CDE menu_names keyed by app/group/original identity (shared header uses action IDs); resolve them after ordering, never in permission or navigation values, so renames cannot change access or destinations.
+- Menu symbols use a shared lazy-loaded registry and menu_icons; submenu keys include parent commands and values so equal labels and renames cannot change icon bindings. Use the explicit Lucide .mjs entry for SSR resolution.

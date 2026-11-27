@@ -1,3 +1,4 @@
+import { wrapMenuIcon, CdeMenuIcon } from "@/components/cde/menu-icon";
 import { useMenuDisplayName } from "@/components/cde/use-menu-names";
 import { AlertMarker } from "@/components/cde/numeric-markers";
 import { ListItemStyleVars } from "@/components/cde/list-item-style";
@@ -114,7 +115,7 @@ function MainMenuEntries({ onSignOut, onChangePassword, supplyManual, homePage, 
   return <>{menuActions?.map(action => <Button key={action.label} cdeIgnore variant="ghost" className={itemClass} onClick={action.onClick}>{action.icon}{action.label}</Button>)}{menuOrderForContext(config, homePage).filter((id) => (id !== "manual" || supplyManual || !!manualApp) && (id !== "access" || accessCapabilities && canOpenAccessManagement(accessCapabilities))).map((id) => {
     const item = MENU_ITEMS.find((i) => i.id === id);
     if (!item) return null;
-    const Icon = item.icon;
+    const Icon = wrapMenuIcon(item.icon, "ERP", "Menu superior", id);
     const appKey = menuAppKey(id);
     const label = menuName(id, appKey ? nameOf(appKey) : id === "access" ? "Acessos" : item.label);
     if ("to" in item) return <Button key={id} asChild cdeIgnore variant="ghost" className={itemClass}><Link to={item.to}><Icon className="h-5 w-5" />{label}{id === "pendentes" ? <CountBadge count={pendingTotal} className="ml-auto" /> : null}</Link></Button>;
@@ -152,7 +153,7 @@ function ThemeEntry({ className, label }: { className: string; label: string }) 
     setExpanded(false);
   };
   return <div className="flex flex-col">
-    <Button cdeIgnore variant="ghost" className={className} aria-expanded={expanded} onClick={(event) => { event.stopPropagation(); setExpanded(value => !value); }}><Palette className="h-5 w-5" />{label}{expanded ? <ChevronDown className="ml-auto h-4 w-4" /> : <ChevronRight className="ml-auto h-4 w-4" />}</Button>
+    <Button cdeIgnore variant="ghost" className={className} aria-expanded={expanded} onClick={(event) => { event.stopPropagation(); setExpanded(value => !value); }}><CdeMenuIcon app="ERP" group="Menu superior" identity="theme" fallback={Palette} className="h-5 w-5" />{label}{expanded ? <ChevronDown className="ml-auto h-4 w-4" /> : <ChevronRight className="ml-auto h-4 w-4" />}</Button>
     {expanded ? APP_APPEARANCES.map(option => <Button key={option.key} cdeIgnore variant="ghost" className={className + " pl-10"} aria-pressed={current === option.key} onClick={() => choose(option.key)}>
       {current === option.key ? <Check className="h-4 w-4" /> : <span className="h-4 w-4" />}{option.label}
     </Button>) : null}

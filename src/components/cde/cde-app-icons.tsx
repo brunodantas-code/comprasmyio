@@ -1,4 +1,7 @@
 import { CdeMenuNameEdit } from "./cde-menu-name-edit";
+import { CdeMenuIconEdit } from "./cde-menu-icon-edit";
+import { wrapMenuIcon } from "./menu-icon";
+import { MENU_SUBMENUS, SUBMENU_PARENTS } from "./menu-submenu-catalog";
 import { CdeSection } from "./cde-section";
 import { useState } from "react";
 import {
@@ -73,21 +76,21 @@ const SUB_PARENT: Record<string, Record<string, string>> = {
 
 function MenuTree({ app, groups }: { app: string; groups: Group[] }) {
   const main = groups.find((g) => g.title === "Barra inferior")?.items ?? [];
-  const subs = groups.find((g) => g.title === "Submenus")?.items ?? [];
-  const map = SUB_PARENT[app] ?? {};
-  return <div className="space-y-2">{main.map((m) => { const children = subs.filter((s) => map[s.label] === m.label); return <div key={m.label} className="flex items-start gap-0 rounded-lg bg-muted/30 p-2">
+  const subs = MENU_SUBMENUS[app as keyof typeof MENU_SUBMENUS] ?? [];
+  return <div className="space-y-2">{main.map((m) => { const parent = SUBMENU_PARENTS[app]?.[m.label]; const children = subs.filter((s) => s.parent === parent); return <div key={m.label} className="flex items-start gap-0 rounded-lg bg-muted/30 p-2">
     <div className="shrink-0"><Tile it={m} app={app} group="Barra inferior" /></div>
-    {children.length ? <div className="flex min-w-0 flex-1 items-start"><span className="mt-5 h-px w-6 shrink-0 bg-primary" /><div className="flex flex-wrap gap-3 border-l-2 border-primary pl-3">{children.map((c) => <Tile key={c.label} it={c} app={app} group="Submenus" />)}</div></div> : <span className="ml-3 mt-4 text-xs text-muted-foreground">Sem submenus</span>}
+    {children.length ? <div className="flex min-w-0 flex-1 items-start"><span className="mt-5 h-px w-6 shrink-0 bg-primary" /><div className="flex flex-wrap gap-3 border-l-2 border-primary pl-3">{children.map((c) => <Tile key={c.value} it={{ ...c, name: c.label }} app={app} group="Submenus" iconGroup={`Submenus:${parent}`} iconIdentity={c.value} />)}</div></div> : <span className="ml-3 mt-4 text-xs text-muted-foreground">Sem submenus</span>}
   </div>; })}</div>;
 }
 
 const SHARED: Item[] = [i("Início (todos os apps)", LayoutGrid, "LayoutGrid"), i("Menu", Menu, "Menu"), i("Voltar", ArrowLeft, "ArrowLeft"), i("Alterar senha", KeyRound, "KeyRound"), i("Sair", LogOut, "LogOut")];
 
-function Tile({ it, app, group, identity }: { it: Item; app?: string; group?: string; identity?: string }) {
-  const Icon = it.icon;
+function Tile({ it, app, group, identity, iconGroup = group, iconIdentity = identity ?? it.label }: { it: Item; app?: string; group?: string; identity?: string; iconGroup?: string; iconIdentity?: string }) {
+  const Icon = app && iconGroup ? wrapMenuIcon(it.icon, app, iconGroup, iconIdentity) : it.icon;
   return <div className="flex w-24 flex-col items-center gap-1 text-center">
     <span className="flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-background"><Icon className="h-5 w-5" /></span>
     {app && group ? <CdeMenuNameEdit app={app} group={group} identity={identity ?? it.label} label={it.label} /> : <span className="text-[0.7rem] leading-tight">{it.label}</span>}
+    {app && iconGroup ? <CdeMenuIconEdit app={app} group={iconGroup} identity={iconIdentity} label={it.label} /> : null}
   </div>;
 }
 

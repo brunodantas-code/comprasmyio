@@ -819,3 +819,6 @@
 - [x] Padronizar cor, tamanho e posição do logo dos apps pela Home, preservando a largura das listas.
 - [x] Corrigir destaques/checks indevidos e simultâneos nos menus Solicitações e Approvals do Supply.
 - [x] Incluir seta de Exibir/Recolher o menu lateral com expansão/recolhimento da área de conteúdo.
+- [x] CDE: biblioteca pesquisável de ícones, botão dedicado abaixo dos menus/submenus e aplicação das escolhas nos apps.
+- [x] Spend: manter Competência junto aos filtros; Total alinhado ao título; ações à direita de Lançamentos e cabeçalho alinhado à faixa preta do PDF.
+- [x] Site Survey: corrigir o cabeçalho indicado para o padrão CDE.

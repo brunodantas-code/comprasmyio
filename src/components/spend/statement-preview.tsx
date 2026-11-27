@@ -49,11 +49,11 @@ export function SpendStatementPreview({ path, metadata }: { path: string; metada
   }, [url.data]);
   const step = (d: number) => setZoom(z => Math.min(3, Math.max(0.5, Math.round((z + d) * 100) / 100)));
   return <section aria-label="Fatura em PDF" className={full ? "fixed inset-0 z-50 flex flex-col bg-background p-4" : "min-w-0 lg:sticky lg:top-24"}>
-    <div className="mb-2 flex min-w-0 flex-wrap items-center gap-1"><div className="mr-auto flex min-w-0 flex-wrap items-center gap-x-2"><h2 className="text-sm text-muted-foreground">Fatura do cartão</h2>{metadata}</div>
-      <Button variant="ghost" size="icon" className="shrink-0" aria-label="Diminuir zoom" title="Diminuir zoom" disabled={zoom <= 0.5} onClick={() => step(-0.25)}><ZoomOut /></Button>
+    <div className="mb-2 grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-1"><div className="flex min-w-0 flex-wrap items-center gap-x-2"><h2 className="text-sm text-muted-foreground">Fatura do cartão</h2>{metadata}</div>
+      <div className="flex shrink-0 items-center gap-1"><Button variant="ghost" size="icon" className="shrink-0" aria-label="Diminuir zoom" title="Diminuir zoom" disabled={zoom <= 0.5} onClick={() => step(-0.25)}><ZoomOut /></Button>
       <button type="button" className="w-12 shrink-0 text-center text-xs tabular-nums text-muted-foreground" title="Voltar a 100%" aria-label="Voltar o zoom a 100%" onClick={() => setZoom(1)}>{Math.round(zoom * 100)}%</button>
       <Button variant="ghost" size="icon" className="shrink-0" aria-label="Aumentar zoom" title="Aumentar zoom" disabled={zoom >= 3} onClick={() => step(0.25)}><ZoomIn /></Button>
-      <Button variant="ghost" size="icon" className="shrink-0" aria-label={full ? "Sair da tela cheia" : "Ver fatura em tela cheia"} title={full ? "Sair da tela cheia" : "Tela cheia"} onClick={() => setFull(f => !f)}>{full ? <Minimize2 /> : <Maximize2 />}</Button>
+      <Button variant="ghost" size="icon" className="shrink-0" aria-label={full ? "Sair da tela cheia" : "Ver fatura em tela cheia"} title={full ? "Sair da tela cheia" : "Tela cheia"} onClick={() => setFull(f => !f)}>{full ? <Minimize2 /> : <Maximize2 />}</Button></div>
     </div>
     <div className={full ? "min-h-0 flex-1 overflow-auto" : "h-[50vh] min-h-80 overflow-auto lg:h-[calc(100vh-18rem)]"} tabIndex={0} aria-label="Páginas da fatura">
       {(loading || url.isPending) && !error && <Loader2 className="mx-auto my-8 size-5 animate-spin" />}

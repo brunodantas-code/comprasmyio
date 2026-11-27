@@ -8,17 +8,20 @@ import { supabase } from "@/integrations/supabase/client";
 import { MENU_ORDER_GROUP, menuKey, sortByMenuOrder, useMenuOrders } from "./menu-order";
 import { CdeNumber } from "./cde-button";
 import { CdeMenuNameEdit } from "./cde-menu-name-edit";
+import { CdeMenuIconEdit } from "./cde-menu-icon-edit";
+import { wrapMenuIcon } from "./menu-icon";
 
 type Item = { label: string; icon: React.ComponentType<{ className?: string }>; name: string };
 
 function SortableTile({ it, n, app, group }: { it: Item; n: number; app: string; group: string }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: it.label });
-  const Icon = it.icon;
+  const Icon = wrapMenuIcon(it.icon, app, group, it.label);
   return <div ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition }} className={`flex w-28 items-start gap-1 ${isDragging ? "z-10 opacity-70" : ""}`}>
     <button type="button" {...attributes} {...listeners} aria-label={`Arrastar ${it.label}`} className="mt-3 cursor-grab touch-none text-primary active:cursor-grabbing"><GripVertical className="h-4 w-4" /></button>
     <div className="flex min-w-0 flex-1 flex-col items-center gap-1 text-center">
       <span className="relative flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-background"><Icon className="h-5 w-5" /><CdeNumber screen="components/cde/cde-sortable-icons.tsx" className="absolute -left-3 -top-3">{n}</CdeNumber></span>
       {(group === "Barra inferior" || group === "Seções do projeto") && app !== "Code" ? <CdeMenuNameEdit app={app} group={group} identity={it.label} /> : <span className="text-[0.7rem] leading-tight">{it.label}</span>}
+      {(group === "Barra inferior" || group === "Seções do projeto") && app !== "Code" ? <CdeMenuIconEdit app={app} group={group} identity={it.label} /> : null}
     </div>
   </div>;
 }

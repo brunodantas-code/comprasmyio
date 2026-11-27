@@ -1,4 +1,5 @@
 import { useMenuDisplayName } from "@/components/cde/use-menu-names";
+import { CdeMenuIcon } from "@/components/cde/menu-icon";
 import { useEffect, useState, type ReactNode } from "react";
 import { Check, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -44,6 +45,7 @@ function useActiveMenu(menus: DeviceMenus): { side: "left" | "right" | null; dro
  */
 export function AppNavSubmenu({
   app,
+  iconScope,
   menus,
   label,
   item,
@@ -55,6 +57,7 @@ export function AppNavSubmenu({
   contentClassName,
 }: {
   app?: string;
+  iconScope?: string;
   menus: DeviceMenus;
   label: string;
   item: ReactNode;
@@ -101,7 +104,7 @@ export function AppNavSubmenu({
                 }}
               >
                 <span className="flex min-h-10 min-w-0 flex-1 flex-row items-center gap-2 px-1">
-                  {SubIcon ? <span className="menu-icon"><SubIcon className="h-4 w-4 shrink-0" /></span> : null}
+                  <span className="menu-icon"><CdeMenuIcon app={app ?? ""} group={`Submenus:${iconScope ?? label}`} identity={value} {...(SubIcon ? { fallback: SubIcon } : {})} className="h-4 w-4 shrink-0" /></span>
                   <span className="min-w-0 flex-1 truncate">{menuName(subLabel)}</span>
                   {active && isSubActive(value) ? <Check className="size-4 shrink-0" /> : null}
                 </span>
@@ -125,7 +128,7 @@ export function AppNavSubmenu({
         <DropdownMenuSeparator />
         {items.map(({ value, label: subLabel, icon: SubIcon }) => (
           <DropdownMenuItem key={value} className="min-h-11 rounded-md" onSelect={() => onSelectSub(value)}>
-            {SubIcon ? <SubIcon className="h-4 w-4" /> : null}
+            <CdeMenuIcon app={app ?? ""} group={`Submenus:${iconScope ?? label}`} identity={value} {...(SubIcon ? { fallback: SubIcon } : {})} className="h-4 w-4" />
             <span className="flex-1">{menuName(subLabel)}</span>
             {active && isSubActive(value) ? <Check className="h-4 w-4 text-primary" /> : null}
           </DropdownMenuItem>

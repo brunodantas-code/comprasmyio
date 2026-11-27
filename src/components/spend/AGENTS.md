@@ -32,3 +32,5 @@
 - Reimbursement receipts may carry no card at all: files live under reimbursement/<user>/<YYYY-MM>/..., extraction evidence stores no card, and the table check allows reimbursement with or without card while myio_card always keeps one.
 - Expenses without a fiscal receipt set spend_receipts.without_receipt with a no-receipt/<id> placeholder path; only Reembolso/Adiantamento, reason required in observation, OCR/evidence guards skipped and Supply orders need no attachment for them.
 - Expense category configuration lives in the Spend menu, retaining cde_selected storage and ERP-admin-only writes; moving its UI never grants finance users CDE management.
+
+- Reconciliation PDF and lines share subgrid header tracks so tools and wrapping keep their reading surfaces aligned; totals and competence retain their existing calculations and filters.

@@ -190,17 +190,58 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 .spend-reconcile-toolbar > div:first-child,
-.spend-reconcile-toolbar > .spend-reconcile-summary {
+.spend-reconcile-toolbar > .spend-reconcile-competence {
   grid-column: 1 / -1;
 }
 @media (min-width: 1024px) {
   .spend-expense-toolbar.spend-reconcile-toolbar {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 0.65fr) minmax(0, 0.55fr) minmax(0, 2.2fr);
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.85fr) minmax(0, 0.65fr) minmax(0, 1.4fr);
     gap: 1rem;
   }
   .spend-reconcile-toolbar > div:first-child,
-  .spend-reconcile-toolbar > .spend-reconcile-summary {
+  .spend-reconcile-toolbar > .spend-reconcile-competence {
     grid-column: auto;
   }
+}
+
+/* A shared header track aligns the PDF page with the list header, even when tools wrap. */
+.spend-invoice-total { text-align: right; }
+.spend-invoice-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.5rem;
+}
+.spend-invoice-actions { display: flex; align-items: center; gap: 0.25rem; flex-shrink: 0; }
+.spend-invoice-progress { grid-column: 1 / -1; min-width: 0; display: flex; flex-direction: column; gap: 0.25rem; }
+.spend-invoice-progress-values { display: inline; }
+@media (max-width: 639px) {
+  .spend-invoice-total { grid-column: 1 / -1; text-align: left; }
+  .spend-invoice-total > * { display: inline; margin-right: 0.5rem; }
+  .spend-invoice-toolbar > h2 { grid-column: 1 / -1; }
+  .spend-invoice-actions { grid-column: 1; }
+  .spend-invoice-progress { grid-column: 2; min-width: 6rem; }
+}
+@media (min-width: 1024px) {
+  .spend-reconcile-columns { grid-template-rows: auto minmax(0, 1fr); row-gap: 0.75rem; }
+  .spend-reconcile-columns > section:not(.fixed) { display: grid; grid-row: span 2; grid-template-rows: subgrid; align-items: start; }
+  .spend-reconcile-columns > section[aria-label="Fatura em PDF"]:not(.fixed) { position: static; }
+  .spend-reconcile-columns > section:not(.fixed) > * { margin-top: 0; margin-bottom: 0; }
+  .spend-reconcile-columns > section:not(.fixed) > header { align-self: center; }
+}
+@media (min-width: 1024px) {
+  .spend-invoice-toolbar { grid-template-columns: minmax(0, 1fr) auto minmax(6rem, 0.7fr); }
+  .spend-invoice-progress { grid-column: 3; }
+}
+
+@media (min-width: 768px) {
+  .spend-reconciliation-table { table-layout: fixed !important; }
+  .spend-reconciliation-table th:nth-child(1) { width: 8%; }
+  .spend-reconciliation-table th:nth-child(2) { width: 32%; }
+  .spend-reconciliation-table th:nth-child(3) { width: 25%; }
+  .spend-reconciliation-table th:nth-child(4) { width: 25%; }
+  .spend-reconciliation-table th:nth-child(5) { width: 10%; }
+  .spend-reconciliation-table .spend-line-row > td { padding-inline: 0.25rem; }
+  .spend-reconciliation-table .spend-line-row .spend-line-status { overflow-wrap: anywhere; }
 }

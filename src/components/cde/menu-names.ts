@@ -1,3 +1,4 @@
+import { wrapMenuIcon } from "./menu-icon";
 /** Display names never replace the original menu identity used for order/access. */
 export type MenuNames = Record<string, Record<string, string>>;
 export const MENU_NAMES_GROUP = "menu_names";
@@ -26,5 +27,5 @@ export function resolveMenuName(names: MenuNames | undefined, app: string, group
 }
 
 export function applyMenuNames<T extends { label: string }>(items: T[], names: MenuNames | undefined, app: string, group: string): T[] {
-  return items.map(item => ({ ...item, label: resolveMenuName(names, app, group, item.label) }));
+  return items.map(item => ({ ...item, ...("icon" in item ? { icon: wrapMenuIcon(item.icon, app, group, item.label) } : {}), label: resolveMenuName(names, app, group, item.label) }));
 }
