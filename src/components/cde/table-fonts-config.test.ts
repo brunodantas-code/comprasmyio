@@ -76,3 +76,9 @@ it("mantém listas em 12px e transmite o tamanho escolhido no CDE", async () => 
   expect(tableAlignVars(parseTableFonts(null))["--td-fs"]).toBe("12px");
   expect(tableAlignVars(parseTableFonts('{"cellPx":13}'))["--td-fs"]).toBe("13px");
 });
+
+ it("preserva a escolha de tamanho dos títulos dos campos ao serializar o padrão", () => {
+  const config = parseTableFonts('{"fieldPx":18,"titlePx":16,"subPx":13}');
+  expect(parseTableFonts(JSON.stringify(config))).toMatchObject({ fieldPx: 18, titlePx: 16, subPx: 13 });
+  expect(parseTableFonts('{}').fieldPx).toBeUndefined();
+});

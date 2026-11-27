@@ -995,7 +995,7 @@ input[data-custom-calendar="true"]::-webkit-calendar-picker-indicator {
 .cde-td { font-weight: var(--td-weight, inherit); font-style: var(--td-style, normal); text-decoration-line: var(--td-decoration, none); }
 .cde-title { font-weight: var(--title-weight, inherit); font-style: var(--title-style, normal); text-decoration-line: var(--title-decoration, none); }
 .cde-subtitle { font-weight: var(--sub-weight, inherit); font-style: var(--sub-style, normal); text-decoration-line: var(--sub-decoration, none); }
-.cde-field-title { font-weight: var(--field-title-weight, inherit); font-style: var(--field-title-style, normal); text-decoration-line: var(--field-title-decoration, none); }
+.cde-field-title { font-size: var(--field-title-fs, inherit); font-weight: var(--field-title-weight, inherit); font-style: var(--field-title-style, normal); text-decoration-line: var(--field-title-decoration, none); }
 .cde-field-title:has(> svg.lucide-paperclip) { display: inline-flex; align-items: center; gap: 0.5rem; }
 .cde-field-title > svg.lucide-paperclip { flex-shrink: 0; }
 /* Only bottom action slots move; header and inline editor actions retain their geometry. */

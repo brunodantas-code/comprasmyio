@@ -17,7 +17,7 @@ import { CdeCategoryHeader } from "./cde-category-header";
 import { CdeTableOrder } from "./cde-table-order";
 import { ALIGN_H, ALIGN_V, HEADER_COLORS, headerColor, tableAlignVars, type AlignH, type AlignV, type HeaderColorKind } from "./table-fonts-config";
 import { CdeButton, useCdeSwatchStyle } from "./cde-button";
-import { TABLE_FILTER_SIZES, TABLE_FONTS_DEFAULT, TABLE_HEADER_SIZES, SUBTITLE_SIZES, TITLE_SIZES, useTableFonts, type TableFontsConfig } from "./table-fonts-config";
+import { FIELD_TITLE_SIZES, TABLE_FILTER_SIZES, TABLE_FONTS_DEFAULT, TABLE_HEADER_SIZES, SUBTITLE_SIZES, TITLE_SIZES, useTableFonts, type TableFontsConfig } from "./table-fonts-config";
 
 export function CdeTableFonts({ number, handle }: { number: number; handle?: import("react").ReactNode }) {
   const [open, setOpen] = useState(false);
@@ -95,7 +95,7 @@ export function CdeTableFonts({ number, handle }: { number: number; handle?: imp
           <div className="space-y-1">
             <h3 className="text-sm font-medium">Títulos dos campos</h3>
             <div role="group" aria-label="Formatação dos títulos dos campos" className="grid w-full max-w-5xl grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-3">
-              {([["fieldBg", "Títulos dos campos — fundo"], ["fieldText", "Títulos dos campos — texto"], ["fieldBorder", "Títulos dos campos — borda"]] as const).map(([k, l]) => <div key={k} className="min-w-0 space-y-2"><ColorPick kind={k} label={l} value={fonts[k]} onChange={(v) => setDraft({ ...fonts, [k]: v })} />{k === "fieldText" && <FontFormatControl context="Títulos dos campos" value={fonts.fieldFormat ?? {}} onChange={format => setDraft({ ...fonts, fieldFormat: format })} />}</div>)}
+              {([["fieldBg", "Títulos dos campos — fundo"], ["fieldText", "Títulos dos campos — texto"], ["fieldBorder", "Títulos dos campos — borda"]] as const).map(([k, l]) => <div key={k} className="min-w-0 space-y-2"><ColorPick kind={k} label={l} value={fonts[k]} onChange={(v) => setDraft({ ...fonts, [k]: v })} />{k === "fieldText" && <><Label>Fonte dos títulos dos campos</Label><Select value={fonts.fieldPx === undefined ? "padrao" : String(fonts.fieldPx)} onValueChange={(v) => { const { fieldPx: _fieldPx, ...rest } = fonts; setDraft(v === "padrao" ? rest : { ...fonts, fieldPx: Number(v) }); }}><SelectTrigger className="h-9" aria-label="Fonte dos títulos dos campos"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="padrao">Padrão atual</SelectItem>{FIELD_TITLE_SIZES.map((n) => <SelectItem key={n} value={String(n)}>{n} px</SelectItem>)}</SelectContent></Select><FontFormatControl context="Títulos dos campos" value={fonts.fieldFormat ?? {}} onChange={format => setDraft({ ...fonts, fieldFormat: format })} /></>}</div>)}
             </div>
           </div>
           <div className="space-y-1">
