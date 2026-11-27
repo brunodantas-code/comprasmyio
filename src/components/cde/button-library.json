@@ -3932,7 +3932,7 @@
   {
     "id": "components/clients-tab.tsx|2ffc5db6d7684601|0",
     "file": "components/clients-tab.tsx",
-    "line": 213,
+    "line": 214,
     "tag": "CdeButton",
     "label": "Filial",
     "dynamic": false,
@@ -3947,7 +3947,7 @@
   {
     "id": "components/clients-tab.tsx|439484d97dcb8080|0",
     "file": "components/clients-tab.tsx",
-    "line": 214,
+    "line": 215,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -3962,7 +3962,7 @@
   {
     "id": "components/clients-tab.tsx|5777a1a70e3b22ba|0",
     "file": "components/clients-tab.tsx",
-    "line": 241,
+    "line": 242,
     "tag": "Button",
     "label": "Remover unidade",
     "dynamic": false,
@@ -3977,7 +3977,7 @@
   {
     "id": "components/clients-tab.tsx|8a241f9d3b5ffa49|0",
     "file": "components/clients-tab.tsx",
-    "line": 293,
+    "line": 294,
     "tag": "Button",
     "label": "Sem nome fixo",
     "dynamic": true,
@@ -3992,7 +3992,7 @@
   {
     "id": "components/clients-tab.tsx|e38411150084cef8|0",
     "file": "components/clients-tab.tsx",
-    "line": 339,
+    "line": 340,
     "tag": "Button",
     "label": "Trash2",
     "dynamic": false,
@@ -4007,7 +4007,7 @@
   {
     "id": "components/clients-tab.tsx|34684b737dc426ee|0",
     "file": "components/clients-tab.tsx",
-    "line": 406,
+    "line": 407,
     "tag": "CdeButton",
     "label": "Adicionar unidade",
     "dynamic": false,
@@ -4022,7 +4022,7 @@
   {
     "id": "components/clients-tab.tsx|b0bb7b0c7ed0434f|0",
     "file": "components/clients-tab.tsx",
-    "line": 421,
+    "line": 422,
     "tag": "Button",
     "label": "Ativa / Inativa",
     "dynamic": true,
@@ -4037,7 +4037,7 @@
   {
     "id": "components/clients-tab.tsx|05e5bb944f37dc83|0",
     "file": "components/clients-tab.tsx",
-    "line": 429,
+    "line": 430,
     "tag": "Button",
     "label": "Pencil",
     "dynamic": false,
@@ -4052,7 +4052,7 @@
   {
     "id": "components/clients-tab.tsx|e38411150084cef8|1",
     "file": "components/clients-tab.tsx",
-    "line": 437,
+    "line": 438,
     "tag": "Button",
     "label": "Trash2",
     "dynamic": false,
@@ -4067,7 +4067,7 @@
   {
     "id": "components/clients-tab.tsx|439484d97dcb8080|1",
     "file": "components/clients-tab.tsx",
-    "line": 475,
+    "line": 476,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -4082,7 +4082,7 @@
   {
     "id": "components/clients-tab.tsx|5908d74fefbac575|0",
     "file": "components/clients-tab.tsx",
-    "line": 568,
+    "line": 569,
     "tag": "Button",
     "label": "Exportar relatório PDF",
     "dynamic": false,
@@ -4097,7 +4097,7 @@
   {
     "id": "components/clients-tab.tsx|52f550a670226fa2|0",
     "file": "components/clients-tab.tsx",
-    "line": 572,
+    "line": 573,
     "tag": "Button",
     "label": "Gerando... / Exportar PDF",
     "dynamic": true,
@@ -4112,7 +4112,7 @@
   {
     "id": "components/clients-tab.tsx|19c1b91dc236f77a|0",
     "file": "components/clients-tab.tsx",
-    "line": 614,
+    "line": 615,
     "tag": "Button",
     "label": "Editar",
     "dynamic": false,
@@ -4127,7 +4127,7 @@
   {
     "id": "components/clients-tab.tsx|439484d97dcb8080|2",
     "file": "components/clients-tab.tsx",
-    "line": 660,
+    "line": 661,
     "tag": "Button",
     "label": "Salvar",
     "dynamic": false,
@@ -15000,9 +15000,54 @@
     "group": ""
   },
   {
+    "id": "components/table-auto-exports.tsx|05163fc72109c056|0",
+    "file": "components/table-auto-exports.tsx",
+    "line": 50,
+    "tag": "Button",
+    "label": "pdf",
+    "dynamic": true,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "",
+    "variant": "ghost",
+    "size": "icon",
+    "className": "",
+    "group": ""
+  },
+  {
+    "id": "components/table-report-actions.tsx|6f7ac627984c464e|0",
+    "file": "components/table-report-actions.tsx",
+    "line": 39,
+    "tag": "Button",
+    "label": "Sem nome fixo",
+    "dynamic": true,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "",
+    "variant": "ghost",
+    "size": "icon",
+    "className": "",
+    "group": ""
+  },
+  {
+    "id": "components/table-report-actions.tsx|008fbbc9b09fd09f|0",
+    "file": "components/table-report-actions.tsx",
+    "line": 39,
+    "tag": "Button",
+    "label": "FileSpreadsheet",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "FileSpreadsheet",
+    "variant": "ghost",
+    "size": "icon",
+    "className": "",
+    "group": ""
+  },
+  {
     "id": "components/table-report-actions.tsx|921b088cba556323|0",
     "file": "components/table-report-actions.tsx",
-    "line": 40,
+    "line": 41,
     "tag": "Button",
     "label": "PDF",
     "dynamic": true,
@@ -15017,7 +15062,7 @@
   {
     "id": "components/table-report-actions.tsx|d0e2c1ad624c617f|0",
     "file": "components/table-report-actions.tsx",
-    "line": 41,
+    "line": 42,
     "tag": "Button",
     "label": "Excel",
     "dynamic": false,
@@ -15662,7 +15707,7 @@
   {
     "id": "components/use-table-filters.tsx|03c087fc3b076bd1|0",
     "file": "components/use-table-filters.tsx",
-    "line": 64,
+    "line": 67,
     "tag": "CdeButton",
     "label": "Filtros",
     "dynamic": false,
@@ -15677,7 +15722,7 @@
   {
     "id": "components/use-table-filters.tsx|afb52d5e8e8a77d4|0",
     "file": "components/use-table-filters.tsx",
-    "line": 71,
+    "line": 74,
     "tag": "Button",
     "label": ":",
     "dynamic": true,
@@ -15692,7 +15737,7 @@
   {
     "id": "components/use-table-filters.tsx|c72c0b82547e9a5c|0",
     "file": "components/use-table-filters.tsx",
-    "line": 71,
+    "line": 74,
     "tag": "Button",
     "label": "X",
     "dynamic": false,
@@ -15707,7 +15752,7 @@
   {
     "id": "components/use-table-filters.tsx|ff0cd4e1453274fb|0",
     "file": "components/use-table-filters.tsx",
-    "line": 72,
+    "line": 75,
     "tag": "Button",
     "label": "Limpar todos os filtros ( / )",
     "dynamic": true,

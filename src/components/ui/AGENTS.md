@@ -24,3 +24,6 @@
 - AppNavigation pages mobile floating entries through MobileFloatingMenu after app filtering; keeping original entries preserves destinations and permissions while avoiding compressed labels.
 
 - Single-line fields/selects measure the live CDE font and longest option/text via field-content-width; textareas retain caller/default full width, preserving multiline editing space and CDE appearance.
+- Compact-field-layout packs shallow field-only rows using their responsive track count; exclude multiline/content sections so compact inputs never spread across empty columns or shrink text boxes.
+- Tables add missing PDF/Excel icons to their scoped list toolbar; export rendered authorized rows in current order, omitting action cells/detail rows, and preserve existing specialized exporters.
+- Non-table filtered lists export authorized filter columns/rows through FilteredListExports; never export unrelated raw object properties or replace specialized report controls.

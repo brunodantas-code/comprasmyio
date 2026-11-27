@@ -17,6 +17,7 @@ import { LinkedRecordDeletionDialog } from "@/components/linked-record-deletion-
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 import { useClientCategories, type ClientCategory } from "@/components/client-categories-tab";
 import { ClientsMapDialog } from "@/components/clients-map-dialog";
+import { TableReportActions } from '@/components/table-report-actions';
 
 export type Client = { id: string; name: string; legal_name: string | null; cnpj: string | null; city: string | null; state: string | null; category_id: string | null };
 export type ClientUnit = { id: string; client_id: string; name: string; cnpj: string | null; city: string | null; state: string | null; category_id: string | null; active: boolean };
@@ -263,7 +264,7 @@ export function ClientsTab({ userId }: { userId: string }) {
         <CardContent>
           {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
             !clients?.length ? <p className="text-sm text-muted-foreground">Sem clientes.</p> :
-            <>{clientFilters.summary}<><div className="mb-2 flex flex-wrap items-center gap-2 erp-list-toolbar">{clientFilters.menu}            <ClientsReportDialog clients={clients ?? []} units={allClientUnits ?? []} categories={categories ?? []} />
+            <>{clientFilters.summary}<><div className="mb-2 flex flex-wrap items-center gap-2 erp-list-toolbar">{clientFilters.menu}<TableReportActions iconOnly title="Clientes" report={{ columns: ['Nome fantasia', 'Razão social', 'Categoria', 'Cidade', 'UF', 'CNPJ'], rows: filteredClients.map(c => [c.name, c.legal_name, categories?.find(category => category.id === c.category_id)?.name ?? '', c.city, c.state, c.cnpj]) }} />            <ClientsReportDialog clients={clients ?? []} units={allClientUnits ?? []} categories={categories ?? []} />
             <ClientsMapDialog clients={clients ?? []} units={allClientUnits ?? []} categories={categories ?? []} />
             <Select value={clientSort} onValueChange={(value: "name" | "category" | "state" | "city") => setClientSort(value)}>
               <SelectTrigger className="h-8 w-40" aria-label="Ordenar clientes"><SelectValue /></SelectTrigger>

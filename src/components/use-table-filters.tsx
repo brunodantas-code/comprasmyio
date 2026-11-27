@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { isFilterActive, matchesColumnFilter, type ColumnFilterValue, type FilterKind } from "@/lib/column-filters";
+import { FilteredListExports } from './filtered-list-exports';
 
 export type FilterColumn<T> = {
   key: string;
@@ -60,6 +61,8 @@ export function TableFilterMenu<T>({ rows, columns, filters, onChange, clear }: 
   const active = columns.filter(c => isFilterActive(filters[c.key])).length;
   const activeColumns = columns.filter(c => isFilterActive(filters[c.key]));
   const describe = (c: FilterColumn<T>) => describeColumnFilter(c.kind ?? "text", filters[c.key]);
+  const exportColumns = columns.filter(c => !['search'].includes(c.key));
+  const exportRows = rows.filter(row => columns.every(c => matchesColumnFilter(c.kind ?? 'text', c.value(row), c.display?.(row) ?? String(c.value(row) ?? ''), filters[c.key])));
   return <span data-list-filter="" className="inline-flex shrink-0 items-center gap-1 text-[length:var(--filter-fs)] text-muted-foreground"><Popover open={open} onOpenChange={setOpen}>
     <PopoverTrigger asChild><CdeButton group="filter" screen="components/use-table-filters.tsx" active={!!active} aria-label="Filtros" title={active ? `Filtros (${active} ativos)` : "Filtros"} className="!bg-transparent gap-2 [&_svg]:!size-5 [&_svg]:stroke-[1.8]" /></PopoverTrigger>
     <PopoverContent align="start" className="max-h-[var(--radix-popover-content-available-height)] w-[min(18rem,calc(100vw-2rem))] overflow-y-auto space-y-3 p-3">
@@ -71,5 +74,5 @@ export function TableFilterMenu<T>({ rows, columns, filters, onChange, clear }: 
       {activeColumns.length > 0 && <div className="space-y-1 border-t pt-2"><p className="text-xs text-muted-foreground">Filtros combinados ({activeColumns.length})</p>{activeColumns.map(c => <div key={c.key} className="flex min-w-0 items-center gap-1 text-xs"><Button type="button" variant="ghost" className="!h-auto !min-w-0 !w-auto flex-1 justify-start text-left font-normal" onClick={() => setKey(c.key)} title={`${c.label}: ${describe(c)}`}><span className="min-w-0 truncate">{c.label}: {describe(c)}</span></Button><Button type="button" variant="ghost" size="compactIcon" aria-label={`Remover filtro ${c.label}`} onClick={() => onChange(c.key, undefined)}><X /></Button></div>)}</div>}
       {active > 0 && <Button variant="outline" size="sm" className="h-7 w-full text-xs" onClick={clear}>Limpar todos os filtros ({active})</Button>}
     </PopoverContent>
-  </Popover>{active > 0 ? <span className="tabular-nums" title={`${active} filtros combinados`}>({active})</span> : null}</span>;
+  </Popover>{active > 0 ? <span className="tabular-nums" title={`${active} filtros combinados`}>({active})</span> : null}<FilteredListExports report={{ columns: exportColumns.map(c => c.label), rows: exportRows.map(row => exportColumns.map(c => c.display?.(row) ?? c.value(row) ?? null)) }} /></span>;
 }

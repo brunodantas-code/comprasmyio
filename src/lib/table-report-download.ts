@@ -28,7 +28,7 @@ export async function exportTableReport(title: string, report: TableReport, form
       report.rows.forEach((_, row) => { const cell = sheet[XLSX.utils.encode_cell({ r: row + 1, c: index })]; if (cell?.t === "n") cell.z = '"R$" #,##0.00'; });
     });
     sheet["!autofilter"] = { ref: sheet["!ref"] ?? "A1" };
-    const workbook = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(workbook, sheet, "Solicitações");
+    const workbook = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(workbook, sheet, "Registros");
     save(new Blob([XLSX.write(workbook, { type: "array", bookType: "xlsx" })], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }), `${name}.xlsx`);
     return;
   }
@@ -36,7 +36,7 @@ export async function exportTableReport(title: string, report: TableReport, form
   const pdf = new jsPDF({ orientation: "landscape", format: report.columns.length > 9 ? "a3" : "a4" });
   pdf.addFileToVFS("Nunito-Regular.ttf", regular); pdf.addFont("Nunito-Regular.ttf", "Nunito", "normal");
   pdf.addFileToVFS("Nunito-Bold.ttf", bold); pdf.addFont("Nunito-Bold.ttf", "Nunito", "bold");
-  pdf.setFont("Nunito", "bold"); pdf.setFontSize(15); pdf.text(`myio Supply | ${title}`, 12, 14);
+  pdf.setFont("Nunito", "bold"); pdf.setFontSize(15); pdf.text(`myio ERP | ${title}`, 12, 14);
   pdf.setFont("Nunito", "normal"); pdf.setFontSize(9); pdf.text(`${report.rows.length} registro(s) · ${new Date().toLocaleString("pt-BR")}`, 12, 21);
   autoTable(pdf, { head: [report.columns], body: report.rows.map(row => row.map((value, index) => value == null ? "—" : typeof value === "number" && report.columns[index]?.includes("Valor") ? value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) : String(value))), startY: 27, margin: 12, theme: "plain", styles: { font: "Nunito", fontSize: 8, cellPadding: 2, overflow: "linebreak" }, headStyles: { fontStyle: "bold" }, columnStyles: Object.fromEntries(report.columns.map((label, index) => [index, { cellWidth: label.includes("Itens") ? 65 : "auto" }])), rowPageBreak: "avoid", didDrawPage: () => { pdf.setFontSize(8); pdf.text(`Página ${pdf.getNumberOfPages()}`, 12, pdf.internal.pageSize.getHeight() - 5); } });
   save(pdf.output("blob"), `${name}.pdf`);

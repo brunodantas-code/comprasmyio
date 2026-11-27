@@ -1,4 +1,5 @@
 import { useLayoutEffect, type RefObject } from 'react';
+import { compactFieldRows } from './compact-field-layout';
 
 export function contentFieldWidth(texts: readonly string[], measure: (text: string) => number, controls: number): number {
   return Math.ceil(Math.max(0, ...texts.flatMap(text => text.split('\n').map(measure))) + controls);
@@ -15,6 +16,7 @@ export function useFieldContentWidth<T extends HTMLElement>(ref: RefObject<T | n
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
     if (!context) return;
+    let layoutFrame = 0;
     const update = () => {
       const font = getComputedStyle(input);
       context.font = `${font.fontStyle} ${font.fontWeight} ${font.fontSize} ${font.fontFamily}`;
@@ -34,12 +36,14 @@ export function useFieldContentWidth<T extends HTMLElement>(ref: RefObject<T | n
         field.parentElement.style.setProperty('width', field.style.width);
         field.parentElement.style.setProperty('max-width', '100%');
       }
+      cancelAnimationFrame(layoutFrame);
+      layoutFrame = requestAnimationFrame(() => compactFieldRows(field));
     };
     update();
     field.addEventListener('input', update);
     window.addEventListener('resize', update);
     let active = true;
     void document.fonts.ready.then(() => { if (active) update(); });
-    return () => { active = false; field.removeEventListener('input', update); window.removeEventListener('resize', update); };
+    return () => { active = false; cancelAnimationFrame(layoutFrame); field.removeEventListener('input', update); window.removeEventListener('resize', update); };
   });
 }

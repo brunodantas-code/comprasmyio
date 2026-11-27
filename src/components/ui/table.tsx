@@ -3,6 +3,7 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { columnPermutation, useTableColumnOrders } from "@/components/cde/table-column-order";
 import { applyColumnName, useTableColumnNames, type TableColumnNames } from "@/components/cde/table-column-names";
+import { TableAutoExports } from '@/components/table-auto-exports';
 
 /** CDE column order: header row computes the permutation; body rows with the same cell count reuse it. */
 type TableOrderCtx = { saved?: number[]; perm: { current: number[] | null }; names?: Record<string, string>; slots?: number[] };
@@ -75,6 +76,7 @@ const Table = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableE
 
     return (
       <TableOrderContext.Provider value={orderCtx}>
+      <TableAutoExports tableRef={innerRef} />
       <div className="relative w-full overflow-hidden rounded-md border border-border md:max-h-[calc(100vh-14rem)] md:overflow-auto">
         <table
           ref={(node) => {
