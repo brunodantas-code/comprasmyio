@@ -804,7 +804,7 @@ function Dashboard() {
       <AppNavigation className={ml.nav} aria-label="Navegação do Supply">
         <div className={`mx-auto grid max-w-2xl grid-cols-5 items-stretch rounded-[1.75rem] border border-border bg-card/95 p-1.5 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-card/90 ${ml.grid}`}>
           {orderedNavigationTabs.map(({ value, label, icon: Icon }) => {
-            const active = activeSection === value;
+            const active = section === value;
             const submenuItems = value === "pedidos"
               ? [{ value: "mine", label: "Minhas Solicitações", icon: ClipboardList, allowed: me.canAccess("solicitacoes_minhas") }, { value: "new", label: "Novas Solicitações", icon: Plus, allowed: me.canAccess("solicitacoes_novas") }].filter((item) => item.allowed)
               : value === "queue"
@@ -831,7 +831,7 @@ function Dashboard() {
                 : value === "admin"
                   ? [{ value: "workflow:organograma", label: "Organograma de Aprovação", icon: CheckCircle2, allowed: me.canAccess("usuarios_workflow") }, { value: "workflow:padrao", label: "Alçadas de Aprovação", icon: CheckCircle2, allowed: me.canAccess("usuarios_workflow") }, { value: "workflow:etapas-adicionais", label: "Etapas Adicionais", icon: CheckCircle2, allowed: me.canAccess("usuarios_workflow") }, { value: "logs", label: "Logs", icon: ScrollText, allowed: me.canAccess("usuarios_logs") }, { value: "backup", label: "Backup", icon: DatabaseBackup, allowed: me.canAccess("usuarios_backup") }].filter((item) => item.allowed)
                   : [];
-            const selectedSubsection = value === "pedidos" ? activeRequestSection : value === "queue" ? activeApprovalSection : value === "stock" ? stockSection : value === "projects" ? activeRegistrationSection : activeAdministrationSection === "workflow" ? `workflow:${workflowSection}` : activeAdministrationSection;
+            const selectedSubsection = value === "pedidos" ? requestSection : value === "queue" ? approvalSection : value === "stock" ? stockSection : value === "projects" ? registrationSection : administrationSection === "workflow" ? `workflow:${workflowSection}` : administrationSection;
             const selectMain = () => setSection(value);
             const item = <span className="flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 px-1"><span className="menu-icon"><Icon className="h-5 w-5 shrink-0" /></span><span className="max-w-full truncate text-[10px] font-semibold leading-none">{label}</span></span>;
             const itemClassName = `h-auto min-w-0 rounded-[1.35rem] p-0 shadow-none ${active ? "!bg-primary/15 !text-primary hover:!bg-primary/20 hover:!text-primary" : "!bg-transparent !text-muted-foreground hover:!bg-muted hover:!text-foreground"}`;

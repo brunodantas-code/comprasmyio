@@ -5,6 +5,6 @@ type Props = {
   tone?: "light" | "dark" | "auto";
 };
 
-export function MyioCashFlowLogo({ className, tone = "auto" }: Props) {
-  return <MyioAppLogo appName="Finance" className={className} tone={tone} />;
+export function MyioCashFlowLogo({ className, tone }: Props) {
+  return <MyioAppLogo appName="Finance" className={className} {...(tone ? { tone } : {})} />;
 }

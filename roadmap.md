@@ -814,3 +814,6 @@
 - [x] CDE: checkbox Flexível junto à largura; arraste pessoal por usuário/app/dispositivo, conteúdo acompanhando e preferência preservada ao recarregar, padrão geral intacto.
 - [x] Arraste limitado a 160–400px e ao espaço disponível (reserva de 800px no desktop); não altera configurações de colunas. Limite, teclado e celular conferidos.
 - [x] CDE prazos: setas independentes Approvals/Atas, subtítulos compartilhados e divisórias cinza únicas, inclusive entre Prazos e Bolinhas; conferidos desktop/mobile sem salvar prazos.
+- [x] Padronizar cor, tamanho e posição do logo dos apps pela Home, preservando a largura das listas.
+- [x] Corrigir destaques/checks indevidos e simultâneos nos menus Solicitações e Approvals do Supply.
+- [x] Incluir seta de Exibir/Recolher o menu lateral com expansão/recolhimento da área de conteúdo.

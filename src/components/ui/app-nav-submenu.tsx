@@ -49,7 +49,6 @@ export function AppNavSubmenu({
   item,
   className,
   active,
-  onSelectMain,
   items,
   isSubActive,
   onSelectSub,
@@ -81,7 +80,6 @@ export function AppNavSubmenu({
           aria-current={active ? "page" : undefined}
           className={cn(className, "app-nav-group-trigger")}
           onClick={() => {
-            onSelectMain();
             setOpen((value) => !value);
           }}
         >
@@ -95,7 +93,7 @@ export function AppNavSubmenu({
                 key={value}
                 type="button"
                 variant="ghost"
-                aria-current={isSubActive(value) ? "page" : undefined}
+                aria-current={active && isSubActive(value) ? "page" : undefined}
                 className={className}
                 onClick={() => {
                   onSelectSub(value);
@@ -105,7 +103,7 @@ export function AppNavSubmenu({
                 <span className="flex min-h-10 min-w-0 flex-1 flex-row items-center gap-2 px-1">
                   {SubIcon ? <span className="menu-icon"><SubIcon className="h-4 w-4 shrink-0" /></span> : null}
                   <span className="min-w-0 flex-1 truncate">{menuName(subLabel)}</span>
-                  {isSubActive(value) ? <Check className="size-4 shrink-0" /> : null}
+                  {active && isSubActive(value) ? <Check className="size-4 shrink-0" /> : null}
                 </span>
               </Button>
             ))}
@@ -118,7 +116,7 @@ export function AppNavSubmenu({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button type="button" variant="ghost" className={className} onClick={onSelectMain} aria-current={active ? "page" : undefined}>
+        <Button type="button" variant="ghost" className={className} aria-current={active ? "page" : undefined}>
           {item}
         </Button>
       </DropdownMenuTrigger>
@@ -129,7 +127,7 @@ export function AppNavSubmenu({
           <DropdownMenuItem key={value} className="min-h-11 rounded-md" onSelect={() => onSelectSub(value)}>
             {SubIcon ? <SubIcon className="h-4 w-4" /> : null}
             <span className="flex-1">{menuName(subLabel)}</span>
-            {isSubActive(value) ? <Check className="h-4 w-4 text-primary" /> : null}
+            {active && isSubActive(value) ? <Check className="h-4 w-4 text-primary" /> : null}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

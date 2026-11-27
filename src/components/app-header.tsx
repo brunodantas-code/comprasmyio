@@ -58,7 +58,7 @@ export function AppHeader({ logo, children, supplyManual = false, manualApp, men
     <header style={{ "--home-header-bg": "var(--card)", ...homeHeaderVars(tile) } as React.CSSProperties} className="home-page-header sticky top-0 z-50 border-b border-border bg-card">
       <TopIconStyleVars /><ListItemStyleVars />
       <div className="app-header-workspace mx-auto max-w-7xl px-4 pb-4 pt-5 sm:flex sm:min-h-[73px] sm:items-center sm:justify-between sm:gap-4 sm:px-6 sm:py-4">
-        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3 sm:items-center">
           <Link to="/portal" className="flex min-w-0 items-center" title="Voltar aos aplicativos">{logo}</Link>
           <div className="flex shrink-0 items-center gap-1 sm:hidden">
             <Button asChild variant="ghost" size="icon" className="top-icon shrink-0 !bg-transparent !text-foreground shadow-none hover:!bg-muted hover:!text-foreground" title="Início" aria-label="Voltar aos aplicativos">

@@ -463,6 +463,10 @@ input[data-custom-calendar="true"]::-webkit-calendar-picker-indicator {
   max-width: none;
   padding-inline: 0;
 }
+/* Brand position follows the Home frame, never an app's wider table frame. */
+.erp-shell .app-header-workspace {
+  max-width: calc(80rem + 2cm);
+}
 @media (min-width: 768px) {
   .erp-shell { --erp-workspace-gutter: 0.75rem; }
 }
@@ -586,6 +590,8 @@ input[data-custom-calendar="true"]::-webkit-calendar-picker-indicator {
   --app-menu-fixed-selected-foreground: var(--dropdown-highlight-foreground);
   --app-menu-side-width: var(--app-menu-side-custom-width, 15rem);
   --app-menu-side-offset: calc(var(--app-menu-side-width) + 1rem);
+  --app-menu-collapsed-width: 2.5rem;
+  --app-menu-collapsed-offset: calc(var(--app-menu-collapsed-width) + 1rem);
   /* Only an actually mounted lateral panel reserves content space (set by AppNavigation). */
   --erp-side-offset: 0px;
 }
@@ -656,6 +662,20 @@ input[data-custom-calendar="true"]::-webkit-calendar-picker-indicator {
 }
 .app-navigation[data-menu-layout="left"] { left: 0 !important; right: auto !important; }
 .app-navigation[data-menu-layout="right"] { right: 0 !important; left: auto !important; }
+.app-navigation:is([data-menu-layout="left"], [data-menu-layout="right"]) > .app-menu-collapse {
+  display: flex;
+  margin: .5rem .5rem .25rem auto;
+  color: var(--app-menu-fixed-foreground) !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+.app-navigation[data-menu-layout="right"] > .app-menu-collapse { margin-inline: .5rem auto; }
+.app-navigation:is([data-menu-layout="left"], [data-menu-layout="right"])[data-collapsed="true"] {
+  width: var(--app-menu-collapsed-width) !important;
+}
+.app-navigation[data-collapsed="true"] > .app-menu-collapse { margin-inline: auto; }
+.app-navigation:is([data-menu-layout="left"], [data-menu-layout="right"])[data-collapsed="true"] > div { display: none !important; }
 .app-menu-resize-handle {
   position: absolute;
   top: 0;

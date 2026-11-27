@@ -3,11 +3,14 @@ import { createPortal } from "react-dom";
 import { MENU_LOOK_DEFAULT, menuLookVars, useMenuLook } from "@/components/cde/menu-look";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { clampMenuWidth, draggedMenuWidth, menuResizeLimits, personalMenuWidthKey } from "@/components/cde/menu-resize";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 /** Keep app navigation outside page stacking/scrolling contexts, below dialogs. */
 export function AppNavigation({ className = "", children, ...props }: ComponentProps<"nav">) {
   const [mounted, setMounted] = useState(false);
   const [layout, setLayout] = useState("floating");
+  const [collapsed, setCollapsed] = useState(false);
   const ref = useRef<HTMLElement>(null);
   // Look saved in the CDE (group menu_look): background, text, selected item, border and shadow.
   const { data: look } = useMenuLook();
@@ -53,9 +56,9 @@ export function AppNavigation({ className = "", children, ...props }: ComponentP
   useEffect(() => {
     if (!mounted) return;
     const root = document.documentElement.style;
-    root.setProperty("--erp-side-offset", layout === "left" || layout === "right" ? "var(--app-menu-side-offset)" : "0px");
+    root.setProperty("--erp-side-offset", layout === "left" || layout === "right" ? collapsed ? "var(--app-menu-collapsed-offset)" : "var(--app-menu-side-offset)" : "0px");
     return () => { root.removeProperty("--erp-side-offset"); };
-  }, [layout, mounted]);
+  }, [layout, mounted, collapsed]);
   useEffect(() => {
     const breakpoint = window.matchMedia("(min-width: 1024px)");
     const update = () => {
@@ -113,9 +116,12 @@ export function AppNavigation({ className = "", children, ...props }: ComponentP
     };
   }, [mounted]);
   if (!mounted) return null;
-  return createPortal(<nav ref={ref} data-menu-layout={layout} style={menuLookVars({ ...(look ?? MENU_LOOK_DEFAULT), sideWidth: width ?? null })} className={`app-navigation fixed inset-x-3 bottom-3 z-40 ${className}`} {...props}>
+  return createPortal(<nav ref={ref} data-menu-layout={layout} data-collapsed={lateral && collapsed ? "true" : undefined} style={menuLookVars({ ...(look ?? MENU_LOOK_DEFAULT), sideWidth: width ?? null })} className={`app-navigation fixed inset-x-3 bottom-3 z-40 ${className}`} {...props}>
+    {lateral ? <Button cdeIgnore variant="ghost" size="icon" className="app-menu-collapse" aria-label={collapsed ? "Exibir menu lateral" : "Recolher menu lateral"} title={collapsed ? "Exibir menu lateral" : "Recolher menu lateral"} aria-expanded={!collapsed} onClick={() => setCollapsed(value => !value)}>
+      {(layout === "left") !== collapsed ? <ChevronLeft className="size-5" /> : <ChevronRight className="size-5" />}
+    </Button> : null}
     {children}
-    {flexible ? <span role="separator" tabIndex={0} aria-label="Ajustar largura do menu lateral" aria-orientation="vertical" aria-valuemin={limits.min} aria-valuemax={limits.max} aria-valuenow={width ?? (desktop ? 240 : 160)} title="Arrastar para ajustar a largura" className="app-menu-resize-handle"
+    {flexible && !collapsed ? <span role="separator" tabIndex={0} aria-label="Ajustar largura do menu lateral" aria-orientation="vertical" aria-valuemin={limits.min} aria-valuemax={limits.max} aria-valuenow={width ?? (desktop ? 240 : 160)} title="Arrastar para ajustar a largura" className="app-menu-resize-handle"
       onPointerDown={event => { if (event.button !== 0) return; event.preventDefault(); drag.current = { x: event.clientX, width: ref.current?.getBoundingClientRect().width ?? 240 }; event.currentTarget.setPointerCapture(event.pointerId); }}
       onPointerMove={event => { const start = drag.current; if (start) resize(draggedMenuWidth(start.width, event.clientX - start.x, layout, window.innerWidth)); }}
       onPointerUp={endDrag} onPointerCancel={endDrag} onLostPointerCapture={() => { drag.current = null; }}

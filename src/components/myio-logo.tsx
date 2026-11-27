@@ -12,8 +12,9 @@ type Props = {
 };
 
 /** Logotipo oficial myio (Manual da Marca) + nome configurável do app. */
-export function MyioLogo({ className, tone = "auto", label = "supply" }: Props) {
-  if (label !== null) return <MyioAppLogo appName={label} className={className} tone={tone} />;
+export function MyioLogo({ className, tone: requestedTone, label = "supply" }: Props) {
+  if (label !== null) return <MyioAppLogo appName={label} className={className} {...(requestedTone ? { tone: requestedTone } : {})} />;
+  const tone = requestedTone ?? "auto";
   return (
     <span className={cn("inline-flex items-end", className)}>
       {tone === "auto" ? <>
