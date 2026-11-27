@@ -5,6 +5,24 @@
   gap: 1rem;
 }
 
+.spend-receipt-actions {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+}
+.spend-receipt-filter-actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.25rem;
+}
+.spend-receipt-actions > .spend-mobile-register-slot { flex: 1 0 100%; }
+@media (min-width: 1024px) {
+  .spend-receipt-actions { flex-wrap: nowrap; }
+}
+
 .spend-mobile-register-slot {
   display: flex;
   flex-direction: column;

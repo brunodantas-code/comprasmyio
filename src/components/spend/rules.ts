@@ -51,12 +51,15 @@ export const extractedJsonSchema = { type: "object", additionalProperties: false
     required: ["data", "estabelecimento", "valor", "parcela", "final_cartao", "categoria_sugerida", "myio_cnpj", "cidade", "uf", "chave_acesso"] } },
   vencimento: { type: ["string", "null"] },
 }, required: ["lancamentos", "vencimento"] };
-export type CategorySetting = { name: string; icon: string; account_id: string; cost_center_id: string; active: boolean; deleted?: boolean };
+export type CategorySetting = { name: string; icon: string; account_id: string; cost_center_id: string; active: boolean; deleted?: boolean; position?: number };
 export function configuredCategories(settings: Record<string, CategorySetting>, includeInactive = false) {
   const rows = [...categories.map(c => ({ ...c, ...settings[c.key] })), ...Object.entries(settings)
     .filter(([key]) => key.startsWith("custom_") && categoryKey.safeParse(key).success)
     .map(([key, s]) => ({ key, account: "Conta contábil padrão", ...s }))];
-  return rows.filter(c => !settings[c.key]?.deleted && (includeInactive || settings[c.key]?.active !== false));
+  return rows.filter(c => !settings[c.key]?.deleted && (includeInactive || settings[c.key]?.active !== false))
+    .map((category, index) => ({ category, index }))
+    .sort((a, b) => (a.category.position ?? Number.MAX_SAFE_INTEGER) - (b.category.position ?? Number.MAX_SAFE_INTEGER) || a.index - b.index)
+    .map(({ category }) => category);
 }
 export function removeCategory(settings: Record<string, CategorySetting>, key: string): Record<string, CategorySetting> {
   const base = categories.find(c => c.key === key);

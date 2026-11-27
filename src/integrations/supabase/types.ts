@@ -14048,6 +14048,14 @@ export type Database = {
         Returns: boolean
       }
       spend_receipt_file_version: { Args: { _path: string }; Returns: string }
+      spend_reimbursement_payments: {
+        Args: never
+        Returns: {
+          paid: boolean
+          payment_date: string
+          receipt_id: string
+        }[]
+      }
       spend_reimbursement_receipts: {
         Args: { _ids: string[] }
         Returns: {

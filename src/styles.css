@@ -804,14 +804,37 @@ input[data-custom-calendar="true"]::-webkit-calendar-picker-indicator {
   box-shadow: none !important;
 }
 }
+.diversos-list {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: transparent;
+}
 .diversos-list > * {
-  border: 1px solid var(--border) !important;
-  border-radius: var(--radius) !important;
+  position: relative;
+  border: 0 !important;
+  border-radius: 0 !important;
   box-shadow: none !important;
   background: transparent !important;
   padding: 0;
 }
-.diversos-list > * + * { margin-top: 0.5rem; }
+.diversos-list > * > :first-child > .flex:first-child {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  width: 100%;
+}
+.diversos-list > * > :first-child .cde-title { justify-self: start; text-align: left; }
+.diversos-list > * > :first-child > .flex:first-child > :last-child { justify-self: end; }
+.diversos-list > * + * { margin-top: 0; }
+.diversos-list > *:not(:first-child)::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  background: var(--border);
+  pointer-events: none;
+}
 .diversos-list > * > :first-child .font-semibold,
 .diversos-list > * > :first-child .cde-title,
 .diversos-list > section > :first-child h3 {

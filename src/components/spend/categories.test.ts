@@ -23,4 +23,13 @@ describe("Categorias simplificadas do Spend", () => {
     expect(configuredCategories(result, true).some(c => c.key === "alimentacao")).toBe(false);
     expect(result['alimentacao']?.name).toBe("Alimentação");
   });
+  it("ordena por posição sem trocar a identidade nem os vínculos das categorias", () => {
+    const result = configuredCategories({
+      alimentacao: { name: "Alimentação", icon: "Utensils", active: true, account_id: "account-food", cost_center_id: "center-1", position: 1 },
+      transporte: { name: "Táxi/Uber", icon: "Car", active: true, account_id: "account-car", cost_center_id: "center-2", position: 0 },
+    });
+    expect(result.slice(0, 2).map(c => c.key)).toEqual(["transporte", "alimentacao"]);
+    expect(result[0]?.account_id).toBe("account-car");
+    expect(result[1]?.account_id).toBe("account-food");
+  });
 });

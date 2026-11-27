@@ -16,6 +16,13 @@ export function paymentSourceLabel(source: string) {
 export function paymentSourceNeedsCard(source: string) {
   return source === "myio_card";
 }
+export function reimbursementStatusLabel(receipt: { reimbursement_order_id: string | null; reimbursement_paid?: boolean }) {
+  if (receipt.reimbursement_paid) return "Pago";
+  return receipt.reimbursement_order_id ? "Solicitado no Supply" : "Reembolso a solicitar";
+}
+export function reimbursementPaymentDate(receipt: { reimbursement_paid?: boolean; reimbursement_payment_date?: string | null }) {
+  return receipt.reimbursement_paid ? receipt.reimbursement_payment_date ?? null : null;
+}
 /** Options a person can pick: myio card only when one is available, reimbursement always, advance when one is open. */
 export function paymentSourceOptions(hasCard: boolean, hasOpenAdvance: boolean) {
   return [...(hasCard ? ["myio_card"] : []), "reimbursement", ...(hasOpenAdvance ? ["advance"] : [])];

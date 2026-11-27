@@ -1,3 +1,21 @@
+- [x] Spend Categorias: 12 alças de arraste, ordem alterada e disquete habilitado sem salvar o teste; ícones, vínculos e identidades preservados.
+- [x] Code anexos: rótulo externo duplicado removido; uma única frase “Prints e arquivos...” conferida no ticket.
+- [x] OpDesk: cabeçalho centralizado pelo CDE e dez alças de largura sem divisória visual.
+- [x] Site Survey Cadastro: 16 seções em moldura única, títulos à esquerda, ações/setas à direita e divisórias cinza; desktop e 390 px sem overflow.
+- [x] Site Survey Novo modelo: linhas verdes alinhadas com diferença máxima de 1 px e Seções padrão sem fundo verde.
+- [x] Site Survey Visitas e pontos: título compartilhado em 18 px/700.
+- [x] Spend Histórico: título compartilhado em 18 px/700.
+- [x] Spend Alocação De-Para: título e nome do menu CDE em 18 px/700.
+- [x] Spend Cartões: título interno duplicado removido; título principal em 18 px/700.
+- [x] Spend Adiantamentos: título compartilhado em 18 px/700.
+- [x] Spend/Supply: consulta autorizada deriva Pago e a data da transição no histórico; nove reembolsos do cartão 6227 exibiram “Pago · 27/11/2026”, sem alterar pedidos.
+- [x] Spend Comprovantes: filtro Tipo com somente Reembolso resultou em zero cartões e nove reembolsos.
+- [x] Spend: Comprovantes, Conciliação, Adiantamentos, Cartões, Alocação De-Para e Histórico usam os nomes CDE em 18 px/700.
+- [x] Minhas Pendências/Central: agrupamentos de KRs nomeados OKRs e KPIs; 31 testes passaram, sem pendências desse app na conta para conferência visual.
+- [x] Spend Comprovantes: total no topo direito e ações na mesma linha; desktop e celular sem overflow.
+- [x] Spend Conciliação: título compartilhado em 18 px/700.
+- [x] Spend Comprovantes: título compartilhado em 18 px/700.
+- [x] Supply Diversos: moldura única e divisórias entre 12 seções mantidas após compartilhar o estilo com Cadastro; sem overflow.
 - [x] Indicadores: nome do responsável alinhado à esquerda com o texto do título nas linhas de KR; medido no preview (título e nome começam em x=317).
 - [x] Indicadores: mini gráfico movido para o fim dos botões de ação, com a base alinhada à base dos botões (KPIs, OKRs e Check-ins); bloco Indicadores e listas sobem no espaço liberado. Conferido em 1440/1600 (mesma linha, bases em y=302) e 1098/celular (linha própria à direita, sem excesso lateral).
 - [ ] Indicadores: título "Objetivos e Key Results" no padrão Minhas Solicitações (CardTitle/CardDescription dentro do bloco); conferir no preview.

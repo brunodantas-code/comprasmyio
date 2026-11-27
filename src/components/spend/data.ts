@@ -5,7 +5,7 @@ import type { Database, Json } from "@/integrations/supabase/types";
 import type { CategorySetting } from "./rules";
 type Row<T extends keyof Database["public"]["Tables"]> = Database["public"]["Tables"][T]["Row"];
 export type SpendCard = Row<"spend_cards">;
-export type Receipt = Row<"spend_receipts">;
+export type Receipt = Row<"spend_receipts"> & { reimbursement_paid?: boolean; reimbursement_payment_date?: string | null };
 export type Statement = Row<"spend_statements">;
 export type Line = Row<"spend_lines">;
 export type Lookup = { id: string; name: string };
@@ -18,9 +18,18 @@ const workspaceSchema = z.object({ role: z.string(), user_id: z.string(), cards:
 export const spendOptions = queryOptions({ queryKey: ["spend"], queryFn: async (): Promise<SpendData> => {
   const r = await supabase.rpc("spend_workspace"); if (r.error) throw r.error;
   const parsed = workspaceSchema.parse(r.data);
-  const allocations = parsed.role === 'finance' ? await supabase.from('spend_supplier_allocations').select('*').order('supplier') : { data: [], error: null };
+  const [allocations, payments] = await Promise.all([
+    parsed.role === 'finance' ? supabase.from('spend_supplier_allocations').select('*').order('supplier') : Promise.resolve({ data: [], error: null }),
+    supabase.rpc('spend_reimbursement_payments'),
+  ]);
   if (allocations.error) throw allocations.error;
-  return { ...(r.data as unknown as SpendData), delegations: parsed.delegations as unknown as Delegation[], advances: parsed.advances as unknown as SpendAdvance[], allocations: allocations.data ?? [] };
+  if (payments.error) throw payments.error;
+  const paymentByReceipt = new Map(payments.data.map(payment => [payment.receipt_id, payment]));
+  const base = r.data as unknown as SpendData;
+  return { ...base, receipts: base.receipts.map(receipt => {
+    const payment = paymentByReceipt.get(receipt.id);
+    return payment ? { ...receipt, reimbursement_paid: payment.paid, reimbursement_payment_date: payment.payment_date } : receipt;
+  }), delegations: parsed.delegations as unknown as Delegation[], advances: parsed.advances as unknown as SpendAdvance[], allocations: allocations.data ?? [] };
 } });
 export async function spendAction(action: string, data: Json) {
   const r = await supabase.rpc("spend_action", { _action: action, _data: data });
