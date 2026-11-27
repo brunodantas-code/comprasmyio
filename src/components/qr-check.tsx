@@ -477,7 +477,7 @@ export function QrCheckSection() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-wrap items-center gap-2 [&>button]:w-full sm:[&>button]:w-auto">
+          <div className="erp-list-toolbar flex flex-wrap items-center gap-2">
             <div className="relative w-full flex-1 sm:min-w-[240px]">
               <Search className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
@@ -490,8 +490,8 @@ export function QrCheckSection() {
                 className="!pl-8" style={{ paddingLeft: 32 }}
               />
             </div>
-            <Button type="button" variant="ghost" className="text-primary hover:bg-transparent hover:text-primary/70" onClick={() => setCode(input.trim())} disabled={!input.trim()}>
-              <QrCode className="mr-1 h-4 w-4" /> Checar
+            <Button type="button" variant="ghost" size="compactIcon" aria-label="Checar QR Code" title="Checar QR Code" onClick={() => setCode(input.trim())} disabled={!input.trim()}>
+              <QrCode className="h-4 w-4" />
             </Button>
             <ManualQrDialog
               label="Digitar código do QR"

@@ -5340,6 +5340,21 @@
     "group": ""
   },
   {
+    "id": "components/erp-disclosure-row.tsx|18e1bd6b185c48a1|0",
+    "file": "components/erp-disclosure-row.tsx",
+    "line": 41,
+    "tag": "Button",
+    "label": "CdeDisclosureIcon",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "CdeDisclosureIcon",
+    "variant": "ghost",
+    "size": "compactIcon",
+    "className": "shrink-0",
+    "group": ""
+  },
+  {
     "id": "components/external-sync.tsx|e34826bfe5a98678|0",
     "file": "components/external-sync.tsx",
     "line": 163,
@@ -5365,8 +5380,8 @@
     "autoCdeSafe": true,
     "icon": "Camera",
     "variant": "ghost",
-    "size": "icon",
-    "className": "text-foreground hover:bg-muted hover:text-foreground",
+    "size": "compactIcon",
+    "className": "",
     "group": ""
   },
   {
@@ -5395,8 +5410,8 @@
     "autoCdeSafe": true,
     "icon": "ImageIcon",
     "variant": "ghost",
-    "size": "icon",
-    "className": "text-foreground hover:bg-muted hover:text-foreground",
+    "size": "compactIcon",
+    "className": "",
     "group": ""
   },
   {
@@ -5410,8 +5425,8 @@
     "autoCdeSafe": true,
     "icon": "Keyboard",
     "variant": "ghost",
-    "size": "icon",
-    "className": "text-foreground hover:bg-muted hover:text-foreground",
+    "size": "compactIcon",
+    "className": "",
     "group": ""
   },
   {
@@ -5852,7 +5867,7 @@
   {
     "id": "components/indicadores/dashboard.tsx|0432d3e046f07afa|0",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 188,
+    "line": 181,
     "tag": "Button",
     "label": "Icon",
     "dynamic": false,
@@ -5867,7 +5882,7 @@
   {
     "id": "components/indicadores/dashboard.tsx|56e0edbf13436716|0",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 196,
+    "line": 219,
     "tag": "Button",
     "label": "Check-in",
     "dynamic": false,
@@ -5882,7 +5897,7 @@
   {
     "id": "components/indicadores/dashboard.tsx|a8dffd5f98a1302d|0",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 234,
+    "line": 257,
     "tag": "Button",
     "label": "Check-in",
     "dynamic": false,
@@ -5897,7 +5912,7 @@
   {
     "id": "components/indicadores/dashboard.tsx|9e77056673298c3b|0",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 240,
+    "line": 263,
     "tag": "Button",
     "label": "Criar OKR",
     "dynamic": false,
@@ -5912,7 +5927,7 @@
   {
     "id": "components/indicadores/dashboard.tsx|186b26e208d5a78a|0",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 288,
+    "line": 312,
     "tag": "CdeButton",
     "label": "Novo Key Result",
     "dynamic": false,
@@ -5927,7 +5942,7 @@
   {
     "id": "components/indicadores/dashboard.tsx|f78efca9e424c46c|0",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 306,
+    "line": 330,
     "tag": "Button",
     "label": "Expandir OKR",
     "dynamic": false,
@@ -5942,7 +5957,7 @@
   {
     "id": "components/indicadores/dashboard.tsx|2466d7a3dce4a979|0",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 371,
+    "line": 395,
     "tag": "CdeButton",
     "label": "Sem nome fixo",
     "dynamic": false,
@@ -5957,7 +5972,7 @@
   {
     "id": "components/indicadores/dashboard.tsx|1b6135276a72b3a5|0",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 431,
+    "line": 455,
     "tag": "Button",
     "label": "v.icon",
     "dynamic": false,
@@ -5972,7 +5987,7 @@
   {
     "id": "components/indicadores/dashboard.tsx|2466d7a3dce4a979|1",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 445,
+    "line": 469,
     "tag": "CdeButton",
     "label": "Sem nome fixo",
     "dynamic": false,
@@ -5987,7 +6002,7 @@
   {
     "id": "components/indicadores/dashboard.tsx|d850325f261cf0df|0",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 597,
+    "line": 618,
     "tag": "CdeButton",
     "label": "Novo Key Result",
     "dynamic": false,
@@ -6002,7 +6017,7 @@
   {
     "id": "components/indicadores/dashboard.tsx|e2c6700f08e432bb|0",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 601,
+    "line": 622,
     "tag": "Button",
     "label": "Icon",
     "dynamic": true,
@@ -6030,9 +6045,24 @@
     "group": ""
   },
   {
-    "id": "components/indicadores/imported-records.tsx|e5732526bdbdda01|0",
+    "id": "components/indicadores/imported-records.tsx|dffa4d4a9b1b14e3|0",
     "file": "components/indicadores/imported-records.tsx",
     "line": 127,
+    "tag": "Button",
+    "label": "Pencil",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "Pencil",
+    "variant": "ghost",
+    "size": "compactIcon",
+    "className": "shrink-0",
+    "group": ""
+  },
+  {
+    "id": "components/indicadores/imported-records.tsx|e5732526bdbdda01|0",
+    "file": "components/indicadores/imported-records.tsx",
+    "line": 164,
     "tag": "Button",
     "label": "Save",
     "dynamic": false,
@@ -6047,28 +6077,13 @@
   {
     "id": "components/indicadores/imported-records.tsx|616b45e899d221f9|0",
     "file": "components/indicadores/imported-records.tsx",
-    "line": 137,
+    "line": 174,
     "tag": "Button",
     "label": "X",
     "dynamic": false,
     "visualCustom": false,
     "autoCdeSafe": true,
     "icon": "X",
-    "variant": "ghost",
-    "size": "compactIcon",
-    "className": "",
-    "group": ""
-  },
-  {
-    "id": "components/indicadores/imported-records.tsx|dffa4d4a9b1b14e3|0",
-    "file": "components/indicadores/imported-records.tsx",
-    "line": 167,
-    "tag": "Button",
-    "label": "Pencil",
-    "dynamic": false,
-    "visualCustom": false,
-    "autoCdeSafe": true,
-    "icon": "Pencil",
     "variant": "ghost",
     "size": "compactIcon",
     "className": "",
@@ -10890,18 +10905,18 @@
     "group": ""
   },
   {
-    "id": "components/qr-check.tsx|622e54d386a51c94|0",
+    "id": "components/qr-check.tsx|8bd624e8d364a82b|0",
     "file": "components/qr-check.tsx",
     "line": 493,
     "tag": "Button",
-    "label": "Checar",
+    "label": "Checar QR Code",
     "dynamic": false,
     "visualCustom": false,
     "autoCdeSafe": true,
     "icon": "QrCode",
     "variant": "ghost",
-    "size": "",
-    "className": "text-primary hover:bg-transparent hover:text-primary/70",
+    "size": "compactIcon",
+    "className": "",
     "group": ""
   },
   {
