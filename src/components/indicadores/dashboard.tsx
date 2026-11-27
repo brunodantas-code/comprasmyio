@@ -216,7 +216,7 @@ export function IndicadoresDashboard() {
     const empty = (Icon: typeof Pencil) => (
       <span aria-hidden="true" className="invisible flex h-6 w-6 items-center justify-center"><Icon className="size-3.5" /></span>
     );
-    return (<div key={m.id}><div className="grid items-center gap-4 py-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)_16rem]"><div className="min-w-0"><div className="flex items-start gap-2"><CdeNumber screen={screen} subcategory>{i+1}</CdeNumber><p className="text-sm">{m.title}</p></div><p className="mt-1 text-xs text-muted-foreground">{importedField(m.source_metadata,'responsible_name') || userName(m.responsible_id)}</p></div><div className="space-y-1 text-xs"><p>{metricValue(m.current_value,m.measure,m.unit)} · Meta: {metricValue(m.target_value,m.measure,m.unit)}</p>{m.due_on && <p className="text-muted-foreground">Prazo: {new Date(`${m.due_on}T12:00:00`).toLocaleDateString('pt-BR')}</p>}</div><Advance value={metricProgress(m.initial_value,m.target_value,m.current_value)} /><div className="flex items-center gap-2">{slot(canEdit && !archived ? iconButton(`Editar ${m.title}`,Pencil,()=>setEdit({type:'metric',row:m,kind:m.kind === 'kpi' ? 'kpi' : 'kr'})) : empty(Pencil))}{slot(canEdit ? iconButton(`Excluir ${m.title}`,Trash2,async()=>{if(await confirmAction(`Excluir o indicador “${m.title}”?`))mutation.mutate({type:'metric',id:m.id});}) : empty(Trash2))}{slot(canCheckin ? <Button onClick={()=>setEdit({type:'checkin',row:m})}><CheckCheck />Check-in</Button> : <span aria-hidden="true" className="invisible">Check-in</span>, "w-32")}{slot(iconButton(`Histórico de ${m.title}`,History,()=>setHistoryFor(v=>v===m.id?null:m.id)))}</div></div>{historyFor===m.id && historyPanel(m)}</div>);
+    return (<div key={m.id}><div className="grid items-center gap-4 py-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)_16rem]"><div className="min-w-0"><div className="flex items-start gap-2"><CdeNumber screen={screen} subcategory>{i+1}</CdeNumber><div className="min-w-0"><p className="text-sm">{m.title}</p><p className="mt-1 text-xs text-muted-foreground">{importedField(m.source_metadata,'responsible_name') || userName(m.responsible_id)}</p></div></div></div><div className="space-y-1 text-xs"><p>{metricValue(m.current_value,m.measure,m.unit)} · Meta: {metricValue(m.target_value,m.measure,m.unit)}</p>{m.due_on && <p className="text-muted-foreground">Prazo: {new Date(`${m.due_on}T12:00:00`).toLocaleDateString('pt-BR')}</p>}</div><Advance value={metricProgress(m.initial_value,m.target_value,m.current_value)} /><div className="flex items-center gap-2">{slot(canEdit && !archived ? iconButton(`Editar ${m.title}`,Pencil,()=>setEdit({type:'metric',row:m,kind:m.kind === 'kpi' ? 'kpi' : 'kr'})) : empty(Pencil))}{slot(canEdit ? iconButton(`Excluir ${m.title}`,Trash2,async()=>{if(await confirmAction(`Excluir o indicador “${m.title}”?`))mutation.mutate({type:'metric',id:m.id});}) : empty(Trash2))}{slot(canCheckin ? <Button onClick={()=>setEdit({type:'checkin',row:m})}><CheckCheck />Check-in</Button> : <span aria-hidden="true" className="invisible">Check-in</span>, "w-32")}{slot(iconButton(`Histórico de ${m.title}`,History,()=>setHistoryFor(v=>v===m.id?null:m.id)))}</div></div>{historyFor===m.id && historyPanel(m)}</div>);
   }
   function metricCard(m: Metric) {
     if (m.kind === "kr") return metricRow(m, metrics.findIndex(row => row.id === m.id));
@@ -487,9 +487,7 @@ export function IndicadoresDashboard() {
               />
             )}
               </div>
-            </div>
-            {filters.summary}
-            <section className="flex flex-wrap items-center gap-6">
+              <div className="max-[1400px]:ml-auto">
               <UserPendingBars
                 data={userBars}
                 title="OKRs e KPIs por usuário"
@@ -507,7 +505,10 @@ export function IndicadoresDashboard() {
                   </div>;
                 }}
               />
-              <section className="w-full overflow-hidden rounded-md border border-border bg-card shadow-sm" aria-label="Resumo dos indicadores"><header className="flex items-center justify-between gap-3 border-b border-border px-4 py-3"><h2 className="truncate text-xs font-bold uppercase text-muted-foreground">Indicadores</h2><Badge>Atualizado</Badge></header><div className="divide-y divide-border p-2 lg:grid lg:grid-cols-4 lg:divide-x lg:divide-y-0">{[
+              </div>
+            </div>
+            {filters.summary}
+            <section className="w-full overflow-hidden rounded-md border border-border bg-card shadow-sm" aria-label="Resumo dos indicadores"><header className="flex items-center justify-between gap-3 border-b border-border px-4 py-3"><h2 className="truncate text-xs font-bold uppercase text-muted-foreground">Indicadores</h2><Badge>Atualizado</Badge></header><div className="divide-y divide-border p-2 lg:grid lg:grid-cols-4 lg:divide-x lg:divide-y-0">{[
                 { label: "Indicadores", value: metrics.length },
                 {
                   label: "Avanço médio",
@@ -528,7 +529,6 @@ export function IndicadoresDashboard() {
                   <strong className="shrink-0 text-lg leading-none tabular-nums">{t.value}</strong>
                 </div>
               ))}</div></section>
-            </section>
             {view === "tree" && tab === "okrs" ? (
               <div className="space-y-3">{tree(null)}</div>
             ) : view === "list" ? (

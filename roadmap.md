@@ -1,3 +1,5 @@
+- [x] Indicadores: nome do responsável alinhado à esquerda com o texto do título nas linhas de KR; medido no preview (título e nome começam em x=317).
+- [x] Indicadores: mini gráfico movido para o fim dos botões de ação, com a base alinhada à base dos botões (KPIs, OKRs e Check-ins); bloco Indicadores e listas sobem no espaço liberado. Conferido em 1440/1600 (mesma linha, bases em y=302) e 1098/celular (linha própria à direita, sem excesso lateral).
 - [ ] Indicadores: título "Objetivos e Key Results" no padrão Minhas Solicitações (CardTitle/CardDescription dentro do bloco); conferir no preview.
 - [ ] Indicadores: "Áreas, equipe e reuniões" deixa de repetir nos 4 menus e vira menu próprio após Ciclos.
 - [ ] Indicadores: Áreas, Equipes e Reuniões editáveis (campos editáveis, preservando o payload original da importação).
