@@ -549,17 +549,16 @@ export function ToolAssetsSection({ userId, canDelete, canCreate = false }: { us
               link de referência e configurações de compra.
             </CardDescription>
           </div>
-           {canCreate && <div className="w-full shrink-0 sm:w-auto">
-            <AddToolDialog userId={userId} />
-           </div>}
+
         </CardHeader>
         <CardContent>
+          <div className="mb-2 flex flex-wrap items-center gap-2 erp-list-toolbar">{toolFilters.menu}{canCreate && <AddToolDialog userId={userId} />}</div>
           {isLoading ? (
             <p className="text-sm text-muted-foreground">Carregando...</p>
           ) : !rows?.length ? (
             <p className="text-sm text-muted-foreground">Nenhuma ferramenta encontrada.</p>
           ) : (
-            <>{toolFilters.summary}<><div className="mb-2 flex flex-wrap items-center gap-2 erp-list-toolbar">{toolFilters.menu}</div><Table>
+            <>{toolFilters.summary}<><Table>
               <TableHeader className="[&_tr]:border-b">
                 <TableRow className="border-b">
                   <TableHead className="w-[45%]">{toolFilters.header("name")}</TableHead>
@@ -669,14 +668,14 @@ export function ToolAssetsSection({ userId, canDelete, canCreate = false }: { us
               <TableBody>
                 {movements.slice(0, 50).map((m) => (
                   <TableRow key={m.id}>
-                    <TableCell className="text-sm text-muted-foreground">{fmt(m.created_at)}</TableCell>
-                    <TableCell>{nameById[m.material_id] ?? "—"}</TableCell>
-                    <TableCell>
+                    <TableCell className="text-xs text-muted-foreground">{fmt(m.created_at)}</TableCell>
+                    <TableCell className="text-xs">{nameById[m.material_id] ?? "—"}</TableCell>
+                    <TableCell className="text-xs">
                       <Badge variant="outline" className={MOVEMENT_CLASSES[m.type]}>{MOVEMENT_LABELS[m.type]}</Badge>
                     </TableCell>
-                    <TableCell className="text-right">{m.type === "saida" ? "-" : "+"}{m.quantity}</TableCell>
-                    <TableCell className="text-sm">{m.destination ?? m.responsible ?? "—"}</TableCell>
-                    <TableCell className="text-sm">{m.created_by ? (profiles?.[m.created_by] ?? "Usuário") : "Sistema"}</TableCell>
+                    <TableCell className="text-right text-xs">{m.type === "saida" ? "-" : "+"}{m.quantity}</TableCell>
+                    <TableCell className="text-xs">{m.destination ?? m.responsible ?? "—"}</TableCell>
+                    <TableCell className="text-xs">{m.created_by ? (profiles?.[m.created_by] ?? "Usuário") : "Sistema"}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

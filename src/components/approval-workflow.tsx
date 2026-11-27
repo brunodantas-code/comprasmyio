@@ -1163,7 +1163,10 @@ export function RulesAdmin() {
       </Card>
 
       <Card>
-        <CardContent className="pt-6">
+        <CardHeader>
+          <CardTitle>Etapas adicionais cadastradas</CardTitle>
+        </CardHeader>
+        <CardContent>
           {isLoading ? (
             <p className="text-sm text-muted-foreground">Carregando...</p>
           ) : (
@@ -1250,7 +1253,7 @@ function MoneyInput({
   const [draft, setDraft] = useState<string | null>(null);
   return (
     <UIMoneyInput
-      className="h-8 w-32"
+      className="mx-auto h-8 w-32 text-center"
       disabled={disabled}
       value={draft ?? String(value ?? 0)}
       onChange={setDraft}
@@ -1272,7 +1275,7 @@ function QuantityLimitInput({ value, disabled, onSave }: { value: number; disabl
       type="number"
       min={0}
       max={99999}
-      className="h-8 w-28"
+      className="mx-auto h-8 w-28 text-center"
       disabled={disabled}
       value={draft}
       onChange={(event) => setDraft(event.target.value.replace(/\D/g, "").slice(0, 5))}
@@ -1440,7 +1443,10 @@ function DefaultChainAdmin() {
       </Card>
 
       <Card>
-        <CardContent className="pt-6">
+        <CardHeader>
+          <CardTitle>Alçadas por valor</CardTitle>
+        </CardHeader>
+        <CardContent>
           {isLoading ? (
             <p className="text-sm text-muted-foreground">Carregando...</p>
           ) : (

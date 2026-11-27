@@ -41,14 +41,14 @@ input[data-search-field="true"] {
 .erp-search-row input[data-search-field="true"] { width: 100% !important; }
 
 /* List tools share left alignment without changing column geometry or action looks. */
-.erp-list-toolbar { justify-content: flex-start !important; margin-inline-start: 0 !important; flex-wrap: wrap; }
+.erp-list-toolbar { justify-content: flex-start !important; align-items: center; gap: 0.5rem; margin-inline-start: 0 !important; flex-wrap: wrap; }
 .erp-list-toolbar > .ml-auto, .erp-list-toolbar > .sm\:ml-auto { margin-inline-start: 0 !important; }
 .erp-list-tools-header { flex-wrap: wrap !important; }
 .erp-list-tools-header > .erp-list-toolbar { flex-basis: 100%; }
 :where(main, .erp-screen-block) :where(div, header).flex:has(> [data-list-filter], > [data-list-sort], > input[data-search-field="true"]) { justify-content: flex-start !important; }
 :where(main, .erp-screen-block) :where(div, header).flex:has(> h1, > h2, > h3):has(> .erp-list-toolbar) { flex-wrap: wrap !important; }
 :where(main, .erp-screen-block) :where(div, header).flex:has(> h1, > h2, > h3) > .erp-list-toolbar { flex-basis: 100%; }
-.erp-list-toolbar > button[aria-expanded]:not([data-list-sort]) { margin-inline-start: auto; }
+.erp-list-toolbar > button[aria-expanded] { margin-inline-start: 0 !important; }
 
 /* Date controls with an explicit calendar action must not also show the browser icon. */
 input[data-custom-calendar="true"] { padding-right: 2.75rem !important; }
@@ -222,6 +222,7 @@ input[data-custom-calendar="true"]::-webkit-calendar-picker-indicator {
   --radius: 0.625rem;
   /* Fontes de cabeçalhos de tabela e barras de filtro — padrão CDE (grupo table_fonts); valores iniciais até o CDE carregar */
   --th-fs: 11px;
+  --td-fs: 12px;
   --filter-fs: 12px;
   --field-title-bg: transparent; --field-title-color: inherit; --field-title-border: transparent;
   --field-title-border-width: 0px; --field-title-padding: 0px; --field-title-radius: 0px;
@@ -804,13 +805,13 @@ input[data-custom-calendar="true"]::-webkit-calendar-picker-indicator {
 }
 }
 .diversos-list > * {
-  border: 0 !important;
-  border-radius: 0 !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius) !important;
   box-shadow: none !important;
   background: transparent !important;
   padding: 0;
 }
-.diversos-list > * + * { border-top: 1px solid var(--border) !important; }
+.diversos-list > * + * { margin-top: 0.5rem; }
 .diversos-list > * > :first-child .font-semibold,
 .diversos-list > section > :first-child h3 {
   font-size: var(--text-sm);
@@ -820,7 +821,7 @@ input[data-custom-calendar="true"]::-webkit-calendar-picker-indicator {
 .diversos-list > * > :first-child {
   position: relative;
   min-height: 48px;
-  padding: 10px 0 10px 40px;
+  padding: 10px 52px 10px 12px;
   margin: 0;
   align-items: center;
 }
@@ -828,13 +829,13 @@ input[data-custom-calendar="true"]::-webkit-calendar-picker-indicator {
 .diversos-list > * > :first-child button[aria-label^="Recolher "],
 .diversos-list > section > :first-child button[aria-label$="contas"] {
   position: absolute;
-  left: 0;
+  right: 12px;
   top: 8px;
 }
 .diversos-list > * > :first-child button[aria-label^="Expandir "] svg,
-.diversos-list > section > :first-child button[aria-label="Exibir contas"] svg { rotate: -90deg; }
+.diversos-list > section > :first-child button[aria-label="Exibir contas"] svg,
 .diversos-list > * > :first-child button[aria-label^="Recolher "] svg,
-.diversos-list > section > :first-child button[aria-label="Recolher contas"] svg { rotate: 180deg; }
+.diversos-list > section > :first-child button[aria-label="Recolher contas"] svg { rotate: 0deg; }
 
 .central-flow { --xy-node-background-color: var(--card); --xy-node-color: var(--foreground); --xy-node-border: 1px solid var(--border); --xy-edge-stroke: var(--foreground); --xy-edge-label-background-color: var(--background); --xy-edge-label-color: var(--foreground); --xy-controls-button-background-color: var(--card); --xy-controls-button-color: var(--foreground); --xy-background-pattern-dots-color: var(--border); }
 .central-flow .central-flow-node { background: var(--card); color: var(--foreground); border: 1px solid var(--border); border-radius: 6px; padding: 12px; }
@@ -995,9 +996,34 @@ input[data-custom-calendar="true"]::-webkit-calendar-picker-indicator {
 .cde-title { font-weight: var(--title-weight, inherit); font-style: var(--title-style, normal); text-decoration-line: var(--title-decoration, none); }
 .cde-subtitle { font-weight: var(--sub-weight, inherit); font-style: var(--sub-style, normal); text-decoration-line: var(--sub-decoration, none); }
 .cde-field-title { font-weight: var(--field-title-weight, inherit); font-style: var(--field-title-style, normal); text-decoration-line: var(--field-title-decoration, none); }
+.cde-field-title:has(> svg.lucide-paperclip) { display: inline-flex; align-items: center; gap: 0.5rem; }
+.cde-field-title > svg.lucide-paperclip { flex-shrink: 0; }
+/* Only bottom action slots move; header and inline editor actions retain their geometry. */
+.erp-form-footer:has([data-cde-action="save"]) { justify-content: flex-end !important; }
+.erp-form-footer > [data-cde-action="save"] { margin-inline-start: auto; order: 99; align-self: center; }
+:is(form, [data-card-content]) > [data-cde-action="save"]:last-child {
+  display: flex;
+  width: max-content !important;
+  margin-inline-start: auto;
+  justify-self: end;
+  align-self: flex-end;
+}
+:is(form, [data-card-content]) > div:last-child:not(:has(input, textarea, select, h1, h2, h3)):has(> [data-cde-action="save"]) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+:is(form, [data-card-content]) > div:last-child:not(:has(input, textarea, select, h1, h2, h3)) > [data-cde-action="save"] { margin-inline-start: auto; order: 99; }
 [class*="text-[length:var(--filter-fs)]"] { font-weight: var(--filter-weight, inherit); font-style: var(--filter-style, normal); text-decoration-line: var(--filter-decoration, none); }
 .cde-font-format button[aria-pressed="true"] {
   background-color: var(--dropdown-highlight) !important;
   color: var(--dropdown-highlight-foreground) !important;
   box-shadow: inset 0 -2px 0 var(--primary);
 }
+
+/* List text follows CDE; fields, action buttons, badges and number markers retain independent standards. */
+.cde-td { font-size: var(--td-fs) !important; }
+.cde-td :where(div, p, time, a):not([data-cde-number]) { font-size: inherit; }
+.cde-td button.underline-offset-4 { font-size: var(--td-fs) !important; }

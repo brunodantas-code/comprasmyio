@@ -828,3 +828,42 @@
 - [x] CDE item 12: lápis ao final de cada linha de nome de coluna; texto vira campo editável na linha, nome salvo por identidade sem mudar ordem. Seis lápis e editor inline conferidos com sessão; quatro testes passaram.
 - [x] CDE: tamanho e formatação da fonte dos títulos e subtítulos dos apps; seleção aplicada a todos os títulos e subtítulos. Prévia 16px/600 e 14px conferida; "Minhas Solicitações" no painel agora 16px em negrito contra subtítulo 14px; onze testes passaram.
 - [x] CDE item 1: subitens "Padrões para edição de cores" e "Customizações do Projects" sem botão de arraste e no padrão de seção dos demais. Conferidos com sessão: nenhuma alça e ambos em seção padrão.
+
+- [x] CDE: incluir campos com rótulos na prévia de Cabeçalhos e Listas.
+- [x] Supply: espaçar e alinhar seletores e textos Entrega/Retirada em Modalidade.
+
+- [x] ERP: clipe à esquerda do texto nos campos de anexos de todos os apps.
+- [x] ERP: salvamento inferior no canto direito de cards e pop-ups.
+
+- [x] ERP: alinhar ícones de filtro e ordenação no cabeçalho indicado.
+
+- [x] ERP: remover espaço entre terceiro e quarto ícones da barra indicada, mantendo todos à esquerda.
+
+- [x] Supply: aplicar o mesmo alinhamento dos ícones à segunda tela enviada.
+
+- [x] Supply: aplicar alinhamento uniforme à terceira tela enviada.
+
+- [x] Padronizar fonte da lista indicada com Tickets e Wishlist.
+
+- [x] Supply: padronizar fonte da segunda lista indicada com Tickets/Wishlist.
+
+- [x] Supply: mover + Item e Zerar estoque para junto do filtro nas listas enviadas.
+
+- [x] ERP: revisar fontes de todas as listas e aplicar padrão de Listas do CDE.
+- [x] Supply: padronizar botões indicados como ghost preto com destaque neutro.
+
+- [x] Supply: mover + Ferramenta para junto do filtro.
+
+- [x] Supply: relatórios PDF/Excel junto ao filtro e ordenação nas telas enviadas.
+
+- [x] Supply: mover ações do cabeçalho Clientes para junto do filtro.
+
+- [x] Supply: cabeçalho de Lembretes no padrão cinza do CDE.
+
+- [x] Supply Cadastro: lista Diversos com seções e setas à direita no padrão Acessos.
+
+- [x] Centralizar campos de valores sob seus cabeçalhos na tela indicada.
+
+- [x] Supply Alçadas: cabeçalho da lista inferior e conteúdo dentro do card; valores centralizados.
+
+- [x] Supply: corrigir título e enquadramento da segunda lista enviada.

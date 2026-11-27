@@ -234,12 +234,12 @@ function MovementHistoryTable({
       <TableBody>
         {filtered.slice(0, 50).map((movement) => (
           <TableRow key={movement.id}>
-            <TableCell className="whitespace-nowrap text-sm text-muted-foreground" title={`Registrado em ${fmt(movement.created_at)}`}>{movement.entry_date ? movement.entry_date.split('-').reverse().join('/') : fmt(movement.created_at)}</TableCell>
-            <TableCell className="font-medium">{names[movement.material_id] ?? "—"}</TableCell>
-            <TableCell><Badge variant="outline" className={MOVEMENT_CLASSES[movement.type]}>{MOVEMENT_LABELS[movement.type]}</Badge></TableCell>
-            <TableCell className="text-right">{movement.type === "saida" ? "-" : "+"}{movement.quantity}</TableCell>
-            <TableCell className="text-sm text-muted-foreground">{movement.reason ?? "—"}</TableCell>
-            <TableCell className="text-sm">{movement.created_by ? (profiles?.[movement.created_by] ?? "Usuário") : "Sistema"}</TableCell>
+            <TableCell className="whitespace-nowrap text-xs text-muted-foreground" title={`Registrado em ${fmt(movement.created_at)}`}>{movement.entry_date ? movement.entry_date.split('-').reverse().join('/') : fmt(movement.created_at)}</TableCell>
+            <TableCell className="text-xs font-medium">{names[movement.material_id] ?? "—"}</TableCell>
+            <TableCell className="text-xs"><Badge variant="outline" className={MOVEMENT_CLASSES[movement.type]}>{MOVEMENT_LABELS[movement.type]}</Badge></TableCell>
+            <TableCell className="text-right text-xs">{movement.type === "saida" ? "-" : "+"}{movement.quantity}</TableCell>
+            <TableCell className="text-xs text-muted-foreground">{movement.reason ?? "—"}</TableCell>
+            <TableCell className="text-xs">{movement.created_by ? (profiles?.[movement.created_by] ?? "Usuário") : "Sistema"}</TableCell>
           </TableRow>
         ))}
         {!filtered.length && <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground">Nenhuma movimentação encontrada.</TableCell></TableRow>}
@@ -1159,15 +1159,15 @@ function StockTableCard({
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2"><div className="flex items-center gap-2"><CardTitle>{title}</CardTitle>{collapsible && <Button type="button" variant="ghost" size="compactIcon" aria-expanded={expanded} aria-label={`${expanded ? "Recolher" : "Exibir"} ${title}`} title={`${expanded ? "Recolher" : "Exibir"} ${title}`} onClick={() => setExpanded(value => !value)}><ChevronDown className={`h-4 w-4 text-primary transition-transform motion-reduce:transition-none ${expanded ? "rotate-180" : ""}`} /></Button>}</div>{totals && <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground"><span>Cadastrados: <strong className="font-normal text-foreground">{totals.registered}</strong></span><span>Saldo positivo: <strong className="font-normal text-foreground">{totals.positive}</strong></span><span>Saldo zerado: <strong className="font-normal text-foreground">{totals.zero}</strong></span></div>}</div>
           <CardDescription>{description}</CardDescription>
         </div>
-        {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
       </CardHeader>
       <CardContent hidden={collapsible && !expanded}>
+        <div className="mb-2 flex flex-wrap items-center gap-2 erp-list-toolbar">{stockFilters.menu}{actions}</div>
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Carregando...</p>
         ) : !rows.length ? (
           <p className="text-sm text-muted-foreground">Nenhum material encontrado.</p>
         ) : (
-          <>{stockFilters.summary}<><div className="mb-2 flex flex-wrap items-center gap-2 erp-list-toolbar">{stockFilters.menu}</div><Table>
+          <>{stockFilters.summary}<><Table>
             <TableHeader className={columnFilters ? "[&_tr]:border-b" : undefined}>
                 <TableRow className={columnFilters ? "border-b" : undefined}>
                   <TableHead className={`${simple ? "w-[70%]" : "w-[45%]"}${columnFilters ? "" : ""}`}>{stockFilters.header("description")}</TableHead>
@@ -1916,15 +1916,15 @@ function TerceirosSection({ userId, canDelete }: { userId: string; canDelete?: b
               Myio. Toque no nome para ver foto, link de referência e configurações de compra.
             </CardDescription>
           </div>
-          <div className="flex flex-wrap items-center gap-2">{toolbar}</div>
         </CardHeader>
         <CardContent>
+          <div className="mb-2 flex flex-wrap items-center gap-2 erp-list-toolbar">{stockFilters.menu}{toolbar}</div>
           {isLoading ? (
             <p className="text-sm text-muted-foreground">Carregando...</p>
           ) : !rows?.length ? (
             <p className="text-sm text-muted-foreground">Nenhum item encontrado.</p>
           ) : (
-            <>{stockFilters.summary}<><div className="mb-2 flex flex-wrap items-center gap-2 erp-list-toolbar">{stockFilters.menu}</div><Table>
+            <>{stockFilters.summary}<><Table>
               <TableHeader className="[&_tr]:border-b">
                 <TableRow className="border-b">
                   <TableHead className="w-[45%]">{stockFilters.header("description")}</TableHead>

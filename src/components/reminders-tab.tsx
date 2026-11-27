@@ -197,7 +197,7 @@ export function RemindersTab() {
             <p className="text-sm text-muted-foreground">Nenhum lembrete cadastrado.</p>
           ) : (
             <div className="overflow-hidden rounded-md border">
-              <div className="hidden grid-cols-[2fr_2fr_1.5fr_1fr_auto] gap-2 border-b border-t-0 bg-myio-green/20 px-3 py-2 text-center text-sm sm:grid">
+              <div className="cde-th hidden grid-cols-[2fr_2fr_1.5fr_1fr_auto] gap-2 border-b border-t-0 px-3 py-2 text-center text-[length:var(--th-fs)] sm:grid">
                 <span className="text-left">Usuário</span>
                 <span>Frequência</span>
                 <span>Horário</span>
@@ -207,7 +207,7 @@ export function RemindersTab() {
               {reminders.map((r) => (
                 <div
                   key={r.id}
-                  className="grid w-full grid-cols-2 items-center gap-2 border-b border-border/60 px-3 py-2 text-left text-sm last:border-0 sm:grid-cols-[2fr_2fr_1.5fr_1fr_auto] sm:text-center"
+                  className="cde-td grid w-full grid-cols-2 items-center gap-2 border-b border-border/60 px-3 py-2 text-left last:border-0 sm:grid-cols-[2fr_2fr_1.5fr_1fr_auto] sm:text-center"
                 >
                   <span className="font-medium sm:text-left">{userLabel(r.user_id)}</span>
                   <span>{frequencyLabel(r)}</span>

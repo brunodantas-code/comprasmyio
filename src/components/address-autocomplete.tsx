@@ -165,9 +165,11 @@ export function AddressAutocomplete({
           <Label>Modalidade</Label>
           <RadioGroup value={mode} onValueChange={(value) => { if (value === "entrega" || value === "retirada") setMode(value); }} className="flex flex-wrap gap-3" aria-label="Entrega ou Retirada">
             {(["entrega", "retirada"] as const).map((value) => (
-              <Label key={value} htmlFor={`${name}-mode-${value}`} className="flex min-h-9 cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-foreground has-[[data-state=checked]]:bg-accent has-[[data-state=checked]]:text-accent-foreground">
-                <RadioGroupItem id={`${name}-mode-${value}`} value={value} />
-                {value === "entrega" ? "Entrega" : "Retirada"}
+              <Label key={value} htmlFor={`${name}-mode-${value}`} className="min-h-9 cursor-pointer rounded-md px-3 py-2 text-foreground has-[[data-state=checked]]:bg-accent has-[[data-state=checked]]:text-accent-foreground">
+                <span className="flex items-center gap-3">
+                  <RadioGroupItem id={`${name}-mode-${value}`} value={value} className="shrink-0" />
+                  <span className="leading-none">{value === "entrega" ? "Entrega" : "Retirada"}</span>
+                </span>
               </Label>
             ))}
           </RadioGroup>

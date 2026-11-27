@@ -70,3 +70,9 @@ describe("list colours", () => {
     expect(v["--th-bg"]).toBe("transparent");
   });
 });
+
+it("mantém listas em 12px e transmite o tamanho escolhido no CDE", async () => {
+  const { tableAlignVars } = await import("./table-fonts-config");
+  expect(tableAlignVars(parseTableFonts(null))["--td-fs"]).toBe("12px");
+  expect(tableAlignVars(parseTableFonts('{"cellPx":13}'))["--td-fs"]).toBe("13px");
+});

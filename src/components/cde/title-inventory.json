@@ -72,6 +72,13 @@
   ]
  },
  {
+  "kind": "titulo",
+  "text": "Alçadas por valor",
+  "files": [
+   "components/approval-workflow.tsx"
+  ]
+ },
+ {
   "kind": "subtitulo",
   "text": "Approvals com aprovação simultânea aparecem em cada cargo responsável. O total geral conta cada approval uma vez.",
   "files": [
@@ -219,6 +226,13 @@
   ]
  },
  {
+  "kind": "titulo",
+  "text": "Clientes",
+  "files": [
+   "components/clients-tab.tsx"
+  ]
+ },
+ {
   "kind": "subtitulo",
   "text": "Com o estoque atual de componentes, quantas unidades de cada dispositivo é possível montar (regras de componentes + perda).",
   "files": [
@@ -319,6 +333,13 @@
  },
  {
   "kind": "titulo",
+  "text": "Desejos compartilhados",
+  "files": [
+   "components/wishlist/workspace.tsx"
+  ]
+ },
+ {
+  "kind": "titulo",
   "text": "Destinos de Estoque",
   "files": [
    "components/stock-destinations-tab.tsx"
@@ -362,6 +383,13 @@
  {
   "kind": "subtitulo",
   "text": "Escolha um tipo cadastrado em Cadastro &gt; Diversos e defina em quais solicitações a etapa será aplicada.",
+  "files": [
+   "components/approval-workflow.tsx"
+  ]
+ },
+ {
+  "kind": "titulo",
+  "text": "Etapas adicionais cadastradas",
   "files": [
    "components/approval-workflow.tsx"
   ]

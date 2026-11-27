@@ -252,17 +252,7 @@ export function ClientsTab({ userId }: { userId: string }) {
         <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2">
             <CardTitle className="inline-flex items-center gap-1">Clientes </CardTitle>
-            <ClientsReportDialog clients={clients ?? []} units={allClientUnits ?? []} categories={categories ?? []} />
-            <ClientsMapDialog clients={clients ?? []} units={allClientUnits ?? []} categories={categories ?? []} />
-            <Select value={clientSort} onValueChange={(value: "name" | "category" | "state" | "city") => setClientSort(value)}>
-              <SelectTrigger className="h-8 w-40" aria-label="Ordenar clientes"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="name">Ordenar por nome</SelectItem>
-                <SelectItem value="category">Ordenar por categoria</SelectItem>
-                <SelectItem value="state">Ordenar por UF</SelectItem>
-                <SelectItem value="city">Ordenar por cidade</SelectItem>
-              </SelectContent>
-            </Select>
+
           </div>
           <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 text-sm" aria-label="Totais de clientes e unidades">
             <span><span className="font-semibold text-foreground">{activeClientsCount}</span>&nbsp;<span className="text-muted-foreground">clientes ativos</span></span>
@@ -273,7 +263,17 @@ export function ClientsTab({ userId }: { userId: string }) {
         <CardContent>
           {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
             !clients?.length ? <p className="text-sm text-muted-foreground">Sem clientes.</p> :
-            <>{clientFilters.summary}<><div className="mb-2 flex flex-wrap items-center gap-2 erp-list-toolbar">{clientFilters.menu}</div><Table>
+            <>{clientFilters.summary}<><div className="mb-2 flex flex-wrap items-center gap-2 erp-list-toolbar">{clientFilters.menu}            <ClientsReportDialog clients={clients ?? []} units={allClientUnits ?? []} categories={categories ?? []} />
+            <ClientsMapDialog clients={clients ?? []} units={allClientUnits ?? []} categories={categories ?? []} />
+            <Select value={clientSort} onValueChange={(value: "name" | "category" | "state" | "city") => setClientSort(value)}>
+              <SelectTrigger className="h-8 w-40" aria-label="Ordenar clientes"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="name">Ordenar por nome</SelectItem>
+                <SelectItem value="category">Ordenar por categoria</SelectItem>
+                <SelectItem value="state">Ordenar por UF</SelectItem>
+                <SelectItem value="city">Ordenar por cidade</SelectItem>
+              </SelectContent>
+            </Select></div><Table>
               <TableHeader>
                  <TableRow>{["name", "legal", "category", "city", "state", "cnpj"].map(key => <TableHead key={key}>{clientFilters.header(key)}</TableHead>)}<TableHead className="w-20" /></TableRow>
               </TableHeader>

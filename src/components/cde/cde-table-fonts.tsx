@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { CardDescription, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { supabase } from "@/integrations/supabase/client";
@@ -87,8 +88,8 @@ export function CdeTableFonts({ number, handle }: { number: number; handle?: imp
           <div role="group" aria-label="Cores dos cabeçalhos e listas" className="grid w-full max-w-5xl grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-3">
             {([["headerBg", "Cabeçalhos — fundo"], ["headerText", "Cabeçalhos — texto"], ["headerBorder", "Cabeçalhos — borda"], ["cellBg", "Listas — fundo"], ["cellText", "Listas — texto"], ["cellBorder", "Listas — borda"], ["titleBg", "Títulos — fundo"], ["titleText", "Títulos — texto"], ["titleBorder", "Títulos — borda"], ["subBg", "Subtítulos — fundo"], ["subText", "Subtítulos — texto"], ["subBorder", "Subtítulos — borda"]] as [HeaderColorKind, string][]).map(([k, l]) => {
               const format = k === "cellText" ? { key: "cellFormat", context: "Listas" } as const : k === "titleText" ? { key: "titleFormat", context: "Títulos" } as const : k === "subText" ? { key: "subFormat", context: "Subtítulos" } as const : null;
-              const sizes = k === "titleText" ? { key: "titlePx" as const, label: "Fonte dos títulos", options: TITLE_SIZES, context: "Títulos" } : k === "subText" ? { key: "subPx" as const, label: "Fonte dos subtítulos", options: SUBTITLE_SIZES, context: "Subtítulos" } : null;
-              return <div key={k} className="min-w-0 space-y-2"><ColorPick kind={k} label={l} value={fonts[k]} onChange={(v) => setDraft({ ...fonts, [k]: v })} />{sizes && <><Label>{sizes.label}</Label><Select value={String(fonts[sizes.key])} onValueChange={(v) => setDraft({ ...fonts, [sizes.key]: Number(v) })}><SelectTrigger className="h-9" aria-label={sizes.label}><SelectValue /></SelectTrigger><SelectContent>{sizes.options.map((n) => <SelectItem key={n} value={String(n)}>{n} px</SelectItem>)}</SelectContent></Select></>}{format && <FontFormatControl context={format.context} defaultWeight={k === "titleText" ? "600" : "400"} value={fonts[format.key] ?? {}} onChange={value => setDraft({ ...fonts, [format.key]: value })} />}</div>;
+              const sizes = k === "cellText" ? { key: "cellPx" as const, label: "Fonte das listas", options: TABLE_FILTER_SIZES, context: "Listas" } : k === "titleText" ? { key: "titlePx" as const, label: "Fonte dos títulos", options: TITLE_SIZES, context: "Títulos" } : k === "subText" ? { key: "subPx" as const, label: "Fonte dos subtítulos", options: SUBTITLE_SIZES, context: "Subtítulos" } : null;
+              return <div key={k} className="min-w-0 space-y-2"><ColorPick kind={k} label={l} value={fonts[k]} onChange={(v) => setDraft({ ...fonts, [k]: v })} />{sizes && <><Label>{sizes.label}</Label><Select value={String(fonts[sizes.key] ?? 12)} onValueChange={(v) => setDraft({ ...fonts, [sizes.key]: Number(v) })}><SelectTrigger className="h-9" aria-label={sizes.label}><SelectValue /></SelectTrigger><SelectContent>{sizes.options.map((n) => <SelectItem key={n} value={String(n)}>{n} px</SelectItem>)}</SelectContent></Select></>}{format && <FontFormatControl context={format.context} defaultWeight={k === "titleText" ? "600" : "400"} value={fonts[format.key] ?? {}} onChange={value => setDraft({ ...fonts, [format.key]: value })} />}</div>;
             })}
           </div>
           <div className="space-y-1">
@@ -101,6 +102,16 @@ export function CdeTableFonts({ number, handle }: { number: number; handle?: imp
             <Label>Prévia</Label>
             <div aria-label="Prévia das fontes" className="max-w-2xl rounded-md border border-border p-3" style={tableAlignVars(fonts) as React.CSSProperties}>
               <div className="mb-3 space-y-1"><CardTitle style={{ fontSize: `${fonts.titlePx}px` }}>Minhas Solicitações</CardTitle><CardDescription style={{ fontSize: `${fonts.subPx}px` }}>Acompanhe o status de suas solicitações de Materiais, Serviços, Viagens, Reembolsos e Contratação de RH.</CardDescription></div>
+              <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="min-w-0 space-y-2">
+                  <Label htmlFor="cde-preview-request-type">Tipo de solicitação</Label>
+                  <Input id="cde-preview-request-type" value="Reembolso de Despesas" readOnly />
+                </div>
+                <div className="min-w-0 space-y-2">
+                  <Label htmlFor="cde-preview-delivery-date">Data de entrega</Label>
+                  <Input id="cde-preview-delivery-date" value="27/11/2026" readOnly />
+                </div>
+              </div>
               <div className="mb-2 flex items-center justify-end gap-2" style={{ fontSize: fonts.filterPx, ...fontFormatCss(fonts.filterFormat) }}>
                 <span className="text-muted-foreground">Contém</span>
                 <span className="text-muted-foreground">Buscar</span>
