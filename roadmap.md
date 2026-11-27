@@ -905,3 +905,5 @@
 
 - [x] Central de Pendências: padronizar o logo com as demais páginas.
 - [x] Menu flutuante mobile: até cinco menus visíveis; havendo sexto, quinta posição com reticências/seta e quatro menus por grupo; Spend avançou, abriu Histórico e retornou, Supply manteve cinco opções, desktop inalterado; cinco testes passaram.
+- [x] iPhone: contador no ícone com o total pessoal, autorização explícita no menu e limpeza ao zerar/sair; cinco testes passaram, 72 pendências reais conferidas com API do dispositivo simulada; ativação física no iPhone requer publicação e autorização, sem push em segundo plano nesta etapa.
+- [x] Todos os menus mobile: seleção com fundo cinza-claro no padrão WhatsApp e submenus identificados; nove apps conferidos no celular, desktop preservado.

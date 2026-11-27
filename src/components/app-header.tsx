@@ -26,6 +26,7 @@ import { MENU_ITEMS, menuAppKey, menuOrderForContext, parseMenuConfig, useMainMe
 import { useAppDisplayName, useAppTile, APP_TILE_DEFAULT, homeHeaderVars } from "@/components/cde/app-order-config";
 import { accessManagementOptions } from "@/components/access/access-context";
 import { canOpenAccessManagement } from "@/lib/access-management";
+import { PendingAppBadgeMenuItem } from "@/components/pending-app-badge";
 
 export function AppHeader({ logo, children, supplyManual = false, manualApp, menuActions }: { logo: ReactNode; children?: ReactNode; supplyManual?: boolean; manualApp?: string; menuActions?: MenuAction[] }) {
   const tile = useAppTile().data ?? APP_TILE_DEFAULT;
@@ -126,7 +127,7 @@ function MainMenuEntries({ onSignOut, onChangePassword, supplyManual, homePage, 
     if (id === "theme") return <ThemeEntry key={id} className={itemClass} label={label} />;
     if (id === "favorites") return <Button key={id} cdeIgnore variant="ghost" className={itemClass} onClick={() => window.dispatchEvent(new Event("open-mobile-favorites"))}><Icon className="h-5 w-5" />{label}</Button>;
     return <Button key={id} cdeIgnore variant="ghost" className={`${itemClass}`} onClick={id === "logout" ? onSignOut : id === "password" ? onChangePassword : () => window.history.back()}><Icon className="h-5 w-5" />{label}</Button>;
-  })}</>;
+  })}<PendingAppBadgeMenuItem className={itemClass} /></>;
 }
 
 function CountBadge({ count, className = "" }: { count: number; className?: string }) {

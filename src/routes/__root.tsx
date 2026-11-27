@@ -22,6 +22,7 @@ import { MobileFavorites } from "@/components/mobile-favorites";
 import { AppAppearanceApplier } from "@/components/cde/app-appearance";
 import { appShortcutHead } from "@/lib/app-shortcuts";
 import { getErpIcon } from "@/lib/erp-icon.functions";
+import { PendingAppBadgeSync } from "@/components/pending-app-badge";
 
 function NotFoundComponent() {
   return (
@@ -170,6 +171,7 @@ function RootComponent() {
       <CdeTableFontsApplier />
       <AppAppearanceApplier />
       <MobileFavorites />
+      <PendingAppBadgeSync />
     </QueryClientProvider>
   );
 }

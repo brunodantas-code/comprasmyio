@@ -755,6 +755,20 @@ input[data-custom-calendar="true"]::-webkit-calendar-picker-indicator {
 }
 @keyframes mobile-menu-enter { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: translateX(0); } }
 @media (prefers-reduced-motion: reduce) { .mobile-menu-paged > :not(.mobile-menu-more) { animation: none; } }
+/* Mobile navigation has its own neutral selected state; desktop keeps the saved CDE look. */
+@layer base {
+  @media (max-width: 1023px) {
+    html body .app-navigation > div :is(button, a):is([aria-current="page"], [data-state="active"], [aria-selected="true"]),
+    html body [data-app-navigation-submenu] [aria-current="page"] {
+      background: var(--muted) !important;
+      color: var(--foreground) !important;
+    }
+    html body .app-navigation > div :is(button, a):is([aria-current="page"], [data-state="active"], [aria-selected="true"]) svg,
+    html body [data-app-navigation-submenu] [aria-current="page"] svg {
+      color: var(--foreground) !important;
+    }
+  }
+}
 @media (min-width: 1024px) {
   .app-navigation.menu-desktop-top_tabs { left: 0 !important; right: 0 !important; bottom: auto !important; top: var(--app-header-bottom, 4.5rem) !important; }
   .app-navigation.menu-desktop-top_tabs > div { max-width: none !important; border-radius: 0 !important; box-shadow: none !important; }

@@ -123,11 +123,11 @@ export function AppNavSubmenu({
           {item}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent side={layout.drop} align="center" sideOffset={10} className={cn("max-h-[70vh] w-64 overflow-y-auto rounded-lg p-1.5 shadow-xl", contentClassName)}>
+      <DropdownMenuContent data-app-navigation-submenu side={layout.drop} align="center" sideOffset={10} className={cn("max-h-[70vh] w-64 overflow-y-auto rounded-lg p-1.5 shadow-xl", contentClassName)}>
         <DropdownMenuLabel>{label}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {items.map(({ value, label: subLabel, icon: SubIcon }) => (
-          <DropdownMenuItem key={value} className="min-h-11 rounded-md" onSelect={() => onSelectSub(value)}>
+          <DropdownMenuItem key={value} aria-current={active && isSubActive(value) ? "page" : undefined} className="min-h-11 rounded-md" onSelect={() => onSelectSub(value)}>
             <CdeMenuIcon app={app ?? ""} group={`Submenus:${iconScope ?? label}`} identity={value} {...(SubIcon ? { fallback: SubIcon } : {})} className="h-4 w-4" />
             <span className="flex-1">{menuName(subLabel)}</span>
             {active && isSubActive(value) ? <Check className="h-4 w-4 text-primary" /> : null}
