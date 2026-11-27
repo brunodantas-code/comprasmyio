@@ -90,16 +90,28 @@ function iconsWithoutText(node: React.ReactNode): React.ReactNode {
 
 function formatIconContent(node: React.ReactNode, format: 'pdf' | 'excel'): React.ReactNode {
   let replaced = false;
+  let hasSpinner = false;
+  function visibleFormatText(children: React.ReactNode): string {
+    return React.Children.toArray(children).map(child => {
+      if (typeof child === 'string' || typeof child === 'number') return String(child);
+      if (!React.isValidElement<{ children?: React.ReactNode; className?: string; hidden?: boolean }>(child) || child.props.hidden || /(?:^|\s)(?:sr-only|hidden)(?:\s|$)/.test(child.props.className ?? '')) return '';
+      return visibleFormatText(child.props.children);
+    }).join(' ');
+  }
   const visit = (children: React.ReactNode): React.ReactNode => React.Children.map(children, child => {
     if (!React.isValidElement<{ children?: React.ReactNode; className?: string }>(child)) return child;
     if (child.props.children !== undefined) return React.cloneElement(child, {}, visit(child.props.children));
+    if (child.props.className?.includes('animate-spin')) hasSpinner = true;
     if (!replaced && typeof child.type !== 'string' && !child.props.className?.includes('animate-spin')) {
       replaced = true;
       return <FileFormatIcon format={format} className={child.props.className ?? 'h-4 w-4'} />;
     }
     return child;
   });
-  return visit(node);
+  const icons = visit(node);
+  const label = format === 'pdf' ? 'PDF' : 'Excel';
+  const hasLabel = (format === 'pdf' ? /\bPDF\b/i : /\bExcel\b/i).test(visibleFormatText(node));
+  return <>{!replaced && !hasSpinner && <FileFormatIcon format={format} className="h-4 w-4" />}{icons}{!hasLabel && <span>{label}</span>}</>;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -133,7 +145,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const IntuitiveIcon = ICONS[look.icon || (group === "pencil" ? "Pencil" : group === "sort" ? "ArrowUpDown" : group === "trash" ? "Trash2" : "Save")];
     const baseContent = intuitiveAction ? IntuitiveIcon ? <IntuitiveIcon className={look.iconClass || "h-4 w-4"} /> : iconsWithoutText(renderedContent) : renderedContent;
     const exportFormat = /\bpdf\b/i.test(accessibleLabel) ? 'pdf' : /\b(excel|xlsx)\b/i.test(accessibleLabel) ? 'excel' : undefined;
-    const content = group === 'export' && exportFormat && !asChild ? formatIconContent(baseContent, exportFormat) : baseContent;
+    const labelledExport = group === 'export' && exportFormat && !asChild;
+    const content = labelledExport ? formatIconContent(baseContent, exportFormat) : baseContent;
     // Icon-only buttons keep the icon's own box: a CDE model's padding must never squeeze it.
     const iconOnly = !buttonText(content).trim();
     const cdeVariant = look.variant ? look.variant as VariantProps<typeof buttonVariants>["variant"] : resolvedVariant;
@@ -141,7 +154,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     // A caller that sets its own width (list rows, full-width controls) keeps that geometry.
     const hasOwnWidth = /(?:^|\s)(?:[^\s:]+:)*w-(?:full|fit|max|min|\[|[\d.])/.test(className ?? "");
     return (
-      <Comp data-cde-id={cdeId} data-cde-action={group} data-action-kind={group ? specific ? "specific" : "standard" : undefined} className={cn(cdeNative && !binding ? className : buttonVariants({ variant: "data-cde-number" in props && !binding ? null : cdeVariant, size: cdeSize, className: binding ? undefined : className }), look.className, !asChild && props.role !== "combobox" && (binding ? binding.label : visibleText) && group && !hasOwnWidth && !(sendStandard && !look.label?.trim()) && ["!w-auto shrink-0", className?.includes("whitespace-normal") ? "!min-w-0" : "!min-w-max"], iconOnly && "[&_svg]:!max-w-none")} style={binding ? look.style : style ?? (look.variant || look.className ? look.style : undefined)} ref={ref} {...((intuitiveAction || binding && !binding.label || sendStandard && !look.label?.trim()) && visibleText ? { "aria-label": accessibleLabel, title: accessibleLabel } : {})} {...props}>{cdeNative && !binding && !intuitiveAction ? children : content}</Comp>
+      <Comp data-cde-id={cdeId} data-cde-action={group} data-action-kind={group ? specific ? "specific" : "standard" : undefined} className={cn(cdeNative && !binding ? className : buttonVariants({ variant: "data-cde-number" in props && !binding ? null : cdeVariant, size: cdeSize, className: binding ? undefined : className }), look.className, !asChild && props.role !== "combobox" && (binding ? binding.label : visibleText) && group && !hasOwnWidth && !(sendStandard && !look.label?.trim()) && ["!w-auto shrink-0", className?.includes("whitespace-normal") ? "!min-w-0" : "!min-w-max"], iconOnly && "[&_svg]:!max-w-none", labelledExport && "erp-export-button")} style={binding ? look.style : style ?? (look.variant || look.className ? look.style : undefined)} ref={ref} {...((intuitiveAction || binding && !binding.label || sendStandard && !look.label?.trim()) && visibleText ? { "aria-label": accessibleLabel, title: accessibleLabel } : {})} {...props}>{cdeNative && !binding && !intuitiveAction && !labelledExport ? children : content}</Comp>
     );
   },
 );

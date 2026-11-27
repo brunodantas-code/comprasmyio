@@ -71,6 +71,11 @@ input[data-search-field="true"] {
 :where(main, .erp-screen-block) :where(div, header).flex:has(> h1, > h2, > h3):has(> .erp-list-toolbar) { flex-wrap: wrap !important; }
 :where(main, .erp-screen-block) :where(div, header).flex:has(> h1, > h2, > h3) > .erp-list-toolbar { flex-basis: 100%; }
 .erp-list-toolbar > button[aria-expanded] { margin-inline-start: 0 !important; }
+/* File identity stays visible; icon-only model widths cannot squeeze export labels. */
+@layer base {
+  html body button.erp-export-button { width: auto !important; min-width: max-content !important; max-width: none !important; flex-shrink: 0; gap: 0.5rem; padding-inline: 0.5rem !important; }
+  .erp-export-button > span { white-space: nowrap; flex-shrink: 0; }
+}
 
 /* Date controls with an explicit calendar action must not also show the browser icon. */
 input[data-custom-calendar="true"] { padding-right: 2.75rem !important; }

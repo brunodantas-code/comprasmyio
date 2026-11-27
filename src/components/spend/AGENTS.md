@@ -38,3 +38,5 @@
 - Camera and document pickers are separate entry points into the same capture flow; PDF originals and image cleanup retain existing private storage and evidence validation.
 
 - Desktop receipt entry opens the document picker; receipt pickers include explicit extensions plus MIME types, while the mobile camera remains image-only.
+
+- Statement description edits use line-locked Finance RPC log revisions resolved separately from bank originals, preserving evidence, classifications, concurrent drafts and immutable approvals.

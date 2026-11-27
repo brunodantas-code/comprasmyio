@@ -27,4 +27,4 @@
 - Compact-field-layout packs shallow field rows and marks adjacent toolbar rows for action-first geometry; exclude multiline/content sections so compact inputs never spread across empty columns or shrink text boxes.
 - Tables add missing PDF/Excel icons to their scoped list toolbar; export rendered authorized rows in current order, omitting action cells/detail rows, and preserve existing specialized exporters.
 - Non-table filtered lists export authorized filter columns/rows through FilteredListExports; never export unrelated raw object properties or replace specialized report controls.
-- Automatic exports reserve their toolbar slot synchronously to avoid duplicate PDF/Excel controls while data loads; shared Button preserves CDE appearance and renders format-specific file symbols.
+- Automatic exports reserve their toolbar slot synchronously to avoid duplicate PDF/Excel controls while data loads; shared Button preserves CDE appearance and renders format-specific symbols plus visible format labels with content-sized widths.

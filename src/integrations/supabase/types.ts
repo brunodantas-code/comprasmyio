@@ -14039,6 +14039,15 @@ export type Database = {
         Returns: Json
       }
       spend_delete_receipt: { Args: { _receipt_id: string }; Returns: Json }
+      spend_edit_line_details: {
+        Args: {
+          _description: string
+          _expected_revision?: string
+          _line_id: string
+          _observation: string
+        }
+        Returns: Json
+      }
       spend_installment_parts: { Args: { _t: string }; Returns: number[] }
       spend_pending_adjustments: { Args: { _all?: boolean }; Returns: Json }
       spend_pending_advances: { Args: { _all?: boolean }; Returns: Json }

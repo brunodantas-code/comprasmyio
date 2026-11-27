@@ -3,11 +3,12 @@ import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database, Json } from "@/integrations/supabase/types";
 import type { CategorySetting } from "./rules";
+import { lineDetails } from './line-details';
 type Row<T extends keyof Database["public"]["Tables"]> = Database["public"]["Tables"][T]["Row"];
 export type SpendCard = Row<"spend_cards">;
 export type Receipt = Row<"spend_receipts"> & { reimbursement_paid?: boolean; reimbursement_payment_date?: string | null };
 export type Statement = Row<"spend_statements">;
-export type Line = Row<"spend_lines">;
+export type Line = Row<"spend_lines"> & { display_description?: string; additional_observation?: string; description_revision?: string | null };
 export type Lookup = { id: string; name: string };
 export type SupplierAllocation = Row<"spend_supplier_allocations">;
 export type SpendData = { role: string; user_id: string; cards: SpendCard[]; receipts: Receipt[]; statements: Statement[]; lines: Line[]; notices: Row<"spend_notices">[]; logs: Row<"spend_logs">[]; users: Lookup[]; projects: Lookup[]; accounts: Lookup[]; centers: Lookup[]; settings: Record<string, CategorySetting>; allocations: SupplierAllocation[]; delegations: Delegation[]; advances: SpendAdvance[] };
@@ -26,7 +27,7 @@ export const spendOptions = queryOptions({ queryKey: ["spend"], queryFn: async (
   if (payments.error) throw payments.error;
   const paymentByReceipt = new Map(payments.data.map(payment => [payment.receipt_id, payment]));
   const base = r.data as unknown as SpendData;
-  return { ...base, receipts: base.receipts.map(receipt => {
+  return { ...base, lines: base.lines.map(line => ({ ...line, ...lineDetails(line, base.logs) })), receipts: base.receipts.map(receipt => {
     const payment = paymentByReceipt.get(receipt.id);
     return payment ? { ...receipt, reimbursement_paid: payment.paid, reimbursement_payment_date: payment.payment_date } : receipt;
   }), delegations: parsed.delegations as unknown as Delegation[], advances: parsed.advances as unknown as SpendAdvance[], allocations: allocations.data ?? [] };

@@ -2269,6 +2269,13 @@
       "when": 1795797227414,
       "tag": "0323_expose_reimbursement_payment_status",
       "breakpoints": true
+    },
+    {
+      "idx": 324,
+      "version": "7",
+      "when": 1795811729860,
+      "tag": "0324_spend_edit_line_details",
+      "breakpoints": true
     }
   ]
 }
