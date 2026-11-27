@@ -824,9 +824,6 @@
 - [x] Site Survey: corrigir o cabeçalho indicado para o padrão CDE.
 
 - [x] Padronizar ferramentas das listas à esquerda e ações intuitivas sem texto; filtros de cabeçalho migrados para barras, buscas/ordenação preservadas e conferência realizada.
-- [ ] CDE item 12: lápis ao final de cada linha de nome de coluna, texto vira campo editável na linha (nome salvo por identidade, sem mudar ordem).
-- [ ] CDE: tamanho e formatação da fonte dos títulos e subtítulos dos apps, aplicados a todos os títulos e subtítulos.
-- [ ] CDE item 1: subitens Padrões para edição de cores e Customizações do Projects fora do padrão, com botão de arraste que os demais subitens não têm.
 - [x] CDE item 12: lápis ao final de cada linha de nome de coluna; texto vira campo editável na linha, nome salvo por identidade sem mudar ordem. Seis lápis e editor inline conferidos com sessão; quatro testes passaram.
 - [x] CDE: tamanho e formatação da fonte dos títulos e subtítulos dos apps; seleção aplicada a todos os títulos e subtítulos. Prévia 16px/600 e 14px conferida; "Minhas Solicitações" no painel agora 16px em negrito contra subtítulo 14px; onze testes passaram.
 - [x] CDE item 1: subitens "Padrões para edição de cores" e "Customizações do Projects" sem botão de arraste e no padrão de seção dos demais. Conferidos com sessão: nenhuma alça e ambos em seção padrão.
