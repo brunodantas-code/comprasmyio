@@ -974,6 +974,9 @@ input[data-custom-calendar="true"]::-webkit-calendar-picker-indicator {
 .cde-category-list :is(.cde-section, .cde-shortcut-sections) + :is(.cde-section, .cde-shortcut-sections) { border-top: 1px solid var(--cde-sub-border, var(--border)); }
 .cde-category-list .cde-subcategory-list { padding: 0; }
 .cde-category-list .cde-subcategory-list > div + div { border-top: 1px solid var(--cde-sub-border, var(--border)); }
+.cde-category-list .cde-section + .cde-subcategory-list,
+.cde-category-list .cde-category-sections > div > .contents + .cde-section,
+.cde-category-list .cde-category-sections > div > .hidden + .cde-section { border-top: 1px solid var(--cde-sub-border, var(--border)); }
 
 /* Monochrome branding only: attachment and application-icon pixels stay intact. */
 :root[data-app-appearance="grayscale"] [data-myio-logo-tone="dark"] { filter: brightness(0); }
