@@ -55,6 +55,7 @@ import { spendDescription } from "./text-case";
 import { SpendTextCaseToggle } from "./text-case-toggle";
 import { canEditSpendReceipt } from "./receipt-edit";
 import { receiptCardsFor, receiptDisplayCardsFor } from "./delegation";
+import { selectedSpendCard } from './card-selection';
 import { receiptCategoryOverride } from "./category-check";
 import { DelegationDialog } from "./delegation-dialog";
 import { statementTotal } from "./statement-total";
@@ -138,7 +139,7 @@ export function SpendWorkspace() {
   const {data}=useSuspenseQuery(spendOptions); const qc=useQueryClient(); const ml=useAppMenuLayout('Spend'); const orders=useMenuOrders().data; const menuNames=useMenuNames().data;
   const categoryAdmin = useQuery({ queryKey: ["spend-category-admin", data.user_id], queryFn: async () => { const result = await supabase.from("erp_admins").select("user_id").eq("user_id", data.user_id).maybeSingle(); if (result.error) throw result.error; return Boolean(result.data); } }).data === true;
   const [sentenceCase,setSentenceCase]=useTextCaseChoice(`spend:${data.user_id}`);
-  const finance=canClassifySpend(data.role); const [tab,setTab]=useState(finance?'reconcile':'receipts'); const [cardId,setCardId]=useState(''); const [period,setPeriod]=useState(new Date().toLocaleDateString('en-CA').slice(0,7)); const [lineId,setLineId]=useState(''); const [selected,setSelected]=useState<Set<string>>(new Set()); const [busy,setBusy]=useState(false); const [capture,setCapture]=useState<{line?:Line;receipt?:Receipt;file?:File;manual?:boolean}|null>(null); const cameraInput=useRef<HTMLInputElement>(null); const documentInput=useRef<HTMLInputElement>(null); const [importing,setImporting]=useState(false); const [notice,setNotice]=useState<string|null>(null); const [message,setMessage]=useState('');
+  const finance=canClassifySpend(data.role); const [tab,setTab]=useState(finance?'reconcile':'receipts'); const [cardId,setCardId]=useState<string | undefined>(undefined); const [period,setPeriod]=useState(new Date().toLocaleDateString('en-CA').slice(0,7)); const [lineId,setLineId]=useState(''); const [selected,setSelected]=useState<Set<string>>(new Set()); const [busy,setBusy]=useState(false); const [capture,setCapture]=useState<{line?:Line;receipt?:Receipt;file?:File;manual?:boolean}|null>(null); const cameraInput=useRef<HTMLInputElement>(null); const documentInput=useRef<HTMLInputElement>(null); const [importing,setImporting]=useState(false); const [notice,setNotice]=useState<string|null>(null); const [message,setMessage]=useState('');
   const receiptToolbarRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const toolbar = receiptToolbarRef.current;
@@ -211,7 +212,7 @@ export function SpendWorkspace() {
   }, [classificationFull]);
   const [competence,setCompetence]=useState('statement');
   const [editingDue,setEditingDue]=useState(false);
-  const myCards=receiptCardsFor(data.user_id,data.cards,data.delegations,new Date().toLocaleDateString('sv-SE')); const ownCard=myCards.find(c=>c.holder_id===data.user_id); const receiptCardChoices=finance?receiptDisplayCardsFor(data.user_id,data.cards):myCards; const card=tab==='receipts'?(receiptCardChoices.find(c=>c.id===cardId)??ownCard??receiptCardChoices[0]):data.cards.find(c=>c.id===cardId)??data.cards[0]; const hasAdvanceOnly=!card&&data.advances.some(a=>a.holder_id===data.user_id&&a.status==='open'); const canSubmitWithoutCard=!card&&tab==='receipts'; const statement=data.statements.find(s=>s.card_id===card?.id && statementMonth(s)===period);
+  const myCards=receiptCardsFor(data.user_id,data.cards,data.delegations,new Date().toLocaleDateString('sv-SE')); const ownCard=myCards.find(c=>c.holder_id===data.user_id); const receiptCardChoices=finance?receiptDisplayCardsFor(data.user_id,data.cards):myCards; const card=tab==='receipts'?selectedSpendCard(receiptCardChoices,cardId,ownCard):selectedSpendCard(data.cards,cardId); const hasAdvanceOnly=!card&&data.advances.some(a=>a.holder_id===data.user_id&&a.status==='open'); const canSubmitWithoutCard=!card&&tab==='receipts'; const statement=data.statements.find(s=>s.card_id===card?.id && statementMonth(s)===period);
   const cardStatements=data.statements.filter(s=>s.card_id===card?.id);
   const year=Number(period.slice(0,4));
   const dueMonth=monthOf(period), dueYear=yearOf(period);

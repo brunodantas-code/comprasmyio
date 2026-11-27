@@ -42,3 +42,4 @@
 - Statement description edits use line-locked Finance RPC log revisions resolved separately from bank originals, preserving evidence, classifications, concurrent drafts and immutable approvals.
 
 - Spend classification shares synchronized code/name selectors for one canonical account ID; filters and sorting split presentation labels, and fullscreen keeps editors mounted to preserve drafts.
+- Spend card selection distinguishes initial undefined from explicit empty string so clearing never reselects a default card in reconciliation or receipts.
