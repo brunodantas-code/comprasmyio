@@ -1,3 +1,4 @@
+- [x] Boxes de Mensagem/Observações restaurados pelo Textarea compartilhado; largura por conteúdo restrita a campos de linha única/seletores. Code autenticado conferido sem salvar conteúdo, dois testes passaram; campos com linha verde preservados. Falta publicar.
 - [x] Spend: Anexar Comprovante Fiscal preservado; botão principal desktop/clipe aceitam .pdf e imagens. PDF selecionado na conta autenticada abriu a forma de pagamento, sem gravar despesa; três testes passaram. Falta publicar.
 - [x] Spend Categorias: 12 alças de arraste, ordem alterada e disquete habilitado sem salvar o teste; ícones, vínculos e identidades preservados.
 - [x] Code anexos: rótulo externo duplicado removido; uma única frase “Prints e arquivos...” conferida no ticket.

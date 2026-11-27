@@ -9,6 +9,7 @@ export function useFieldContentWidth<T extends HTMLElement>(ref: RefObject<T | n
   useLayoutEffect(() => {
     const field = ref.current;
     if (!field) return;
+    if (field instanceof HTMLTextAreaElement) return;
     if (field instanceof HTMLInputElement && ['hidden', 'file', 'checkbox', 'radio', 'range', 'color'].includes(field.type)) return;
     const input = inputRef?.current ?? field;
     const canvas = document.createElement('canvas');
@@ -17,7 +18,7 @@ export function useFieldContentWidth<T extends HTMLElement>(ref: RefObject<T | n
     const update = () => {
       const font = getComputedStyle(input);
       context.font = `${font.fontStyle} ${font.fontWeight} ${font.fontSize} ${font.fontFamily}`;
-      const native = field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement;
+      const native = field instanceof HTMLInputElement;
       const values = native ? [field.value || field.placeholder || (field instanceof HTMLInputElement && field.type === 'number' ? '0' : '          ')] : texts;
       const valueTexts = field instanceof HTMLInputElement && field.type === 'password' ? values.map(text => '•'.repeat(text.length)) : values;
       const own = getComputedStyle(field);
