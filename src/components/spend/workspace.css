@@ -281,6 +281,11 @@ header > div.grid:has(> .erp-list-toolbar) > .erp-list-toolbar { grid-column: 1 
   .spend-classification-primary { grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr) minmax(0, 1fr) !important; }
   .spend-classification-project { grid-column: 3; }
 }
+/* The expanded screen has room for code, account name, cost center and project on one line. */
+@media (min-width: 640px) {
+  .spend-classification-full .spend-classification-primary { grid-template-columns: minmax(0, 0.6fr) minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr) !important; }
+  .spend-classification-full .spend-classification-project { grid-column: auto; }
+}
 .spend-classification-full > header { flex-shrink: 0; }
 .spend-classification-full .spend-invoice-actions { flex-wrap: wrap; }
 @media (min-width: 768px) {
