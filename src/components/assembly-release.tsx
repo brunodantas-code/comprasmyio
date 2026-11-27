@@ -618,7 +618,7 @@ export function ReleaseAssembledDialog({ userId }: { userId: string }) {
           }}
         >
           <div className="space-y-2">
-            <div className="text-sm">{deviceFilters.header("device")}</div>
+            <div className="erp-list-toolbar text-sm">{deviceFilters.menu}</div>
             {deviceFilters.summary}
             <div className="max-h-64 space-y-1 overflow-y-auto rounded border p-2">
               {!filtered.length ? (

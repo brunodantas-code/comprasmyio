@@ -130,7 +130,7 @@ export function AccessProfilesTab() {
         <CardDescription>Adicione ou remova acessos do perfil atual de cada usuário.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">{userFilters.header("name")}</div>
+        <div className="erp-list-toolbar flex flex-wrap gap-4 text-sm text-muted-foreground">{userFilters.menu}</div>
         {userFilters.summary}
         <AccessStatusTabs value={status} onChange={setStatus} counts={statusCounts} />
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> : null}

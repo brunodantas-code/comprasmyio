@@ -11,7 +11,7 @@ export function CdeFilterStandard() {
   const change = (key: string, value: ColumnFilterValue | undefined) => setFilters(current => ({ ...current, [key]: value }));
   return <section className="space-y-3 border-b border-border px-4 py-4" aria-label="Padrão de filtros múltiplos">
     <div className="flex flex-wrap items-center justify-between gap-2"><h3 className="text-sm font-medium">Filtros múltiplos com identificação</h3><Badge variant="outline">Padrão aplicado em todos os apps</Badge></div>
-    <div className="flex justify-end"><TableFilterMenu triggerLabel="Filtros" rows={rows} columns={columns} filters={filters} onChange={change} clear={() => setFilters({})} /></div>
+    <div className="flex justify-end erp-list-toolbar"><TableFilterMenu triggerLabel="Filtros" rows={rows} columns={columns} filters={filters} onChange={change} clear={() => setFilters({})} /></div>
     <TableFilterSummary columns={columns} filters={filters} onChange={change} />
   </section>;
 }

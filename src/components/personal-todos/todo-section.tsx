@@ -51,9 +51,9 @@ export function TodoSection({ initialTask }: { initialTask?: string } = {}) {
   const task = data?.tasks.find(t => t.id === selected) ?? null;
   const tools = <>{filters.menu}<DropdownMenu><DropdownMenuTrigger asChild><Button variant="ghost" size="compactIcon" className="!text-foreground !bg-transparent !border-0" aria-label="Ordenar tarefas" title="Ordenar tarefas" disabled={ordering}><ArrowUpDown /></Button></DropdownMenuTrigger><DropdownMenuContent align="end"><DropdownMenuRadioGroup value={sortMode} onValueChange={value => { if (isTodoSortMode(value)) void saveOrder(value); }}>{Object.entries(TODO_SORT_MODES).map(([value, label]) => <DropdownMenuRadioItem key={value} value={value}>{label}</DropdownMenuRadioItem>)}</DropdownMenuRadioGroup></DropdownMenuContent></DropdownMenu>{me && <TodoLabelsManager userId={me.id} />}<CdeButton group="plus" screen="components/personal-todos/todo-section.tsx" aria-label="Novo To Do" title="Novo To Do" onClick={() => setSelected("new")} /></>;
   return <section className="overflow-hidden rounded-md border border-border bg-card" aria-label="To Dos">
-    <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border-b border-border p-4 sm:flex sm:justify-between">
+    <header className="flex flex-wrap items-center gap-2 border-b border-border p-4 erp-list-tools-header">
       <h2 className="flex min-w-0 items-center gap-2 text-xl font-bold"><ListTodo className="size-5 shrink-0" /><span className="min-w-0 whitespace-nowrap">To Dos</span></h2>
-      <div className="flex shrink-0 items-center justify-end gap-2" aria-label="Ações dos To Dos">{tools}</div>
+      <div className="flex shrink-0 items-center gap-2 erp-list-toolbar" aria-label="Ações dos To Dos">{tools}</div>
     </header>
     {filters.summary}
     <div>

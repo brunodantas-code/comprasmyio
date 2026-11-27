@@ -242,14 +242,14 @@ export function UsersAdmin() {
       <CardHeader>
         <div className="flex items-center justify-between gap-3">
           <CardTitle>Usuários cadastrados</CardTitle>
-          {!isLoading ? userFilters.menu : null}
         </div>
         <CardDescription>Defina o cargo principal da cadeia, cargos adicionais e o perfil de acesso.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
         <>
-          <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-2 erp-list-toolbar">
+            {userFilters.menu}
             <AccessStatusTabs value={status} onChange={setStatus} counts={statusCounts} />
             <Select value={sortBy} onValueChange={(value) => setSortBy(value as "name" | "profile")}>
               <SelectTrigger aria-label="Ordenação dos usuários" className="h-8 w-auto min-w-0 text-[length:var(--filter-fs)]"><SelectValue /></SelectTrigger>

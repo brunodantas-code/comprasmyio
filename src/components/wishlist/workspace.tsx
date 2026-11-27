@@ -42,10 +42,10 @@ export function WishlistWorkspace({ userId }: { userId: string }) {
         <CardDescription>{shown.length} desejos</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="mb-3 flex flex-wrap items-center gap-2 text-[length:var(--filter-fs)]">
-          <span className="inline-flex shrink-0 items-center gap-1 text-[length:var(--filter-fs)] text-muted-foreground">{filters.menu}Filtros</span>
+        <div className="mb-3 flex flex-wrap items-center gap-2 text-[length:var(--filter-fs)] erp-list-toolbar">
+          {filters.menu}
           <TableSortMenu columns={[{ key: "title", label: "Desejo" }]} value={sorting} onChange={setSorting} />
-          <div className="ml-auto">
+          <div>
           <div className="erp-search-row grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2"><Search className="size-4 shrink-0 text-muted-foreground" /><Input aria-label="Buscar desejos" title="Buscar desejo, idealizador ou situação" placeholder="Buscar desejo" value={search} onChange={event => setSearch(event.target.value)} className="h-8 text-[length:var(--filter-fs)]" /><Button variant="ghost" size="compactIcon" aria-label="Limpar busca" title="Limpar busca" disabled={!search} onClick={() => setSearch("")}><X /></Button></div>
           </div>
         </div>

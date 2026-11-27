@@ -36,7 +36,7 @@ function SearchBox({ value, onChange, placeholder }: { value: string; onChange: 
   return <Input aria-label={placeholder} placeholder={placeholder} value={value} onChange={(e) => onChange(e.target.value)} className="h-8 w-56 max-w-full text-[length:var(--filter-fs)] md:text-[length:var(--filter-fs)]" />;
 }
 function SectionTitle({ title, children }: { title: string; children?: React.ReactNode }) {
-  return <div className="mb-4 flex flex-wrap items-end justify-between gap-3"><h1 className="text-xl font-semibold">{title}</h1><div className="flex flex-wrap items-end justify-end gap-2">{children}</div></div>;
+  return <div className="mb-4 flex flex-wrap items-end gap-3 erp-list-tools-header"><h1 className="text-xl font-semibold">{title}</h1><div className="flex flex-wrap items-end gap-2 erp-list-toolbar">{children}</div></div>;
 }
 const AddButton = ({ label, onClick }: { label: string; onClick: () => void }) => <Button variant="ghost" onClick={onClick}><Plus className="h-4 w-4" />{label}</Button>;
 

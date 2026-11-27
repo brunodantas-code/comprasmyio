@@ -40,6 +40,16 @@ input[data-search-field="true"] {
 }
 .erp-search-row input[data-search-field="true"] { width: 100% !important; }
 
+/* List tools share left alignment without changing column geometry or action looks. */
+.erp-list-toolbar { justify-content: flex-start !important; margin-inline-start: 0 !important; flex-wrap: wrap; }
+.erp-list-toolbar > .ml-auto, .erp-list-toolbar > .sm\:ml-auto { margin-inline-start: 0 !important; }
+.erp-list-tools-header { flex-wrap: wrap !important; }
+.erp-list-tools-header > .erp-list-toolbar { flex-basis: 100%; }
+:where(main, .erp-screen-block) :where(div, header).flex:has(> [data-list-filter], > [data-list-sort], > input[data-search-field="true"]) { justify-content: flex-start !important; }
+:where(main, .erp-screen-block) :where(div, header).flex:has(> h1, > h2, > h3):has(> .erp-list-toolbar) { flex-wrap: wrap !important; }
+:where(main, .erp-screen-block) :where(div, header).flex:has(> h1, > h2, > h3) > .erp-list-toolbar { flex-basis: 100%; }
+.erp-list-toolbar > button[aria-expanded]:not([data-list-sort]) { margin-inline-start: auto; }
+
 /* Date controls with an explicit calendar action must not also show the browser icon. */
 input[data-custom-calendar="true"] { padding-right: 2.75rem !important; }
 input[data-custom-calendar="true"]::-webkit-calendar-picker-indicator {

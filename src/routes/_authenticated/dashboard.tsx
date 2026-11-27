@@ -3029,7 +3029,7 @@ function OrdersTable({
 
   return (
     <>
-      <div className="mb-2 flex flex-wrap items-center gap-2 py-1 text-[length:var(--filter-fs)] [&>*]:shrink-0">
+      <div className="mb-2 flex flex-wrap items-center gap-2 py-1 text-[length:var(--filter-fs)] [&>*]:shrink-0 erp-list-toolbar">
         <TableFilterMenu triggerLabel="Filtros" rows={orders} columns={colDefs.filter(c => showRequester || c.key !== "req").map(c => ({ key: c.key, label: c.label, kind: c.kind, value: c.raw as (o: typeof orders[number]) => string | number | null | undefined, display: c.list }))} filters={cf} onChange={(key, value) => setCf(prev => ({ ...prev, [key]: value }))} clear={() => setCf({})} />
         {<TableSortMenu columns={colDefs} value={columnSort} onChange={setColumnSort} />}
         {toolbarActions}
@@ -3991,8 +3991,8 @@ function ProjectsAdmin({ userId }: { userId: string }) {
       <Card>
         <CardHeader>
           <CardTitle>Projetos</CardTitle>
-          <div className="flex flex-wrap items-center gap-4 pt-2 text-sm text-muted-foreground">
-            {projectFilters.header("name")}{projectFilters.header("status")}{projectFilters.header("budget")}
+          <div className="erp-list-toolbar flex flex-wrap items-center gap-4 pt-2 text-sm text-muted-foreground">
+            {projectFilters.menu}
             <Select value={projectSort} onValueChange={setProjectSort}>
               <SelectTrigger aria-label="Ordenar projetos"><ArrowUpDown className="mr-2 h-4 w-4" /><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -4472,7 +4472,7 @@ function LogsAdmin() {
       <CardContent className="space-y-4">
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
           !logs?.length ? <p className="text-sm text-muted-foreground">Nada registrado ainda.</p> :
-          <>{logFilters.summary}<Table>
+          <>{logFilters.summary}<><div className="mb-2 flex flex-wrap items-center gap-2 erp-list-toolbar">{logFilters.menu}</div><Table>
             <TableHeader><TableRow>{["date", "action", "order", "actor", "details"].map(key => <TableHead key={key}>{logFilters.header(key)}</TableHead>)}</TableRow></TableHeader>
             <TableBody>
               {filtered.map((l) => {
@@ -4489,7 +4489,7 @@ function LogsAdmin() {
                 );
               })}
             </TableBody>
-          </Table></>
+          </Table></></>
         }
       </CardContent>
     </Card>

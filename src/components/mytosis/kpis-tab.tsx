@@ -105,7 +105,7 @@ export function KpisTab({ data, canEdit }: { data: MytosisData; canEdit: boolean
 
   return <div className="space-y-4">
     <div className="flex items-end gap-2">
-      <div className="flex flex-1 flex-wrap gap-4 text-sm text-muted-foreground">{["segment", "name", "responsible", "target"].map(key => <span key={key}>{kpiFilters.header(key)}</span>)}</div>
+      <div className="erp-list-toolbar flex flex-1 flex-wrap gap-4 text-sm text-muted-foreground">{kpiFilters.menu}</div>
       {canEdit ? <CdeButton group="plus" screen="components/mytosis/kpis-tab.tsx" title="Novo KPI" aria-label="Novo KPI" onClick={() => setDraft(emptyDraft())}></CdeButton> : null}
     </div>
 

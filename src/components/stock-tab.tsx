@@ -227,7 +227,7 @@ function MovementHistoryTable({
   const filtered = movementFilters.filtered;
 
   return (
-    <>{movementFilters.summary}<Table>
+    <>{movementFilters.summary}<><div className="mb-2 flex flex-wrap items-center gap-2 erp-list-toolbar">{movementFilters.menu}</div><Table>
       <TableHeader className="[&_tr]:border-b">
         <TableRow>{["date", "description", "type", "quantity", "reason", "responsible"].map(key => <TableHead key={key}>{movementFilters.header(key)}</TableHead>)}</TableRow>
       </TableHeader>
@@ -244,7 +244,7 @@ function MovementHistoryTable({
         ))}
         {!filtered.length && <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground">Nenhuma movimentação encontrada.</TableCell></TableRow>}
       </TableBody>
-    </Table></>
+    </Table></></>
   );
 }
 
@@ -1167,7 +1167,7 @@ function StockTableCard({
         ) : !rows.length ? (
           <p className="text-sm text-muted-foreground">Nenhum material encontrado.</p>
         ) : (
-          <>{stockFilters.summary}<Table>
+          <>{stockFilters.summary}<><div className="mb-2 flex flex-wrap items-center gap-2 erp-list-toolbar">{stockFilters.menu}</div><Table>
             <TableHeader className={columnFilters ? "[&_tr]:border-b" : undefined}>
                 <TableRow className={columnFilters ? "border-b" : undefined}>
                   <TableHead className={`${simple ? "w-[70%]" : "w-[45%]"}${columnFilters ? "" : ""}`}>{stockFilters.header("description")}</TableHead>
@@ -1291,7 +1291,7 @@ function StockTableCard({
                 );
               })}
             </TableBody>
-          </Table></>
+          </Table></></>
 
         )}
       </CardContent>
@@ -1924,7 +1924,7 @@ function TerceirosSection({ userId, canDelete }: { userId: string; canDelete?: b
           ) : !rows?.length ? (
             <p className="text-sm text-muted-foreground">Nenhum item encontrado.</p>
           ) : (
-            <>{stockFilters.summary}<Table>
+            <>{stockFilters.summary}<><div className="mb-2 flex flex-wrap items-center gap-2 erp-list-toolbar">{stockFilters.menu}</div><Table>
               <TableHeader className="[&_tr]:border-b">
                 <TableRow className="border-b">
                   <TableHead className="w-[45%]">{stockFilters.header("description")}</TableHead>
@@ -2005,7 +2005,7 @@ function TerceirosSection({ userId, canDelete }: { userId: string; canDelete?: b
                   );
                 })}
               </TableBody>
-            </Table></>
+            </Table></></>
 
           )}
         </CardContent>

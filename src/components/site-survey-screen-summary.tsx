@@ -171,7 +171,7 @@ export function SiteSurveyScreenSummary({ visitNumber, visitTemplateId, sections
           {pointFilters.summary}
           {!embedded ? <div className="border-b bg-muted/30 px-4 py-3 sm:px-6">
             <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_12rem_12rem_auto] sm:items-center">
-              <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">{pointFilters.header("search")}{pointFilters.header("type")}</div>
+              <div className="erp-list-toolbar flex flex-wrap gap-4 text-sm text-muted-foreground">{pointFilters.menu}</div>
               <Select value={sort} onValueChange={setSort}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="luc">Ordenar por LUC</SelectItem><SelectItem value="name">Ordenar por nome</SelectItem><SelectItem value="location">Ordenar por localização</SelectItem></SelectContent></Select>
               <span className="shrink-0 text-xs font-semibold text-muted-foreground">{completedCount}/{points.length} concluídos</span>
               <label className="flex w-fit cursor-pointer items-center gap-2 text-sm sm:col-span-4"><Checkbox aria-label="Somente sem foto de fachada" checked={missingFacadeOnly} onCheckedChange={(checked) => setMissingFacadeOnly(checked === true)} />Somente sem foto de fachada</label>

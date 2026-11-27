@@ -85,10 +85,11 @@ export function ErpAppAccessAdmin({ appKey }: { appKey?: string }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2"><ShieldCheck className="h-5 w-5" />{appKey ? `Acessos · ${nameOf(appKey)}` : "Usuários e aplicativos"}{userFilters.menu}</CardTitle>
+        <CardTitle className="flex items-center gap-2"><ShieldCheck className="h-5 w-5" />{appKey ? `Acessos · ${nameOf(appKey)}` : "Usuários e aplicativos"}</CardTitle>
         <CardDescription>{appKey ? `Usuários com e sem acesso ao ${nameOf(appKey)}.` : "Libere os aplicativos do ERP sem alterar cargos ou perfis internos de cada app."}</CardDescription>
       </CardHeader>
       <CardContent>
+        <div className="mb-2 flex flex-wrap items-center gap-2 erp-list-toolbar">{userFilters.menu}</div>
         {userFilters.summary}
         <AccessStatusTabs className="mb-2" value={status} onChange={setStatus} counts={statusCounts} />
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando usuários...</p> : null}

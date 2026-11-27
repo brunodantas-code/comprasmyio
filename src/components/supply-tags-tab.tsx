@@ -101,7 +101,7 @@ export function SupplyTagsTab({ userId }: { userId: string }) {
       <CardContent className="space-y-3">
         <p className="text-xs text-muted-foreground">Identificam projetos internos (feiras, novas tecnologias etc.) para consolidar seu custo total. {canManage ? "" : "Somente Admin, Financeiro e Compras criam ou alteram etiquetas."}</p>
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> : !tags?.length ? <p className="text-sm text-muted-foreground">Nenhuma etiqueta.</p> : (
-          <>{tagFilters.summary}<Table>
+          <>{tagFilters.summary}<><div className="mb-2 flex flex-wrap items-center gap-2 erp-list-toolbar">{tagFilters.menu}</div><Table>
             <TableHeader><TableRow>{["name", "description", "status", "creator", "date"].map(key => <TableHead key={key}>{tagFilters.header(key)}</TableHead>)}<TableHead /></TableRow></TableHeader>
             <TableBody>
               {filtered.map((t) => (
@@ -126,7 +126,7 @@ export function SupplyTagsTab({ userId }: { userId: string }) {
                 </TableRow>
               ))}
             </TableBody>
-          </Table></>
+          </Table></></>
         )}
       </CardContent>
     </Card>

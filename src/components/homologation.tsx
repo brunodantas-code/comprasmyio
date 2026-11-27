@@ -1226,7 +1226,7 @@ export function BoxesCard() {
         ) : !data?.length ? (
           <p className="text-sm text-muted-foreground">Nenhuma caixa homologada.</p>
         ) : (
-          <>{boxFilters.summary}<Table>
+          <>{boxFilters.summary}<><div className="mb-2 flex flex-wrap items-center gap-2 erp-list-toolbar">{boxFilters.menu}</div><Table>
             <TableHeader>
               <TableRow>
                 <TableHead>{boxFilters.header("box")}</TableHead>
@@ -1262,7 +1262,7 @@ export function BoxesCard() {
                 </TableRow>
               ))}
             </TableBody>
-          </Table></>
+          </Table></></>
         )}
       </CardContent>
     </Card>

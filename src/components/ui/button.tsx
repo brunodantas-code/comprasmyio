@@ -79,6 +79,14 @@ function buttonText(node: React.ReactNode): string {
   return "";
 }
 
+function iconsWithoutText(node: React.ReactNode): React.ReactNode {
+  return React.Children.map(node, child => {
+    if (!React.isValidElement<{ children?: React.ReactNode }>(child)) return null;
+    if (child.props.children !== undefined) return React.cloneElement(child, {}, iconsWithoutText(child.props.children));
+    return child;
+  });
+}
+
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, children, style, actionKind, cdeId, cdeNative, cdeIgnore, ...props }, ref) => {
     const Comp = asChild ? Slot : "button";
@@ -104,7 +112,11 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const BoundIcon = look.icon ? ICONS[look.icon] : undefined;
     const progress = /salvando|excluindo|enviando|gerando|carregando|processando|cancelando|confirmando|concluindo/i.test(visibleText);
     const boundContent = binding && !asChild && !binding.preserveContent ? <>{BoundIcon && <BoundIcon className={look.iconClass || "h-4 w-4"} />}{progress ? children : binding.label || null}</> : undefined;
-    const content = binding?.preserveContent ? children : boundContent ?? (sendStandard ? <><SendIcon className={look.iconClass || "h-4 w-4"} />{look.label?.trim() || null}</> : standardSave ? <><SaveIcon className={look.iconClass || "h-4 w-4"} />{visibleText ? actionLabel : null}</> : children);
+    const renderedContent = binding?.preserveContent ? children : boundContent ?? (sendStandard ? <><SendIcon className={look.iconClass || "h-4 w-4"} />{look.label?.trim() || null}</> : standardSave ? <><SaveIcon className={look.iconClass || "h-4 w-4"} />{visibleText ? actionLabel : null}</> : children);
+    // Keep confirmation choices and progress explicit; ordinary intuitive actions use icons with accessible descriptions.
+    const intuitiveAction = !asChild && !cdeIgnore && !progress && (group === "save" || group === "pencil" || group === "sort" || group === "trash" && !/\be\s+(manter|excluir|chamados)\b/i.test(visibleText));
+    const IntuitiveIcon = ICONS[look.icon || (group === "pencil" ? "Pencil" : group === "sort" ? "ArrowUpDown" : group === "trash" ? "Trash2" : "Save")];
+    const content = intuitiveAction ? IntuitiveIcon ? <IntuitiveIcon className={look.iconClass || "h-4 w-4"} /> : iconsWithoutText(renderedContent) : renderedContent;
     // Icon-only buttons keep the icon's own box: a CDE model's padding must never squeeze it.
     const iconOnly = !buttonText(content).trim();
     const cdeVariant = look.variant ? look.variant as VariantProps<typeof buttonVariants>["variant"] : resolvedVariant;
@@ -112,7 +124,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     // A caller that sets its own width (list rows, full-width controls) keeps that geometry.
     const hasOwnWidth = /(?:^|\s)(?:[^\s:]+:)*w-(?:full|fit|max|min|\[|[\d.])/.test(className ?? "");
     return (
-      <Comp data-cde-id={cdeId} data-action-kind={group ? specific ? "specific" : "standard" : undefined} className={cn(cdeNative && !binding ? className : buttonVariants({ variant: "data-cde-number" in props && !binding ? null : cdeVariant, size: cdeSize, className: binding ? undefined : className }), look.className, !asChild && props.role !== "combobox" && (binding ? binding.label : visibleText) && group && !hasOwnWidth && !(sendStandard && !look.label?.trim()) && ["!w-auto shrink-0", className?.includes("whitespace-normal") ? "!min-w-0" : "!min-w-max"], iconOnly && "[&_svg]:!max-w-none")} style={binding ? look.style : style ?? (look.variant || look.className ? look.style : undefined)} ref={ref} {...((binding && !binding.label || sendStandard && !look.label?.trim()) && visibleText ? { "aria-label": accessibleLabel, title: accessibleLabel } : {})} {...props}>{cdeNative && !binding ? children : content}</Comp>
+      <Comp data-cde-id={cdeId} data-action-kind={group ? specific ? "specific" : "standard" : undefined} className={cn(cdeNative && !binding ? className : buttonVariants({ variant: "data-cde-number" in props && !binding ? null : cdeVariant, size: cdeSize, className: binding ? undefined : className }), look.className, !asChild && props.role !== "combobox" && (binding ? binding.label : visibleText) && group && !hasOwnWidth && !(sendStandard && !look.label?.trim()) && ["!w-auto shrink-0", className?.includes("whitespace-normal") ? "!min-w-0" : "!min-w-max"], iconOnly && "[&_svg]:!max-w-none")} style={binding ? look.style : style ?? (look.variant || look.className ? look.style : undefined)} ref={ref} {...((intuitiveAction || binding && !binding.label || sendStandard && !look.label?.trim()) && visibleText ? { "aria-label": accessibleLabel, title: accessibleLabel } : {})} {...props}>{cdeNative && !binding && !intuitiveAction ? children : content}</Comp>
     );
   },
 );

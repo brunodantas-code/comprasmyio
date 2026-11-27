@@ -96,7 +96,7 @@ export function useCdeAddLabel(screen: string | undefined, text: ReactNode): Rea
 export const CdeButton = forwardRef<HTMLButtonElement, Props>(function CdeButton({ group, screen, active, className, children, type = "button", ...rest }, ref) {
   const { data } = useCdeStandards();
   const m = resolveCdeModel(data, group, screen);
-  const label = useCdeAddLabel(group === "plus" ? screen : undefined, children);
+  const label = useCdeAddLabel(group === "plus" ? screen : undefined, group === "filter" ? undefined : children);
   const specific = !children || isSpecificAction({ className, modelStyle: m.style, secondary: data?.selected.some(s => s.group_key === group && !s.is_primary && !!screen && s.screens.includes(screen)) });
   const common = resolveCdeModel(data, "action_standard");
   const visual = COMMON_ACTION_GROUPS.has(group) && !specific ? common : m;

@@ -415,7 +415,7 @@ export function PendingForMe({ renderEditAction }: { renderEditAction?: EditActi
   const sortControl = (key: string) => {
     const c = sortDefs.find(c => c.key === key);
     if (!c) return null;
-    return <span className="inline-flex items-center gap-1 whitespace-nowrap">{c.label}{tableFilters.control(key)}</span>;
+    return <span className="inline-flex items-center gap-1 whitespace-nowrap">{c.label}</span>;
   };
 
   const refresh = () => {
@@ -453,7 +453,7 @@ export function PendingForMe({ renderEditAction }: { renderEditAction?: EditActi
         </div>
       </CardHeader>
       <CardContent>
-        <>{tableFilters.summary}<div className="mb-2 flex justify-end"><TableSortMenu columns={sortDefs.map(c => ({ key: c.key, label: c.label }))} value={sorting} onChange={setSorting} /></div><Table>
+        <>{tableFilters.summary}<div className="mb-2 flex justify-end erp-list-toolbar">{tableFilters.menu}<TableSortMenu columns={sortDefs.map(c => ({ key: c.key, label: c.label }))} value={sorting} onChange={setSorting} /></div><Table>
           <TableHeader className="[&_tr]:border-b">
               <TableRow className="border-b">
                 <TableHead>{sortControl("number")}</TableHead>
@@ -691,7 +691,7 @@ export function MyApprovalFlows({ renderEditAction }: { renderEditAction?: EditA
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex items-center gap-2 border-t p-2">
+        <div className="flex items-center gap-2 border-t p-2 erp-list-toolbar">
           {flowFilters.header("approval")}{flowFilters.header("type")}{flowFilters.header("value")}
           <TableSortMenu columns={[{ key: "approval", label: "Approval" }]} value={numberDirection ? { key: "approval", direction: numberDirection } : undefined} onChange={v => setNumberDirection(v?.direction)} />
         </div>

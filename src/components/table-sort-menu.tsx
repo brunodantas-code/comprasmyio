@@ -6,7 +6,7 @@ import type { SortDirection } from "@/lib/column-sort";
 
 export type TableSorting = { key: string; direction: SortDirection };
 
-export function TableSortMenu({ columns, value, onChange, iconOnly = false }: {
+export function TableSortMenu({ columns, value, onChange }: {
   columns: { key: string; label: string }[];
   value?: TableSorting;
   onChange: (value: TableSorting | undefined) => void;
@@ -19,8 +19,8 @@ export function TableSortMenu({ columns, value, onChange, iconOnly = false }: {
   };
   return <Popover>
     <PopoverTrigger asChild>
-      <Button type="button" variant={iconOnly ? "ghost" : "outline"} size={iconOnly ? "compactIcon" : "sm"} aria-label="Ordenar" title={selected ? `Ordenar: ${selected.label}, ${value?.direction === "desc" ? "decrescente" : "crescente"}` : "Ordenar"} className={iconOnly ? "" : "!w-auto !min-w-max shrink-0"}>
-        <ArrowUpDown className="size-4" />{!iconOnly && " Ordenar"}
+      <Button data-list-sort="" type="button" variant="ghost" size="compactIcon" aria-label="Ordenar" title={selected ? `Ordenar: ${selected.label}, ${value?.direction === "desc" ? "decrescente" : "crescente"}` : "Ordenar"}>
+        <ArrowUpDown className="size-4" />
       </Button>
     </PopoverTrigger>
     <PopoverContent align="start" className="w-[min(18rem,calc(100vw-2rem))] space-y-3 p-3">

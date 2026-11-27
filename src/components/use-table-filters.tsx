@@ -32,12 +32,10 @@ export function useTableFilters<T>(rows: readonly T[], columns: FilterColumn<T>[
     controlShown = true;
     return menu;
   };
-  // Filtro consolidado: um único funil, exibido junto ao primeiro cabeçalho renderizado.
-  let menuKey: string | undefined;
+  // Column headings describe columns; list tools live in the toolbar above the table.
   const header = (key: string) => {
     const column = columns.find((entry) => entry.key === key);
-    menuKey ??= key;
-    return <span className="inline-flex max-w-full flex-nowrap items-center gap-1"><span className="min-w-0 break-words">{column?.label}</span>{key === menuKey ? <span className="inline-flex shrink-0">{menu}</span> : null}</span>;
+    return <span className="inline-flex max-w-full flex-nowrap items-center gap-1"><span className="min-w-0 break-words">{column?.label}</span></span>;
   };
   const searchText = (key: string) => filters[key]?.op === "contains" ? filters[key]?.value ?? "" : "";
   const summary = <TableFilterSummary columns={columns} filters={filters} onChange={(key, value) => setFilters(current => ({ ...current, [key]: value }))} />;
@@ -48,7 +46,7 @@ export function TableFilterSummary<T>({ columns, filters, onChange }: { columns:
   return <ActiveFilterTags items={columns.filter(column => isFilterActive(filters[column.key])).map(column => ({ key: column.key, label: column.label, description: describeColumnFilter(column.kind ?? "text", filters[column.key]), remove: () => onChange(column.key, undefined) }))} />;
 }
 
-export function TableFilterMenu<T>({ rows, columns, filters, onChange, clear, triggerLabel }: {
+export function TableFilterMenu<T>({ rows, columns, filters, onChange, clear }: {
   rows: readonly T[];
   columns: FilterColumn<T>[];
   filters: Record<string, ColumnFilterValue | undefined>;
@@ -62,8 +60,8 @@ export function TableFilterMenu<T>({ rows, columns, filters, onChange, clear, tr
   const active = columns.filter(c => isFilterActive(filters[c.key])).length;
   const activeColumns = columns.filter(c => isFilterActive(filters[c.key]));
   const describe = (c: FilterColumn<T>) => describeColumnFilter(c.kind ?? "text", filters[c.key]);
-  return <span className="inline-flex shrink-0 items-center gap-1 text-[length:var(--filter-fs)] text-muted-foreground"><Popover open={open} onOpenChange={setOpen}>
-    <PopoverTrigger asChild><CdeButton group="filter" screen="components/use-table-filters.tsx" active={!!active} aria-label="Filtros" title={active ? `Filtros (${active} ativos)` : "Filtros"} className="!bg-transparent gap-2 [&_svg]:!size-5 [&_svg]:stroke-[1.8]">{triggerLabel}</CdeButton></PopoverTrigger>
+  return <span data-list-filter="" className="inline-flex shrink-0 items-center gap-1 text-[length:var(--filter-fs)] text-muted-foreground"><Popover open={open} onOpenChange={setOpen}>
+    <PopoverTrigger asChild><CdeButton group="filter" screen="components/use-table-filters.tsx" active={!!active} aria-label="Filtros" title={active ? `Filtros (${active} ativos)` : "Filtros"} className="!bg-transparent gap-2 [&_svg]:!size-5 [&_svg]:stroke-[1.8]" /></PopoverTrigger>
     <PopoverContent align="start" className="max-h-[var(--radix-popover-content-available-height)] w-[min(18rem,calc(100vw-2rem))] overflow-y-auto space-y-3 p-3">
       <Select value={column?.key} onValueChange={setKey}>
         <SelectTrigger aria-label="Tipo de filtro" className="h-8 text-xs"><SelectValue /></SelectTrigger>

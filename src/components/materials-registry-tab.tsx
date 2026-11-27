@@ -267,8 +267,8 @@ export function MaterialsRegistryTab({ canCreate = false }: { canCreate?: boolea
       </CardHeader>
       <CollapsibleContent asChild>
         <CardContent className="space-y-4">
-          {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> : !materials.length ? <p className="text-sm text-muted-foreground">Nenhum material encontrado.</p> : <>{tableFilters.summary}<Table>
-            <TableHeader><TableRow><TableHead>{tableFilters.header("name")}{tableFilters.control("description")}</TableHead><TableHead>{tableFilters.header("group")}</TableHead><TableHead>{tableFilters.header("code")}</TableHead><TableHead className="w-16" /></TableRow></TableHeader>
+          {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> : !materials.length ? <p className="text-sm text-muted-foreground">Nenhum material encontrado.</p> : <>{tableFilters.summary}<><div className="mb-2 flex flex-wrap items-center gap-2 erp-list-toolbar">{tableFilters.menu}</div><Table>
+            <TableHeader><TableRow><TableHead>{tableFilters.header("name")}</TableHead><TableHead>{tableFilters.header("group")}</TableHead><TableHead>{tableFilters.header("code")}</TableHead><TableHead className="w-16" /></TableRow></TableHeader>
             <TableBody>{filtered.map((material) => <TableRow key={`${material.source}:${material.id}`}>
               <TableCell><div className="font-medium">{material.name}</div>{material.description && <div className="max-w-xl truncate text-xs text-muted-foreground">{material.description}</div>}</TableCell>
                <TableCell>
@@ -296,7 +296,7 @@ export function MaterialsRegistryTab({ canCreate = false }: { canCreate?: boolea
                 <DeleteMaterialButton material={material} />
               </div></TableCell>
             </TableRow>)}</TableBody>
-          </Table></>}
+          </Table></></>}
         </CardContent>
       </CollapsibleContent>
     </Card>
@@ -328,8 +328,8 @@ export function MyioDevicesRegistryTab() {
       </CardHeader>
       <CollapsibleContent asChild>
         <CardContent className="space-y-4">
-          {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> : !devices.length ? <p className="text-sm text-muted-foreground">Nenhum dispositivo encontrado.</p> : <>{tableFilters.summary}<Table>
-            <TableHeader><TableRow><TableHead><span className="inline-flex items-center gap-1">Dispositivo{tableFilters.menu}</span></TableHead><TableHead>Cód. Fabricante</TableHead><TableHead className="w-16" /></TableRow></TableHeader>
+          {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> : !devices.length ? <p className="text-sm text-muted-foreground">Nenhum dispositivo encontrado.</p> : <><div className="mb-2 flex erp-list-toolbar">{tableFilters.menu}</div>{tableFilters.summary}<Table>
+            <TableHeader><TableRow><TableHead>Dispositivo</TableHead><TableHead>Cód. Fabricante</TableHead><TableHead className="w-16" /></TableRow></TableHeader>
             <TableBody>{filtered.map((device) => <TableRow key={device.id}>
               <TableCell><div className="font-medium">{device.name}</div>{device.description && <div className="max-w-xl truncate text-xs text-muted-foreground">{device.description}</div>}</TableCell>
               <TableCell>{device.manufacturer_code || "—"}</TableCell>

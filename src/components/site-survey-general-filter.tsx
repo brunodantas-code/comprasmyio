@@ -18,7 +18,7 @@ export function SiteSurveyGeneralFilter({ fields, value, onChange, countMatches 
   const filtered = useMemo(() => fields.filter((field) => `${field.section} ${field.prompt} ${field.label} ${field.options.join(" ")}`.toLocaleLowerCase("pt-BR").includes(search.toLocaleLowerCase("pt-BR"))), [fields, search]);
   const sections = [...new Set(filtered.map((field) => field.section))];
   const update = (key: string, patch: Partial<FilterRule>) => setDraft((current) => ({ ...current, rules: { ...current.rules, [key]: { ...(current.rules[key] ?? { values: [] }), ...patch } } }));
-  return <div className="flex min-w-0 max-w-full shrink-0 flex-wrap items-center justify-end gap-2">
+  return <div className="flex min-w-0 max-w-full shrink-0 flex-wrap items-center gap-2 erp-list-toolbar">
     <CdeButton group="filter" screen="components/site-survey-general-filter.tsx" active={!!activeCount} className="h-8 !w-auto !min-w-max shrink-0 gap-1 whitespace-nowrap px-2 text-xs" aria-label="Filtros do Checklist" title="Filtros do Checklist" onClick={() => { setDraft(structuredClone(value)); setSearch(""); setExpanded(new Set(fields.filter((f) => activeFilterRules(value).some(([key]) => key === f.key)).map((f) => f.section))); setOpen(true); }}>Filtros do Checklist{activeCount ? <span className="tabular-nums">({activeCount})</span> : null}</CdeButton>
     <Dialog open={open} onOpenChange={setOpen}><DialogContent className="flex max-h-[90dvh] min-h-0 w-[calc(100%-2rem)] flex-col gap-3 sm:max-w-4xl" aria-describedby={undefined}>
       <DialogHeader><DialogTitle>Filtros do Checklist</DialogTitle></DialogHeader>

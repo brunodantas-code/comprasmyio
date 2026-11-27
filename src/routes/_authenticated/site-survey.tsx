@@ -339,9 +339,9 @@ function SiteSurveyPage() {
             {visitsSection === "minhas" || visitsSection === "resumo" || visitsSection === "pendencias" ? <div aria-label={visitsSection === "resumo" ? "Consulta das visitas" : visitsSection === "pendencias" ? "Sanar Pendências" : "Realizar Visita"}>
 {visitFilters.summary}
                <div className="overflow-hidden rounded-md border border-border bg-card">
-                 <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b border-border px-4 py-3">
+                 <header className="flex flex-wrap items-center gap-3 border-b border-border px-4 py-3 erp-list-tools-header">
                    <h2 className="min-w-0 text-sm text-muted-foreground">Visitas e pontos</h2>
-                   <div className="flex shrink-0 items-center gap-2">{visitFilters.menu}<Button type="button" size="compactIcon" variant="ghost" aria-label={visitsListOpen ? "Recolher relação de visitas" : "Exibir relação de visitas"} title={visitsListOpen ? "Recolher" : "Exibir"} aria-expanded={visitsListOpen} onClick={() => setVisitsListOpen((current) => !current)}><ChevronDown className={`h-5 w-5 transition-transform ${visitsListOpen ? "rotate-180" : ""}`} /></Button></div>
+                   <div className="flex shrink-0 items-center gap-2 erp-list-toolbar">{visitFilters.menu}<Button type="button" size="compactIcon" variant="ghost" aria-label={visitsListOpen ? "Recolher relação de visitas" : "Exibir relação de visitas"} title={visitsListOpen ? "Recolher" : "Exibir"} aria-expanded={visitsListOpen} onClick={() => setVisitsListOpen((current) => !current)}><ChevronDown className={`h-5 w-5 transition-transform ${visitsListOpen ? "rotate-180" : ""}`} /></Button></div>
                  </header>
                  <div className="cde-th hidden min-h-10 grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] items-center gap-3 border-b border-border px-4 py-2 text-[length:var(--th-fs)] lg:grid"><span>Nº da Visita</span><span>Cliente / Projeto</span><span>Técnico</span><span>Agendamento</span><span>Situação</span><span>Ações</span></div>
                  {filtered.map((visit) => {

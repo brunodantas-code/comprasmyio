@@ -822,3 +822,5 @@
 - [x] CDE: biblioteca pesquisável de ícones, botão dedicado abaixo dos menus/submenus e aplicação das escolhas nos apps.
 - [x] Spend: manter Competência junto aos filtros; Total alinhado ao título; ações à direita de Lançamentos e cabeçalho alinhado à faixa preta do PDF.
 - [x] Site Survey: corrigir o cabeçalho indicado para o padrão CDE.
+
+- [x] Padronizar ferramentas das listas à esquerda e ações intuitivas sem texto; filtros de cabeçalho migrados para barras, buscas/ordenação preservadas e conferência realizada.

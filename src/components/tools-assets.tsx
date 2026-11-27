@@ -559,7 +559,7 @@ export function ToolAssetsSection({ userId, canDelete, canCreate = false }: { us
           ) : !rows?.length ? (
             <p className="text-sm text-muted-foreground">Nenhuma ferramenta encontrada.</p>
           ) : (
-            <>{toolFilters.summary}<Table>
+            <>{toolFilters.summary}<><div className="mb-2 flex flex-wrap items-center gap-2 erp-list-toolbar">{toolFilters.menu}</div><Table>
               <TableHeader className="[&_tr]:border-b">
                 <TableRow className="border-b">
                   <TableHead className="w-[45%]">{toolFilters.header("name")}</TableHead>
@@ -640,7 +640,7 @@ export function ToolAssetsSection({ userId, canDelete, canCreate = false }: { us
                   );
                 })}
               </TableBody>
-            </Table></>
+            </Table></></>
 
           )}
         </CardContent>

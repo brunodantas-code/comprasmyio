@@ -750,7 +750,7 @@
   {
     "id": "components/spend/workspace.tsx|0",
     "file": "components/spend/workspace.tsx",
-    "line": 282,
+    "line": 297,
     "context": "Lista de comprovantes",
     "headers": [
       "(sem título)",
@@ -1036,7 +1036,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|0",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3099,
+    "line": 3102,
     "context": "Itens e valores",
     "headers": [
       "Approval",
@@ -1056,7 +1056,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|1",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 3392,
+    "line": 3395,
     "context": "Aprovações",
     "headers": [
       "Etapa",
@@ -1069,7 +1069,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|2",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 4011,
+    "line": 4014,
     "context": "Projetos",
     "headers": [
       "Nome do projeto",
@@ -1083,7 +1083,7 @@
   {
     "id": "routes/_authenticated/dashboard.tsx|3",
     "file": "routes/_authenticated/dashboard.tsx",
-    "line": 4472,
+    "line": 4475,
     "context": "Logs de pedidos",
     "headers": [
       "Quando",

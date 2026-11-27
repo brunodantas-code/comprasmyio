@@ -59,8 +59,8 @@ export function PropostasSection({ data }: { data: CrmData }) {
   ]);
   const rows = filters.filtered.filter((p) => (status === "all" || p.status === status) && matchesSearch(q, p.numero, opOf(p.oportunidade_id)?.titulo, empresaOf(p.oportunidade_id)));
   return <div>
-    <div className="mb-4 flex flex-wrap items-end justify-between gap-3"><h1 className="text-xl font-semibold">Propostas ({rows.length})</h1>
-      <div className="flex flex-wrap items-end justify-end gap-2">
+    <div className="mb-4 flex flex-wrap items-end justify-between gap-3 erp-list-tools-header"><h1 className="text-xl font-semibold">Propostas ({rows.length})</h1>
+      <div className="flex flex-wrap items-end justify-end gap-2 erp-list-toolbar">
         <Select value={status} onValueChange={setStatus}><SelectTrigger aria-label="Situação" className="h-8 w-40 text-[length:var(--filter-fs)]"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">Todas as situações</SelectItem>{STATUS_PROPOSTA.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}</SelectContent></Select>
         <Input aria-label="Buscar proposta" placeholder="Buscar proposta" value={q} onChange={(e) => setQ(e.target.value)} className="h-8 w-56 max-w-full text-[length:var(--filter-fs)] md:text-[length:var(--filter-fs)]" />
         <Button variant="ghost" onClick={() => setNova(true)}><Plus className="h-4 w-4" />Nova proposta</Button>

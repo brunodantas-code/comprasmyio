@@ -403,7 +403,7 @@ export function IndicadoresDashboard() {
                   />
                 </div>
               )}
-              <div className="flex flex-wrap items-center gap-1 [&_button]:!h-8 [&_button]:!w-8 [&_button]:!min-w-8 [&_button]:!px-0 [&_svg]:!size-5">
+              <div className="flex flex-wrap items-center gap-1 [&_button]:!h-8 [&_button]:!w-8 [&_button]:!min-w-8 [&_button]:!px-0 [&_svg]:!size-5 erp-list-toolbar">
                 {[
                   { value: "cards", label: "Cards", icon: LayoutGrid },
                   { value: "list", label: "Lista por responsável", icon: List },
