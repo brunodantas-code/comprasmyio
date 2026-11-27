@@ -1,3 +1,5 @@
+- [x] Spend Conciliação: vencimento cinza junto à Fatura do cartão, lápis abre editor existente e resumo junto aos filtros; fatura real de 16/11/2026 conferida, PDF/lançamentos começam em y=278 no desktop; 1098px/celular sem excesso lateral, 20 testes passaram, nenhum dado salvo.
+- [x] Esclarecer aviso “Esta mensagem foi cancelada”: não foi enviado pelo assistente; origem não confirmada.
 - [x] CDE: cabeçalhos atuais medidos após carregar configurações; todas as 16 linhas têm 52 px no computador, incluindo linha 3.
 - [x] CDE menus: lápis centralizado abaixo de cada nome; Cronograma/Adiantamentos em uma linha, edição funcional e celular sem excesso lateral; nenhum nome salvo.
 - [x] CDE: subir a prévia indicada no print para não sobrepor os menus.

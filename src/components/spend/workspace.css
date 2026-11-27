@@ -75,7 +75,7 @@
   .spend-expense-toolbar > div.spend-card-summary {
     flex: 0 0 auto;
   }
-  /* Month and year are short lists: keep both droplists narrow so the due-date field still fits the same row. */
+  /* Month and year keep the invoice selection compact. */
   .spend-expense-toolbar > div.spend-period-field {
     flex: 0 1 8.5rem;
   }
@@ -184,4 +184,23 @@
 
 @media (prefers-reduced-motion: reduce) {
   .spend-mobile-register { transition: none; }
+}
+/* Invoice context shares the selection row, leaving both reading columns aligned. */
+.spend-expense-toolbar.spend-reconcile-toolbar {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.spend-reconcile-toolbar > div:first-child,
+.spend-reconcile-toolbar > .spend-reconcile-summary {
+  grid-column: 1 / -1;
+}
+@media (min-width: 1024px) {
+  .spend-expense-toolbar.spend-reconcile-toolbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.65fr) minmax(0, 0.55fr) minmax(0, 2.2fr);
+    gap: 1rem;
+  }
+  .spend-reconcile-toolbar > div:first-child,
+  .spend-reconcile-toolbar > .spend-reconcile-summary {
+    grid-column: auto;
+  }
 }

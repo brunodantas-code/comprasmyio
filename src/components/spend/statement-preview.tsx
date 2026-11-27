@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2, Maximize2, Minimize2, ZoomIn, ZoomOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { spendFileUrl } from "./data";
 
-export function SpendStatementPreview({ path }: { path: string }) {
+export function SpendStatementPreview({ path, metadata }: { path: string; metadata?: ReactNode }) {
   const url = useQuery({ queryKey: ["spend-file", path], queryFn: () => spendFileUrl(path), staleTime: 300000 });
   const container = useRef<HTMLDivElement>(null);
   const [error, setError] = useState(false);
@@ -49,7 +49,7 @@ export function SpendStatementPreview({ path }: { path: string }) {
   }, [url.data]);
   const step = (d: number) => setZoom(z => Math.min(3, Math.max(0.5, Math.round((z + d) * 100) / 100)));
   return <section aria-label="Fatura em PDF" className={full ? "fixed inset-0 z-50 flex flex-col bg-background p-4" : "min-w-0 lg:sticky lg:top-24"}>
-    <div className="mb-2 flex min-w-0 items-center gap-1"><h2 className="mr-auto min-w-0 truncate text-sm text-muted-foreground">Fatura do cartão</h2>
+    <div className="mb-2 flex min-w-0 flex-wrap items-center gap-1"><div className="mr-auto flex min-w-0 flex-wrap items-center gap-x-2"><h2 className="text-sm text-muted-foreground">Fatura do cartão</h2>{metadata}</div>
       <Button variant="ghost" size="icon" className="shrink-0" aria-label="Diminuir zoom" title="Diminuir zoom" disabled={zoom <= 0.5} onClick={() => step(-0.25)}><ZoomOut /></Button>
       <button type="button" className="w-12 shrink-0 text-center text-xs tabular-nums text-muted-foreground" title="Voltar a 100%" aria-label="Voltar o zoom a 100%" onClick={() => setZoom(1)}>{Math.round(zoom * 100)}%</button>
       <Button variant="ghost" size="icon" className="shrink-0" aria-label="Aumentar zoom" title="Aumentar zoom" disabled={zoom >= 3} onClick={() => step(0.25)}><ZoomIn /></Button>
