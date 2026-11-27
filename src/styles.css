@@ -813,12 +813,15 @@ input[data-custom-calendar="true"]::-webkit-calendar-picker-indicator {
 }
 .diversos-list > * + * { margin-top: 0.5rem; }
 .diversos-list > * > :first-child .font-semibold,
+.diversos-list > * > :first-child .cde-title,
 .diversos-list > section > :first-child h3 {
   font-size: var(--text-sm);
   line-height: var(--text-sm--line-height);
   font-weight: 600;
 }
 .diversos-list > * > :first-child {
+  --title-fs: var(--text-sm);
+  --title-weight: 600;
   position: relative;
   min-height: 48px;
   padding: 10px 52px 10px 12px;
