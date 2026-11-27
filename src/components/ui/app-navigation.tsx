@@ -5,6 +5,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { clampMenuWidth, draggedMenuWidth, menuResizeLimits, personalMenuWidthKey } from "@/components/cde/menu-resize";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { MobileFloatingMenu } from "@/components/ui/mobile-floating-menu";
 
 /** Keep app navigation outside page stacking/scrolling contexts, below dialogs. */
 export function AppNavigation({ className = "", children, ...props }: ComponentProps<"nav">) {
@@ -120,7 +121,7 @@ export function AppNavigation({ className = "", children, ...props }: ComponentP
     {lateral ? <Button cdeIgnore variant="ghost" size="icon" className="app-menu-collapse" aria-label={collapsed ? "Exibir menu lateral" : "Recolher menu lateral"} title={collapsed ? "Exibir menu lateral" : "Recolher menu lateral"} aria-expanded={!collapsed} onClick={() => setCollapsed(value => !value)}>
       {(layout === "left") !== collapsed ? <ChevronLeft className="size-5" /> : <ChevronRight className="size-5" />}
     </Button> : null}
-    {children}
+    {!desktop && layout === "floating" ? <MobileFloatingMenu>{children}</MobileFloatingMenu> : children}
     {flexible && !collapsed ? <span role="separator" tabIndex={0} aria-label="Ajustar largura do menu lateral" aria-orientation="vertical" aria-valuemin={limits.min} aria-valuemax={limits.max} aria-valuenow={width ?? (desktop ? 240 : 160)} title="Arrastar para ajustar a largura" className="app-menu-resize-handle"
       onPointerDown={event => { if (event.button !== 0) return; event.preventDefault(); drag.current = { x: event.clientX, width: ref.current?.getBoundingClientRect().width ?? 240 }; event.currentTarget.setPointerCapture(event.pointerId); }}
       onPointerMove={event => { const start = drag.current; if (start) resize(draggedMenuWidth(start.width, event.clientX - start.x, layout, window.innerWidth)); }}

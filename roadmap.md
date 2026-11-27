@@ -904,3 +904,4 @@
 - [x] Diversos: substituir Ordem dos pop-ups por arraste e numeração sequencial em todos os cadastros aplicáveis.
 
 - [x] Central de Pendências: padronizar o logo com as demais páginas.
+- [x] Menu flutuante mobile: até cinco menus visíveis; havendo sexto, quinta posição com reticências/seta e quatro menus por grupo; Spend avançou, abriu Histórico e retornou, Supply manteve cinco opções, desktop inalterado; cinco testes passaram.
