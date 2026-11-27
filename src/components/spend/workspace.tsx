@@ -3,6 +3,7 @@ import { useMenuNames } from "@/components/cde/use-menu-names";
 import { SpendCategoryConfig } from "./category-config";
 import { SpendNoticeHistory } from "./notice-history";
 import { SpendLineDetailsEditor } from './line-details-editor';
+import { SpendBulkClassificationDialog } from './bulk-classification-dialog';
 import { MissingReceiptDialog } from "./missing-receipt-dialog";
 import { canDeclareMissingReceipt, missingReceiptLabels, missingReceiptReason } from "./missing-receipt";
 import { activeSpendNotices, type SpendAdjustment } from "./pending";
@@ -26,7 +27,7 @@ import { SpendStatementPreview } from "./statement-preview";
 import { SpendReceiptPdfPreview } from "./receipt-pdf-preview";
 import { receiptBelongsToView } from "./receipt-visibility";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
-import { classificationAccess, showReceiptCnpj, classificationTargets, toggleFilteredSelection } from "./classification";
+import { classificationAccess, showReceiptCnpj, classificationTargets, toggleFilteredSelection, bulkClassificationTargets, type bulkClassificationPatch } from "./classification";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -201,7 +202,7 @@ export function SpendWorkspace() {
   const receiptSortColumn = receiptColumns.find(c => c.key === receiptSorting?.key);
   const visibleReceipts = receiptSortColumn && receiptSorting ? [...receiptFilters.filtered].sort((a,b) => compareColumnValues(('kind' in receiptSortColumn ? receiptSortColumn.kind : undefined) ?? 'text', receiptSortColumn.value(a), receiptSortColumn.value(b), receiptSorting.direction)) : receiptFilters.filtered;
   const receiptNotices = activeSpendNotices(data.notices.filter(n=>n.card_id===card?.id),pending?.spendItems??[]).slice(0,5);
-  const filters=useTableFilters(lines,[{key:'merchant',label:'Estabelecimento',value:l=>l.display_description ?? l.merchant},{key:'status',label:'Situação',value:l=>l.receipt_not_applicable?'Comprovante não se aplica':l.status==='pending'?'Sem comprovante':statusNames[l.status] ?? l.status},{key:'amount',label:'Valor',kind:'number',value:l=>l.amount},{key:'date',label:'Data',value:l=>l.date}]);
+  const filters=useTableFilters(lines,[{key:'merchant',label:'Estabelecimento',value:l=>l.display_description ?? l.merchant},{key:'status',label:'Situação',value:l=>l.receipt_not_applicable?'Comprovante não se aplica':l.status==='pending'?'Sem comprovante':statusNames[l.status] ?? l.status},{key:'amount',label:'Valor',kind:'number',value:l=>l.amount},{key:'date',label:'Data',kind:'date',value:l=>l.date}]);
   const selectable=filters.filtered.filter(l=>l.status!=='approved');
   const selectedVisible=selectable.filter(l=>selected.has(l.id)).length;
   const refresh=async()=>{ await Promise.all([qc.invalidateQueries({queryKey:['spend']}),qc.invalidateQueries({queryKey:['cash-flow-payables']}),qc.invalidateQueries({queryKey:['pending-actions']}),qc.invalidateQueries({queryKey:['central-admin']})]); };
@@ -253,6 +254,29 @@ export function SpendWorkspace() {
       setSelected(new Set());toast.success(`${count} lançamentos enviados ao Finance`);
     }catch(e){toast.error(`${count?`${count} lançamentos enviados; `:''}${e instanceof Error?e.message:'Não foi possível aprovar o lote'}`);}finally{await refresh();setBusy(false);}
   }
+  async function classifyBatch(patch: ReturnType<typeof bulkClassificationPatch>): Promise<boolean> {
+    if (busy || !Object.keys(patch).length) return false;
+    setBusy(true);
+    try {
+      const targets = bulkClassificationTargets(lines, selected);
+      const fields = [patch.cost_center_id ? 'Centro de Custo' : '', patch.account_id ? 'Plano de Contas' : '', patch.project_id ? 'Projeto' : ''].filter(Boolean).join(', ');
+      if (!await confirmAction(`Aplicar ${fields} aos ${targets.length} lançamentos selecionados? As classificações desses campos serão substituídas; os demais campos permanecerão como estão.`, { title: 'Classificação em lote', confirmLabel: 'Aplicar classificação' })) return false;
+      const reviews: Record<string, ProjectReview> = {};
+      if (patch.project_id) {
+        for (const target of targets) {
+          const review = await reviewProject(target, patch.project_id);
+          if (!review) return false;
+          reviews[target.id] = review;
+        }
+      }
+      const result = await saveSpendClassification({ line_ids: targets.map(target => target.id), ...patch, ...(patch.project_id ? { project_reviews: reviews } : {}) });
+      if (!result || typeof result !== 'object' || Array.isArray(result) || result['count'] !== targets.length) throw new Error('Não foi possível confirmar a classificação do lote.');
+      await refresh();
+      toast.success(`Classificação salva em ${targets.length} lançamentos`);
+      return true;
+    } catch (error) { toast.error(error instanceof Error ? error.message : 'Não foi possível classificar o lote'); return false; }
+    finally { setBusy(false); }
+  }
   async function exportZip(){if(!card)return;setBusy(true);try{const {default:JSZip}=await import('jszip');const zip=new JSZip();const paths=[...new Set([...receipts.filter(r=>!r.without_receipt).map(r=>r.file_path),...(statement?[statement.file_path]:[])])];for(const path of paths){const r=await supabase.storage.from('spend-files').download(path);if(r.error)throw r.error;if(r.data)zip.file(path,r.data);}zip.file('classificacao.json',JSON.stringify({cartao:card.name,periodo:period,lancamentos:statementLines,comprovantes:receipts},null,2));const blob=await zip.generateAsync({type:'blob'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`Spend-${period}-${card.last_four}.zip`;a.click();URL.revokeObjectURL(url);}catch(e){toast.error(e instanceof Error?e.message:'Não foi possível exportar');}finally{setBusy(false);}}
   const receiptActions=(r:Receipt)=><><ReceiptAttachment path={r.file_path} merchant={r.merchant} />{canEditSpendReceipt(r,data.user_id,false,finance) && r.status!=='approved' ? <TooltipProvider><Tooltip><TooltipTrigger asChild><Button variant="ghost" size="icon" aria-label={`Editar comprovante de ${r.merchant}`} onClick={()=>{const c=data.cards.find(x=>x.id===r.card_id);if(c)setCardId(c.id);setTab('receipts');setCapture({receipt:r});}}><Pencil /></Button></TooltipTrigger><TooltipContent>Editar comprovante</TooltipContent></Tooltip></TooltipProvider> : <Button variant="ghost" size="icon" aria-hidden tabIndex={-1} disabled className="invisible"><Pencil /></Button>}</>;
   const total=statementLines.reduce((s,l)=>s+Math.max(0,l.amount),0);const matched=statementLines.filter(l=>l.receipt_id || l.receipt_not_applicable).reduce((s,l)=>s+Math.max(0,l.amount),0);const pct=total?Math.round(matched/total*100):0;
@@ -289,7 +313,7 @@ export function SpendWorkspace() {
       {statement?<SpendStatementPreview key={statement.id} path={statement.file_path} metadata={<span className="inline-flex flex-wrap items-center gap-1 text-sm text-muted-foreground"><span>| Vencimento: {formatDate(statement.due_date??'')}</span><Button variant="ghost" size="icon" aria-label="Editar vencimento da fatura" title="Editar vencimento da fatura" onClick={()=>setEditingDue(true)}><Pencil /></Button></span>}/>:<p className="py-10 text-sm text-muted-foreground">Nenhuma fatura importada neste mês.</p>}
       <section className="spend-invoice-lines min-w-0 space-y-3" aria-label="Lançamentos da fatura">
         <header className="spend-invoice-toolbar min-w-0">
-          <h2 className="min-w-0 text-sm text-muted-foreground">{competence==='statement'?'Lançamentos da fatura':'Gastos por data do fato gerador'}</h2>
+          <div className="spend-bulk-action min-w-0"><SpendBulkClassificationDialog data={data} targets={lines.filter(line => selected.has(line.id) && line.status !== 'approved')} busy={busy} apply={classifyBatch}/></div>
           <div className="spend-invoice-actions" aria-label="Ações da conciliação">
             {filters.menu}<SpendTextCaseToggle active={sentenceCase} onChange={setSentenceCase}/>
             <Button variant="ghost" size="icon" aria-label="Enviar PDF da fatura" title="Enviar PDF da fatura" disabled={busy} onClick={()=>setImporting(true)}><Upload /></Button>

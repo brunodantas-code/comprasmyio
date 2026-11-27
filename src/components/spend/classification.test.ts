@@ -1,5 +1,5 @@
 import { expect, it } from "vitest";
-import { classificationAccess, showReceiptCnpj, classificationTargets, toggleFilteredSelection } from "./classification";
+import { classificationAccess, showReceiptCnpj, classificationTargets, toggleFilteredSelection, bulkClassificationPatch, bulkClassificationTargets } from "./classification";
 it("CNPJ aparece somente com comprovante anexado", () => {
   expect(showReceiptCnpj(null)).toBe(false);
   expect(showReceiptCnpj("comprovante")).toBe(true);
@@ -28,4 +28,22 @@ it("aplica a classificação aos selecionados e ao lançamento editado sem dupli
   const lines = [{ id: "iof1", status: "pending" }, { id: "iof2", status: "pending" }, { id: "aprovado", status: "approved" }];
   expect(classificationTargets(lines, new Set(["iof1", "iof2", "aprovado"]), "iof1")).toEqual(["iof1", "iof2"]);
   expect(classificationTargets(lines, new Set(), "iof1")).toEqual(["iof1"]);
+});
+it('aplica somente Centro de Custo sem substituir conta ou projeto', () => {
+  expect(bulkClassificationPatch('', 'Operação', '')).toEqual({ cost_center_id: 'Operação' });
+});
+it('aplica somente Plano de Contas', () => {
+  expect(bulkClassificationPatch('Alimentação', '', '')).toEqual({ account_id: 'Alimentação' });
+});
+it('aplica somente Projeto', () => {
+  expect(bulkClassificationPatch('', '', 'Mogi')).toEqual({ project_id: 'Mogi' });
+});
+it('aplica os três campos cumulativamente', () => {
+  expect(bulkClassificationPatch('Alimentação', 'Operação', 'Mogi')).toEqual({ account_id: 'Alimentação', cost_center_id: 'Operação', project_id: 'Mogi' });
+});
+it('classifica somente selecionados não aprovados da mesma fatura', () => {
+  const lines = [{ id: '1', status: 'pending', statement_id: 'fatura' }, { id: '2', status: 'approved', statement_id: 'fatura' }, { id: '3', status: 'pending', statement_id: 'outra' }];
+  expect(bulkClassificationTargets(lines, new Set(['1', '2']))).toEqual([lines[0]]);
+  expect(() => bulkClassificationTargets(lines, new Set(['1', '3']))).toThrow('mesma fatura');
+  expect(() => bulkClassificationTargets(lines, new Set(['2']))).toThrow('Selecione');
 });

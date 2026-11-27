@@ -233,6 +233,7 @@
 }
 .spend-invoice-actions { display: flex; align-items: center; gap: 0.25rem; flex-shrink: 0; }
 .spend-invoice-actions { order: -1; }
+.spend-bulk-action { grid-column: 1 / -1; }
 .spend-expense-toolbar { justify-items: start; }
 header > div.grid:has(> .erp-list-toolbar) > .erp-list-toolbar { grid-column: 1 / -1; }
 .spend-invoice-progress { grid-column: 1 / -1; min-width: 0; display: flex; flex-direction: column; gap: 0.25rem; }
@@ -252,8 +253,10 @@ header > div.grid:has(> .erp-list-toolbar) > .erp-list-toolbar { grid-column: 1 
   .spend-reconcile-columns > section:not(.fixed) > header { align-self: center; }
 }
 @media (min-width: 1024px) {
-  .spend-invoice-toolbar { grid-template-columns: auto minmax(0, 1fr) minmax(6rem, 0.7fr); }
-  .spend-invoice-progress { grid-column: 3; }
+  .spend-invoice-toolbar { grid-template-columns: minmax(0, 1fr) minmax(6rem, 0.7fr); }
+  .spend-invoice-actions { flex-wrap: wrap; }
+  .spend-invoice-progress { grid-column: 2; grid-row: 1; }
+  .spend-bulk-action { grid-column: 1; grid-row: 2; }
 }
 
 @media (min-width: 768px) {

@@ -13,3 +13,16 @@ export function toggleFilteredSelection<T extends { id: string; status: string }
   for (const line of lines) if (line.status !== "approved") { if (checked) next.add(line.id); else next.delete(line.id); }
   return next;
 }
+export function bulkClassificationPatch(account: string, center: string, project: string) {
+  return {
+    ...(account ? { account_id: account } : {}),
+    ...(center ? { cost_center_id: center } : {}),
+    ...(project ? { project_id: project } : {}),
+  };
+}
+export function bulkClassificationTargets<T extends { id: string; status: string; statement_id: string }>(lines: readonly T[], selected: ReadonlySet<string>) {
+  const targets = lines.filter(line => selected.has(line.id) && line.status !== 'approved');
+  if (!targets.length) throw new Error('Selecione ao menos um lançamento não aprovado.');
+  if (new Set(targets.map(line => line.statement_id)).size > 1) throw new Error('Selecione lançamentos da mesma fatura.');
+  return targets;
+}
