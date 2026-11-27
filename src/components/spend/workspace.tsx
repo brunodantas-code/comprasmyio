@@ -204,6 +204,16 @@ export function SpendWorkspace() {
   const receiptNotices = activeSpendNotices(data.notices.filter(n=>n.card_id===card?.id),pending?.spendItems??[]).slice(0,5);
   const filters=useTableFilters(lines,[{key:'merchant',label:'Estabelecimento',value:l=>l.display_description ?? l.merchant},{key:'status',label:'Situação',value:l=>l.receipt_not_applicable?'Comprovante não se aplica':l.status==='pending'?'Sem comprovante':statusNames[l.status] ?? l.status},{key:'amount',label:'Valor',kind:'number',value:l=>l.amount},{key:'date',label:'Data',kind:'date',value:l=>l.date}]);
   const selectable=filters.filtered.filter(l=>l.status!=='approved');
+  const [lineSorting, setLineSorting] = useState<TableSorting | undefined>();
+  const lineSortColumns = [{ key: 'date', label: 'Data' }, { key: 'amount', label: 'Valor' }, { key: 'status', label: 'Situação' }];
+  const visibleLines = lineSorting ? [...filters.filtered].sort((a, b) => {
+    if (lineSorting.key === 'amount') return compareColumnValues('number', a.amount, b.amount, lineSorting.direction);
+    if (lineSorting.key === 'status') {
+      const label = (line: Line) => line.receipt_not_applicable ? 'Comprovante não se aplica' : line.status === 'pending' ? 'Sem comprovante' : statusNames[line.status] ?? line.status;
+      return compareColumnValues('text', label(a), label(b), lineSorting.direction);
+    }
+    return compareColumnValues('date', a.date, b.date, lineSorting.direction);
+  }) : filters.filtered;
   const selectedVisible=selectable.filter(l=>selected.has(l.id)).length;
   const refresh=async()=>{ await Promise.all([qc.invalidateQueries({queryKey:['spend']}),qc.invalidateQueries({queryKey:['cash-flow-payables']}),qc.invalidateQueries({queryKey:['pending-actions']}),qc.invalidateQueries({queryKey:['central-admin']})]); };
   useEffect(()=>{setLineId('');setSelected(new Set());},[card?.id,period,competence]); const [dueDraft,setDueDraft]=useState(''); useEffect(()=>{setDueDraft(statement?.due_date??'');},[statement?.id,statement?.due_date]); async function saveDue(){if(!statement||!dueDraft)return;setBusy(true);try{const {error}=await supabase.rpc('spend_set_statement_due',{_statement_id:statement.id,_due_date:dueDraft});if(error)throw error;await refresh();setPeriod(dueDraft.slice(0,7));setEditingDue(false);toast.success(`Fatura movida para ${dueDraft.slice(5,7)}/${dueDraft.slice(0,4)}`);}catch(e){toast.error(e instanceof Error?e.message:'Não foi possível salvar o vencimento');}finally{setBusy(false);}}
@@ -315,7 +325,7 @@ export function SpendWorkspace() {
         <header className="spend-invoice-toolbar min-w-0">
           <div className="spend-bulk-action min-w-0"><SpendBulkClassificationDialog data={data} targets={lines.filter(line => selected.has(line.id) && line.status !== 'approved')} busy={busy} apply={classifyBatch}/></div>
           <div className="spend-invoice-actions" aria-label="Ações da conciliação">
-            {filters.menu}<SpendTextCaseToggle active={sentenceCase} onChange={setSentenceCase}/>
+            {filters.menu}<TableSortMenu columns={lineSortColumns} {...(lineSorting ? { value: lineSorting } : {})} onChange={setLineSorting} iconOnly/><SpendTextCaseToggle active={sentenceCase} onChange={setSentenceCase}/>
             <Button variant="ghost" size="icon" aria-label="Enviar PDF da fatura" title="Enviar PDF da fatura" disabled={busy} onClick={()=>setImporting(true)}><Upload /></Button>
             <Button title="Exportar para contabilidade" aria-label="Exportar ZIP" variant="ghost" size="icon" disabled={busy} onClick={exportZip}><Download /></Button>
             {statement&&<Button title="Conciliar automaticamente" aria-label="Conciliar automaticamente" variant="ghost" size="icon" disabled={busy} onClick={()=>action('automatch',{statement_id:statement.id})}><WandSparkles /></Button>}
@@ -328,7 +338,7 @@ export function SpendWorkspace() {
         </header>
         <div className="min-w-0 space-y-3">
         <Table className="spend-reconciliation-table"><TableHeader><TableRow><TableHead className="w-10"><Checkbox aria-label="Marcar todos os filtrados" title="Marcar todos os filtrados" disabled={busy || !selectable.length} checked={selectedVisible===0?false:selectedVisible===selectable.length?true:"indeterminate"} onCheckedChange={v=>setSelected(prev=>toggleFilteredSelection(filters.filtered,prev,v===true))}/></TableHead><TableHead>Data / Descrição</TableHead><TableHead>Valor</TableHead><TableHead>Situação</TableHead><TableHead className="w-10">Ações</TableHead></TableRow></TableHeader><TableBody>
-          {filters.filtered.map(l=><LineRows key={l.id} line={l} data={data} busy={busy} expanded={lineId===l.id} sentenceCase={sentenceCase} selected={selected.has(l.id)} toggle={()=>setLineId(lineId===l.id?'':l.id)} select={v=>setSelected(prev=>{const n=new Set(prev);if(v)n.add(l.id);else n.delete(l.id);return n;})} approve={approve} save={save} notify={t=>{setLineId(l.id);setNotice(t);setMessage(`${t==='notify'?'Envie o comprovante':'Confira e ajuste o comprovante'}: ${l.merchant} · ${BRL.format(l.amount)}`);}} attach={()=>setCapture({line:l})} link={id=>action('link',{line_id:l.id,receipt_id:id})}/>)}
+          {visibleLines.map(l=><LineRows key={l.id} line={l} data={data} busy={busy} expanded={lineId===l.id} sentenceCase={sentenceCase} selected={selected.has(l.id)} toggle={()=>setLineId(lineId===l.id?'':l.id)} select={v=>setSelected(prev=>{const n=new Set(prev);if(v)n.add(l.id);else n.delete(l.id);return n;})} approve={approve} save={save} notify={t=>{setLineId(l.id);setNotice(t);setMessage(`${t==='notify'?'Envie o comprovante':'Confira e ajuste o comprovante'}: ${l.merchant} · ${BRL.format(l.amount)}`);}} attach={()=>setCapture({line:l})} link={id=>action('link',{line_id:l.id,receipt_id:id})}/>)}
         </TableBody></Table>
         {!filters.filtered.length&&<p className="py-10 text-center text-sm text-muted-foreground">Nenhum gasto encontrado para os filtros selecionados.</p>}
         </div>

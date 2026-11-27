@@ -14,9 +14,11 @@ describe("ordenação das solicitações", () => {
   });
   it("ordena status pelo nome exibido", () => {
     expect(["Pendente", "Entregue", "Conforme"].sort((a, b) => compareColumnValues("text", a, b, "asc"))).toEqual(["Conforme", "Entregue", "Pendente"]);
+    expect(["Sem comprovante", "Enviado ao Finance", "Ajuste solicitado"].sort((a, b) => compareColumnValues("text", a, b, "desc"))).toEqual(["Sem comprovante", "Enviado ao Finance", "Ajuste solicitado"]);
   });
   it("ordena valores numericamente e não altera empates", () => {
     expect([100, 2, 10].sort((a, b) => compareColumnValues("number", a, b, "asc"))).toEqual([2, 10, 100]);
+    expect([100, 2, 10].sort((a, b) => compareColumnValues("number", a, b, "desc"))).toEqual([100, 10, 2]);
     expect(compareColumnValues("text", "João", "Joao", "asc")).toBe(0);
   });
 });
