@@ -2,9 +2,10 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 import { columnPermutation, useTableColumnOrders } from "@/components/cde/table-column-order";
+import { applyColumnName, useTableColumnNames, type TableColumnNames } from "@/components/cde/table-column-names";
 
 /** CDE column order: header row computes the permutation; body rows with the same cell count reuse it. */
-type TableOrderCtx = { saved?: number[]; perm: { current: number[] | null } };
+type TableOrderCtx = { saved?: number[]; perm: { current: number[] | null }; names?: Record<string, string>; slots?: number[] };
 const TableOrderContext = React.createContext<TableOrderCtx | null>(null);
 const HeaderContext = React.createContext(false);
 
@@ -13,6 +14,7 @@ function permuteChildren(children: React.ReactNode, ctx: TableOrderCtx | null, i
   const items = React.Children.toArray(children);
   if (inHeader) {
     const present = items.map((c, i) => { const v = React.isValidElement(c) ? (c.props as Record<string, unknown>)["data-cde-col"] : undefined; return typeof v === "number" ? v : i; });
+    ctx.slots = present;
     ctx.perm.current = columnPermutation(present, ctx.saved);
   }
   const perm = ctx.perm.current;
@@ -23,10 +25,30 @@ function permuteChildren(children: React.ReactNode, ctx: TableOrderCtx | null, i
 const Table = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableElement> & { cdeTableId?: string }>(
   ({ className, cdeTableId, ...props }, ref) => {
     const { data: orders } = useTableColumnOrders();
+    const { data: names } = useTableColumnNames();
     const perm = React.useRef<number[] | null>(null);
     const saved = cdeTableId ? orders?.[cdeTableId] : undefined;
-    const orderCtx = React.useMemo<TableOrderCtx | null>(() => (saved ? { saved, perm } : null), [saved]);
+    const tableNames = cdeTableId ? names?.[cdeTableId] : undefined;
+    const orderCtx = React.useMemo<TableOrderCtx | null>(
+      () => (saved || tableNames ? { saved, perm, names: tableNames } : null),
+      [saved, tableNames],
+    );
     const innerRef = React.useRef<HTMLTableElement | null>(null);
+
+    // Aplica o nome editado no CDE ao cabeçalho; o rótulo do modo empilhado usa o texto já trocado.
+    React.useEffect(() => {
+      const el = innerRef.current;
+      const ctx = orderCtx;
+      if (!el || !ctx?.names) return;
+      const headRow = el.tHead?.rows[0];
+      if (!headRow) return;
+      const slots = ctx.slots ?? Array.from(headRow.children).map((_, i) => i);
+      Array.from(headRow.children).forEach((th, pos) => {
+        const slot = slots[pos];
+        if (slot === undefined) return;
+        applyColumnName(th, ctx.names?.[String(slot)]);
+      });
+    });
 
     // Rotula cada célula com o texto do cabeçalho, para o modo empilhado no celular.
     React.useEffect(() => {

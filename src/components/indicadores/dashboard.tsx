@@ -203,11 +203,11 @@ export function IndicadoresDashboard() {
       <Card key={m.id} classification={{ app: "indicadores", department: indicatorDepartment(m.objective_id, data.objectives), status: confidenceName(m.source_metadata && !latest(m.id)?.recorded_by ? null : m.confidence), responsible: m.responsible_id ?? (importedField(m.source_metadata, "responsible_name") || "Sem responsável") }} className="flex h-48 min-w-0 flex-col">
         <CardHeader className="gap-0.5 space-y-0.5 p-3 pb-1 sm:p-3 sm:pb-1">
           <div className="flex items-start gap-2">
-            <CardTitle className="min-w-0 flex-1 text-xs font-normal leading-snug">
+            <CardTitle className="indicadores-compact-title min-w-0 flex-1 text-xs font-normal leading-snug">
               <TruncatedText text={m.title} />
             </CardTitle>
           </div>
-          <CardDescription className="min-w-0 text-xs"><TruncatedText text={importedField(m.source_metadata, "responsible_name") || userName(m.responsible_id)} /></CardDescription>
+          <CardDescription className="indicadores-compact-subtitle min-w-0 text-xs"><TruncatedText text={importedField(m.source_metadata, "responsible_name") || userName(m.responsible_id)} /></CardDescription>
         </CardHeader>
         <CardContent className="flex min-h-0 flex-1 flex-col gap-1 p-3 pt-0 sm:p-3 sm:pt-0">
           <div className="flex min-w-0 items-center justify-between gap-2">
@@ -255,14 +255,14 @@ export function IndicadoresDashboard() {
           <CardHeader className="space-y-1 p-3 sm:p-3">
             <div className="flex items-center gap-2">
               <CdeNumber screen={screen}>{index + 1}</CdeNumber>
-              <CardTitle className="min-w-0 flex-1 text-xs font-normal leading-snug">
+              <CardTitle className="indicadores-compact-title min-w-0 flex-1 text-xs font-normal leading-snug">
                 <TruncatedText text={o.title} />
               </CardTitle>
               {o.confidential && (
                 <LockKeyhole aria-label="Confidencial" className="size-4 shrink-0" />
               )}
             </div>
-            <CardDescription className="min-w-0 truncate text-xs" title={`${data.imported.filter(r => r.source_table === "objective_owners" && importedField(r.data,"objective_id") === o.id).map(r => importedField(data.imported.find(m => m.source_table === "team_members" && importedField(m.data,"id") === importedField(r.data,"team_member_id"))?.data,"full_name")).filter(Boolean).join(", ") || importedField(o.source_metadata,"responsible_name") || userName(o.responsible_id)} · ${o.alignment_name ?? o.scope}`}>
+            <CardDescription className="indicadores-compact-subtitle min-w-0 truncate text-xs" title={`${data.imported.filter(r => r.source_table === "objective_owners" && importedField(r.data,"objective_id") === o.id).map(r => importedField(data.imported.find(m => m.source_table === "team_members" && importedField(m.data,"id") === importedField(r.data,"team_member_id"))?.data,"full_name")).filter(Boolean).join(", ") || importedField(o.source_metadata,"responsible_name") || userName(o.responsible_id)} · ${o.alignment_name ?? o.scope}`}>
               {data.imported.filter(r => r.source_table === "objective_owners" && importedField(r.data,"objective_id") === o.id).map(r => importedField(data.imported.find(m => m.source_table === "team_members" && importedField(m.data,"id") === importedField(r.data,"team_member_id"))?.data,"full_name")).filter(Boolean).join(", ") || importedField(o.source_metadata,"responsible_name") || userName(o.responsible_id)} ·{" "}
               {o.alignment_name ??
                 {

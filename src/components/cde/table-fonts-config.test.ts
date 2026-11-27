@@ -22,6 +22,18 @@ describe("parseTableFonts", () => {
     expect(parseTableFonts("não é json")).toMatchObject(TABLE_FONTS_DEFAULT);
     expect(parseTableFonts('{"headerPx":12}')).toMatchObject({ headerPx: 12, filterPx: 12 });
   });
+
+  it("oferece tamanho de fonte para títulos e subtítulos", () => {
+    expect(parseTableFonts(undefined)).toMatchObject({ titlePx: 16, subPx: 14 });
+    expect(parseTableFonts('{"titlePx":18,"subPx":12}')).toMatchObject({ titlePx: 18, subPx: 12 });
+    expect(parseTableFonts('{"titlePx":30,"subPx":4}')).toMatchObject({ titlePx: 16, subPx: 14 });
+  });
+
+  it("emite as variáveis de tamanho de títulos e subtítulos", async () => {
+    const { parseTableFonts, tableAlignVars } = await import("./table-fonts-config");
+    expect(tableAlignVars(parseTableFonts('{"titlePx":18,"subPx":12}'))).toMatchObject({ "--title-fs": "18px", "--sub-fs": "12px" });
+    expect(tableAlignVars(parseTableFonts(null))).toMatchObject({ "--title-fs": "16px", "--sub-fs": "14px" });
+  });
 });
 
 describe("table alignment", () => {

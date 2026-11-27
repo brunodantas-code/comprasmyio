@@ -343,7 +343,7 @@ export function CdeWorkspace() {
     onSuccess: () => { refresh(); toast.success("Modelo restaurado"); },
   });
 
-  const renderGroup = (g0: (typeof GROUPS)[number], num: string, parent: string | null, handle: React.ReactNode) => {
+  const renderGroup = (g0: (typeof GROUPS)[number], num: string, parent: string | null, handle: React.ReactNode, asSection = false) => {
         const g = { ...g0, title: `${num} ${cdeOrder.titles?.[g0.key] ?? baseTitle(g0.title)}` };
                   const list = groupModels(g.key);
         const standards = standardsOf(g.key);
@@ -353,8 +353,11 @@ export function CdeWorkspace() {
         const removed = (data?.removed ?? []).filter((r) => r.group_key === g.key);
         const isOpen = open.has(g.key);
         return (
-          <section className={cn(parent ? "cde-model-section min-w-0" : "min-w-0 cde-category-sections")}>
-            {!parent ? <CdeCategoryHeader handle={handle} number={num} title={g.title.split(" ").slice(1).join(" ")} hint={`${list.length} modelos · ${g.hint}`} open={isOpen} onToggle={() => setOpen((s) => { const n = new Set(s); if (n.has(g.key)) n.delete(g.key); else n.add(g.key); return n; })} action={<CdeButton group="plus" screen="components/cde/cde-workspace.tsx" title="Criar modelo" aria-label={`Criar modelo em ${g.title}`} onClick={() => { setDraft({ ...emptyDraft, tag: (g.key === "box" || g.key === "confirm_dialog") ? "div" : "Button" }); setCreating(g.key); }} />} /> : <div className="cde-sub-band flex items-center gap-3 px-5 py-2">{handle}
+          <section className={cn(parent ? (asSection ? "cde-section min-w-0" : "cde-model-section min-w-0") : "min-w-0 cde-category-sections")}>
+            {!parent ? <CdeCategoryHeader handle={handle} number={num} title={g.title.split(" ").slice(1).join(" ")} hint={`${list.length} modelos · ${g.hint}`} open={isOpen} onToggle={() => setOpen((s) => { const n = new Set(s); if (n.has(g.key)) n.delete(g.key); else n.add(g.key); return n; })} action={<CdeButton group="plus" screen="components/cde/cde-workspace.tsx" title="Criar modelo" aria-label={`Criar modelo em ${g.title}`} onClick={() => { setDraft({ ...emptyDraft, tag: (g.key === "box" || g.key === "confirm_dialog") ? "div" : "Button" }); setCreating(g.key); }} />} /> : asSection ? <header className="cde-section-header grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+              <div className="min-w-0"><h3 className="cde-section-title flex min-w-0 items-center gap-3"><span className="min-w-0 break-words">{g.title.split(" ").slice(1).join(" ")}</span></h3><p className="cde-sub-hint mt-1">{list.length} modelos · {g.hint}</p></div>
+              <div className="cde-header-actions"><CdeButton group="plus" screen="components/cde/cde-workspace.tsx" title="Criar modelo" aria-label={`Criar modelo em ${g.title}`} onClick={() => { setDraft({ ...emptyDraft, tag: FIELD_TAGS[g.key]?.[0] ?? (NUMBER_MODELS[g.key] ? "span" : (g.key === "box" || g.key === "confirm_dialog") ? "div" : "Button"), label: NUMBER_MODELS[g.key] ? "1" : "" }); setCreating(g.key); }} /><CdeButton group="toggle" screen="components/cde/cde-workspace.tsx" title={`${isOpen ? "Recolher" : "Exibir"} ${g.title}`} aria-label={`${isOpen ? "Recolher" : "Exibir"} ${g.title}`} aria-expanded={isOpen} onClick={() => setOpen((s) => { const n = new Set(s); if (n.has(g.key)) n.delete(g.key); else n.add(g.key); return n; })} /></div>
+            </header> : <div className="cde-sub-band flex items-center gap-3 px-5 py-2">{handle}
               <Button cdeNative actionKind="specific" variant="ghost" type="button" aria-expanded={isOpen} onClick={() => setOpen((s) => { const n = new Set(s); if (n.has(g.key)) n.delete(g.key); else n.add(g.key); return n; })} className="!flex !h-auto !min-w-0 flex-1 items-center !justify-start gap-4 !bg-transparent !p-0 text-left whitespace-normal">
                 <span className="min-w-0 flex-1">
                   <span className="cde-section-title block font-normal">{g.title.split(" ").slice(1).join(" ")}</span>
@@ -501,7 +504,7 @@ export function CdeWorkspace() {
           if (cat === "title_texts") return <CdeTitleTexts key={`CdeTitleTexts-${collapseKey}`} number={ci + 1} handle={handle} />;
           if (cat === "app_appearance") return <AppAppearanceItem key={`AppAppearance-${collapseKey}`} number={ci + 1} handle={handle}>
             <CdeSortableList className="cde-subcategory-list space-y-0" ids={cdeOrder.subs["app_appearance"] ?? []} labelOf={catLabel} onMove={ids => saveCdeOrder({ ...cdeOrder, subs: { ...cdeOrder.subs, app_appearance: ids } })}>
-              {(id, index, subHandle) => { if (id === "project_budget") return <CdeProjectCustomizations key={`CdeProjectCustomizations-${collapseKey}`} number={ci + 1} handle={subHandle} title={catLabel(id)} embedded />; const group = GROUPS.find(group => group.key === id); return group ? renderGroup(group, `${n}.${index + 3}`, n, subHandle) : null; }}
+              {(id, index) => { if (id === "project_budget") return <CdeProjectCustomizations key={`CdeProjectCustomizations-${collapseKey}`} number={ci + 1} title={catLabel(id)} embedded />; const group = GROUPS.find(group => group.key === id); return group ? renderGroup(group, `${n}.${index + 3}`, n, null, true) : null; }}
             </CdeSortableList>
           </AppAppearanceItem>;
           if (cat === "tags") return <CdeTags key={`CdeTags-${collapseKey}`} number={ci + 1} handle={handle} />;

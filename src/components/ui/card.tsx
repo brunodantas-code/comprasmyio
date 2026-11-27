@@ -34,7 +34,8 @@ CardHeader.displayName = "CardHeader";
 const CardTitle = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, children, ...props }, ref) => {
     const text = useTitleText("titulo", children);
-    return <div ref={ref} className={cn("cde-title font-semibold leading-none tracking-tight", className)} {...props}>{text}</div>;
+    // Título e subtítulo seguem tamanho e formatação escolhidos no CDE (Cabeçalhos e Listas).
+    return <div ref={ref} className={cn("cde-title leading-none tracking-tight", className)} {...props}>{text}</div>;
   },
 );
 CardTitle.displayName = "CardTitle";
@@ -42,7 +43,7 @@ CardTitle.displayName = "CardTitle";
 const CardDescription = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, children, ...props }, ref) => {
     const text = useTitleText("subtitulo", children);
-    return <div ref={ref} className={cn("cde-subtitle text-sm", className)} {...props}>{text}</div>;
+    return <div ref={ref} className={cn("cde-subtitle", className)} {...props}>{text}</div>;
   },
 );
 CardDescription.displayName = "CardDescription";

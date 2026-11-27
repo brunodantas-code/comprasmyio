@@ -849,8 +849,11 @@ input[data-custom-calendar="true"]::-webkit-calendar-picker-indicator {
 @layer base {
   .cde-th { text-align: var(--th-align); vertical-align: var(--th-valign); background: var(--th-bg); color: var(--th-color); }
   :where(thead) > tr { border-color: var(--th-border); }
-  .cde-title { color: var(--title-color, inherit); background: var(--title-bg, transparent); border: 1px solid var(--title-border, transparent); }
-  .cde-subtitle { color: var(--sub-color, inherit); background: var(--sub-bg, transparent); border: 1px solid var(--sub-border, transparent); }
+  .cde-title { font-size: var(--title-fs, 16px) !important; color: var(--title-color, inherit); background: var(--title-bg, transparent); border: 1px solid var(--title-border, transparent); }
+  .cde-subtitle { font-size: var(--sub-fs, 14px) !important; color: var(--sub-color, inherit); background: var(--sub-bg, transparent); border: 1px solid var(--sub-border, transparent); }
+  /* Cards compactos de Indicadores mantêm a fonte própria menor. */
+  .indicadores-compact-title.cde-title { font-size: var(--text-xs) !important; }
+  .indicadores-compact-subtitle.cde-subtitle { font-size: var(--text-xs) !important; }
   .cde-td { text-align: var(--td-align); vertical-align: var(--td-valign); color: var(--td-color); }
   :where(tbody) > tr { background-color: var(--td-bg); border-color: var(--td-border); }
   /* Botões, links e grupos de ações dentro das células acompanham o alinhamento escolhido */
