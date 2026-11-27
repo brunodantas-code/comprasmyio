@@ -69,6 +69,19 @@ export function AppNavigation({ className = "", children, ...props }: ComponentP
     window.addEventListener("resize", update);
     return () => { breakpoint.removeEventListener("change", update); window.removeEventListener("resize", update); };
   }, [className]);
+  // The side panel starts exactly where the sticky top band ends, whatever height CDE gives it.
+  useEffect(() => {
+    if (!mounted) return;
+    const header = document.querySelector<HTMLElement>("header.home-page-header");
+    if (!header) return;
+    const update = () => document.documentElement.style.setProperty("--app-header-bottom", `${Math.max(0, header.getBoundingClientRect().bottom)}px`);
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(header);
+    window.addEventListener("resize", update);
+    window.addEventListener("scroll", update, { passive: true });
+    return () => { observer.disconnect(); window.removeEventListener("resize", update); window.removeEventListener("scroll", update); };
+  }, [mounted]);
   useEffect(() => {
     if (!mounted) return;
     const viewport = window.visualViewport;
