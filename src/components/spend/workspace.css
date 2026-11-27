@@ -12,6 +12,8 @@
   align-items: center;
   gap: 0.25rem;
 }
+.spend-manual-action { justify-content: flex-start; }
+.spend-manual-action.spend-manual-newline { flex: 0 0 100%; }
 .spend-receipt-filter-actions {
   display: flex;
   flex-shrink: 0;
@@ -19,9 +21,6 @@
   gap: 0.25rem;
 }
 .spend-receipt-actions > .spend-mobile-register-slot { flex: 1 0 100%; }
-@media (min-width: 1024px) {
-  .spend-receipt-actions { flex-wrap: nowrap; }
-}
 
 .spend-mobile-register-slot {
   display: flex;

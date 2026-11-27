@@ -943,3 +943,5 @@
 - [x] CDE Home: salvar mescla somente o perfil atual no registro recém-lido; Roxo Mobile/Verde Mobile e gravação simultânea Verde Desktop conferidos com sessão, originais restaurados; 46 testes passaram. Falta publicar.
 
 - [x] Spend classificação: campos agrupados à esquerda, intervalo uniforme de 12 px entre linhas verdes, quatro campos na mesma linha expandida; desktop/mobile conferidos sem salvar dados. Falta publicar.
+
+- [x] Spend Comprovantes: botão “Sem comprovante” com quebra à esquerda abaixo do funil quando faltar largura; conferido em 1440/1098/1024 px e formulário aberto, sem salvar despesas. Falta publicar.
