@@ -18,8 +18,8 @@ export function SpendBulkClassificationDialog({ data, targets, busy, apply }: { 
   return <>
     <Button disabled={busy || !targets.length} title="Classificação em lote" aria-label="Classificação em lote" onClick={() => { setAccount(''); setCenter(''); setProject(''); setOpen(true); }}><ListChecks /><span>Classificação em lote</span></Button>
     <Dialog open={open} onOpenChange={value => { if (!busy) setOpen(value); }}>
-      <DialogContent className="sm:max-w-2xl" aria-describedby={undefined} topActions={<Button variant="ghost" size="icon" title="Salvar classificação em lote" aria-label="Salvar classificação em lote" disabled={busy || !sameStatement || !Object.keys(patch).length} onClick={async () => { if (await apply(patch)) setOpen(false); }}><Save /></Button>}>
-        <DialogHeader><DialogTitle>Classificação em lote</DialogTitle></DialogHeader>
+      <DialogContent className="grid-cols-[minmax(0,1fr)] sm:max-w-2xl" aria-describedby={undefined} topActions={<Button variant="ghost" size="icon" title="Salvar classificação em lote" aria-label="Salvar classificação em lote" disabled={busy || !sameStatement || !Object.keys(patch).length} onClick={async () => { if (await apply(patch)) setOpen(false); }}><Save /></Button>}>
+        <DialogHeader className="min-w-0 text-left pr-0"><DialogTitle className="break-words">Classificação em lote</DialogTitle></DialogHeader>
         <p className="text-sm text-muted-foreground">{targets.length} lançamentos selecionados · {BRL.format(targets.reduce((total, line) => total + line.amount, 0))}</p>
         {!sameStatement && <p role="alert" className="text-sm text-destructive">Selecione lançamentos da mesma fatura.</p>}
         <div className="flex flex-wrap items-end gap-4">
