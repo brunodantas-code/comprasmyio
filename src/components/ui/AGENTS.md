@@ -20,3 +20,4 @@
 - Button `cdeIgnore` marks navigation rows (app menu, sidebars): no CDE action model, no auto width, so an action icon like the pen cannot shrink one row. A caller that sets its own width class (w-full list rows) also keeps it against the auto-width rule.
 - List toolbar containers use erp-list-toolbar and erp-list-tools-header for shared wrapping geometry without changing table columns; intuitive Button actions retain accessible descriptions when their visible labels are removed.
 - Buttons expose data-cde-action and footers use erp-form-footer; bottom-save positioning is scoped to footer/final form/card actions, preserving header geometry.
+- Icon-only Button labels resolve their CDE standard from the leading action word only ("Excluir o indicador X" is trash, "Histórico de Concluir…" is none), so an object name can never restyle an icon action; file-format nouns (PDF/Excel/exportar) still identify export anywhere in the label.

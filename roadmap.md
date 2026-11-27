@@ -1,3 +1,6 @@
+- [ ] Indicadores: título "Objetivos e Key Results" no padrão Minhas Solicitações (CardTitle/CardDescription dentro do bloco); conferir no preview.
+- [ ] Indicadores: "Áreas, equipe e reuniões" deixa de repetir nos 4 menus e vira menu próprio após Ciclos.
+- [ ] Indicadores: Áreas, Equipes e Reuniões editáveis (campos editáveis, preservando o payload original da importação).
 - [x] CDE: divisórias cinza acima de Padrões para edição de cores e de Ícones e menus por app restauradas; conferidas na conta autenticada, com 1 px e a cor de borda do CDE.
 - [x] Spend Conciliação: vencimento cinza junto à Fatura do cartão, lápis abre editor existente e resumo junto aos filtros; fatura real de 16/11/2026 conferida, PDF/lançamentos começam em y=278 no desktop; 1098px/celular sem excesso lateral, 20 testes passaram, nenhum dado salvo.
 - [x] Esclarecer aviso “Esta mensagem foi cancelada”: não foi enviado pelo assistente; origem não confirmada.
@@ -867,3 +870,5 @@
 - [x] Supply Alçadas: cabeçalho da lista inferior e conteúdo dentro do card; valores centralizados.
 
 - [x] Supply: corrigir título e enquadramento da segunda lista enviada.
+- [x] Indicadores: alinhar Meta, gráfico de % de conclusão, lápis, lixeira, check-in e histórico em colunas fixas, todos na mesma linha em cada registro.
+- [x] Indicadores: histórico em milestones no padrão dos Tickets, sem pop-up.

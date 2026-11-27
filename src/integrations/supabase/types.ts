@@ -4958,18 +4958,27 @@ export type Database = {
       indicadores_import_records: {
         Row: {
           data: Json
+          edited_at: string | null
+          edited_by: string | null
+          edits: Json | null
           original_source_id: string | null
           source_id: string
           source_table: string
         }
         Insert: {
           data: Json
+          edited_at?: string | null
+          edited_by?: string | null
+          edits?: Json | null
           original_source_id?: string | null
           source_id: string
           source_table: string
         }
         Update: {
           data?: Json
+          edited_at?: string | null
+          edited_by?: string | null
+          edits?: Json | null
           original_source_id?: string | null
           source_id?: string
           source_table?: string

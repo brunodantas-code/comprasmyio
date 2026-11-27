@@ -47,8 +47,12 @@ export function detectButtonGroup(children: React.ReactNode, label?: string): Au
   const icon = iconName(children);
   if (icon) return ICON_GROUP[icon];
   const visible = text(children).trim();
-  const t = (visible || label || "").toLowerCase();
-  if (/\b(pdf|excel|exportar)\b/.test(t)) return "export";
+  // Icon-only buttons name their object ("Excluir o indicador X", "Histórico de Concluir…"):
+  // only the leading action word identifies the standard, never a word inside the object name.
+  const lead = (label || "").trim().split(/\s+/)[0] ?? "";
+  const t = (visible || lead).toLowerCase();
+  // File-format nouns still identify export wherever they appear ("Baixar PDF", "Abrir PDF").
+  if (/\b(pdf|excel|exportar)\b/.test((visible || label || "").toLowerCase())) return "export";
   if (/\b(agrupar|consolidar)\b|custo por etiqueta|indicadores de prazos/.test(t)) return "organize";
   if (/\b(limpar|limpando)\b/.test(t)) return "clear";
   if (/\b(anexar|anexando)\b/.test(t)) return "attach";

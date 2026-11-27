@@ -5852,7 +5852,7 @@
   {
     "id": "components/indicadores/dashboard.tsx|0432d3e046f07afa|0",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 187,
+    "line": 188,
     "tag": "Button",
     "label": "Icon",
     "dynamic": false,
@@ -5867,7 +5867,7 @@
   {
     "id": "components/indicadores/dashboard.tsx|56e0edbf13436716|0",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 195,
+    "line": 196,
     "tag": "Button",
     "label": "Check-in",
     "dynamic": false,
@@ -5882,7 +5882,7 @@
   {
     "id": "components/indicadores/dashboard.tsx|a8dffd5f98a1302d|0",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 233,
+    "line": 234,
     "tag": "Button",
     "label": "Check-in",
     "dynamic": false,
@@ -5897,7 +5897,7 @@
   {
     "id": "components/indicadores/dashboard.tsx|9e77056673298c3b|0",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 239,
+    "line": 240,
     "tag": "Button",
     "label": "Criar OKR",
     "dynamic": false,
@@ -5912,7 +5912,7 @@
   {
     "id": "components/indicadores/dashboard.tsx|186b26e208d5a78a|0",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 287,
+    "line": 288,
     "tag": "CdeButton",
     "label": "Novo Key Result",
     "dynamic": false,
@@ -5927,7 +5927,7 @@
   {
     "id": "components/indicadores/dashboard.tsx|f78efca9e424c46c|0",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 305,
+    "line": 306,
     "tag": "Button",
     "label": "Expandir OKR",
     "dynamic": false,
@@ -5942,7 +5942,7 @@
   {
     "id": "components/indicadores/dashboard.tsx|2466d7a3dce4a979|0",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 354,
+    "line": 371,
     "tag": "CdeButton",
     "label": "Sem nome fixo",
     "dynamic": false,
@@ -5957,7 +5957,7 @@
   {
     "id": "components/indicadores/dashboard.tsx|1b6135276a72b3a5|0",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 415,
+    "line": 431,
     "tag": "Button",
     "label": "v.icon",
     "dynamic": false,
@@ -5972,7 +5972,7 @@
   {
     "id": "components/indicadores/dashboard.tsx|2466d7a3dce4a979|1",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 429,
+    "line": 445,
     "tag": "CdeButton",
     "label": "Sem nome fixo",
     "dynamic": false,
@@ -5987,7 +5987,7 @@
   {
     "id": "components/indicadores/dashboard.tsx|d850325f261cf0df|0",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 574,
+    "line": 597,
     "tag": "CdeButton",
     "label": "Novo Key Result",
     "dynamic": false,
@@ -6002,7 +6002,7 @@
   {
     "id": "components/indicadores/dashboard.tsx|e2c6700f08e432bb|0",
     "file": "components/indicadores/dashboard.tsx",
-    "line": 578,
+    "line": 601,
     "tag": "Button",
     "label": "Icon",
     "dynamic": true,
@@ -6030,18 +6030,48 @@
     "group": ""
   },
   {
-    "id": "components/indicadores/imported-summary.tsx|d09226a94fdedbc7|0",
-    "file": "components/indicadores/imported-summary.tsx",
-    "line": 15,
+    "id": "components/indicadores/imported-records.tsx|e5732526bdbdda01|0",
+    "file": "components/indicadores/imported-records.tsx",
+    "line": 127,
     "tag": "Button",
-    "label": "Áreas, equipe e reuniões",
+    "label": "Save",
     "dynamic": false,
     "visualCustom": false,
     "autoCdeSafe": true,
-    "icon": "CdeDisclosureIcon",
+    "icon": "Save",
     "variant": "ghost",
-    "size": "",
-    "className": "!w-auto !h-auto gap-2 text-sm",
+    "size": "compactIcon",
+    "className": "",
+    "group": ""
+  },
+  {
+    "id": "components/indicadores/imported-records.tsx|616b45e899d221f9|0",
+    "file": "components/indicadores/imported-records.tsx",
+    "line": 137,
+    "tag": "Button",
+    "label": "X",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "X",
+    "variant": "ghost",
+    "size": "compactIcon",
+    "className": "",
+    "group": ""
+  },
+  {
+    "id": "components/indicadores/imported-records.tsx|dffa4d4a9b1b14e3|0",
+    "file": "components/indicadores/imported-records.tsx",
+    "line": 167,
+    "tag": "Button",
+    "label": "Pencil",
+    "dynamic": false,
+    "visualCustom": false,
+    "autoCdeSafe": true,
+    "icon": "Pencil",
+    "variant": "ghost",
+    "size": "compactIcon",
+    "className": "",
     "group": ""
   },
   {

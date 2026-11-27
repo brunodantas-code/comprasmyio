@@ -3,6 +3,7 @@
 - Cards, markers, fields, filters and actions use the live shared CDE components; progress and periods share pure tested helpers.
 - Objective and metric cards have independent shared filters and stable pure sorting by their own visible domain fields; filters intersect authorized cycle/personal rows and never grant access through matching.
 - Imported OKR records retain original IDs and payloads separately from ERP identities; unknown authors and confidence remain unknown, and historical imports never grant app roles.
-- Read check-in history in stable paginated batches so the API row limit cannot truncate a user's history; imported areas, memberships and meetings remain a read-only historical view.
+- Read check-in history in stable paginated batches so the API row limit cannot truncate a user's history; check-in history renders inline as milestones in the shared Tickets timeline, never in a pop-up.
+- Imported areas, team members and meetings keep their original payload and gain admin-only field edits stored as separate overrides, so imported identities and histories stay intact.
 - User summaries reuse Central's mini-chart and disclosure renderer with domain labels; group authorized OKRs/KPIs by stable ERP identity or preserved historical name without assigning new access.
 - Objective details open with the shared fullscreen Dialog and list only authorized filtered KRs; selection stores stable IDs and resolves fresh query rows so updates retain permissions and current values without shifting overview cards.- KR pendencies come from one identity-scoped RPC (current non-archived cycle, overdue unmet target or >7 days without check-in) shared by personal Central, Admin Central and the portal badge.

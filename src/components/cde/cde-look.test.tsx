@@ -14,3 +14,16 @@ describe('Approval action standard grouping', () => {
     });
   }
 });
+
+describe('Icon-only object names', () => {
+  it('keeps a descriptive object on the trash standard', () => {
+    expect(detectButtonGroup(null, 'Excluir o indicador de vendas')).toBe('trash');
+  });
+  it('ignores action words inside an object name', () => {
+    expect(detectButtonGroup(null, 'Histórico de Concluir a migração')).toBeUndefined();
+    expect(detectButtonGroup(null, 'Check-in de Criar nova loja')).toBeUndefined();
+  });
+  it('still exports on a file-format noun', () => {
+    expect(detectButtonGroup(null, 'Baixar PDF respondido')).toBe('export');
+  });
+});

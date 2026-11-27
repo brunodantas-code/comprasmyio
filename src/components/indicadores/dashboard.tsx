@@ -18,16 +18,8 @@ import {
   Pencil,
   Target,
   Trash2,
+  Users,
 } from "lucide-react";
-import {
-  CartesianGrid,
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { confirmAction } from "@/components/confirm-dialog";
@@ -56,10 +48,12 @@ import {
 } from "@/lib/indicadores";
 import { indicadoresOptions, type Metric, type Objective } from "./data";
 import { Choice, IndicadorEditor, type EditSelection } from "./editors";
-import { ImportedSummary } from "./imported-summary";
+import { ImportedRecords } from "./imported-records";
+import { ErpDisclosureRow } from "@/components/erp-disclosure-row";
 import { UserPendingBars } from "@/components/central/user-bars";
 import { indicadoresUserBars } from "@/lib/indicadores-user-bars";
 import { importedField, historicalAuthor } from "@/lib/indicadores-import";
+import { MilestoneTimeline } from "@/components/milestone-timeline";
 const screen = "components/indicadores/dashboard.tsx";
 function TruncatedText({ text }: { text: string }) {
   return <TooltipProvider><TextTooltip><TooltipTrigger asChild><span className="block w-full min-w-0 truncate" title={text}>{text}</span></TooltipTrigger><TooltipContent className="max-w-sm whitespace-normal">{text}</TooltipContent></TextTooltip></TooltipProvider>;
@@ -87,7 +81,7 @@ export function IndicadoresDashboard() {
   const [cycleId, setCycleId] = useState("active");
   const [cardSorts, setCardSorts] = useState<Record<string, CardSort | undefined>>({});
   const [edit, setEdit] = useState<EditSelection | null>(null);
-  const [history, setHistory] = useState<Metric | null>(null);
+  const [historyFor, setHistoryFor] = useState<string | null>(null);
   const [focusedObjective, setFocusedObjective] = useState<{ id: string; metricIds: string[] } | null>(null);
   const canEdit = data.role === "admin" || data.role === "editor";
   const qc = useQueryClient();
@@ -189,10 +183,40 @@ export function IndicadoresDashboard() {
     </Button>
   );
   const latest = (id: string) => data.checkins.find((c) => c.metric_id === id);
+  const historyEntries = (m: Metric) =>
+    data.checkins
+      .filter((c) => c.metric_id === m.id)
+      .map((c) => ({
+        id: c.id,
+        created_at: c.recorded_at,
+        text:
+          `Check-in: ${metricValue(c.value, m.measure, m.unit)} · ${confidenceName(c.confidence)}` +
+          (c.comment ? `\n${c.comment}` : "") +
+          (importedField(c.source_metadata, "created_at")
+            ? `\nRegistro original: ${new Date(importedField(c.source_metadata, "created_at")).toLocaleString("pt-BR")}`
+            : "") +
+          `\npor ${historicalAuthor(c.recorded_by, (id) => userName(id))}`,
+      }));
+  const historyPanel = (m: Metric) => {
+    const entries = historyEntries(m);
+    return (
+      <div className="border-t border-border pt-3">
+        <p className="mb-2 flex items-center gap-2 text-sm font-semibold"><History className="h-4 w-4" />Histórico</p>
+        {entries.length ? <MilestoneTimeline entries={entries} /> : <p className="text-xs text-muted-foreground">Nenhum check-in registrado.</p>}
+      </div>
+    );
+  };
   function metricRow(m: Metric, i: number) {
     const owner = data.objectives.find(o => o.id === m.objective_id);
     const archived = owner ? isArchived(owner) : false;
-    return (<div key={m.id} className="grid items-center gap-4 py-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)_auto]"><div className="min-w-0"><div className="flex items-start gap-2"><CdeNumber screen={screen} subcategory>{i+1}</CdeNumber><p className="text-sm">{m.title}</p></div><p className="mt-1 text-xs text-muted-foreground">{importedField(m.source_metadata,'responsible_name') || userName(m.responsible_id)}</p></div><div className="space-y-1 text-xs"><p>{metricValue(m.current_value,m.measure,m.unit)} · Meta: {metricValue(m.target_value,m.measure,m.unit)}</p>{m.due_on && <p className="text-muted-foreground">Prazo: {new Date(`${m.due_on}T12:00:00`).toLocaleDateString('pt-BR')}</p>}</div><Advance value={metricProgress(m.initial_value,m.target_value,m.current_value)} /><div className="flex items-center gap-2">{canEdit && !archived && iconButton(`Editar ${m.title}`,Pencil,()=>setEdit({type:'metric',row:m,kind:m.kind === 'kpi' ? 'kpi' : 'kr'}))}{canEdit && iconButton(`Excluir ${m.title}`,Trash2,async()=>{if(await confirmAction(`Excluir o indicador “${m.title}”?`))mutation.mutate({type:'metric',id:m.id});})}{!archived && (m.responsible_id===data.userId || data.role==='admin') && <Button onClick={()=>setEdit({type:'checkin',row:m})}><CheckCheck />Check-in</Button>}{iconButton(`Histórico de ${m.title}`,History,()=>setHistory(m))}</div></div>);
+    const canCheckin = !archived && (m.responsible_id === data.userId || data.role === "admin");
+    const slot = (node: React.ReactNode, width = "w-6") => (
+      <span className={`flex shrink-0 items-center justify-center ${width}`}>{node}</span>
+    );
+    const empty = (Icon: typeof Pencil) => (
+      <span aria-hidden="true" className="invisible flex h-6 w-6 items-center justify-center"><Icon className="size-3.5" /></span>
+    );
+    return (<div key={m.id}><div className="grid items-center gap-4 py-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)_16rem]"><div className="min-w-0"><div className="flex items-start gap-2"><CdeNumber screen={screen} subcategory>{i+1}</CdeNumber><p className="text-sm">{m.title}</p></div><p className="mt-1 text-xs text-muted-foreground">{importedField(m.source_metadata,'responsible_name') || userName(m.responsible_id)}</p></div><div className="space-y-1 text-xs"><p>{metricValue(m.current_value,m.measure,m.unit)} · Meta: {metricValue(m.target_value,m.measure,m.unit)}</p>{m.due_on && <p className="text-muted-foreground">Prazo: {new Date(`${m.due_on}T12:00:00`).toLocaleDateString('pt-BR')}</p>}</div><Advance value={metricProgress(m.initial_value,m.target_value,m.current_value)} /><div className="flex items-center gap-2">{slot(canEdit && !archived ? iconButton(`Editar ${m.title}`,Pencil,()=>setEdit({type:'metric',row:m,kind:m.kind === 'kpi' ? 'kpi' : 'kr'})) : empty(Pencil))}{slot(canEdit ? iconButton(`Excluir ${m.title}`,Trash2,async()=>{if(await confirmAction(`Excluir o indicador “${m.title}”?`))mutation.mutate({type:'metric',id:m.id});}) : empty(Trash2))}{slot(canCheckin ? <Button onClick={()=>setEdit({type:'checkin',row:m})}><CheckCheck />Check-in</Button> : <span aria-hidden="true" className="invisible">Check-in</span>, "w-32")}{slot(iconButton(`Histórico de ${m.title}`,History,()=>setHistoryFor(v=>v===m.id?null:m.id)))}</div></div>{historyFor===m.id && historyPanel(m)}</div>);
   }
   function metricCard(m: Metric) {
     if (m.kind === "kr") return metricRow(m, metrics.findIndex(row => row.id === m.id));
@@ -200,7 +224,7 @@ export function IndicadoresDashboard() {
     const ownerObjective = data.objectives.find((o) => o.id === m.objective_id);
     const archived = ownerObjective ? isArchived(ownerObjective) : false;
     return (
-      <Card key={m.id} classification={{ app: "indicadores", department: indicatorDepartment(m.objective_id, data.objectives), status: confidenceName(m.source_metadata && !latest(m.id)?.recorded_by ? null : m.confidence), responsible: m.responsible_id ?? (importedField(m.source_metadata, "responsible_name") || "Sem responsável") }} className="flex h-48 min-w-0 flex-col">
+      <Card key={m.id} classification={{ app: "indicadores", department: indicatorDepartment(m.objective_id, data.objectives), status: confidenceName(m.source_metadata && !latest(m.id)?.recorded_by ? null : m.confidence), responsible: m.responsible_id ?? (importedField(m.source_metadata, "responsible_name") || "Sem responsável") }} className={`flex min-w-0 flex-col ${historyFor === m.id ? "min-h-48" : "h-48"}`}>
         <CardHeader className="gap-0.5 space-y-0.5 p-3 pb-1 sm:p-3 sm:pb-1">
           <div className="flex items-start gap-2">
             <CardTitle className="indicadores-compact-title min-w-0 flex-1 text-xs font-normal leading-snug">
@@ -234,13 +258,14 @@ export function IndicadoresDashboard() {
                 <CheckCheck className="size-4" />
               </Button>
             )}
-            {iconButton(`Histórico de ${m.title}`, History, () => setHistory(m))}
+            {iconButton(`Histórico de ${m.title}`, History, () => setHistoryFor(v => v === m.id ? null : m.id))}
             {m.kind === "kpi" && canEdit && (
               <Button variant="ghost" size="compactIcon" aria-label={`Criar OKR de ${m.title}`} title="Criar OKR" onClick={() => setEdit({ type: "convert", row: m })}>
                 <Target className="size-4" />
               </Button>
             )}
           </div>
+          {historyFor === m.id && historyPanel(m)}
           {checkinDue(latest(m.id)?.recorded_at, new Date()) && !archived && (
             <p className="text-xs text-destructive">Check-in semanal pendente</p>
           )}
@@ -331,6 +356,7 @@ export function IndicadoresDashboard() {
       { value: "kpis", label: "KPIs", icon: Gauge },
       { value: "checkins", label: "Check-ins", icon: CheckCheck },
       { value: "cycles", label: "Ciclos", icon: CalendarDays },
+      { value: "areas", label: "Áreas, equipe e reuniões", icon: Users },
     ],
     menuOrders?.["Indicadores|Barra inferior"],
   ), menuNames, "Indicadores", "Barra inferior");
@@ -339,16 +365,31 @@ export function IndicadoresDashboard() {
       <AppHeader logo={<MyioAppLogo appName={appName} />} />
       <main className={`mx-auto max-w-[1500px] space-y-5 px-4 pb-28 pt-6 sm:px-6 ${ml.main}`}>
         <section className="erp-screen-block space-y-5">
-        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:flex sm:justify-between">
-          <h1 className="min-w-0 text-xl font-normal">
-            {tab === "okrs"
-              ? "Objetivos e Key Results"
-              : tab === "kpis"
-                ? "Indicadores de desempenho"
-                : tab === "checkins"
-                  ? "Check-ins semanais"
-                  : "Ciclos e períodos"}
-          </h1>
+        <CardHeader className="flex flex-col gap-4 p-0 sm:flex-row sm:items-center sm:justify-between sm:p-0">
+          <div className="min-w-0 space-y-1">
+            <CardTitle>
+              {tab === "okrs"
+                ? "Objetivos e Key Results"
+                : tab === "kpis"
+                  ? "Indicadores de desempenho"
+                  : tab === "checkins"
+                    ? "Check-ins semanais"
+                    : tab === "areas"
+                      ? "Áreas, equipe e reuniões"
+                      : "Ciclos e períodos"}
+            </CardTitle>
+            <CardDescription>
+              {tab === "okrs"
+                ? "Acompanhe os objetivos e os resultados-chave do ciclo selecionado."
+                : tab === "kpis"
+                  ? "Acompanhe os indicadores de desempenho, suas metas e responsáveis."
+                  : tab === "checkins"
+                    ? "Acompanhe os registros semanais de avanço de cada indicador."
+                    : tab === "areas"
+                      ? "Consulte e corrija as áreas, as pessoas da equipe e as reuniões trazidas da origem."
+                      : "Gerencie os períodos de vigência dos objetivos e indicadores."}
+            </CardDescription>
+          </div>
           <div className="flex items-center gap-2">
             {canEdit && tab === "cycles" && (
               <CdeButton
@@ -372,9 +413,8 @@ export function IndicadoresDashboard() {
               />
             )}
           </div>
-        </div>
-        <ImportedSummary records={data.imported} />
-        {tab !== "cycles" && (
+        </CardHeader>
+        {tab !== "cycles" && tab !== "areas" && (
           <>
             <div className="flex flex-wrap items-end gap-3">
               <div className="w-44">
@@ -492,17 +532,14 @@ export function IndicadoresDashboard() {
             {view === "tree" && tab === "okrs" ? (
               <div className="space-y-3">{tree(null)}</div>
             ) : view === "list" ? (
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {tab === "okrs" ? [...new Set(objectives.map(objectiveOwner))].map(name => {
                   const rows = objectives.filter(o => objectiveOwner(o) === name);
-                  return <details key={name}><summary className="cursor-pointer py-3">{name} · {rows.length}</summary><div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,16rem),16rem))] items-start gap-3">{rows.map((o,i) => objectiveCard(o,i))}</div></details>;
-                }) : [...new Set(metrics.map(m => m.responsible_id))].map(id => (
-                  <details key={id}><summary className="cursor-pointer py-3">{userName(id)} · {metrics.filter(m => m.responsible_id === id).length}</summary>
-                    <div className={tab === "kpis" ? "grid grid-cols-[repeat(auto-fill,minmax(min(100%,16rem),16rem))] items-start gap-3" : "divide-y divide-border"}>
-                      {metrics.filter(m => m.responsible_id === id).map((m,i) => tab === "kpis" ? metricCard(m) : metricRow(m,i))}
-                    </div>
-                  </details>
-                ))}
+                  return <ErpDisclosureRow key={name} name={name} meta={`${rows.length} OKRs`} label={`OKRs de ${name}`} screen={screen}><div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,16rem),16rem))] items-start gap-3">{rows.map((o,i) => objectiveCard(o,i))}</div></ErpDisclosureRow>;
+                }) : [...new Set(metrics.map(m => m.responsible_id))].map(id => {
+                  const rows = metrics.filter(m => m.responsible_id === id);
+                  return <ErpDisclosureRow key={id} name={userName(id)} meta={`${rows.length} indicadores`} label={`indicadores de ${userName(id)}`} screen={screen}><div className={tab === "kpis" ? "grid grid-cols-[repeat(auto-fill,minmax(min(100%,16rem),16rem))] items-start gap-3" : "divide-y divide-border"}>{rows.map((m,i) => tab === "kpis" ? metricCard(m) : metricRow(m,i))}</div></ErpDisclosureRow>;
+                })}
               </div>
             ) : view === "calendar" ? (
               <div className="space-y-4">
@@ -569,11 +606,18 @@ export function IndicadoresDashboard() {
             )}
           </div>
         )}
+        {tab === "areas" && (
+          <ImportedRecords
+            data={data}
+            canEdit={data.role === "admin"}
+            resolveUser={(id) => userName(id)}
+          />
+        )}
         </section>
       </main>
       {focusedObjective && (() => { const o = data.objectives.find(x => x.id === focusedObjective.id); if (!o) return null; const rows = data.metrics.filter(m => m.objective_id === o.id && focusedObjective.metricIds.includes(m.id)); return <Dialog open onOpenChange={open => { if (!open) setFocusedObjective(null); }}><DialogContent defaultExpanded className="content-start"><DialogHeader><DialogTitle>{o.title}</DialogTitle></DialogHeader><p className="text-sm text-muted-foreground">{importedField(o.source_metadata,'responsible_name') || userName(o.responsible_id)} · {data.cycles.find(c => c.id === o.cycle_id)?.name ?? 'Sem ciclo'}</p>{o.description && <p className="whitespace-pre-wrap text-sm">{o.description}</p>}<div className="max-w-xl"><Advance value={progress.get(o.id) ?? 0} /></div><header className="flex items-center justify-between gap-3"><h2 className="text-base">Key Results · {rows.length}</h2>{canEdit && !isArchived(o) && <CdeButton group="plus" screen={screen} title="Novo Key Result" aria-label={`Novo KR em ${o.title}`} onClick={() => setEdit({ type:'metric',kind:'kr',objective:o })} />}</header><div className="divide-y divide-border">{rows.map(metricRow)}{!rows.length && <p className="py-6 text-sm text-muted-foreground">Nenhum Key Result neste objetivo.</p>}</div></DialogContent></Dialog>; })()}
       <AppNavigation className={ml.nav} aria-label={`Navegação de ${appName}`}>
-        <div className={`mx-auto grid max-w-2xl grid-cols-4 items-stretch rounded-[1.75rem] border border-border bg-card/95 p-1.5 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-card/90 ${ml.grid}`}>
+        <div className={`mx-auto grid max-w-2xl grid-cols-5 items-stretch rounded-[1.75rem] border border-border bg-card/95 p-1.5 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-card/90 ${ml.grid}`}>
           {tabs.map(({ value, label, icon: Icon }) => (
             <Button
               key={value}
@@ -603,53 +647,6 @@ export function IndicadoresDashboard() {
           onClose={() => setEdit(null)}
         />
       )}
-      <Dialog
-        open={!!history}
-        onOpenChange={(o) => {
-          if (!o) setHistory(null);
-        }}
-      >
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Histórico · {history?.title}</DialogTitle>
-          </DialogHeader>
-          <div className="h-56">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart
-                data={data.checkins
-                  .filter((c) => c.metric_id === history?.id)
-                  .slice()
-                  .reverse()
-                  .map((c) => ({
-                    date: new Date(c.recorded_at).toLocaleDateString("pt-BR"),
-                    value: c.value,
-                  }))}
-              >
-                <CartesianGrid stroke="var(--border)" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip />
-                <Line dataKey="value" stroke="var(--primary)" strokeWidth={2} />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-          {data.checkins
-            .filter((c) => c.metric_id === history?.id)
-            .map((c) => (
-              <div key={c.id} className="space-y-1 py-2">
-                <p className="text-sm">
-                  {new Date(c.recorded_at).toLocaleDateString("pt-BR", { timeZone: "UTC" })} · {historicalAuthor(c.recorded_by, id => userName(id))}
-                </p>
-                <p>
-                  {history ? metricValue(c.value, history.measure, history.unit) : c.value} ·{" "}
-                  {confidenceName(c.confidence)}
-                  {importedField(c.source_metadata, "created_at") && <span className="block text-xs text-muted-foreground">Registro original: {new Date(importedField(c.source_metadata,"created_at")).toLocaleString("pt-BR")}</span>}
-                </p>
-                <p className="whitespace-pre-wrap text-sm text-muted-foreground">{c.comment}</p>
-              </div>
-            ))}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
