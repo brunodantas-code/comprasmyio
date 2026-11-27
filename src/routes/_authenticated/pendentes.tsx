@@ -12,7 +12,8 @@ import { inventoryPendingItems } from '@/components/inventory-pending-items';
 import { PendingGroups, PendingRowContent } from "@/components/pending-groups";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PendingForMe } from "@/components/approval-workflow";
-import { MyioLogo } from "@/components/myio-logo";
+import { MyioPlatformLogo } from "@/components/myio-platform-logo";
+import { APP_TILE_DEFAULT, appLogoPx, homeHeaderLogoTone, useAppTile } from "@/components/cde/app-order-config";
 import { Bell, CheckCircle2, CodeXml, Phone, ShieldCheck, ShoppingCart, MessageCircleQuestion, FileSignature, PackageCheck } from "lucide-react";
 import { usePendingActions } from "@/hooks/use-pending-actions";
 import { AppHeader } from "@/components/app-header";
@@ -34,6 +35,7 @@ export const Route = createFileRoute("/_authenticated/pendentes")({
 });
 
 function PendentesPage() {
+  const headerConfig = useAppTile().data ?? APP_TILE_DEFAULT;
   const { data, isLoading } = usePendingActions();
   const { data: me } = useCurrentUser();
   const search = Route.useSearch();
@@ -42,7 +44,7 @@ function PendentesPage() {
   const change = (patch: Record<string,string>) => { void navigate({ search: prev => ({ ...prev, ...patch }) }); };
   return (
     <div className="min-h-screen bg-background">
-      <AppHeader logo={<MyioLogo className="text-xl sm:text-2xl" label={null} />} />
+      <AppHeader logo={<MyioPlatformLogo tone={homeHeaderLogoTone(headerConfig)} logoPx={appLogoPx(headerConfig)} />} />
       <main className="mx-auto max-w-7xl px-3 py-5 sm:px-6 sm:py-8">
         <section className="erp-screen-block">
         <div className="mb-6">

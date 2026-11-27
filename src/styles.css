@@ -827,6 +827,12 @@ input[data-custom-calendar="true"]::-webkit-calendar-picker-indicator {
 .diversos-list > * > :first-child .cde-title { justify-self: start; text-align: left; }
 .diversos-list > * > :first-child > .flex:first-child > :last-child { justify-self: end; }
 .diversos-list > * + * { margin-top: 0; }
+.diversos-list > [data-reimbursement-accounts] > .space-y-2 > .flex {
+  padding-inline: 12px;
+}
+.diversos-list > [data-reimbursement-accounts] > .space-y-2 > .flex:last-child {
+  border-bottom: 0;
+}
 .diversos-list > *:not(:first-child)::before {
   content: "";
   position: absolute;
@@ -856,7 +862,8 @@ input[data-custom-calendar="true"]::-webkit-calendar-picker-indicator {
 .diversos-list > section > :first-child button[aria-label$="contas"] {
   position: absolute;
   right: 12px;
-  top: 8px;
+  top: 50%;
+  transform: translateY(-50%);
 }
 .diversos-list > * > :first-child button[aria-label^="Expandir "] svg,
 .diversos-list > section > :first-child button[aria-label="Exibir contas"] svg,

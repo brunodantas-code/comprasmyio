@@ -892,3 +892,15 @@
 - [x] Supply: corrigir título e enquadramento da segunda lista enviada.
 - [x] Indicadores: alinhar Meta, gráfico de % de conclusão, lápis, lixeira, check-in e histórico em colunas fixas, todos na mesma linha em cada registro.
 - [x] Indicadores: histórico em milestones no padrão dos Tickets, sem pop-up.
+
+- [x] Supply Diversos: alinhar nomes PIX ao título e remover divisória cinza duplicada.
+
+- [x] Alinhar elementos na mesma altura em todos os cards indicados no print.
+
+- [x] Permitir ordenação por arraste na lista indicada.
+
+- [x] Permitir ordenação por arraste na segunda lista indicada.
+
+- [x] Diversos: substituir Ordem dos pop-ups por arraste e numeração sequencial em todos os cadastros aplicáveis.
+
+- [x] Central de Pendências: padronizar o logo com as demais páginas.

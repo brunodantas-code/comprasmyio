@@ -1,3 +1,4 @@
+import { SortableRegistryBody } from "@/components/sortable-registry";
 import { CdeButton } from "@/components/cde/cde-button";
 import { useState } from "react";
 import type { ReactNode } from "react";
@@ -12,7 +13,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Table, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { LinkedRecordDeletionDialog } from "@/components/linked-record-deletion-dialog";
 
@@ -110,11 +111,12 @@ export function StockDestinationsTab() {
         {isLoading ? <p className="text-sm text-muted-foreground">Carregando...</p> : (
           <Table>
             <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>Ordem</TableHead><TableHead>Ativo</TableHead><TableHead /></TableRow></TableHeader>
-            <TableBody>
-              {(destinations ?? []).map((destination) => (
-                <TableRow key={destination.code}>
-                  <TableCell className="font-medium">{destination.name}</TableCell>
-                  <TableCell>{destination.position}</TableCell>
+            <SortableRegistryBody rows={destinations ?? []} persist={async (rows) => {
+              try { for (const row of rows) { const { error } = await supabase.from("stock_destinations").update({ position: row.position }).eq("code", row.code).select("code").single(); if (error) throw error; } }
+              finally { await invalidate(); }
+            }} render={(destination, handle, index) => <>
+                  <TableCell className="font-medium"><div className="flex items-center gap-2">{handle}<span className="min-w-0">{destination.name}</span></div></TableCell>
+                  <TableCell>{index + 1}</TableCell>
                   <TableCell><Switch checked={destination.active} onCheckedChange={(active) => toggle.mutate({ code: destination.code, active })} /></TableCell>
                   <TableCell className="text-right"><div className="flex items-center justify-end gap-1">
                     <DestinationDialog
@@ -127,10 +129,7 @@ export function StockDestinationsTab() {
                     />
                     <LinkedRecordDeletionDialog entityId={destination.code} entityName={destination.name} entityLabel="destino de estoque" linkField="request_type" registry="stock_destination" destinations={(destinations ?? []).filter((item) => item.active).map((item) => ({ id: item.code, name: item.name }))} onDelete={() => remove.mutate(destination.code)} deleting={remove.isPending} />
                   </div></TableCell>
-                </TableRow>
-              ))}
-              {!destinations?.length && <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground">Nenhum destino cadastrado.</TableCell></TableRow>}
-            </TableBody>
+                </>} empty={<TableRow><TableCell colSpan={4} className="text-center text-muted-foreground">Nenhum destino cadastrado.</TableCell></TableRow>} />
           </Table>
         )}
       </CardContent></CollapsibleContent>
@@ -152,24 +151,24 @@ function DestinationDialog({ title, description, defaultName = "", defaultPositi
 }) {
   const [internalOpen, setInternalOpen] = useState(false);
   const [name, setName] = useState(defaultName);
-  const [position, setPosition] = useState(String(defaultPosition));
+
   const open = controlledOpen ?? internalOpen;
   const setOpen = controlledOnOpenChange ?? setInternalOpen;
 
   return (
-    <Dialog open={open} onOpenChange={(next) => { setOpen(next); if (next) { setName(defaultName); setPosition(String(defaultPosition)); } }}>
+    <Dialog open={open} onOpenChange={(next) => { setOpen(next); if (next) { setName(defaultName);  } }}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent>
         <DialogHeader><DialogTitle>{title}</DialogTitle>{description ? <DialogDescription>{description}</DialogDescription> : null}</DialogHeader>
         <form className="space-y-4" onSubmit={async (event) => {
           event.preventDefault();
-          const order = Number(position);
+          const order = defaultPosition;
           if (name.trim().length < 2) return toast.error("Nome muito curto");
           if (!Number.isInteger(order) || order < 0) return toast.error("Informe uma ordem válida");
           try { await onSave(name.trim(), order); setOpen(false); } catch { /* A alteração exibe a mensagem. */ }
         }}>
           <div className="space-y-2"><Label htmlFor={`stock-destination-name-${defaultName || "new"}`}>Nome</Label><Input id={`stock-destination-name-${defaultName || "new"}`} value={name} onChange={(event) => setName(event.target.value)} required /></div>
-          <div className="space-y-2"><Label htmlFor={`stock-destination-position-${defaultName || "new"}`}>Ordem</Label><Input id={`stock-destination-position-${defaultName || "new"}`} type="number" min={0} step={1} value={position} onChange={(event) => setPosition(event.target.value)} required /></div>
+
           <DialogFooter><Button type="submit" disabled={saving}>Salvar</Button></DialogFooter>
         </form>
       </DialogContent>
