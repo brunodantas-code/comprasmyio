@@ -42,7 +42,7 @@ export function CodeAppAttendants({ open, onOpenChange, admins, appNames }: { op
 
 export function CodeAttendantsPanel({ admins, appNames, enabled = true }: { admins: Admin[]; appNames: Record<string, string>; enabled?: boolean }) {
   const query = useQuery({ queryKey: ["code-app-attendants"], enabled, queryFn: async () => {
-    const [apps, assignments] = await Promise.all([supabase.from("erp_apps").select("key,name").eq("active", true).order("position"), supabase.from("code_app_attendants").select("app_key,attendant_id")]);
+    const [apps, assignments] = await Promise.all([supabase.from("erp_apps").select("key,name").or("active.eq.true,key.eq.erp").order("position"), supabase.from("code_app_attendants").select("app_key,attendant_id")]);
     if (apps.error) throw apps.error;
     if (assignments.error) throw assignments.error;
     return { apps: apps.data, assignments: new Map(assignments.data.map(a => [a.app_key, a.attendant_id])) };

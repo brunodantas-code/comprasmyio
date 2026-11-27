@@ -1,21 +1,28 @@
 import { CdeSection } from "./cde-section";
 import { CdeButton } from "./cde-button";
 import { useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Save } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
-import { PORTAL_APPS, useAppDisplayName } from "./app-order-config";
-import { useCodeAppExclusions } from "./code-apps-config";
+import { useAppDisplayName } from "./app-order-config";
+import { CODE_APPS, codeAppName, useCodeAppExclusions } from "./code-apps-config";
 import { APP_ICONS } from "@/lib/app-icons";
+import { ERP_ICON_OPTIONS, erpIconKey } from "@/lib/erp-icon";
 
 /** CDE list of apps served by Code; new portal apps are included automatically. */
 export function CdeCodeApps() {
   const qc = useQueryClient();
   const nameOf = useAppDisplayName();
   const { data } = useCodeAppExclusions();
+  const erpIcon = useQuery({ queryKey: ["code-erp-icon"], queryFn: async () => {
+    const result = await supabase.rpc("public_erp_icon");
+    if (result.error) throw result.error;
+    const base = ERP_ICON_OPTIONS.find(option => option.key === erpIconKey(result.data))?.base ?? "";
+    return `${base}/apple-touch-icon.png`;
+  } });
   const [draft, setDraft] = useState<string[] | null>(null);
   const [saving, setSaving] = useState(false);
   const [contentOpen, setContentOpen] = useState(true);
@@ -39,7 +46,7 @@ export function CdeCodeApps() {
     
     <p className="text-xs text-muted-foreground">Novos apps entram automaticamente; desmarque para retirar do Code.</p>
     <div role="group" aria-label="Apps atendidos pelo Code" className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-6">
-      {PORTAL_APPS.map((app) => { const id = `code-app-${app.key}`; const Icon = APP_ICONS[app.key]?.[0]; return <label key={app.key} htmlFor={id} className="flex min-h-9 min-w-0 items-center gap-2 text-sm"><Checkbox id={id} className="shrink-0" checked={!excluded.includes(app.key)} onCheckedChange={(v) => toggle(app.key, v === true)} /><span aria-hidden="true" className="flex h-5 w-5 shrink-0 items-center justify-center text-primary">{Icon && <Icon className="h-5 w-5" />}</span><span className="min-w-0 break-words">{nameOf(app.key) || app.name}</span></label>; })}
+      {CODE_APPS.map((app) => { const id = `code-app-${app.key}`; const Icon = APP_ICONS[app.key]?.[0]; return <label key={app.key} htmlFor={id} className="flex min-h-9 min-w-0 items-center gap-2 text-sm"><Checkbox id={id} className="shrink-0" checked={!excluded.includes(app.key)} onCheckedChange={(v) => toggle(app.key, v === true)} /><span aria-hidden="true" className="flex h-5 w-5 shrink-0 items-center justify-center text-[var(--cde-palette-black)]">{app.key === "erp" ? <img src={erpIcon.data ?? "/apple-touch-icon.png"} alt="" className="h-5 w-5 object-contain" /> : Icon && <Icon className="h-5 w-5" />}</span><span className="min-w-0 break-words">{codeAppName(app.key, nameOf)}</span></label>; })}
     </div>
   </CdeSection>;
 }

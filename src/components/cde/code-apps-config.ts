@@ -5,6 +5,9 @@ import { PORTAL_APPS } from "./app-order-config";
 /** Legacy app keys that may exist on older Code tickets but are no longer portal apps. */
 const LEGACY_CODE_APPS: Record<string, string> = { rh: "RH" };
 
+/** ERP is a support target, not a second portal app or a new access grant. */
+export const CODE_APPS = [{ key: "erp", name: "myio ERP" }, ...PORTAL_APPS];
+
 /**
  * Code serves every portal app unless CDE explicitly excludes it (cde_selected group code_apps stores
  * {"excluded":[keys]}). Storing exclusions, not inclusions, makes newly created apps appear automatically.
@@ -13,10 +16,11 @@ export function parseCodeAppExclusions(raw?: string | null): string[] {
   try { const parsed = JSON.parse(raw ?? "{}"); return Array.isArray(parsed?.excluded) ? parsed.excluded.filter((k: unknown): k is string => typeof k === "string") : []; } catch { return []; }
 }
 export function codeApps(excluded: string[], nameOf?: (key: string) => string) {
-  return PORTAL_APPS.filter((a) => !excluded.includes(a.key)).map((a) => ({ key: a.key as string, name: nameOf?.(a.key) ?? a.name }));
+  return CODE_APPS.filter((a) => !excluded.includes(a.key)).map((a) => ({ key: a.key as string, name: codeAppName(a.key, nameOf) }));
 }
 export function codeAppName(key: string, nameOf?: (key: string) => string) {
-  const original = PORTAL_APPS.find((a) => a.key === key)?.name ?? LEGACY_CODE_APPS[key];
+  if (key === "erp") return "myio ERP";
+  const original = CODE_APPS.find((a) => a.key === key)?.name ?? LEGACY_CODE_APPS[key];
   return original ? (nameOf?.(key) ?? original) : key;
 }
 export function useCodeAppExclusions() {

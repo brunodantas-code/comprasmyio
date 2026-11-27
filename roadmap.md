@@ -945,3 +945,8 @@
 - [x] Spend classificação: campos agrupados à esquerda, intervalo uniforme de 12 px entre linhas verdes, quatro campos na mesma linha expandida; desktop/mobile conferidos sem salvar dados. Falta publicar.
 
 - [x] Spend Comprovantes: botão “Sem comprovante” com quebra à esquerda abaixo do funil quando faltar largura; conferido em 1440/1098/1024 px e formulário aberto, sem salvar despesas. Falta publicar.
+
+- [x] Code: ERP geral com ícone do iPhone e opção no CDE; abertura e releitura autenticadas conferidas, chamado temporário removido; sem novo acesso. Falta publicar.
+- [x] CDE Apps atendidos pelo Code: símbolos pretos conferidos na seção Home Page, logotipo oficial do ERP preservado. Falta publicar.
+
+- [x] Favoritos: lista permitida atualizada para Spend e Indicadores; erro reproduzido antes, salvamento e releitura pelo celular conferidos após; escolha e ordem originais restauradas, limite de quatro preservado.

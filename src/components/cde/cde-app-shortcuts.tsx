@@ -61,6 +61,7 @@ export function CdeAppShortcuts({ tile }: { tile: AppTileConfig }) {
         else setAppDraft(null);
       }
       await qc.invalidateQueries({ queryKey: ["cde-erp-icon"] });
+      await qc.invalidateQueries({ queryKey: ["code-erp-icon"] });
       await router.invalidate();
       toast.success("Ícones do ERP e dos apps atualizados");
     } catch { toast.error("Não foi possível salvar os ícones"); }

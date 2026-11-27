@@ -1,0 +1,2 @@
+ALTER TABLE public.mobile_app_favorites DROP CONSTRAINT mobile_favorites_known_apps;
+ALTER TABLE public.mobile_app_favorites ADD CONSTRAINT mobile_favorites_known_apps CHECK (app_keys <@ ARRAY['supply','spend','cash_flow','crm','legal','rh','site_survey','chamados','development','mytosis','indicadores','wishlist','projects','cde']::text[]);

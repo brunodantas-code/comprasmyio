@@ -2283,6 +2283,13 @@
       "when": 1795812561807,
       "tag": "0325_spend_partial_bulk_classification",
       "breakpoints": true
+    },
+    {
+      "idx": 326,
+      "version": "7",
+      "when": 1795820903363,
+      "tag": "0326_allow_current_apps_in_mobile_favorites",
+      "breakpoints": true
     }
   ]
 }

@@ -42,7 +42,7 @@
 - Disclosure headers reserve their rightmost slot for expansion; labelled CdeButton toggles order the arrow after text, and toolbars stay separate from it.
 - Rules for shared src/components/ui/ components (Select, Dialog/Sheet X, Button/Input/Textarea, Badge, Card, Table) live in src/components/ui/AGENTS.md.
 - App-wide appearance uses cde_selected app_appearance with a reversible root token/legacy literal overlay; convert original colours, preserve saved models and media pixels, exempt palette-reference swatches, so theme changes never compound or erase customization.
-- Code app list derives from PORTAL_APPS minus CDE code_apps exclusions, so new apps join Code automatically.
+- Code targets use CODE_APPS (ERP general plus PORTAL_APPS) minus CDE exclusions; ERP stays outside portal/access catalogs, retains its phone icon, and is available for attendant assignment without a new access grant.
 
 - Menu display names use CDE menu_names keyed by app/group/original identity (shared header uses action IDs); resolve them after ordering, never in permission or navigation values, so renames cannot change access or destinations.
 - Menu symbols use a shared lazy-loaded registry and menu_icons; submenu keys include parent commands and values so equal labels and renames cannot change icon bindings. Use the explicit Lucide .mjs entry for SSR resolution.
