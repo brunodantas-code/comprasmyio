@@ -164,6 +164,19 @@ describe('customizações completas por versão', () => {
     expect(resolveAppTile(saved, 'green', true)).toMatchObject({ fill: 'verde_claro', mobileTilePct: 90, labelPx: 12 });
     expect(resolveAppTile(saved, 'purple', false)).toMatchObject({ fill: 'flat', tilePct: 110 });
   });
+  it('salvar Roxo Mobile preserva Verde Mobile e os dois Desktops, mesmo com um rascunho antigo', () => {
+    const original = parseAppTile('{}');
+    const draft = { ...resolveAppTile(original, 'purple', true), gapX: 56, mobileTilePct: 90 };
+    let latest = updateAppTileProfile(original, 'green_desktop', { ...original, gapX: 40, tilePct: 90 });
+    latest = updateAppTileProfile(latest, 'green_mobile', { ...original, gapX: 40, mobileTilePct: 90 });
+    latest = updateAppTileProfile(latest, 'purple_desktop', { ...original, gapX: 32, tilePct: 110 });
+    const saved = parseAppTile(JSON.stringify(updateAppTileProfile(latest, appTileScope('purple', true), draft)));
+    expect(resolveAppTile(saved, 'purple', true)).toMatchObject({ gapX: 56, mobileTilePct: 90 });
+    expect(saved.profiles?.green_mobile).toEqual(latest.profiles?.green_mobile);
+    expect(saved.profiles?.green_desktop).toEqual(latest.profiles?.green_desktop);
+    expect(saved.profiles?.purple_desktop).toEqual(latest.profiles?.purple_desktop);
+    expect(saved.gapX).toBe(original.gapX);
+  });
 });
 
 it('vincula salvamento automaticamente ao tema e dispositivo atuais', () => {

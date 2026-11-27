@@ -15,7 +15,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { CdeCategoryHeader } from "./cde-category-header";
-import { APP_NAME_COLORS, APP_TILE_DEFAULT, PORTAL_APPS, appDisplay, appLogoPx, appTileColor, appTileColorList, appTileColorVars, scopedAppTileVars, appTileLowContrast, homeHeaderVars, homeHeaderLogoTone, mobileTileVars, parseAppOrder, useAppOrder, useAppTile, resolveAppTile, appTileScope, updateAppTileProfile, type TileStyleScope, type AppDisplayOverride, type AppTileColorKind, type AppTileConfig } from "./app-order-config";
+import { APP_NAME_COLORS, APP_TILE_DEFAULT, PORTAL_APPS, appDisplay, appLogoPx, appTileColor, appTileColorList, appTileColorVars, scopedAppTileVars, appTileLowContrast, homeHeaderVars, homeHeaderLogoTone, mobileTileVars, parseAppOrder, parseAppTile, useAppOrder, useAppTile, resolveAppTile, appTileScope, updateAppTileProfile, type TileStyleScope, type AppDisplayOverride, type AppTileColorKind, type AppTileConfig } from "./app-order-config";
 import { CdeButton, useCdeSwatchStyle } from "./cde-button";
 import { themedColorOptions } from "./appearance-names";
 import { useActiveAppearance } from "./app-appearance";
@@ -104,13 +104,18 @@ export function CdeAppOrder({ number, handle }: { number: number; handle?: impor
     setTileDraft({ ...tile, apps: { ...tile.apps, [key]: { ...existing, ...patch } } });
   }
   async function saveTile() {
+    // Capture the visible version before awaiting; merge only it into the fresh saved row.
+    const profileToSave = tile;
+    const scopeToSave = appearance === 'grayscale' ? null : editingScope;
     setSaving(true);
     try {
       const user = (await supabase.auth.getUser()).data.user;
       if (!user) throw new Error("Sessão não encontrada");
       const existing = await supabase.from("cde_selected").select("variant_key").eq("group_key", "app_tile").eq("is_primary", true).maybeSingle();
       if (existing.error) throw existing.error;
-      const row = { variant_key: JSON.stringify(baseTile), chosen_by: user.id };
+      const latestTile = existing.data ? parseAppTile(existing.data.variant_key) : savedTile;
+      const mergedTile = scopeToSave ? updateAppTileProfile(latestTile, scopeToSave, profileToSave) : { ...profileToSave, ...(latestTile.profiles ? { profiles: latestTile.profiles } : {}) };
+      const row = { variant_key: JSON.stringify(mergedTile), chosen_by: user.id };
       const result = existing.data ? await supabase.from("cde_selected").update(row).eq("group_key", "app_tile").eq("is_primary", true).eq("variant_key", existing.data.variant_key).select("variant_key").single() : await supabase.from("cde_selected").insert({ ...row, group_key: "app_tile" }).select("variant_key").single();
       if (result.error) throw result.error;
       if (result.data?.variant_key !== row.variant_key) throw new Error("O padrão não foi salvo. Recarregue e tente novamente.");

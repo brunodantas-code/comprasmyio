@@ -278,12 +278,12 @@ header > div.grid:has(> .erp-list-toolbar) > .erp-list-toolbar { grid-column: 1 
   gap: 0.75rem;
 }
 @media (min-width: 640px) {
-  .spend-classification-primary { grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr) minmax(0, 1fr) !important; }
+  .spend-classification-primary { grid-template-columns: repeat(3, minmax(0, max-content)) !important; justify-content: start; }
   .spend-classification-project { grid-column: 3; }
 }
 /* The expanded screen has room for code, account name, cost center and project on one line. */
 @media (min-width: 640px) {
-  .spend-classification-full .spend-classification-primary { grid-template-columns: minmax(0, 0.6fr) minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr) !important; }
+  .spend-classification-full .spend-classification-primary { grid-template-columns: repeat(4, minmax(0, max-content)) !important; }
   .spend-classification-full .spend-classification-project { grid-column: auto; }
 }
 .spend-classification-full > header { flex-shrink: 0; }

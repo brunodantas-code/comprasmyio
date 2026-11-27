@@ -939,3 +939,7 @@
 - [x] CDE Home: perfis completos Desktop/Mobile × Verde/Roxo para cores, fontes, dimensões e espaçamento; 45 testes passaram.
 
 - [x] CDE Home: destino automático pelo tema/dispositivo; salvamentos reais Roxo Desktop e Verde Mobile relidos na Home, originais restaurados; falta publicar.
+
+- [x] CDE Home: salvar mescla somente o perfil atual no registro recém-lido; Roxo Mobile/Verde Mobile e gravação simultânea Verde Desktop conferidos com sessão, originais restaurados; 46 testes passaram. Falta publicar.
+
+- [x] Spend classificação: campos agrupados à esquerda, intervalo uniforme de 12 px entre linhas verdes, quatro campos na mesma linha expandida; desktop/mobile conferidos sem salvar dados. Falta publicar.
