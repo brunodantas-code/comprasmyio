@@ -10,6 +10,8 @@ export function useFieldContentWidth<T extends HTMLElement>(ref: RefObject<T | n
   useLayoutEffect(() => {
     const field = ref.current;
     if (!field) return;
+    // Boxed access forms keep their original full-width geometry.
+    if (field.closest('[data-full-width-fields]')) return;
     if (field instanceof HTMLTextAreaElement) return;
     if (field instanceof HTMLInputElement && ['hidden', 'file', 'checkbox', 'radio', 'range', 'color'].includes(field.type)) return;
     const input = inputRef?.current ?? field;

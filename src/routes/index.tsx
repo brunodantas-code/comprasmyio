@@ -237,7 +237,7 @@ export function Landing() {
           </div>
         </section>
 
-         <section className="order-2 w-full min-[960px]:order-none min-[960px]:mt-[13.25rem] min-[960px]:w-[17rem] lg:mt-[14.95rem] lg:w-[18rem]" aria-labelledby="access-title">
+         <section data-full-width-fields className="order-2 w-full min-[960px]:order-none min-[960px]:mt-[13.25rem] min-[960px]:w-[17rem] lg:mt-[14.95rem] lg:w-[18rem]" aria-labelledby="access-title">
           <div className="rounded-2xl border border-erp-access-border bg-erp-access p-5 text-erp-landing-foreground shadow-2xl backdrop-blur-2xl lg:p-6">
             <div className="mb-5">
               <h2 id="access-title" className="text-2xl font-extrabold text-erp-landing-foreground">Acesse sua conta</h2>
