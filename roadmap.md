@@ -926,3 +926,6 @@
 - [x] Spend: câmera preservada e Anexar PDF ou foto separado (PDF/JPG/PNG/WebP); seleção e formulário conferidos em computador/celular, nenhum comprovante de teste salvo.
 
 - [x] Campos compartilhados: largura pelo maior texto/opção na fonte CDE, sem esticar a linha verde, limitada ao espaço disponível; digitação e seleção conferidas, olho da senha acompanha o campo e 29 testes passaram.
+
+- [x] Home Roxo: gerar prévia minimalista no chat, sem alterar a apresentação atual.
+- [ ] Home Roxo: aplicar opção minimalista somente após aprovação de Leonardo.
