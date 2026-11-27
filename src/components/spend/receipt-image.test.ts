@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { detectReceiptCrop } from "./receipt-image";
+import { detectReceiptCrop, prepareSpendReceipt } from "./receipt-image";
 
 function photo(width: number, height: number, pixel: (x: number, y: number) => number) {
   const data = new Uint8ClampedArray(width * height * 4);
@@ -12,6 +12,12 @@ function photo(width: number, height: number, pixel: (x: number, y: number) => n
 }
 
 describe("recorte de comprovantes", () => {
+  it("preserva o PDF original selecionado fora da câmera", async () => {
+    const file = new File(['%PDF-1.7\nconteudo fiscal'], 'comprovante.pdf', { type: 'application/pdf' });
+    const result = await prepareSpendReceipt(file);
+    expect(result).toBe(file);
+    expect(await result.text()).toBe('%PDF-1.7\nconteudo fiscal');
+  });
   it("separa o papel de uma mesa clara com borda escura e texto", () => {
     const data = photo(200, 300, (x, y) => {
       if (x >= 35 && x <= 140 && y >= 20 && y <= 280) {

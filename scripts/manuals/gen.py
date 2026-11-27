@@ -40,10 +40,11 @@ def build(data, pages=None):
         return txt(t)
 
     app = data['app']; secs = data['sections']
+    date_long = data.get('date_long', DATE_LONG)
     big = svgs[data['icon']].replace('width="12"', 'width="34"').replace('height="12"', 'height="34"')
     out = [f'''<section class="page cover"><div class="logo">{LOGO}</div>
 <div class="ctitle"><h1>{html.escape(app)} <span class="bigic">{big}</span></h1><h2>Manual do Usuário</h2>
-<p class="csub">{html.escape(data['subtitle'])}</p><p class="cver">Versão {VERSION} · {DATE_LONG}<br>Versão inicial</p></div></section>''']
+<p class="csub">{html.escape(data['subtitle'])}</p><p class="cver">Versão {VERSION} · {date_long}<br>Versão inicial</p></div></section>''']
     out.append('<section class="page"><h2 class="ch">Objetivo</h2>' + ''.join(f'<p>{txt(p)}</p>' for p in data['objetivo']) +
                f'<h3>Para quem</h3><p>{txt(data["para_quem"])}</p><h3>Como usar</h3><p>{txt(data["como_usar"])}</p></section>')
     rows = ''.join(f'<a class="toc" href="#c{i+1}"><span class="num">{i+1}</span><span class="tt">{title_html(s["title"])}</span><span class="pg">{(pages or {}).get(i+1, "")}</span></a>' for i, s in enumerate(secs))
@@ -95,7 +96,7 @@ async def render(data, path):
         async def go(pages):
             await pg.set_content(build(data, pages), wait_until='networkidle')
             await pg.pdf(path=path, format='A4', display_header_footer=True, header_template='<span></span>',
-                         footer_template=FOOT.format(app=html.escape(data['app']), v=VERSION, d=DATE),
+                         footer_template=FOOT.format(app=html.escape(data['app']), v=VERSION, d=data.get('date', DATE)),
                          margin={'top': '16mm', 'bottom': '18mm', 'left': '16mm', 'right': '16mm'}, outline=True, tagged=True)
         await go(None)
         # locate chapter pages via text

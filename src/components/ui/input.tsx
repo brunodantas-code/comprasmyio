@@ -3,10 +3,13 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { useCdeLook } from "@/components/cde/cde-look";
 import { finishNumberInputDraft, numberInputDraftValue } from "./number-input-draft";
+import { useFieldContentWidth } from './field-content-width';
 
 const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input"> & { bufferedNumber?: boolean }>(
   ({ className, type, style, bufferedNumber = false, ...props }, ref) => {
     const [numberDraft, setNumberDraft] = React.useState<string | null>(null);
+    const fieldRef = React.useRef<HTMLInputElement>(null);
+    useFieldContentWidth(fieldRef);
     const buffered = bufferedNumber && type === "number" && props.value !== undefined;
     const min = props.min === undefined ? undefined : Number(props.min);
     const max = props.max === undefined ? undefined : Number(props.max);
@@ -22,7 +25,7 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input"> &
           look.className,
         )}
         style={{ ...look.style, ...style }}
-        ref={ref}
+        ref={node => { fieldRef.current = node; if (typeof ref === 'function') ref(node); else if (ref) ref.current = node; }}
         {...props}
         {...(buffered ? {
           value: numberDraft ?? props.value,

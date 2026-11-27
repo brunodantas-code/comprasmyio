@@ -907,3 +907,10 @@
 - [x] Menu flutuante mobile: até cinco menus visíveis; havendo sexto, quinta posição com reticências/seta e quatro menus por grupo; Spend avançou, abriu Histórico e retornou, Supply manteve cinco opções, desktop inalterado; cinco testes passaram.
 - [x] iPhone: contador no ícone com o total pessoal, autorização explícita no menu e limpeza ao zerar/sair; cinco testes passaram, 72 pendências reais conferidas com API do dispositivo simulada; ativação física no iPhone requer publicação e autorização, sem push em segundo plano nesta etapa.
 - [x] Todos os menus mobile: seleção com fundo cinza-claro no padrão WhatsApp e submenus identificados; nove apps conferidos no celular, desktop preservado.
+
+- [x] Menu Principal: fundo transparente na Home e quatro apps, em computador e celular; menus abrem corretamente.
+- [x] Manual geral ERP: oito capítulos, leitura em tela pelo Menu Principal, ícone configurável no CDE e PDF V1 em Diversos; 11 páginas revisadas sem cortes/sobreposições, desktop/mobile conferidos.
+
+- [x] Spend: câmera preservada e Anexar PDF ou foto separado (PDF/JPG/PNG/WebP); seleção e formulário conferidos em computador/celular, nenhum comprovante de teste salvo.
+
+- [x] Campos compartilhados: largura pelo maior texto/opção na fonte CDE, sem esticar a linha verde, limitada ao espaço disponível; digitação e seleção conferidas, olho da senha acompanha o campo e 29 testes passaram.

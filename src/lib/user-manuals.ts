@@ -7,6 +7,7 @@ import opdeskV1 from '@/assets/manuals/opdesk-v1.pdf.asset.json';
 import codeV1 from '@/assets/manuals/code-v1.pdf.asset.json';
 import mytosisV1 from '@/assets/manuals/mytosis-v1.pdf.asset.json';
 import cdeV1 from '@/assets/manuals/cde-v1.pdf.asset.json';
+import erpV1 from '@/assets/manuals/erp-v1.pdf.asset.json';
 
 export const supplyManualVersions = [
   { version: 4, date: '06.11.2026', url: v4.url, summary: 'Capa e numeração revisadas', current: true },
@@ -15,6 +16,7 @@ export const supplyManualVersions = [
 const first = 'Versão inicial';
 /** Every app manual version; editable sources live in src/content/manuals/*.json. */
 export const manualVersions = [
+  { app: 'ERP', version: 1, date: '27.11.2026', url: erpV1.url, summary: 'Home Page, Menu Principal e contador no iOS e Android', current: true },
   ...supplyManualVersions.map((m) => ({ app: 'Supply', ...m })),
   { app: 'Finance', version: 1, date: '08.11.2026', url: cashFlowV1.url, summary: first, current: true },
   { app: 'Legal', version: 1, date: '08.11.2026', url: legalV1.url, summary: first, current: true },

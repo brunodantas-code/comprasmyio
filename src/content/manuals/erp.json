@@ -1,0 +1,352 @@
+{
+  "app": "ERP myio",
+  "slug": "erp",
+  "icon": "LayoutGrid",
+  "date": "27.11.2026",
+  "date_long": "27 de novembro de 2026",
+  "subtitle": "Página principal, navegação e contador de pendências",
+  "objetivo": [
+    "Reunir o acesso aos aplicativos myio e às tarefas que precisam da sua atenção, com identificação pessoal, atalhos e navegação comuns.",
+    "Explicar a Home Page, o Menu Principal e a instalação no celular, incluindo como autorizar o contador de pendências no ícone."
+  ],
+  "para_quem": "Todos os usuários do ERP myio. Os aplicativos e ações disponíveis dependem das permissões de cada conta.",
+  "como_usar": "Escolha um assunto no Sumário. Os nomes destacados correspondem a menus e opções; alguns podem ter sido personalizados no CDE.",
+  "labels": [
+    "Home Page",
+    "Menu Principal",
+    "Minhas Pendências",
+    "To Dos",
+    "Meus favoritos",
+    "Minha assinatura",
+    "Alterar senha",
+    "Aparência",
+    "Acessos",
+    "Todos os apps",
+    "Abrir chamado (Code)",
+    "Manual do Usuário",
+    "Ativar contador no ícone",
+    "Atualizar contador no ícone",
+    "Sair",
+    "Compartilhar",
+    "Adicionar à Tela de Início",
+    "Adicionar à Tela inicial",
+    "Instalar aplicativo",
+    "Permitir",
+    "Notificações",
+    "Avisos",
+    "Sumário",
+    "Fotografar Comprovante",
+    "Anexar PDF ou foto"
+  ],
+  "icons": {
+    "Menu Principal": "Menu",
+    "Minhas Pendências": "ClipboardList",
+    "To Dos": "ListTodo",
+    "Meus favoritos": "Star",
+    "Minha assinatura": "PenLine",
+    "Alterar senha": "KeyRound",
+    "Aparência": "Palette",
+    "Acessos": "Settings2",
+    "Todos os apps": "LayoutGrid",
+    "Abrir chamado (Code)": "LifeBuoy",
+    "Manual do Usuário": "BookOpen",
+    "Ativar contador no ícone": "BellRing",
+    "Atualizar contador no ícone": "BellRing",
+    "Sair": "LogOut",
+    "Anexar PDF ou foto": "Paperclip"
+  },
+  "sections": [
+    {
+      "title": "Home Page e aplicativos",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "A Home Page reúne os aplicativos liberados para sua conta, comunicados corporativos, To Dos e Minhas Pendências. A disposição e os nomes podem seguir as escolhas feitas no CDE."
+        },
+        {
+          "kind": "steps",
+          "steps": [
+            "Entre em https://erpmyio.lovable.app com sua conta.",
+            "Toque no ícone do app desejado. Se um app não aparecer, solicite a liberação ao responsável por Acessos.",
+            "Para retornar à Home Page, use a grade de Todos os apps no cabeçalho."
+          ]
+        },
+        {
+          "kind": "table",
+          "headers": [
+            "Item",
+            "O que representa"
+          ],
+          "rows": [
+            [
+              "Nome e perfil",
+              "Identificam a conta atual; as ações dependem das permissões."
+            ],
+            [
+              "Comunicados",
+              "Informações publicadas pela empresa."
+            ],
+            [
+              "Ícones dos apps",
+              "Acesso às atividades de cada aplicativo."
+            ],
+            [
+              "Marcadores vermelhos",
+              "Pendências da sua conta, quando disponíveis para o app."
+            ],
+            [
+              "To Dos",
+              "Suas tarefas pessoais."
+            ],
+            [
+              "Minhas Pendências",
+              "Ações que aguardam sua atuação, agrupadas por aplicativo."
+            ]
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "Os números mudam conforme as tarefas e permissões. O número no Menu Principal representa suas pendências, não as de todos os usuários."
+        }
+      ]
+    },
+    {
+      "title": "Menu Principal",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "Abra o Menu Principal pelo ícone de três barras. No computador ele abre uma lista; no celular abre um painel na parte inferior. Toque no X para fechar."
+        },
+        {
+          "kind": "table",
+          "headers": [
+            "Item",
+            "O que representa"
+          ],
+          "rows": [
+            [
+              "Minhas Pendências",
+              "Abrir a relação das ações que aguardam você."
+            ],
+            [
+              "Manual do Usuário",
+              "Na Home Page, abrir este manual geral. Nos apps com manual próprio, consultar o manual correspondente."
+            ],
+            [
+              "Aparência",
+              "Escolher a apresentação disponível para sua conta."
+            ],
+            [
+              "Meus favoritos",
+              "Selecionar até quatro aplicativos favoritos no celular."
+            ],
+            [
+              "Minha assinatura",
+              "Consultar ou preparar sua assinatura pessoal."
+            ],
+            [
+              "Alterar senha",
+              "Trocar a senha; o olho permite mostrar ou ocultar o texto digitado."
+            ],
+            [
+              "Acessos",
+              "Gerenciar usuários, perfis e aplicativos conforme autorização."
+            ],
+            [
+              "Abrir chamado (Code)",
+              "Registrar problemas ou melhorias quando a opção estiver disponível."
+            ],
+            [
+              "Ativar contador no ícone",
+              "Autorizar o contador em dispositivo instalado e compatível."
+            ],
+            [
+              "Sair",
+              "Encerrar sua sessão."
+            ]
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "A ordem, os nomes, símbolos e itens visíveis são definidos no CDE. Nem todas as opções aparecem para todas as contas. Na Home Page, Minhas Pendências vem primeiro; Voltar e Todos os apps não são repetidos no menu."
+        }
+      ]
+    },
+    {
+      "title": "Pendências, tarefas e favoritos",
+      "blocks": [
+        {
+          "kind": "steps",
+          "steps": [
+            "Abra Minhas Pendências na Home Page ou no Menu Principal.",
+            "Expanda o agrupamento desejado pela seta à direita.",
+            "Toque na tarefa para abrir o registro e execute a ação solicitada no app correspondente.",
+            "Volte à lista para conferir a atualização."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Um documento anexado ou uma compra marcada como Comprado não necessariamente conclui a tarefa: siga a etapa final prevista no aplicativo. A contagem considera as ações que ainda aguardam você."
+        },
+        {
+          "kind": "p",
+          "text": "Em To Dos, acompanhe as tarefas pessoais separadamente. Para escolher atalhos no celular, abra Meus favoritos e selecione até quatro apps. A seleção não exige acesso de administrador."
+        },
+        {
+          "kind": "p",
+          "text": "Nos menus flutuantes do celular, até cinco opções cabem diretamente. Com seis ou mais, aparecem quatro menus e reticências com seta na quinta posição. Toque para avançar e acessar os demais; use o mesmo controle para retornar."
+        }
+      ]
+    },
+    {
+      "title": "Instalar no iPhone ou iPad",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "Para o contador no ícone, use iOS ou iPadOS 16.4 ou posterior e abra o ERP como aplicativo da Tela de Início, não apenas em uma aba do navegador."
+        },
+        {
+          "kind": "steps",
+          "steps": [
+            "Abra https://erpmyio.lovable.app no Safari.",
+            "Toque em Compartilhar, o quadrado com seta para cima.",
+            "Escolha Adicionar à Tela de Início e confirme a inclusão. A posição dessa opção pode variar conforme a versão do sistema.",
+            "Abra o ERP pelo novo ícone na Tela de Início e entre na sua conta.",
+            "Abra o Menu Principal e toque em Ativar contador no ícone, se a opção estiver disponível.",
+            "Quando o sistema solicitar autorização para Notificações, toque em Permitir."
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "Se o pedido de autorização não aparecer ou for recusado, a ativação não foi concluída. A opção depende de o sistema disponibilizar o recurso de contador para o aplicativo instalado."
+        }
+      ]
+    },
+    {
+      "title": "Instalar no Android",
+      "blocks": [
+        {
+          "kind": "steps",
+          "steps": [
+            "Abra https://erpmyio.lovable.app no Google Chrome.",
+            "Abra o menu de três pontos do navegador.",
+            "Escolha Instalar aplicativo ou Adicionar à Tela inicial, conforme a opção oferecida, e confirme.",
+            "Abra pelo ícone instalado e entre na sua conta.",
+            "Abra o Menu Principal. Se aparecer Ativar contador no ícone, toque e autorize Notificações quando solicitado.",
+            "Nas configurações de notificações do aparelho, habilite os indicadores nos ícones, caso exista essa opção."
+          ]
+        },
+        {
+          "kind": "note",
+          "text": "No Android, o contador depende da versão do navegador, do aparelho e do aplicativo de tela inicial. Alguns exibem apenas um ponto, outros um número, e outros não oferecem esse recurso. A instalação não garante o mesmo contador numérico do iPhone."
+        }
+      ]
+    },
+    {
+      "title": "Contador no ícone e permissões",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "O contador utiliza o total pessoal de Minhas Pendências da conta conectada. Ele é atualizado enquanto o ERP está aberto e em uso; ao zerar as pendências ou sair da conta, o ERP solicita a remoção do contador."
+        },
+        {
+          "kind": "p",
+          "text": "Após autorizar, a opção muda para Atualizar contador no ícone. Abra o aplicativo e toque nela para solicitar uma nova conferência."
+        },
+        {
+          "kind": "note",
+          "text": "Esta versão não envia notificações push nem atualiza o número em segundo plano com o ERP fechado. A autorização de notificações é uma permissão do sistema, não a ativação de avisos automáticos por mensagem."
+        },
+        {
+          "kind": "steps",
+          "steps": [
+            "Se o contador não aparecer, confirme que abriu o ERP pelo ícone instalado.",
+            "Confira a autorização de Notificações e Avisos nos ajustes do aplicativo no iPhone; no Android, confira também os indicadores da tela inicial.",
+            "Abra novamente o ERP e use Atualizar contador no ícone, quando disponível.",
+            "Compare o número com Minhas Pendências após a atualização. Se a opção não existir, o navegador ou dispositivo não disponibilizou o recurso necessário."
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Navegação e ações comuns",
+      "blocks": [
+        {
+          "kind": "table",
+          "headers": [
+            "Item",
+            "O que representa"
+          ],
+          "rows": [
+            [
+              "Funil",
+              "Combinar filtros e remover cada condição individualmente."
+            ],
+            [
+              "Ordenação",
+              "Escolher a ordem de apresentação da lista."
+            ],
+            [
+              "Busca",
+              "Localizar os registros disponíveis para você."
+            ],
+            [
+              "Lápis",
+              "Editar o registro ou nome correspondente."
+            ],
+            [
+              "Lixeira",
+              "Excluir conforme confirmação e permissões."
+            ],
+            [
+              "Disquete",
+              "Salvar as alterações; alguns formulários exigem revisão antes de habilitar."
+            ],
+            [
+              "Seta à direita",
+              "Exibir ou recolher detalhes."
+            ],
+            [
+              "Clipe",
+              "Abrir ou anexar arquivos."
+            ],
+            [
+              "Aa",
+              "Alterar a apresentação do texto sem mudar o conteúdo armazenado."
+            ]
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Buscas, filtros e ordenação ficam à esquerda acima das listas. As descrições dos ícones podem ser consultadas pelas dicas no computador."
+        },
+        {
+          "kind": "p",
+          "text": "No Spend, use Fotografar Comprovante para a câmera ou Anexar PDF ou foto para arquivos. Escolha a forma de pagamento depois de selecionar o comprovante e confira os dados reconhecidos antes de salvar."
+        }
+      ]
+    },
+    {
+      "title": "Acesso, segurança e ajuda",
+      "blocks": [
+        {
+          "kind": "p",
+          "text": "Cada conta possui acesso próprio aos apps e registros. Não compartilhe sua senha. A ausência de um app ou botão pode significar que sua conta não tem a autorização correspondente."
+        },
+        {
+          "kind": "steps",
+          "steps": [
+            "Para trocar sua senha, abra Alterar senha no Menu Principal.",
+            "Ao terminar em um aparelho compartilhado, use Sair.",
+            "Para registrar um problema, use Abrir chamado (Code), se disponível, e informe a tela, o que tentou fazer e o resultado.",
+            "Para entender uma rotina específica, consulte Manual do Usuário dentro do app correspondente."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "As customizações do CDE preservam as identidades e permissões. No CDE, Manual do Usuário pode ter sua posição, visibilidade e símbolo ajustados no Menu Principal e na biblioteca de ícones dos menus."
+        }
+      ]
+    }
+  ]
+}

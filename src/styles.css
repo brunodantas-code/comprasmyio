@@ -36,9 +36,10 @@ input[data-search-field="true"] {
   flex: 0 1 var(--search-field-width);
 }
 .erp-search-row {
-  width: min(calc(var(--search-field-width) + 4rem), 100%);
+  width: fit-content;
+  max-width: 100%;
 }
-.erp-search-row input[data-search-field="true"] { width: 100% !important; }
+.erp-search-row input[data-search-field="true"] { max-width: 100%; }
 
 /* List tools share left alignment without changing column geometry or action looks. */
 .erp-list-toolbar { justify-content: flex-start !important; align-items: center; gap: 0.5rem; margin-inline-start: 0 !important; flex-wrap: wrap; }

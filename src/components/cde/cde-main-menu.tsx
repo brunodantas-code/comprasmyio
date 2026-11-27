@@ -15,13 +15,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { CdeCategoryHeader } from "./cde-category-header";
 import { MENU_ITEMS, USER_INFO_OPTIONS, menuAppKey, userInfoLine, parseMenuConfig, useMainMenuConfig, type MenuId, type MenuConfig } from "./main-menu-config";
 import { useAppDisplayName } from "./app-order-config";
+import { wrapMenuIcon } from "./menu-icon";
 
 function MenuRow({ id, checked, onChange }: { id: MenuId; checked: boolean; onChange: () => void }) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
   const nameOf = useAppDisplayName();
   const item = MENU_ITEMS.find((i) => i.id === id);
   if (!item) return null;
-  const Icon = item.icon;
+  const Icon = wrapMenuIcon(item.icon, "ERP", "Menu superior", id);
   const appKey = menuAppKey(id);
   const label = appKey ? nameOf(appKey) : item.label;
   return <div ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition }} className="flex items-center gap-3 border-b border-border bg-card py-2">
@@ -61,10 +62,10 @@ export function CdeMainMenu({ number, handle }: { number: number; handle?: impor
     } catch { toast.error("Não foi possível salvar o menu."); } finally { setSaving(false); }
   }
   return <section className="cde-category-sections">
-    <CdeCategoryHeader handle={handle} number={number} title="Menu principal" hint="Ícones, ordem e exibição das ações do menu dos apps" open={open} onToggle={() => setOpen(!open)} />
+    <CdeCategoryHeader handle={handle} number={number} title="Menu principal" hint="Ícones, ordem e exibição das ações, incluindo o Manual do Usuário do ERP na Home Page" open={open} onToggle={() => setOpen(!open)} />
     {open && <CdeSection title="Organização do menu" open={contentOpen} actions={<><Button aria-label="Salvar Organização do menu" title="Salvar Organização do menu" size="icon" variant="ghost"  onClick={save} disabled={saving || !draft || JSON.stringify(draft) === JSON.stringify(data ?? parseMenuConfig())}><Save className="h-4 w-4" /><Save /></Button><CdeButton group="toggle" screen="components/cde/cde-main-menu.tsx" aria-label={`${contentOpen ? "Recolher" : "Exibir"} organização do menu`} title={`${contentOpen ? "Recolher" : "Exibir"} organização do menu`} aria-expanded={contentOpen} onClick={() => setContentOpen(!contentOpen)} /></>}><div><DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={move}><SortableContext items={config.order} strategy={verticalListSortingStrategy}>{config.order.map((id) => <MenuRow key={id} id={id} checked={!config.hidden.includes(id)} onChange={() => setDraft({ ...config, hidden: config.hidden.includes(id) ? config.hidden.filter((v) => v !== id) : [...config.hidden, id] })} />)}</SortableContext></DndContext><div className="mt-4 space-y-1"><Label>Informação abaixo do nome do usuário</Label><Select value={config.userInfo ?? "name"} onValueChange={(v) => setDraft({ ...config, userInfo: v as MenuConfig["userInfo"] })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{USER_INFO_OPTIONS.map((o) => <SelectItem key={o.key} value={o.key}>{o.label}</SelectItem>)}</SelectContent></Select></div>
       </div>
-      <div className="space-y-3"><h3 className="text-sm font-semibold">Prévia</h3><div className="max-w-72 text-right"><p className="text-sm font-semibold">Nome do Usuário</p>{userInfoLine(config.userInfo, "Cargo", "Perfil") ? <p className="text-xs text-muted-foreground">{userInfoLine(config.userInfo, "Cargo", "Perfil")}</p> : null}</div><div className="max-w-72 overflow-hidden rounded-lg border border-border">{config.order.filter((id) => !config.hidden.includes(id)).map((id) => { const item = MENU_ITEMS.find((i) => i.id === id); if (!item) return null; const Icon = item.icon; const appKey = menuAppKey(id); const label = appKey ? nameOf(appKey) : item.label; return <div key={id} className="flex items-center gap-3 px-4 py-3 text-sm"><Icon className="h-5 w-5" />{label}</div>; })}</div></div>
+      <div className="space-y-3"><h3 className="text-sm font-semibold">Prévia</h3><div className="max-w-72 text-right"><p className="text-sm font-semibold">Nome do Usuário</p>{userInfoLine(config.userInfo, "Cargo", "Perfil") ? <p className="text-xs text-muted-foreground">{userInfoLine(config.userInfo, "Cargo", "Perfil")}</p> : null}</div><div className="max-w-72 overflow-hidden rounded-lg border border-border">{config.order.filter((id) => !config.hidden.includes(id)).map((id) => { const item = MENU_ITEMS.find((i) => i.id === id); if (!item) return null; const Icon = wrapMenuIcon(item.icon, "ERP", "Menu superior", id); const appKey = menuAppKey(id); const label = appKey ? nameOf(appKey) : item.label; return <div key={id} className="flex items-center gap-3 px-4 py-3 text-sm"><Icon className="h-5 w-5" />{label}</div>; })}</div></div>
     </CdeSection>}
   </section>;
 }

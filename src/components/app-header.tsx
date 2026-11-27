@@ -54,7 +54,7 @@ export function AppHeader({ logo, children, supplyManual = false, manualApp, men
     navigate({ to: "/auth", replace: true });
   }
 
-  const iconButton = "top-icon shrink-0 !bg-transparent !text-foreground shadow-none hover:!bg-muted hover:!text-foreground";
+  const iconButton = "top-icon shrink-0 !bg-transparent !text-foreground shadow-none hover:!bg-transparent hover:!text-foreground";
 
   return (
     <header style={{ "--home-header-bg": "var(--card)", ...homeHeaderVars(tile) } as React.CSSProperties} className="home-page-header sticky top-0 z-50 border-b border-border bg-card">
@@ -113,7 +113,7 @@ function MainMenuEntries({ onSignOut, onChangePassword, supplyManual, homePage, 
   const config = data ?? parseMenuConfig();
   const pendingTotal = usePendingActions().data?.total ?? 0;
   const { data: accessCapabilities } = useQuery(accessManagementOptions);
-  return <>{menuActions?.map(action => <Button key={action.label} cdeIgnore variant="ghost" className={itemClass} onClick={action.onClick}>{action.icon}{action.label}</Button>)}{menuOrderForContext(config, homePage).filter((id) => (id !== "manual" || supplyManual || !!manualApp) && (id !== "access" || accessCapabilities && canOpenAccessManagement(accessCapabilities))).map((id) => {
+  return <>{menuActions?.map(action => <Button key={action.label} cdeIgnore variant="ghost" className={itemClass} onClick={action.onClick}>{action.icon}{action.label}</Button>)}{menuOrderForContext(config, homePage).filter((id) => (id !== "access" || accessCapabilities && canOpenAccessManagement(accessCapabilities))).map((id) => {
     const item = MENU_ITEMS.find((i) => i.id === id);
     if (!item) return null;
     const Icon = wrapMenuIcon(item.icon, "ERP", "Menu superior", id);
@@ -121,6 +121,7 @@ function MainMenuEntries({ onSignOut, onChangePassword, supplyManual, homePage, 
     const label = menuName(id, appKey ? nameOf(appKey) : id === "access" ? "Acessos" : item.label);
     if ("to" in item) return <Button key={id} asChild cdeIgnore variant="ghost" className={itemClass}><Link to={item.to}><Icon className="h-5 w-5" />{label}{id === "pendentes" ? <CountBadge count={pendingTotal} className="ml-auto" /> : null}</Link></Button>;
     if (id === "manual" && supplyManual) return <Button key={id} asChild cdeIgnore variant="ghost" className={itemClass}><Link to="/supply-manual"><Icon className="h-5 w-5" />{label}</Link></Button>;
+    if (id === "manual" && !manualApp) return <Button key={id} asChild cdeIgnore variant="ghost" className={itemClass}><Link to="/erp-manual"><Icon className="h-5 w-5" />{label}</Link></Button>;
     if (id === "manual") return <Button key={id} cdeIgnore variant="ghost" className={itemClass} onClick={onOpenManual}><Icon className="h-5 w-5" />{label}</Button>;
     if (id === "signature") return <Button key={id} cdeIgnore variant="ghost" className={itemClass} onClick={onOpenSignature}><Icon className="h-5 w-5" />{label}</Button>;
     if (id === "access") return <Button key={id} asChild cdeIgnore variant="ghost" className={itemClass}><Link to="/acessos"><Icon className="h-5 w-5" />{label}</Link></Button>;
@@ -173,7 +174,7 @@ export function HeaderMenu({ userName, onSignOut, onChangePassword, buttonClass,
     return () => media.removeEventListener("change", update);
   }, []);
   const itemClass = "!h-10 !w-full !min-w-0 !justify-start !rounded-none !border-0 px-4 !bg-transparent !text-foreground !shadow-none hover:!bg-muted hover:!text-foreground focus-visible:!bg-muted focus-visible:!text-foreground";
-  const trigger = <Button variant="ghost" size="icon" className={`relative ${buttonClass}`} aria-label="Abrir menu"><Menu className="!h-6 !w-6" /><MenuTriggerBadge /></Button>;
+  const trigger = <Button cdeIgnore variant="ghost" size="icon" className={`relative ${buttonClass}`} aria-label="Abrir menu"><Menu className="!h-6 !w-6" /><MenuTriggerBadge /></Button>;
 
   if (mobile) return <Sheet open={open} onOpenChange={setOpen}>
     <SheetTrigger asChild>{trigger}</SheetTrigger>

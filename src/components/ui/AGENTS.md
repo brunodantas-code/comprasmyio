@@ -22,3 +22,5 @@
 - Buttons expose data-cde-action and footers use erp-form-footer; bottom-save positioning is scoped to footer/final form/card actions, preserving header geometry.
 - Icon-only Button labels resolve their CDE standard from the leading action word only ("Excluir o indicador X" is trash, "Histórico de Concluir…" is none), so an object name can never restyle an icon action; file-format nouns (PDF/Excel/exportar) still identify export anywhere in the label.
 - AppNavigation pages mobile floating entries through MobileFloatingMenu after app filtering; keeping original entries preserves destinations and permissions while avoiding compressed labels.
+
+- Shared fields measure the live CDE font and longest option/text via field-content-width; only geometry changes, bounded by available space, preserving values, heights and actions.

@@ -10,3 +10,5 @@
 - Survey visit completion uses an explicit real end time and a status-scoped verified update after pending saves flush; only the visit closes, preserving point status, pending fields and original technical timestamps.
 - Supply reimbursements carry per-item allocation (alloc/cost center/project/client/tag); submission groups items by identical classification into separate orders sharing request_group_id, so profitability and Spend receipt guards stay per order.
 - PendingAppBadgeSync observes the shared personal pending query once at root; installed-app permission is requested only from the menu tap, and zero/sign-out clear the badge without push workers or offline caches.
+
+- HeaderMenu ignores action bindings; ERP manual shares JSON with PDF and opens by fallback.

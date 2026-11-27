@@ -20,6 +20,7 @@ import { Route as AuthenticatedChamadosRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedCrmRouteImport } from './routes/_authenticated/crm'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedDevelopmentRouteImport } from './routes/_authenticated/development'
+import { Route as AuthenticatedErpManualRouteImport } from './routes/_authenticated/erp-manual'
 import { Route as AuthenticatedIndicadoresRouteImport } from './routes/_authenticated/indicadores'
 import { Route as AuthenticatedInventorySignaturesRouteImport } from './routes/_authenticated/inventory-signatures'
 import { Route as AuthenticatedLegalRouteImport } from './routes/_authenticated/legal'
@@ -89,6 +90,11 @@ const AuthenticatedDevelopmentRoute =
     path: '/development',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedErpManualRoute = AuthenticatedErpManualRouteImport.update({
+  id: '/erp-manual',
+  path: '/erp-manual',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedIndicadoresRoute =
   AuthenticatedIndicadoresRouteImport.update({
     id: '/indicadores',
@@ -170,6 +176,7 @@ export interface FileRoutesByFullPath {
   '/crm': typeof AuthenticatedCrmRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/development': typeof AuthenticatedDevelopmentRoute
+  '/erp-manual': typeof AuthenticatedErpManualRoute
   '/indicadores': typeof AuthenticatedIndicadoresRoute
   '/inventory-signatures': typeof AuthenticatedInventorySignaturesRoute
   '/legal': typeof AuthenticatedLegalRoute
@@ -195,6 +202,7 @@ export interface FileRoutesByTo {
   '/crm': typeof AuthenticatedCrmRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/development': typeof AuthenticatedDevelopmentRoute
+  '/erp-manual': typeof AuthenticatedErpManualRoute
   '/indicadores': typeof AuthenticatedIndicadoresRoute
   '/inventory-signatures': typeof AuthenticatedInventorySignaturesRoute
   '/legal': typeof AuthenticatedLegalRoute
@@ -222,6 +230,7 @@ export interface FileRoutesById {
   '/_authenticated/crm': typeof AuthenticatedCrmRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/development': typeof AuthenticatedDevelopmentRoute
+  '/_authenticated/erp-manual': typeof AuthenticatedErpManualRoute
   '/_authenticated/indicadores': typeof AuthenticatedIndicadoresRoute
   '/_authenticated/inventory-signatures': typeof AuthenticatedInventorySignaturesRoute
   '/_authenticated/legal': typeof AuthenticatedLegalRoute
@@ -249,6 +258,7 @@ export interface FileRouteTypes {
     | '/crm'
     | '/dashboard'
     | '/development'
+    | '/erp-manual'
     | '/indicadores'
     | '/inventory-signatures'
     | '/legal'
@@ -274,6 +284,7 @@ export interface FileRouteTypes {
     | '/crm'
     | '/dashboard'
     | '/development'
+    | '/erp-manual'
     | '/indicadores'
     | '/inventory-signatures'
     | '/legal'
@@ -300,6 +311,7 @@ export interface FileRouteTypes {
     | '/_authenticated/crm'
     | '/_authenticated/dashboard'
     | '/_authenticated/development'
+    | '/_authenticated/erp-manual'
     | '/_authenticated/indicadores'
     | '/_authenticated/inventory-signatures'
     | '/_authenticated/legal'
@@ -400,6 +412,13 @@ declare module '@tanstack/react-router' {
       path: '/development'
       fullPath: '/development'
       preLoaderRoute: typeof AuthenticatedDevelopmentRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/erp-manual': {
+      id: '/_authenticated/erp-manual'
+      path: '/erp-manual'
+      fullPath: '/erp-manual'
+      preLoaderRoute: typeof AuthenticatedErpManualRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/indicadores': {
@@ -504,6 +523,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCrmRoute: typeof AuthenticatedCrmRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedDevelopmentRoute: typeof AuthenticatedDevelopmentRoute
+  AuthenticatedErpManualRoute: typeof AuthenticatedErpManualRoute
   AuthenticatedIndicadoresRoute: typeof AuthenticatedIndicadoresRoute
   AuthenticatedInventorySignaturesRoute: typeof AuthenticatedInventorySignaturesRoute
   AuthenticatedLegalRoute: typeof AuthenticatedLegalRoute
@@ -526,6 +546,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCrmRoute: AuthenticatedCrmRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedDevelopmentRoute: AuthenticatedDevelopmentRoute,
+  AuthenticatedErpManualRoute: AuthenticatedErpManualRoute,
   AuthenticatedIndicadoresRoute: AuthenticatedIndicadoresRoute,
   AuthenticatedInventorySignaturesRoute: AuthenticatedInventorySignaturesRoute,
   AuthenticatedLegalRoute: AuthenticatedLegalRoute,

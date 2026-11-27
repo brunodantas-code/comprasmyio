@@ -2,10 +2,13 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 import { useCdeLook } from "@/components/cde/cde-look";
+import { useFieldContentWidth } from './field-content-width';
 
 const Textarea = React.forwardRef<HTMLTextAreaElement, React.ComponentProps<"textarea">>(
   ({ className, style, ...props }, ref) => {
     const look = useCdeLook("fields_textarea", true);
+    const fieldRef = React.useRef<HTMLTextAreaElement>(null);
+    useFieldContentWidth(fieldRef);
     return (
       <textarea
         className={cn(
@@ -14,7 +17,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, React.ComponentProps<"tex
           look.className,
         )}
         style={{ ...look.style, ...style }}
-        ref={ref}
+        ref={node => { fieldRef.current = node; if (typeof ref === 'function') ref(node); else if (ref) ref.current = node; }}
         {...props}
       />
     );

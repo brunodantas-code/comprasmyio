@@ -34,3 +34,5 @@
 - Expense category configuration lives in the Spend menu, retaining cde_selected storage and ERP-admin-only writes; moving its UI never grants finance users CDE management.
 
 - Reconciliation PDF and lines share subgrid header tracks so tools and wrapping keep their reading surfaces aligned; totals and competence retain their existing calculations and filters.
+
+- Camera and document pickers are separate entry points into the same capture flow; PDF originals and image cleanup retain existing private storage and evidence validation.

@@ -7,12 +7,25 @@ import { Check, ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { resolveCdeModel, useCdeStandards } from "@/components/cde/cde-button";
 import { styleOf } from "@/components/cde/cde-render";
+import { useFieldContentWidth } from './field-content-width';
+
+const SelectWidthContext = React.createContext<string[]>([]);
+function selectOptionTexts(node: React.ReactNode): string[] {
+  return React.Children.toArray(node).flatMap(child => {
+    if (!React.isValidElement<{ children?: React.ReactNode; textValue?: string }>(child)) return [];
+    if (child.type === SelectItem) return [child.props.textValue ?? textOf(child.props.children)];
+    return selectOptionTexts(child.props.children);
+  });
+}
+function textOf(node: React.ReactNode): string {
+  return React.Children.toArray(node).map(child => typeof child === 'string' || typeof child === 'number' ? String(child) : React.isValidElement<{ children?: React.ReactNode }>(child) ? textOf(child.props.children) : '').join('');
+}
 
 const SelectFontContext = React.createContext<{ format: React.CSSProperties; setFormat: (value: React.CSSProperties) => void; fontSize: string; setFontSize: (value: string) => void }>({ format: {}, setFormat: () => {}, fontSize: "14px", setFontSize: () => {} });
 function Select(props: React.ComponentProps<typeof SelectPrimitive.Root>) {
   const [format, setFormat] = React.useState<React.CSSProperties>({});
   const [fontSize, setFontSize] = React.useState("14px");
-  return <SelectFontContext.Provider value={{ fontSize, setFontSize, format, setFormat }}><SelectPrimitive.Root {...props} /></SelectFontContext.Provider>;
+  return <SelectWidthContext.Provider value={selectOptionTexts(props.children)}><SelectFontContext.Provider value={{ fontSize, setFontSize, format, setFormat }}><SelectPrimitive.Root {...props} /></SelectFontContext.Provider></SelectWidthContext.Provider>;
 }
 
 const SelectGroup = SelectPrimitive.Group;
@@ -32,6 +45,7 @@ const SelectTrigger = React.forwardRef<
   const formatRef = React.useRef("");
   const setFormatPrevious = (next: React.CSSProperties) => { const key = JSON.stringify(next); if (key !== formatRef.current) { formatRef.current = key; setFormat(next); } };
   const triggerRef = React.useRef<HTMLButtonElement | null>(null);
+  useFieldContentWidth(triggerRef, React.useContext(SelectWidthContext));
   React.useLayoutEffect(() => {
     if (triggerRef.current) {
       const css = getComputedStyle(triggerRef.current);

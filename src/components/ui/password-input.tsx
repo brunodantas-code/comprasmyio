@@ -15,7 +15,7 @@ const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputProps>(
     const Icon = visible ? EyeOff : Eye;
 
     return (
-      <div className="relative">
+      <div data-password-field className="relative">
         <Input
           ref={ref}
           type={visible ? "text" : "password"}
